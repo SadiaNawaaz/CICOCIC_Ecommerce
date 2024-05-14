@@ -20507,8 +20507,8 @@ a {
 .dropdown.dropdown-full-width .dropdown-menu {
     left: 0 !important;
     right: 0 !important;
-    top: 100% !important;
-    transform: none !important
+    transform: none !important;
+    top: 83% !important;
 }
 
 .dropdown .dropdown-menu {

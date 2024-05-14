@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\FinalCleanArchitecture\\Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj": {}
+    "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj": {}
   },
   "projects": {
-    "F:\\FinalCleanArchitecture\\Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj": {
+    "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\FinalCleanArchitecture\\Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj",
+        "projectUniqueName": "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj",
         "projectName": "Ecommerce.Admin",
-        "projectPath": "F:\\FinalCleanArchitecture\\Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj",
+        "projectPath": "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj",
         "packagesPath": "C:\\Users\\Z B O O K\\.nuget\\packages\\",
-        "outputPath": "F:\\FinalCleanArchitecture\\Ecommerce\\Ecommerce.Admin\\obj\\",
+        "outputPath": "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
