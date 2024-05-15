@@ -39,5 +39,21 @@
     <script src="/assets/js/e-commerce/vendor.min.js"></script>
     <script src="/assets/js/e-commerce/app.min.js"></script>
 </body>
+<script>
+window.closeDropdownMenu = function () {
+    console.log("called");
+
+    var dropdownMenus = document.querySelectorAll('.dropdown-menu.p-0');
+
+    dropdownMenus.forEach(function(menu) {
+        // Check if the menu is open
+        if (menu.classList.contains('show')) {
+            // Close the menu
+            menu.classList.remove('show');
+        }
+    });
+};
+
+</script>
 
 </html>

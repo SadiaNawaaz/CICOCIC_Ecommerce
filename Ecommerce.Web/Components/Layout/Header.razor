@@ -1,5 +1,7 @@
 ﻿
-
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 <div id="header" class="header">
     <!-- BEGIN container -->
     <div class="container">
@@ -14,14 +16,14 @@
             <!-- END navbar-toggle -->
             <!-- BEGIN header-logo -->
             @*<div class="header-logo">
-                <a href="/">
-                    <span class="brand-logo"></span>
-                    <span class="brand-text">
-                        <span> CICO</span>CIC
-                        <small>e-commerce Plateform</small>
-                    </span>
-                </a>
-            </div>*@
+                    <a href="/">
+                        <span class="brand-logo"></span>
+                        <span class="brand-text">
+                            <span> CICO</span>CIC
+                            <small>e-commerce Plateform</small>
+                        </span>
+                    </a>
+                </div>*@
             <!-- END header-logo -->
             <!-- BEGIN header-nav -->
             <div class="header-nav">
@@ -42,67 +44,93 @@
                                     <div class="dropdown-menu-sidebar">
                                         <h4 class="title">Shop By Categories</h4>
                                         <ul class="dropdown-menu-list">
-                                            <li><a href="product.html">Electronica</a></li>
-                                            <li><a href="product.html">Huis</a></li>
-                                            <li><a href="product.html">Auto & Fiets</a></li>
-                                            <li><a href="product.html">Tuin & Klussen</a></li>
-                                            <li><a href="product.html">Speelgoed & Kids</a></li>
-                                            <li><a href="product.html">Verzorging </a></li>
-                                            <li><a href="product.html">Sporten</a></li>
-                                            <li><a href="product.html">Sporten</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Electronica"))">Electronica</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Huis"))">Huis</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Auto & Fiets"))">Auto & Fiets</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Tuin & Klussen"))">Tuin & Klussen</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Speelgoed & Kids"))">Speelgoed & Kids</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Verzorging"))">Verzorging</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Sporten"))">Sporten</a></li>
+                                            <li><a @onclick="@(async () => await GetData("Sporten"))">Sporten</a></li>
+
                                         </ul>
                                     </div>
                                     <!-- END dropdown-menu-sidebar -->
                                     <!-- BEGIN dropdown-menu-content -->
                                     <div class="dropdown-menu-content">
-                                        <h4 class="title">Shop By Popular Phone</h4>
-                                        <div class="row">
-                                            <div class="col-lg-3">
-                                                <ul class="dropdown-menu-list">
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> iPhone 7</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> iPhone 6s</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> iPhone 6</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> iPhone 5s</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> iPhone 5</a></li>
-                                                </ul>
-                                            </div>
-                                            <div class="col-lg-3">
-                                                <ul class="dropdown-menu-list">
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Galaxy S7</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Galaxy A9</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Galaxy J3</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Galaxy Note 5</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Galaxy S7</a></li>
-                                                </ul>
-                                            </div>
-                                            <div class="col-lg-3">
-                                                <ul class="dropdown-menu-list">
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Lumia 730</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Lumia 735</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Lumia 830</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Lumia 820</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Lumia Icon</a></li>
-                                                </ul>
-                                            </div>
-                                            <div class="col-lg-3">
-                                                <ul class="dropdown-menu-list">
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Xperia X</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Xperia Z5</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Xperia M5</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Xperia C5</a></li>
-                                                    <li><a href="product_detail.html"><i class="fa fa-fw fa-angle-right text-muted"></i> Xperia C4</a></li>
-                                                </ul>
+
+
+                                        <div class="container" style="margin-bottom:10px">
+                                            <div class="row no-gutters">
+                                                <div class="col-md-3 border">
+                                                    <input type="text" class="form-control border-0" id="query" name="query" placeholder="Search" aria-label="Search" autocomplete="off">
+                                                </div>
+                                                <div class="col-md-3 border">
+                                                    <select class="form-control border-0" id="categoryId" name="categoryId">
+                                                        <option value="" disabled selected>Choose category:</option>
+                                                        <option value="0">Electronica</option>
+                                                        <option value="0">Huis</option>
+                                                        <option value="0">Auto & Fiets</option>
+                                                        <option value="0">Verzorging</option>
+                                                        <!-- Add more options for categories as needed -->
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 border">
+                                                    <input type="text" class="form-control border-0" id="postcode" name="postcode" placeholder="Postal Code" autocomplete="off">
+                                                </div>
+                                                <div class="col-md-2 border">
+                                                    <select class="form-control border-0" id="distance" name="distance">
+                                                        <option value="" disabled selected>Choose distance:</option>
+                                                        <option value="0">&lt; 3 km</option>
+                                                        <option value="0">&lt; 4 km</option>
+                                                        <!-- Add more options for distances as needed -->
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 border">
+                                                    <a @onclick="@(async () => await fnDetails("Dummy Product"))" class="btn btn-primary" style="width:100%">Search</a>
+                                                </div>
                                             </div>
                                         </div>
+
+
+
+
+
+
+
+
+
+
+                                        <h4 class="title">Shop By Popular @MainCat</h4>
+                                        <div class="row">
+                                            @foreach (var category in _subCategory)
+                                            {
+                                                <div class="col-lg-3">
+                                                    <span style="text-align:center;margin:5px;font-size:medium">@category.Name</span>
+                                                    <ul class="dropdown-menu-list" style="margin-top:10px">
+                                                        @if (category.Childs != null)
+                                                        {
+                                                            foreach (var product in category.Childs)
+                                                            {
+                                                                <li><a @onclick="@(async () => await fnDetails(product.Name))"><i class="fa fa-fw fa-angle-right text-muted"></i> @product.Name</a></li>
+                                                            }
+                                                        }
+
+                                                    </ul>
+                                                </div>
+
+                                            }
+                                        </div>
+
                                         <h4 class="title">Shop By Brand</h4>
                                         <ul class="dropdown-brand-list mb-0">
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-apple.png" alt="" /></a></li>
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-samsung.png" alt="" /></a></li>
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-htc.png" alt="" /></a></li>
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-microsoft.png" alt="" /></a></li>
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-nokia.png" alt="" /></a></li>
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-blackberry.png" alt="" /></a></li>
-                                            <li><a href="product.html"><img src="../assets/img/brand/brand-sony.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("Apple"))"><img src="../assets/img/brand/brand-apple.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("samsung"))"><img src="../assets/img/brand/brand-samsung.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("htc"))"><img src="../assets/img/brand/brand-htc.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("microsoft"))"><img src="../assets/img/brand/brand-microsoft.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("nokia"))"><img src="../assets/img/brand/brand-nokia.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("blackberry"))"><img src="../assets/img/brand/brand-blackberry.png" alt="" /></a></li>
+                                            <li><a @onclick="@(async () => await fnDetails("sony"))"><img src="../assets/img/brand/brand-sony.png" alt="" /></a></li>
                                         </ul>
                                     </div>
                                     <!-- END dropdown-menu-content -->
@@ -276,7 +304,7 @@
                         </div>
                     </li>
                     <li class="divider"></li>
-                  
+
                 </ul>
             </div>
             <!-- END header-nav -->
@@ -285,3 +313,218 @@
     </div>
     <!-- END container -->
 </div>
+@code {
+    public List<SubCategory> _subCategory = new List<SubCategory>();
+    public List<SubCategory> _subsubCategory = new List<SubCategory>();
+    public string MainCat = "";
+
+    private async Task GetData(string category)
+    {
+        MainCat = category;
+
+        List<SubCategory> dummyData;
+
+        switch (category)
+        {
+            case "Electronica":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Computers", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Desktops Monitoren", Category = "Computers" },
+                        new SubCategory { Name = "Computer accessoires", Category = "Computers" },
+                        new SubCategory { Name = "Laptops ultrabooks", Category = "Computers" },
+                        new SubCategory { Name = "NetWork", Category = "Computers" },
+
+
+                    }
+                },
+                new SubCategory { Name = "Mobiel", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "GSM tablet accessoires", Category = "Mobile" },
+                        new SubCategory { Name = "GSM's tablets", Category = "Mobile" },
+                        new SubCategory { Name = "GSM's tablets", Category = "Mobile" },
+
+                    }
+                },
+                  new SubCategory { Name = "Beeld en geluid", Category = category, Childs = new List<SubCategory>
+              {
+          new SubCategory { Name = "TV accessoires", Category = "Mobile" },
+          new SubCategory { Name = "GSM's tablets", Category = "Mobile" },
+          new SubCategory { Name = "Portable audio video", Category = "Mobile" },
+              new SubCategory { Name = "Batterijen", Category = "Mobile" },
+                   }
+                 },
+
+
+            };
+                break;
+            case "Huis":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Chair", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Wooden Chair", Category = "Chair" },
+                        new SubCategory { Name = "Plastic Chair", Category = "Chair" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                new SubCategory { Name = "Table", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Coffee Table", Category = "Table" },
+                        new SubCategory { Name = "Dining Table", Category = "Table" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                // Add more subcategories or products as needed
+            };
+                break;
+            case "Auto & Fiets":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Car", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Sedan", Category = "Car" },
+                        new SubCategory { Name = "SUV", Category = "Car" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                new SubCategory { Name = "Bicycle", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Mountain Bike", Category = "Bicycle" },
+                        new SubCategory { Name = "Road Bike", Category = "Bicycle" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                // Add more subcategories or products as needed
+            };
+                break;
+            case "Tuin & Klussen":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Gardening Tools", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Shovel", Category = "Gardening Tools" },
+                        new SubCategory { Name = "Rake", Category = "Gardening Tools" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                new SubCategory { Name = "Power Drill", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Cordless Drill", Category = "Power Drill" },
+                        new SubCategory { Name = "Electric Drill", Category = "Power Drill" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                // Add more subcategories or products as needed
+            };
+                break;
+            case "Speelgoed & Kids":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Dolls", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Barbie", Category = "Dolls" },
+                        new SubCategory { Name = "Action Figure", Category = "Dolls" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                new SubCategory { Name = "Board Games", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Monopoly", Category = "Board Games" },
+                        new SubCategory { Name = "Chess", Category = "Board Games" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                // Add more subcategories or products as needed
+            };
+                break;
+            case "Verzorging":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Shampoo", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Anti-Dandruff", Category = "Shampoo" },
+                        new SubCategory { Name = "Moisturizing", Category = "Shampoo" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                new SubCategory { Name = "Soap", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Hand Soap", Category = "Soap" },
+                        new SubCategory { Name = "Body Wash", Category = "Soap" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                // Add more subcategories or products as needed
+            };
+                break;
+            case "Sporten":
+                dummyData = new List<SubCategory>
+        {
+                new SubCategory { Name = "Running Shoes", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Nike", Category = "Running Shoes" },
+                        new SubCategory { Name = "Adidas", Category = "Running Shoes" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                new SubCategory { Name = "Yoga Mat", Category = category, Childs = new List<SubCategory>
+                {
+                        new SubCategory { Name = "Eco-Friendly", Category = "Yoga Mat" },
+                        new SubCategory { Name = "Non-Slip", Category = "Yoga Mat" },
+                        // Add more subcategories or products as needed
+                    }
+                },
+                // Add more subcategories or products as needed
+            };
+                break;
+            default:
+                dummyData = new List<SubCategory>();
+                break;
+        }
+
+        // Assign the dummy data to the _subCategory list
+        _subCategory = dummyData;
+    }
+
+
+
+
+
+    private async Task fnOpenSubsub(SubCategory product)
+    {
+
+        List<SubCategory> dummyData;
+
+        dummyData = new List<SubCategory>
+   {
+     new SubCategory { Name = product.Name+"-1" },
+     new SubCategory { Name = product.Name+"-2"},
+     new SubCategory { Name = product.Name+"-3" }
+
+      };
+        _subsubCategory = dummyData;
+
+
+    }
+
+
+    public class SubCategory
+    {
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public List<SubCategory> Childs { get; set; }
+
+    }
+
+    public async Task fnDetails(string Name)
+    {
+
+        await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
+
+        NavigationManager.NavigateTo($"/ShowAll/{Name}");
+    }
+
+
+}

@@ -56,3 +56,4 @@ F:\CICOCIC_Ecommerce\Ecommerce.Web\obj\Debug\net8.0\refint\Ecommerce.Web.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Web\obj\Debug\net8.0\Ecommerce.Web.pdb
 F:\CICOCIC_Ecommerce\Ecommerce.Web\obj\Debug\net8.0\Ecommerce.Web.genruntimeconfig.cache
 F:\CICOCIC_Ecommerce\Ecommerce.Web\obj\Debug\net8.0\ref\Ecommerce.Web.dll
+F:\CICOCIC_Ecommerce\Ecommerce.Web\obj\Debug\net8.0\Ecommerce.Web.sourcelink.json

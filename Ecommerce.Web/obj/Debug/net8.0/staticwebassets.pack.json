@@ -549,6 +549,10 @@
       "PackagePath": "staticwebassets\\assets\\img\\post\\post-9.jpg"
     },
     {
+      "Id": "F:\\CICOCIC_Ecommerce\\Ecommerce.Web\\wwwroot\\assets\\img\\product\\NoImage.jpg",
+      "PackagePath": "staticwebassets\\assets\\img\\product\\NoImage.jpg"
+    },
+    {
       "Id": "F:\\CICOCIC_Ecommerce\\Ecommerce.Web\\wwwroot\\assets\\img\\product\\product-3dtouch.jpg",
       "PackagePath": "staticwebassets\\assets\\img\\product\\product-3dtouch.jpg"
     },
