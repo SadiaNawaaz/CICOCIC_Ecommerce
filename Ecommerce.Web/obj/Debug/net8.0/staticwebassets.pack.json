@@ -421,6 +421,10 @@
       "PackagePath": "staticwebassets\\assets\\img\\cover\\cover-9.jpg"
     },
     {
+      "Id": "F:\\CICOCIC_Ecommerce\\Ecommerce.Web\\wwwroot\\assets\\img\\flag\\OIP.jpg",
+      "PackagePath": "staticwebassets\\assets\\img\\flag\\OIP.jpg"
+    },
+    {
       "Id": "F:\\CICOCIC_Ecommerce\\Ecommerce.Web\\wwwroot\\assets\\img\\flag\\flag-chinese.png",
       "PackagePath": "staticwebassets\\assets\\img\\flag\\flag-chinese.png"
     },

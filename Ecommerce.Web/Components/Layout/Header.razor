@@ -91,36 +91,58 @@
                                                 </div>
                                             </div>
                                         </div>
-
-
-
-
-
-
-
-
-
-
                                         <h4 class="title">Shop By Popular @MainCat</h4>
+
                                         <div class="row">
+
+
                                             @foreach (var category in _subCategory)
                                             {
                                                 <div class="col-lg-3">
-                                                    <span style="text-align:center;margin:5px;font-size:medium">@category.Name</span>
+                                                    <span style="text-align:center;margin:5px;font-size:medium"><b>@category.Name</b></span>
+
+
+
                                                     <ul class="dropdown-menu-list" style="margin-top:10px">
                                                         @if (category.Childs != null)
                                                         {
-                                                            foreach (var product in category.Childs)
+                                                            foreach (var subCategory in category.Childs)
                                                             {
-                                                                <li><a @onclick="@(async () => await fnDetails(product.Name))"><i class="fa fa-fw fa-angle-right text-muted"></i> @product.Name</a></li>
+                                                                <li>
+                                                                    @*<a @onclick="@(async () => await fnDetails(subCategory.Name))">
+                                                        <i class="fa fa-fw fa-angle-right text-muted"></i> @subCategory.Name
+                                                    </a>*@
+
+                                                                    <details>
+                                                                        <summary>  @subCategory.Name</summary>
+                                                                        <div class="details">
+                                                                            @if (subCategory.Childs != null)
+                                                                            {
+                                                                                <ul>
+                                                                                    @foreach (var subChild in subCategory.Childs)
+                                                                                    {
+                                                                                        <li>
+                                                                                            <a style="font-size:small" @onclick="@(async () => await fnDetails(subChild.Name))">
+                                                                                                @subChild.Name
+                                                                                            </a>
+                                                                                        </li>
+                                                                                    }
+                                                                                </ul>
+                                                                            }
+                                                                        </div>
+                                                                    </details>
+
+
+
+                                                                </li>
                                                             }
                                                         }
-
                                                     </ul>
                                                 </div>
-
                                             }
                                         </div>
+
+
 
                                         <h4 class="title">Shop By Brand</h4>
                                         <ul class="dropdown-brand-list mb-0">
@@ -157,22 +179,7 @@
                         </li>
 
 
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                Electronica
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
-                        </li>
+
 
                         <li class="dropdown dropdown-hover">
                             <a href="#" data-bs-toggle="dropdown">
@@ -240,78 +247,183 @@
                                 <a class="dropdown-item" href="product.html">Gadget</a>
                             </div>
                         </li>
+                        <li class="dropdown dropdown-hover">
+                            <a href="#" data-bs-toggle="dropdown">
+                                Verzorging
+                                <b class="caret"></b>
+                                <span class="arrow top"></span>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
+                                <a class="dropdown-item" href="product.html">Tablet</a>
+                                <a class="dropdown-item" href="product.html">TV</a>
+                                <a class="dropdown-item" href="product.html">Desktop</a>
+                                <a class="dropdown-item" href="product.html">Laptop</a>
+                                <a class="dropdown-item" href="product.html">Speaker</a>
+                                <a class="dropdown-item" href="product.html">Gadget</a>
+                            </div>
+                        </li>
+
+                        
+
+
+
                     </ul>
                 </div>
             </div>
-            <!-- END header-nav -->
-            <!-- BEGIN header-nav -->
+     
             <div class="header-nav">
-                <ul class="nav justify-content-end">
+
+                <ul class="nav justify-content-center">
                     <li class="dropdown dropdown-hover">
+                        <a href="#" data-bs-toggle="dropdown">
+                            Sporten
+                            <b class="caret"></b>
+                            <span class="arrow top"></span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="product.html">Mobile Phone</a>
+                            <a class="dropdown-item" href="product.html">Tablet</a>
+                            <a class="dropdown-item" href="product.html">TV</a>
+                            <a class="dropdown-item" href="product.html">Desktop</a>
+                            <a class="dropdown-item" href="product.html">Laptop</a>
+                            <a class="dropdown-item" href="product.html">Speaker</a>
+                            <a class="dropdown-item" href="product.html">Gadget</a>
+                        </div>
+                    </li>
+                    <li style="width:20px">
                         <a href="#" class="header-cart" data-bs-toggle="dropdown">
                             <i class="fa fa-shopping-bag"></i>
                             <span class="total">2</span>
                             <span class="arrow top"></span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-cart p-0">
-                            <div class="cart-header">
-                                <h4 class="cart-title">Shopping Bag (1) </h4>
+                    </li>
+                   
+                    @*<li class="dropdown dropdown-hover">
+            <a href="#" class="header-cart" data-bs-toggle="dropdown">
+                <i class="fa fa-shopping-bag"></i>
+                <span class="total">2</span>
+                <span class="arrow top"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-cart p-0">
+                <div class="cart-header">
+                    <h4 class="cart-title">Shopping Bag (1) </h4>
+                </div>
+                <div class="cart-body">
+                    <ul class="cart-item">
+                        <li>
+                            <div class="cart-item-image"><img src="../assets/img/product/product-ipad.jpg" alt="" /></div>
+                            <div class="cart-item-info">
+                                <h4>iPad Pro Wi-Fi 128GB - Silver</h4>
+                                <p class="price">$699.00</p>
                             </div>
-                            <div class="cart-body">
-                                <ul class="cart-item">
-                                    <li>
-                                        <div class="cart-item-image"><img src="../assets/img/product/product-ipad.jpg" alt="" /></div>
-                                        <div class="cart-item-info">
-                                            <h4>iPad Pro Wi-Fi 128GB - Silver</h4>
-                                            <p class="price">$699.00</p>
-                                        </div>
-                                        <div class="cart-item-close">
-                                            <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="cart-item-image"><img src="../assets/img/product/product-imac.jpg" alt="" /></div>
-                                        <div class="cart-item-info">
-                                            <h4>21.5-inch iMac</h4>
-                                            <p class="price">$1299.00</p>
-                                        </div>
-                                        <div class="cart-item-close">
-                                            <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="cart-item-image"><img src="../assets/img/product/product-iphone.png" alt="" /></div>
-                                        <div class="cart-item-info">
-                                            <h4>iPhone 6s 16GB - Silver</h4>
-                                            <p class="price">$649.00</p>
-                                        </div>
-                                        <div class="cart-item-close">
-                                            <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                                        </div>
-                                    </li>
-                                </ul>
+                            <div class="cart-item-close">
+                                <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
                             </div>
-                            <div class="cart-footer">
-                                <div class="row gx-2">
-                                    <div class="col-6">
-                                        <a href="checkout_cart.html" class="btn btn-default btn-theme d-block">View Cart</a>
-                                    </div>
-                                    <div class="col-6">
-                                        <a href="checkout_cart.html" class="btn btn-dark btn-theme d-block">Checkout</a>
-                                    </div>
+                        </li>
+                        <li>
+                            <div class="cart-item-image"><img src="../assets/img/product/product-imac.jpg" alt="" /></div>
+                            <div class="cart-item-info">
+                                <h4>21.5-inch iMac</h4>
+                                <p class="price">$1299.00</p>
+                            </div>
+                            <div class="cart-item-close">
+                                <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="cart-item-image"><img src="../assets/img/product/product-iphone.png" alt="" /></div>
+                            <div class="cart-item-info">
+                                <h4>iPhone 6s 16GB - Silver</h4>
+                                <p class="price">$649.00</p>
+                            </div>
+                            <div class="cart-item-close">
+                                <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="cart-footer">
+                    <div class="row gx-2">
+                        <div class="col-6">
+                            <a href="checkout_cart.html" class="btn btn-default btn-theme d-block">View Cart</a>
+                        </div>
+                        <div class="col-6">
+                            <a href="checkout_cart.html" class="btn btn-dark btn-theme d-block">Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>*@
+                </ul>
+
+
+                @*<ul class="nav justify-content-end">
+            <li class="dropdown dropdown-hover">
+                <a href="#" class="header-cart" data-bs-toggle="dropdown">
+                    <i class="fa fa-shopping-bag"></i>
+                    <span class="total">2</span>
+                    <span class="arrow top"></span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-cart p-0">
+                    <div class="cart-header">
+                        <h4 class="cart-title">Shopping Bag (1) </h4>
+                    </div>
+                    <div class="cart-body">
+                        <ul class="cart-item">
+                            <li>
+                                <div class="cart-item-image"><img src="../assets/img/product/product-ipad.jpg" alt="" /></div>
+                                <div class="cart-item-info">
+                                    <h4>iPad Pro Wi-Fi 128GB - Silver</h4>
+                                    <p class="price">$699.00</p>
                                 </div>
+                                <div class="cart-item-close">
+                                    <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="cart-item-image"><img src="../assets/img/product/product-imac.jpg" alt="" /></div>
+                                <div class="cart-item-info">
+                                    <h4>21.5-inch iMac</h4>
+                                    <p class="price">$1299.00</p>
+                                </div>
+                                <div class="cart-item-close">
+                                    <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="cart-item-image"><img src="../assets/img/product/product-iphone.png" alt="" /></div>
+                                <div class="cart-item-info">
+                                    <h4>iPhone 6s 16GB - Silver</h4>
+                                    <p class="price">$649.00</p>
+                                </div>
+                                <div class="cart-item-close">
+                                    <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cart-footer">
+                        <div class="row gx-2">
+                            <div class="col-6">
+                                <a href="checkout_cart.html" class="btn btn-default btn-theme d-block">View Cart</a>
+                            </div>
+                            <div class="col-6">
+                                <a href="checkout_cart.html" class="btn btn-dark btn-theme d-block">Checkout</a>
                             </div>
                         </div>
-                    </li>
-                    <li class="divider"></li>
+                    </div>
+                </div>
+            </li>
+            <li class="divider"></li>
 
-                </ul>
+        </ul>*@
             </div>
-            <!-- END header-nav -->
+      
         </div>
-        <!-- END header-container -->
+      
     </div>
-    <!-- END container -->
+
 </div>
 @code {
     public List<SubCategory> _subCategory = new List<SubCategory>();
@@ -331,10 +443,54 @@
         {
                 new SubCategory { Name = "Computers", Category = category, Childs = new List<SubCategory>
                 {
-                        new SubCategory { Name = "Desktops Monitoren", Category = "Computers" },
-                        new SubCategory { Name = "Computer accessoires", Category = "Computers" },
-                        new SubCategory { Name = "Laptops ultrabooks", Category = "Computers" },
-                        new SubCategory { Name = "NetWork", Category = "Computers" },
+                        //new SubCategory { Name = "Desktops Monitoren", Category = "Computers" },
+                        //new SubCategory { Name = "Computer accessoires", Category = "Computers" },
+                        //new SubCategory { Name = "Laptops ultrabooks", Category = "Computers" },
+                        //new SubCategory { Name = "NetWork", Category = "Computers" },
+                        new SubCategory
+{
+    Name = "Desktops Monitoren",
+    Category = "Computers",
+    Childs = new List<SubCategory>
+    {
+        new SubCategory { Name = "Desktop Computers", Category = "Desktops Monitoren" },
+        new SubCategory { Name = "Monitors", Category = "Desktops Monitoren" },
+        // Add more child categories for "Desktops Monitoren" if needed
+    }
+},
+new SubCategory
+{
+    Name = "Computer accessoires",
+    Category = "Computers",
+    Childs = new List<SubCategory>
+    {
+        new SubCategory { Name = "Keyboards", Category = "Computer accessoires" },
+        new SubCategory { Name = "Mice", Category = "Computer accessoires" },
+        // Add more child categories for "Computer accessoires" if needed
+    }
+},
+new SubCategory
+{
+    Name = "Laptops ultrabooks",
+    Category = "Computers",
+    Childs = new List<SubCategory>
+    {
+        new SubCategory { Name = "Laptops", Category = "Laptops ultrabooks" },
+        new SubCategory { Name = "Ultrabooks", Category = "Laptops ultrabooks" },
+        // Add more child categories for "Laptops ultrabooks" if needed
+    }
+},
+new SubCategory
+{
+    Name = "NetWork",
+    Category = "Computers",
+    Childs = new List<SubCategory>
+    {
+        new SubCategory { Name = "Routers", Category = "NetWork" },
+        new SubCategory { Name = "Switches", Category = "NetWork" },
+        // Add more child categories for "NetWork" if needed
+    }
+},
 
 
                     }
