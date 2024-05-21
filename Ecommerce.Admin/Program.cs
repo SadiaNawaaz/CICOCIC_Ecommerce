@@ -1,4 +1,8 @@
 using Ecommerce.Admin.Components;
+using Ecommerce.Shared.Context;
+using Microsoft.EntityFrameworkCore;
+using MudBlazor;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +10,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddDbContext<ApplicationDbContext>(
+ o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.NewestOnTop = false;
+    config.SnackbarConfiguration.ShowCloseIcon = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 5000;
+    config.SnackbarConfiguration.HideTransitionDuration = 500;
+    config.SnackbarConfiguration.ShowTransitionDuration = 500;
+    config.SnackbarConfiguration.SnackbarVariant = Variant.Outlined;
+    config.SnackbarConfiguration.MaxDisplayedSnackbars = 3;
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -20,6 +39,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+
+
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -19,4 +19,8 @@
     <Folder Include="wwwroot\assets\img\Logo\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.Shared\Ecommerce.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

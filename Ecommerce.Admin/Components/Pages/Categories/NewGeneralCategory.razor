@@ -1,0 +1,66 @@
+﻿@rendermode InteractiveServer
+@using Ecommerce.Shared.Dto;
+
+<div class="col-xl-12">
+
+
+
+    <div class="panel panel-inverse" data-sortable-id="form-validation-1">
+        <div class="panel-body">
+
+            <div class="d-flex align-items-center mb-3">
+                <h4 class="modal-title d-flex align-items-center"> <small class="fs-13px fw-bold ms-2"><b>@category.Name</b></small></h4>
+               
+            </div>
+            <div class="form-group">
+                <label class="col-lg-4 col-form-label form-label" for="Cate"></label>
+                <div class="col-lg-12">
+                    <input class="form-control" type="text" @bind="@this.input" />
+                </div>
+            </div>
+
+            <div class="form-group row mt-20px">
+                <label class="col-lg-5 col-form-label form-label">&nbsp;</label>
+                <div class="col-lg-7">
+                    <button type="submit" class="btn btn-primary" @onclick="@this.OK">Submit</button>
+
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+
+@code {
+    private string input = string.Empty;
+    CategoryDto category = new CategoryDto();
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public CategoryDto Item { get; set; }
+    [Parameter]
+    public bool IsEdit { get; set; }
+    private void OK() => this.MudDialog.Close(DialogResult.Ok(this.input));
+
+    protected override void OnInitialized()
+    {
+
+        category = Item;
+
+
+        if (category == null)
+        {
+            category = new CategoryDto();
+        }
+        if(IsEdit)
+        {
+            input = category.Name;
+        }
+    }
+}

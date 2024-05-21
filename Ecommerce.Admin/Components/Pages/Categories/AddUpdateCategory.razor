@@ -1,0 +1,174 @@
+﻿@page "/"
+@page "/AddCategory"
+@page "/category-tree"
+@rendermode InteractiveServer
+@using Ecommerce.Shared.Dto;
+@inject IDialogService DialogService
+
+<div class="col-xl-12">
+    
+    <div class="panel panel-inverse" data-sortable-id="tree-view-1" style="min-height:500px">
+        <div class="panel-heading">
+            <h4 class="panel-title">Category</h4>
+            <div class="panel-heading-btn">
+                <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+            </div>
+        </div>
+        <div class="panel-body">
+          
+
+
+            <div class="mb-2">
+                <button href="javascript:;" class="btn btn-sm btn-primary"  @onclick="() => OpenAddDialog(null)">
+                    <span class="d-flex align-items-center text-start">
+                        <i class="fab fa-plus"></i>
+                        <span>
+                            <span class="d-block"><b> &nbsp;Main Level</b></span>
+                            
+                        </span>
+                    </span>
+                </button>
+            </div>
+
+            <MudTreeView Items="@TreeItems" Hover="true" Width="100%">
+                <ItemTemplate Context="item">
+                    <MudTreeViewItem Items="@item.SubCategories" Icon="@Icons.Material.Filled.Folder" sm="6">
+                        <BodyContent>
+                            <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
+                                <MudText Style="justify-self: start;">@item.Name</MudText>
+                                <div style="justify-self: end;">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="() => OpenAddDialog(item)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="() => OpenEditDialog(item)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => ConfirmRemoveDialog(item)" />
+                                </div>
+                            </div>
+                        </BodyContent>
+                    </MudTreeViewItem>
+                </ItemTemplate>
+            </MudTreeView>
+        </div>
+
+    </div>
+   
+</div>
+
+
+
+@code {
+
+    private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
+
+    protected override void OnInitialized()
+    {
+        TreeItems = GetCategoryDtoData();
+    }
+
+    public HashSet<CategoryDto> GetCategoryDtoData()
+    {
+        return new HashSet<CategoryDto>
+{
+            new CategoryDto
+            {
+                Name = "Level 1 - Category 1",
+                Icon = "icon1.png",Level=1,
+                SubCategories = new HashSet<CategoryDto>
+        {
+                    new CategoryDto
+                    {
+                        Name = "Level 2 - SubCategory 1.1",
+                        Icon = "icon2.png",Level=2,
+                        SubCategories = new HashSet<CategoryDto>
+                {
+
+                        }
+                    },
+
+                }
+            },
+
+        };
+    }
+
+
+
+    private async Task OpenAddDialog(CategoryDto? item)
+    {
+        var options = new DialogOptions { CloseButton = true, FullWidth = true };
+        var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto() };
+        var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
+        string value = result.Data as string ?? string.Empty;
+        if (!result.Cancelled && value != null)
+        {
+            string newCategoryName = value;
+            if (!string.IsNullOrEmpty(newCategoryName))
+            {
+                if (item == null)
+                {
+                    // Add a new top-level node
+                    TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = 1 });
+                }
+                else
+                {
+                    // Add a new subcategory node
+                    item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = item.Level + 1 });
+                }
+            }
+        }
+    }
+    private async Task ConfirmRemoveDialog(CategoryDto item)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete '{item.Name}'?",
+            yesText: "Yes", cancelText: "No"
+        );
+
+        if (result == true)
+        {
+            RemoveCategory(TreeItems, item);
+        }
+    }
+    private bool RemoveCategory(HashSet<CategoryDto> categories, CategoryDto itemToRemove)
+    {
+        // Try to remove the item from the root level
+        if (categories.Remove(itemToRemove))
+        {
+            return true;
+        }
+
+        // Otherwise, search recursively in subcategories
+        foreach (var category in categories)
+        {
+            if (RemoveCategory(category.SubCategories, itemToRemove))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    private async Task OpenEditDialog(CategoryDto item)
+    {
+
+        try
+        {
+            var options = new DialogOptions { CloseButton = true, FullWidth = true };
+            var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto(), ["IsEdit"] = true };
+            var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
+            item.Name = result.Data as string ?? string.Empty;
+
+
+
+        }
+
+        catch(Exception ex)
+        {
+
+        }
+    }
+}
