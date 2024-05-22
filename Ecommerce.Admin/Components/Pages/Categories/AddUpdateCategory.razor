@@ -4,9 +4,12 @@
 @rendermode InteractiveServer
 @using Ecommerce.Shared.Dto;
 @inject IDialogService DialogService
-
+@using Ecommerce.Shared.Services.Categories;
+@inject ICategoryService CategoryService
+@inject ISnackbar Snackbar
+@using Ecommerce.Shared.Services.Shared; 
 <div class="col-xl-12">
-    
+
     <div class="panel panel-inverse" data-sortable-id="tree-view-1" style="min-height:500px">
         <div class="panel-heading">
             <h4 class="panel-title">Category</h4>
@@ -18,16 +21,16 @@
             </div>
         </div>
         <div class="panel-body">
-          
+
 
 
             <div class="mb-2">
-                <button href="javascript:;" class="btn btn-sm btn-primary"  @onclick="() => OpenAddDialog(null)">
+                <button href="javascript:;" class="btn btn-sm btn-primary" @onclick="() => OpenAddDialog(null)">
                     <span class="d-flex align-items-center text-start">
                         <i class="fab fa-plus"></i>
                         <span>
                             <span class="d-block"><b> &nbsp;Main Level</b></span>
-                            
+
                         </span>
                     </span>
                 </button>
@@ -40,9 +43,16 @@
                             <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
                                 <MudText Style="justify-self: start;">@item.Name</MudText>
                                 <div style="justify-self: end;">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="() => OpenAddDialog(item)" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="() => OpenEditDialog(item)" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => ConfirmRemoveDialog(item)" />
+
+                                    <MudTooltip Text="Edit">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="text-success btn btn-sm" OnClick="() => OpenAddDialog(item)" />
+                                    </MudTooltip>
+                                        <MudTooltip Text="Edit">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" class="text-warning btn btn-sm" OnClick="() => OpenEditDialog(item)" />
+                                        </MudTooltip>
+                                        <MudTooltip Text="Delete">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" class="text-danger btn btn-sm" OnClick="() => ConfirmRemoveDialog(item)" />
+                                        </MudTooltip>
                                 </div>
                             </div>
                         </BodyContent>
@@ -52,7 +62,7 @@
         </div>
 
     </div>
-   
+
 </div>
 
 
@@ -61,63 +71,169 @@
 
     private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
 
-    protected override void OnInitialized()
+
+
+
+    #region 
+
+    protected override async Task OnInitializedAsync()
     {
-        TreeItems = GetCategoryDtoData();
+        await LoadCategoryTreeAsync();
     }
 
-    public HashSet<CategoryDto> GetCategoryDtoData()
+    private async Task LoadCategoryTreeAsync()
     {
-        return new HashSet<CategoryDto>
-{
-            new CategoryDto
-            {
-                Name = "Level 1 - Category 1",
-                Icon = "icon1.png",Level=1,
-                SubCategories = new HashSet<CategoryDto>
+        try
         {
-                    new CategoryDto
-                    {
-                        Name = "Level 2 - SubCategory 1.1",
-                        Icon = "icon2.png",Level=2,
-                        SubCategories = new HashSet<CategoryDto>
-                {
-
-                        }
-                    },
-
-                }
-            },
-
-        };
+            var response = await CategoryService.GetCategoriesAsync();
+            if (response.Success)
+            {
+                var categories = response.Data;
+                TreeItems = categories.Where(c => c.ParentCategoryId == null)
+                              .Select(MapToCategoryDto)
+                              .ToHashSet();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+        }
     }
 
-
+    #endregion
+    #region Save_Edit
 
     private async Task OpenAddDialog(CategoryDto? item)
     {
-        var options = new DialogOptions { CloseButton = true, FullWidth = true };
-        var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto() };
-        var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
-        string value = result.Data as string ?? string.Empty;
-        if (!result.Cancelled && value != null)
+        try
         {
-            string newCategoryName = value;
-            if (!string.IsNullOrEmpty(newCategoryName))
+            var options = new DialogOptions { CloseButton = true, FullWidth = true };
+            var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto() };
+            var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
+            string value = result.Data as string ?? string.Empty;
+            if (!result.Cancelled && value != null)
             {
-                if (item == null)
+                string newCategoryName = value;
+
+                if (!string.IsNullOrEmpty(newCategoryName))
                 {
-                    // Add a new top-level node
-                    TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = 1 });
-                }
-                else
-                {
-                    // Add a new subcategory node
-                    item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = item.Level + 1 });
+
+                    if (item == null)
+                    {
+
+
+                        var category = new Category
+                        {
+                            Name = value,
+                            Icon = "",
+                            Level = 1,
+                            ParentCategoryId = null
+                        };
+
+                        await SaveOrUpdateCategoryAsync(category);
+                        TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id,ParentCategoryId= category.ParentCategoryId });
+
+
+                    }
+                    else
+                    {
+
+                        var category = new Category
+                        {
+                            Name = newCategoryName,
+                            Icon = "",
+                            Level = item.Level + 1,
+                            ParentCategoryId = item.Id
+                        };
+                        await SaveOrUpdateCategoryAsync(category);
+                        item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId });
+                    }
                 }
             }
         }
+
+
+        catch(Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
     }
+    private async Task OpenEditDialog(CategoryDto item)
+    {
+
+        try
+        {
+            var options = new DialogOptions { CloseButton = true, FullWidth = true };
+            var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto(), ["IsEdit"] = true };
+            var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
+            item.Name = result.Data as string ?? string.Empty;
+            item.Name = item.Name;
+
+            var category = new Category
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Icon = item.Icon,
+                Level = item.Level,
+                ParentCategoryId = item.ParentCategoryId
+            };
+
+            await  SaveOrUpdateCategoryAsync(category);
+
+        }
+
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+    private async Task SaveOrUpdateCategoryAsync(Category category)
+    {
+        try
+        {
+            ServiceResponse<Category> response;
+            if (category.Id == 0)
+            {
+                response = await CategoryService.AddCategoryAsync(category);
+            }
+            else
+            {
+                response = await CategoryService.UpdateCategoryAsync(category);
+            }
+            if (response.Success)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+    #endregion
+
+    private CategoryDto MapToCategoryDto(Category category)
+    {
+        return new CategoryDto
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Icon = category.Icon,
+            Level = category.Level,
+            SubCategories = category.SubCategories?.Select(MapToCategoryDto).ToHashSet()
+        };
+    }
+
+    #region Remove
+
     private async Task ConfirmRemoveDialog(CategoryDto item)
     {
         bool? result = await DialogService.ShowMessageBox(
@@ -128,47 +244,58 @@
 
         if (result == true)
         {
-            RemoveCategory(TreeItems, item);
+            await RemoveCategoryAndDeleteAsync(TreeItems, item.Id);
         }
     }
-    private bool RemoveCategory(HashSet<CategoryDto> categories, CategoryDto itemToRemove)
-    {
-        // Try to remove the item from the root level
-        if (categories.Remove(itemToRemove))
-        {
-            return true;
-        }
 
-        // Otherwise, search recursively in subcategories
-        foreach (var category in categories)
+
+
+    private async Task<bool> DeleteCategoryAsync(long id)
+    {
+        try
         {
-            if (RemoveCategory(category.SubCategories, itemToRemove))
+            var response = await CategoryService.DeleteCategoryAsync(id);
+            return response.Success;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred while deleting category: {ex.Message}", Severity.Error);
+            return false;
+        }
+    }
+
+
+    private async Task<bool> RemoveCategoryAndDeleteAsync(HashSet<CategoryDto> categories, long id)
+    {
+        var itemToRemove = categories.FirstOrDefault(c => c.Id == id);
+        if (itemToRemove != null)
+        {
+            if (await DeleteCategoryAsync(id))
             {
+                categories.Remove(itemToRemove);
                 return true;
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete category", Severity.Error);
+                return false;
+            }
+        }
+        else
+        {
+            foreach (var category in categories)
+            {
+                if (await RemoveCategoryAndDeleteAsync(category.SubCategories, id))
+                {
+                    Snackbar.Add("Category deleted successfully", Severity.Success);
+                    return true;
+                }
             }
         }
 
+        Snackbar.Add("Category not found", Severity.Warning);
         return false;
     }
 
-
-    private async Task OpenEditDialog(CategoryDto item)
-    {
-
-        try
-        {
-            var options = new DialogOptions { CloseButton = true, FullWidth = true };
-            var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto(), ["IsEdit"] = true };
-            var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
-            item.Name = result.Data as string ?? string.Empty;
-
-
-
-        }
-
-        catch(Exception ex)
-        {
-
-        }
-    }
+    #endregion
 }

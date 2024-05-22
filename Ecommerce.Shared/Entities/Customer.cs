@@ -1,9 +1,10 @@
 ﻿
+using Ecommerce.Shared.Abstraction;
 using System.ComponentModel.DataAnnotations;
 
 namespace Ecommerce.Shared.Entities;
 
-public class Customer
+public class Customer: BaseEntity
 {
     public required string FirstName { get; set; }
     public required string LastName { get; set; }

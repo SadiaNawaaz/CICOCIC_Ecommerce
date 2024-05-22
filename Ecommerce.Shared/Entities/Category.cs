@@ -10,6 +10,7 @@ public class Category: BaseEntity
     public string Name { get; set; }
     [Required]
     public int Level { get; set; }
+    public string? Icon { get; set; } = "Icons.Material.Filled.Folder";
     public long? ParentCategoryId { get; set; } 
 
     [ForeignKey("ParentCategoryId")]

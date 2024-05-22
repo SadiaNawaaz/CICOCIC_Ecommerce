@@ -21,16 +21,45 @@
             right: 0.75rem;
             top: 0.5rem;
         }
+
+    /* Error */
+    .mud-alert-filled-error {
+        color: white;
+        font-weight: 500;
+        background-color: #f44336 !important;
+    }
+
+    /* Warning */
+    .mud-alert-filled-warning {
+        color: white;
+        font-weight: 500;
+        background-color: #ff9800 !important;
+    }
+
+    /* Info */
+    .mud-alert-filled-info {
+        color: white;
+        font-weight: 500;
+        background-color: #00bcd4 !important;
+    }
+
+    /* Success */
+    .mud-alert-filled-success {
+        color: white;
+        font-weight: 500;
+        background-color: #4caf50 !important;
+    }
+
 </style>
 <!DOCTYPE html>
 <html lang="en">
 
 <body>
-
-
+    <MudDialogProvider @rendermode="InteractiveServer" />
+    <MudSnackbarProvider @rendermode="InteractiveServer" />
     <div id="app" class="app app-header-fixed app-sidebar-fixed ">
-        <MudDialogProvider  @rendermode="InteractiveServer" />
-        <MudSnackbarProvider />
+
+
         <Header></Header>
 
         <Sidebar></Sidebar>

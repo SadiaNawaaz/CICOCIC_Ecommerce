@@ -1,6 +1,7 @@
 ﻿
 
 using Ecommerce.Shared.Entities;
+using Ecommerce.Shared.Entities.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.Shared.Context;
@@ -18,7 +19,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Customer> Customers { get; set; }
 
-
+    public DbSet<ErrorLog> ErrorLogs { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //base.OnModelCreating(modelBuilder);
