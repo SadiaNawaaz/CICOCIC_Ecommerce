@@ -1,0 +1,472 @@
+﻿
+@page "/AddUpdateProduct"
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product Details</li>
+        </ol>
+        <h1 class="page-header mb-0">Product Details</h1>
+    </div>
+</div>
+
+
+<!-- The Modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Add New Product </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form>
+                 
+                    <div class="row mb-15px">
+                        <label class="form-label col-form-label col-md-3">Product Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control">
+                        </div>
+                    </div>
+                 
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn btn-danger  btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-8">
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" placeholder="Product name">
+                </div>
+                <div class="">
+                    <label class="form-label">Description</label>
+                    <div class="form-control p-0 overflow-hidden">
+                        <textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media
+            </div>
+            <div class="card-body">
+                <div id="dropzone">
+                    <form action="/upload" class="dropzone needsclick" id="demo-upload">
+                        <div class="dz-message needsclick">
+                            Drop files <b>here</b> or <b>click</b> to upload.<br />
+                            <span class="dz-note needsclick">
+                                (This is just a demo dropzone. Selected files are <strong>not</strong> actually uploaded.)
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    Add features Specifications and thier value.
+                </div>
+
+                <!--<MudGrid>
+                    <MudAutocomplete T="WarrantyType" Label="Spec" @bind-Value="newWarranty" SearchFunc="@Search"/>-->
+                @*<MudItem xs="12" md="6">
+                        <MudAutocomplete T="string" Label="Select Option" @bind-Value="newWarranty.Type" Variant="Variant.Outlined" Dense="true" Data="@warranties.Select(w => w.Type).ToList()">
+                        </MudAutocomplete>
+                    </MudItem>*@
+                <!--<MudItem xs="12" md="4">
+                        <MudTextField T="string" Label="Value" @bind-Value="newWarranty.Value" Variant="Variant.Outlined" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudButton Color="Color.Primary" OnClick="AddWarranty">Add</MudButton>
+                    </MudItem>
+                </MudGrid>-->
+
+
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <select class="form-control form-select" name="warranty_type_id" @bind="selectedOption">
+                            <option value="Model (Model)">Model (Model)</option>
+                            <option value="Aanbevolen gebruik (Recommended use)">Aanbevolen gebruik (Recommended use)</option>
+                            <option value="Eancode (EAN code)">Eancode (EAN code)</option>
+                            <option value="Garantie (Warranty)">Garantie (Warranty)</option>
+                            <option value="Volumeregeling (Volume control)">Volumeregeling (Volume control)</option>
+                            <option value="Bluetooth (Bluetooth)">Bluetooth (Bluetooth)</option>
+                            <option value="USB-aansluiting (USB connection)">USB-aansluiting (USB connection)</option>
+                            <option value="Aansluiting microfoon (Microphone connection)">Aansluiting microfoon (Microphone connection)</option>
+                            <option value="Microfoontype (Microphone type)">Microfoontype (Microphone type)</option>
+                            <option value="Gewicht (gram) (Weight in grams)">Gewicht (gram) (Weight in grams)</option>
+                            <option value="Snelstartgids (Quick start guide)">Snelstartgids (Quick start guide)</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" @bind="inputText" class="form-control" id="exampleInputPassword2" placeholder="Value">
+
+
+                    </div>
+                    <div class="col-lg-1">
+
+                        <button class="btn btn-primary" @onclick="AddItem">Add</button>
+                    </div>
+                </div>
+                <div>
+                    <h3>Selected Items</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0 align-middle">
+                            <thead>
+                                <tr>
+
+                                    <th>Feature</th>
+                                    <th>Value</th>
+                                    <th width="1%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in selectedItems)
+                                {
+
+                                    <tr>
+
+                                        <td>@item.Name </td>
+                                        <td>@item.Value</td>
+                                        <td nowrap="">
+
+                                            <a href="#" class="btn btn-sm btn-white w-60px" @onclick="() => RemoveItem(item)">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="col-xl-4">
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Publish</div>
+                </div>
+                <div><a href="#" class="text-decoration-none text-gray-500">Manage</a></div>
+            </div>
+            <div class="card-body fw-bold">
+                <div class="d-flex">
+                    <div class="flex-1 d-flex">
+                        <div class="me-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="widget_todolist_1">
+                            </div>
+                        </div>
+                        <div>Publish to Site</div>
+
+                    </div>
+                    <div class="w-50px text-center"><a href="#" class="text-decoration-none"><i class="fa fa-lg fa-fw fa-calendar"></i></a></div>
+                </div>
+                <hr />
+
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Product Level</div>
+                </div>
+            </div>
+            <div class="card-body fw-bold">
+
+                <div class="mb-0">
+                    <label class="form-label">Main Category</label>
+                    <div class="input-group">
+                        <select class="form-control form-select" name="warranty_type_id">
+                            <option value="">Elektronica</option>
+                            <option value="1">Huis</option>
+
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="mb-0">
+                    <label class="form-label">Group Category</label>
+                    <div class="input-group">
+                        <select class="form-control form-select" name="warranty_type_id">
+                            <option value="">Beeld en geluid</option>
+                            <option value="1">Koken en tafelen</option>
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Sub Category</label>
+                    <div class="input-group">
+                        <select class="form-control form-select" name="warranty_type_id">
+                            <option value=""> Portable audio en video</option>
+                            <option value=""> Koffie</option>
+
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Sub Sub Category</label>
+                    <div class="input-group">
+                        <select class="form-control form-select" name="warranty_type_id">
+                            <option value="">Koptelefoon</option>
+                            <option value=""> Espressomachine</option>
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-0 mt-10px">
+                    <label class="form-label">
+                        Product
+                        <button type="button" class="btn btn-success btn-sm  me-1 mb-1" data-bs-toggle="modal" data-bs-target="#myModal">Add New</button>
+                    </label>
+                    <div class="input-group">
+                        <select class="form-control form-select" name="warranty_type_id">
+                            <option value="">Corsair HS35</option>
+                            <option value=""> Corsair HS80 RGB USB</option>
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Brand</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center position-relative fw-bold mb-2">
+
+
+                    <select class="form-control form-select" name="warranty_type_id">
+                        <option value="">Apple</option>
+                        <option value=""> Samsung</option>
+                        <option value=""> Sony</option>
+                    </select>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Variants</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    Add variants if this product comes in multiple versions, like different sizes or colors.
+                </div>
+                <form class="form-horizontal form-bordered">
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Size</label>
+                        <div class="col-lg-8">
+
+                            <select class="form-select" name="warranty_id">
+                                <option value="">-- Select Size --</option>
+                                <option value="1">Small</option>
+                                <option value="2">Large</option>
+                                <option value="3">XL</option>
+                                <option value="4">XXL</option>
+
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Color</label>
+                        <div class="col-lg-8">
+                            <select id="color-select" class="form-control">
+                                <option value="#FF0000" style="color: red; background-color: red;">Red - #FF0000</option>
+                                <option value="#00FF00" style="color: green; background-color: green;">Green - #00FF00</option>
+                                <option value="#0000FF" style="color: blue; background-color: blue;">Blue - #0000FF</option>
+                                <option value="#FFFF00" style="color: yellow; background-color: yellow;">Yellow - #FFFF00</option>
+                                <option value="#FFA500" style="color: orange; background-color: orange;">Orange - #FFA500</option>
+                                <option value="#800080" style="color: purple; background-color: purple;">Purple - #800080</option>
+                                <option value="#000000" style="color: white; background-color: black;">Black - #000000</option>
+                                <option value="#FFFFFF" style="color: black; background-color: white;">White - #FFFFFF</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">SKU</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="masked-input-tid" placeholder="#sku00001">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Price</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="masked-input-pkey" placeholder="300">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Build Year</label>
+                        <div class="col-lg-8">
+                            <select class="form-select" name="warranty_id">
+                                <option value="">-- Select Year --</option>
+                                <option value="1">2024</option>
+                                <option value="2">2023</option>
+                                <option value="3">2022</option>
+                                <option value="4">2021</option>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">SSN</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="masked-input-pno" placeholder="AAA-9999-A">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    string selectedOption;
+    string inputText;
+    public class ListItem
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
+
+    // Create a list to store selected items
+    List<ListItem> selectedItems = new List<ListItem>();
+
+    // Method to handle Add button click
+    void AddItem()
+    {
+        // Get the selected item from the dropdown and the value from the input
+        var selectedItemName = selectedOption;
+        var value = inputText;
+
+        // Create a new ListItem object
+        var newItem = new ListItem
+        {
+            Name = selectedItemName,
+            Value = value
+        };
+
+        // Add the new item to the list
+        selectedItems.Add(newItem);
+
+        // Clear input fields
+        inputText = "";
+        selectedOption = "";
+    }
+    private WarrantyType newWarranty = new WarrantyType();
+    private List<WarrantyType> warranties = new List<WarrantyType>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        warranties.Add(new WarrantyType { Type = "Model (Model)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Aanbevolen gebruik (Recommended use)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Eancode (EAN code)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Garantie (Warranty)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Volumeregeling (Volume control)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Bluetooth (Bluetooth)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "USB-aansluiting (USB connection)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Aansluiting microfoon (Microphone connection)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Microfoontype (Microphone type)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Gewicht (gram) (Weight in grams)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Snelstartgids (Quick start guide)", Value = "" });
+    }
+
+    private string searchString = "";
+
+    private void AddWarranty()
+    {
+        if (!string.IsNullOrWhiteSpace(newWarranty.Type) && !string.IsNullOrWhiteSpace(newWarranty.Value))
+        {
+            warranties.Add(newWarranty);
+            Snackbar.Add($"Added: {newWarranty.Type} - {newWarranty.Value}", Severity.Success);
+            newWarranty = new WarrantyType(); // Reset the form
+        }
+        else
+        {
+            Snackbar.Add("Both fields are required.", Severity.Error);
+        }
+    }
+
+    //private Func<WarrantyType, bool> FilterFunc => x => FilterFunc(x, searchString);
+
+    private bool FilterFunc(WarrantyType warranty, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (warranty.Type.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (warranty.Value.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private Task<IEnumerable<WarrantyType>> Search(string searchTerm)
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            return Task.FromResult(Enumerable.Empty<WarrantyType>());
+        }
+
+        var products = warranties?
+            .Where(product => product.Type.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+            ?? Enumerable.Empty<WarrantyType>();
+
+        return Task.FromResult(products);
+    }
+    public class WarrantyType
+    {
+        public string Type { get; set; }
+        public string Value { get; set; }
+    }
+    void RemoveItem(ListItem item)
+    {
+        selectedItems.Remove(item);
+    }
+}

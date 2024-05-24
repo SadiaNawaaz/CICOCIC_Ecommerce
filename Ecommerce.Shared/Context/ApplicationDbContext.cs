@@ -1,6 +1,8 @@
 ﻿
 
 using Ecommerce.Shared.Entities;
+using Ecommerce.Shared.Entities.Brands;
+using Ecommerce.Shared.Entities.ModelYears;
 using Ecommerce.Shared.Entities.Shared;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +22,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<Customer> Customers { get; set; }
 
     public DbSet<ErrorLog> ErrorLogs { get; set; }
+    public DbSet<ModelYear> ModelYears { get; set; }
+    public DbSet<Brand> Brands { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //base.OnModelCreating(modelBuilder);
