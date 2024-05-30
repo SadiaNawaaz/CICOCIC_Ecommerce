@@ -1,0 +1,211 @@
+﻿@page "/ClusterList"
+@using Ecommerce.Shared.Entities.Clusters
+@using Ecommerce.Shared.Services.Clusters
+@using Pages.Shared
+@inject IClusterService clusterService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ClusterList">Cluster</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Clusters</li>
+        </ol>
+
+    </div>
+</div>
+
+
+<div class="panel panel-inverse">
+    <!-- BEGIN panel-heading -->
+    <div class="panel-heading">
+        <h4 class="panel-title">Cluster - List</h4>
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+        </div>
+    </div>
+    <!-- END panel-heading -->
+    <!-- BEGIN panel-body -->
+    <div class="panel-body">
+        <div class="row fileupload-buttonbar">
+            <div class="col-xl-7">
+
+                <button type="button" class="btn btn-primary start me-1" @onclick="NavigateToAddEditCluster">
+                    <i class="fa fa-fw fa-add"></i>
+                    <span>Add new</span>
+                </button>
+
+                <!-- The global file processing state -->
+                <span class="fileupload-process"></span>
+            </div>
+
+            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
+                <div class="progress progress-striped active">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <div class="progress-extended">&nbsp;</div>
+            </div>
+        </div>
+        <MudDataGrid T="Cluster" Items="@clusters" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+            <ColGroup>
+                <col style="width: 90%;" />
+                <col style="width: 10%;" />
+
+                <col />
+            </ColGroup>
+            <Columns>
+                <!-- PropertyColumn for the name -->
+                <PropertyColumn Property="x => x.Name" Title="Name" Style="width:90%" />
+                <TemplateColumn CellClass="d-flex justify-end" Style="width:10%">
+                    <HeaderTemplate>
+                        <div>Edit</div>
+                    </HeaderTemplate>
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditCluster(context.Item)" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteCluster(context.Item)" />
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+
+            <PagerContent>
+                <MudDataGridPager T="Cluster" PageSizeOptions=@(new int[] {5, 10, 20}) />
+            </PagerContent>
+        </MudDataGrid>
+
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+@code {
+    private bool _resizeColumn;
+    private IEnumerable<Cluster> clusters = new List<Cluster>();
+    private string _searchString;
+    private List<string> _events = new();
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    
+
+    // Quick filter - filter globally across multiple columns with the same input
+    private Func<Cluster, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadClusters();
+    }
+
+    private async Task LoadClusters()
+    {
+        try
+        {
+            var response = await clusterService.GetClustersAsync();
+            if (response.Success)
+            {
+                clusters = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while loading clusters: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadClusters: {ex}");
+        }
+    }
+
+  
+
+    private void EditCluster(Cluster cluster)
+    {
+        try
+        {
+            NavigationManager.NavigateTo($"/AddEditCluster/{cluster.Id}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while navigating to edit the cluster: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in EditCluster: {ex}");
+        }
+    }
+
+    private async Task DeleteCluster(Cluster cluster)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("ContentText", "Do you want to confirm?");
+            parameters.Add("ButtonText", "Yes");
+            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+            var result = await dialogresult.Result;
+            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+                await Delete(cluster);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while attempting to delete the cluster: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteCluster: {ex}");
+        }
+    }
+
+    private async Task Delete(Cluster cluster)
+    {
+        try
+        {
+            var response = await clusterService.DeleteClusterAsync(cluster.Id);
+            if (response.Success)
+            {
+                await LoadClusters();
+                Snackbar.Add(response.Message, Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while deleting the cluster: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in Delete: {ex}");
+        }
+    }
+
+    private void NavigateToAddEditCluster()
+    {
+        try
+        {
+            NavigationManager.NavigateTo("/AddEditCluster");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while navigating to add or edit a cluster: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in NavigateToAddEditCluster: {ex}");
+        }
+    }
+}

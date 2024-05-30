@@ -1,0 +1,221 @@
+﻿
+@page "/AddMain"
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Main</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product</li>
+        </ol>
+        <h1 class="page-header mb-0">Main Product </h1>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
+            </div>
+            <div class="card-body">
+                @*<div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" placeholder="Product name">
+                </div>*@
+                <form class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Product Title">
+                    </div>
+                  
+                    <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
+                 
+                </form>
+            </div>
+        </div>
+     
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    Add features Specifications and thier value.
+                </div>
+
+
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <select class="form-control form-select" name="warranty_type_id" @bind="selectedOption">
+                            <option value="Model (Model)">Model (Model)</option>
+                            <option value="Aanbevolen gebruik (Recommended use)">Aanbevolen gebruik (Recommended use)</option>
+                            <option value="Eancode (EAN code)">Eancode (EAN code)</option>
+                            <option value="Garantie (Warranty)">Garantie (Warranty)</option>
+                            <option value="Volumeregeling (Volume control)">Volumeregeling (Volume control)</option>
+                            <option value="Bluetooth (Bluetooth)">Bluetooth (Bluetooth)</option>
+                            <option value="USB-aansluiting (USB connection)">USB-aansluiting (USB connection)</option>
+                            <option value="Aansluiting microfoon (Microphone connection)">Aansluiting microfoon (Microphone connection)</option>
+                            <option value="Microfoontype (Microphone type)">Microfoontype (Microphone type)</option>
+                            <option value="Gewicht (gram) (Weight in grams)">Gewicht (gram) (Weight in grams)</option>
+                            <option value="Snelstartgids (Quick start guide)">Snelstartgids (Quick start guide)</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" @bind="inputText" class="form-control" id="exampleInputPassword2" placeholder="Value">
+
+
+                    </div>
+                    <div class="col-lg-1">
+
+                        <button class="btn btn-primary" @onclick="AddItem">Add</button>
+                    </div>
+                </div>
+                <div>
+                    <h3>Selected Items</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0 align-middle">
+                            <thead>
+                                <tr>
+
+                                    <th>Feature</th>
+                                    <th>Value</th>
+                                    <th width="1%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in selectedItems)
+                                {
+
+                                    <tr>
+
+                                        <td>@item.Name </td>
+                                        <td>@item.Value</td>
+                                        <td nowrap="">
+
+                                            <a href="#" class="btn btn-sm btn-white w-60px" @onclick="() => RemoveItem(item)">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    
+</div>
+
+@code {
+    string selectedOption;
+    string inputText;
+    public class ListItem
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
+
+    // Create a list to store selected items
+    List<ListItem> selectedItems = new List<ListItem>();
+
+    // Method to handle Add button click
+    void AddItem()
+    {
+        // Get the selected item from the dropdown and the value from the input
+        var selectedItemName = selectedOption;
+        var value = inputText;
+
+        // Create a new ListItem object
+        var newItem = new ListItem
+        {
+            Name = selectedItemName,
+            Value = value
+        };
+
+        // Add the new item to the list
+        selectedItems.Add(newItem);
+
+        // Clear input fields
+        inputText = "";
+        selectedOption = "";
+    }
+    private WarrantyType newWarranty = new WarrantyType();
+    private List<WarrantyType> warranties = new List<WarrantyType>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        warranties.Add(new WarrantyType { Type = "Model (Model)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Aanbevolen gebruik (Recommended use)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Eancode (EAN code)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Garantie (Warranty)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Volumeregeling (Volume control)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Bluetooth (Bluetooth)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "USB-aansluiting (USB connection)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Aansluiting microfoon (Microphone connection)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Microfoontype (Microphone type)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Gewicht (gram) (Weight in grams)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Snelstartgids (Quick start guide)", Value = "" });
+    }
+
+    private string searchString = "";
+
+    private void AddWarranty()
+    {
+        if (!string.IsNullOrWhiteSpace(newWarranty.Type) && !string.IsNullOrWhiteSpace(newWarranty.Value))
+        {
+            warranties.Add(newWarranty);
+            Snackbar.Add($"Added: {newWarranty.Type} - {newWarranty.Value}", Severity.Success);
+            newWarranty = new WarrantyType(); // Reset the form
+        }
+        else
+        {
+            Snackbar.Add("Both fields are required.", Severity.Error);
+        }
+    }
+
+    //private Func<WarrantyType, bool> FilterFunc => x => FilterFunc(x, searchString);
+
+    private bool FilterFunc(WarrantyType warranty, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (warranty.Type.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (warranty.Value.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private Task<IEnumerable<WarrantyType>> Search(string searchTerm)
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            return Task.FromResult(Enumerable.Empty<WarrantyType>());
+        }
+
+        var products = warranties?
+            .Where(product => product.Type.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+            ?? Enumerable.Empty<WarrantyType>();
+
+        return Task.FromResult(products);
+    }
+    public class WarrantyType
+    {
+        public string Type { get; set; }
+        public string Value { get; set; }
+    }
+    void RemoveItem(ListItem item)
+    {
+        selectedItems.Remove(item);
+    }
+}

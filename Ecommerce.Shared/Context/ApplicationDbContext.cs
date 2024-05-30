@@ -2,6 +2,8 @@
 
 using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.Brands;
+using Ecommerce.Shared.Entities.Clusters;
+using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ModelYears;
 using Ecommerce.Shared.Entities.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +27,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<ModelYear> ModelYears { get; set; }
     public DbSet<Brand> Brands { get; set; }
 
-
+    public DbSet<Feature> Features { get; set; }
+    public DbSet<Cluster> Clusters { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //base.OnModelCreating(modelBuilder);

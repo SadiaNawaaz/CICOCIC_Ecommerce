@@ -1,0 +1,129 @@
+﻿@page "/BrandList"
+@using Ecommerce.Shared.Entities.Brands
+@using Ecommerce.Shared.Services.Brands;
+@inject IBrandService BrandService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@using Pages.Shared
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Brands</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Brands</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <button class="btn btn-primary mb-3" @onclick="NavigateToAddBrand">Add Brand</button>
+                <MudDataGrid T="Brand" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+                    <ColGroup>
+                        <col style="width: 70%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                    </ColGroup>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Name" Title="Name" />
+                        <PropertyColumn Property="x => x.ImageUrl" Title="Image URL" />
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <HeaderTemplate>
+                                <div>Actions</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditBrand(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="Brand" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private bool _resizeColumn = true;
+    private List<Brand> brands;
+    [Inject]
+    public IDialogService DialogService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBrands();
+    }
+
+    private async Task LoadBrands()
+    {
+        var response = await BrandService.GetBrandsAsync();
+        if (response.Success)
+        {
+            brands = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private void NavigateToAddBrand()
+    {
+        NavigationManager.NavigateTo("/AddEditBrand");
+    }
+
+    private void EditBrand(long brandId)
+    {
+        NavigationManager.NavigateTo($"/AddEditBrand/{brandId}");
+    }
+
+
+    private async Task DeleteBrand(Brand cluster)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("ContentText", "Do you want to confirm?");
+            parameters.Add("ButtonText", "Yes");
+            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+            var result = await dialogresult.Result;
+            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+                await DeleteBrand(cluster.Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while attempting to delete the cluster: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteCluster: {ex}");
+        }
+    }
+
+    private async Task DeleteBrand(long brandId)
+    {
+        var response = await BrandService.DeleteBrandAsync(brandId);
+        if (response.Success)
+        {
+            Snackbar.Add(response.Message, Severity.Success);
+            await LoadBrands();
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+}

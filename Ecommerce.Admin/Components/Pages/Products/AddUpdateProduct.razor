@@ -28,14 +28,99 @@
             <!-- Modal body -->
             <div class="modal-body">
                 <form>
-                 
+
                     <div class="row mb-15px">
                         <label class="form-label col-form-label col-md-3">Product Name</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control">
                         </div>
                     </div>
-                 
+                    <div class="card border-0 mb-4">
+                        <div class="card-header h6 mb-0 bg-none p-3">
+                            <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                Add features Specifications and thier value.
+                            </div>
+
+                            <!--<MudGrid>
+                <MudAutocomplete T="WarrantyType" Label="Spec" @bind-Value="newWarranty" SearchFunc="@Search"/>-->
+                            @*<MudItem xs="12" md="6">
+                    <MudAutocomplete T="string" Label="Select Option" @bind-Value="newWarranty.Type" Variant="Variant.Outlined" Dense="true" Data="@warranties.Select(w => w.Type).ToList()">
+                    </MudAutocomplete>
+                </MudItem>*@
+                            <!--<MudItem xs="12" md="4">
+                    <MudTextField T="string" Label="Value" @bind-Value="newWarranty.Value" Variant="Variant.Outlined" Dense="true" />
+                </MudItem>
+                <MudItem xs="12" md="2">
+                    <MudButton Color="Color.Primary" OnClick="AddWarranty">Add</MudButton>
+                </MudItem>
+            </MudGrid>-->
+
+
+                            <div class="row align-items-center">
+                                <div class="col-lg-6">
+                                    <select class="form-control form-select" name="warranty_type_id" @bind="selectedOption">
+                                        <option value="Model (Model)">Model (Model)</option>
+                                        <option value="Aanbevolen gebruik (Recommended use)">Aanbevolen gebruik (Recommended use)</option>
+                                        <option value="Eancode (EAN code)">Eancode (EAN code)</option>
+                                        <option value="Garantie (Warranty)">Garantie (Warranty)</option>
+                                        <option value="Volumeregeling (Volume control)">Volumeregeling (Volume control)</option>
+                                        <option value="Bluetooth (Bluetooth)">Bluetooth (Bluetooth)</option>
+                                        <option value="USB-aansluiting (USB connection)">USB-aansluiting (USB connection)</option>
+                                        <option value="Aansluiting microfoon (Microphone connection)">Aansluiting microfoon (Microphone connection)</option>
+                                        <option value="Microfoontype (Microphone type)">Microfoontype (Microphone type)</option>
+                                        <option value="Gewicht (gram) (Weight in grams)">Gewicht (gram) (Weight in grams)</option>
+                                        <option value="Snelstartgids (Quick start guide)">Snelstartgids (Quick start guide)</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4">
+                                    <input type="text" @bind="inputText" class="form-control" id="exampleInputPassword2" placeholder="Value">
+
+
+                                </div>
+                                <div class="col-lg-1">
+
+                                    <button class="btn btn-primary" @onclick="AddItem">Add</button>
+                                </div>
+                            </div>
+                            <div>
+                                <h3>Selected Items</h3>
+                                <div class="table-responsive">
+                                    <table class="table table-striped mb-0 align-middle">
+                                        <thead>
+                                            <tr>
+
+                                                <th>Feature</th>
+                                                <th>Value</th>
+                                                <th width="1%"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in selectedItems)
+                                            {
+
+                                                <tr>
+
+                                                    <td>@item.Name </td>
+                                                    <td>@item.Value</td>
+                                                    <td nowrap="">
+
+                                                        <a href="#" class="btn btn-sm btn-white w-60px" @onclick="() => RemoveItem(item)">Delete</a>
+                                                    </td>
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
 
@@ -108,7 +193,7 @@
                 </MudGrid>-->
 
 
-                <div class="row align-items-center">
+                @*<div class="row align-items-center">
                     <div class="col-lg-6">
                         <select class="form-control form-select" name="warranty_type_id" @bind="selectedOption">
                             <option value="Model (Model)">Model (Model)</option>
@@ -133,8 +218,8 @@
 
                         <button class="btn btn-primary" @onclick="AddItem">Add</button>
                     </div>
-                </div>
-                <div>
+                </div>*@
+                @*<div>
                     <h3>Selected Items</h3>
                     <div class="table-responsive">
                         <table class="table table-striped mb-0 align-middle">
@@ -167,7 +252,7 @@
                     </div>
 
 
-                </div>
+                </div>*@
             </div>
         </div>
 
@@ -255,7 +340,7 @@
                 <div class="mb-0 mt-10px">
                     <label class="form-label">
                         Product
-                        <button type="button" class="btn btn-success btn-sm  me-1 mb-1" data-bs-toggle="modal" data-bs-target="#myModal">Add New</button>
+                        <a href="/AddMain" class="btn btn-success btn-sm  me-1 mb-1" >Add New</a>
                     </label>
                     <div class="input-group">
                         <select class="form-control form-select" name="warranty_type_id">

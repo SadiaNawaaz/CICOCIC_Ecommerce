@@ -1,0 +1,127 @@
+﻿@page "/AddEditCluster/{ClusterId:long?}"
+@using Ecommerce.Shared.Entities.Clusters
+@using Ecommerce.Shared.Services.Clusters;
+@inject IClusterService clusterService
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Clusters</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Cluster</li>
+        </ol>
+
+    </div>
+</div>
+<div class="row">
+    <!-- BEGIN col-12 -->
+    <div class="col-12 ui-sortable">
+        <!-- BEGIN panel -->
+        <div class="panel panel-inverse" data-sortable-id="form-stuff-13">
+            <!-- BEGIN panel-heading -->
+            <div class="panel-heading ui-sortable-handle">
+                <h4 class="panel-title">Cluster Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+
+            <div class="panel-body">
+
+
+
+                <EditForm Model="@newCluster" OnValidSubmit="@HandleValidSubmit" FormName="clusterForm">
+                    <div class="row">
+                        <div class="col-4">
+                            <InputText id="Name" class="form-control" @bind-Value="newCluster.Name" />
+                            <ValidationMessage For="@(() => newCluster.Name)" />
+
+                        </div>
+
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
+                           
+                        </div>
+                    </div>
+
+                    <p style="margin-top:30px">
+                        <a href="javascript:history.back(-1);" class="btn btn-success">
+                            <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                        </a>
+                    </p>
+                </EditForm>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@code {
+    [Parameter] public long? ClusterId { get; set; }
+    private Cluster newCluster = new Cluster();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ClusterId.HasValue)
+        {
+            var response = await clusterService.GetClusterByIdAsync(ClusterId.Value);
+            if (response.Success)
+            {
+                newCluster = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (ClusterId.HasValue)
+            {
+                var response = await clusterService.UpdateClusterAsync(newCluster);
+                if (response.Success)
+                {
+                    Snackbar.Add(response.Message, Severity.Success);
+                    NavigationManager.NavigateTo("/ClusterList");
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+            else
+            {
+                var response = await clusterService.AddClusterAsync(newCluster);
+                if (response.Success)
+                {
+                    Snackbar.Add(response.Message, Severity.Success);
+                    NavigationManager.NavigateTo("/ClusterList");
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+}
+

@@ -1,0 +1,109 @@
+﻿@page "/AddEditBrand/{BrandId:long?}"
+@using Ecommerce.Shared.Entities.Brands
+@inject IBrandService BrandService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@using Ecommerce.Shared.Services.Brands;
+@using Ecommerce.Shared.Services.Shared;
+@rendermode InteractiveServer
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/BrandList">Brands</a></li>
+            <li class="breadcrumb-item active">Brand</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Brand Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <EditForm Model="@brand" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="Name">Name</label>
+                            <InputText id="Name" class="form-control" @bind-Value="brand.Name" />
+                            <ValidationMessage For="@(() => brand.Name)" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="ImageUrl">Image URL</label>
+                            <InputText id="ImageUrl" class="form-control" @bind-Value="brand.ImageUrl" />
+                            <ValidationMessage For="@(() => brand.ImageUrl)" />
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public long? BrandId { get; set; }
+    private Brand brand = new Brand();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (BrandId.HasValue)
+        {
+            var response = await BrandService.GetBrandByIdAsync(BrandId.Value);
+            if (response.Success)
+            {
+                brand = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            ServiceResponse<Brand> response;
+            if (BrandId.HasValue)
+            {
+                response = await BrandService.UpdateBrandAsync(brand);
+            }
+            else
+            {
+                response = await BrandService.AddBrandAsync(brand);
+            }
+
+            if (response.Success)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+                NavigationManager.NavigateTo("/BrandList");
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/BrandList");
+    }
+}

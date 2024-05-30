@@ -34,6 +34,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcU2lkZWJhci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Brands/AddEditBrand.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xCcmFuZHNcQWRkRWRpdEJyYW5kLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Brands/BrandList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xCcmFuZHNcQnJhbmRMaXN0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Categories/AddUpdateCategory.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDYXRlZ29yaWVzXEFkZFVwZGF0ZUNhdGVnb3J5LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
@@ -50,6 +58,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDYXRlZ29yaWVzXFNob3dDYXRlZ29yaWVzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Clusters/AddEditCluster.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDbHVzdGVyc1xBZGRFZGl0Q2x1c3Rlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Clusters/ClusterList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDbHVzdGVyc1xDbHVzdGVyTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Counter.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb3VudGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
@@ -62,12 +78,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/ModelYear/AddEditModelYear.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xNb2RlbFllYXJcQWRkRWRpdE1vZGVsWWVhci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/ModelYear/ModelYearList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xNb2RlbFllYXJcTW9kZWxZZWFyTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Products/AddMainProduct.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQcm9kdWN0c1xBZGRNYWluUHJvZHVjdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Products/AddUpdateProduct.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQcm9kdWN0c1xBZGRVcGRhdGVQcm9kdWN0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Products/ProductList.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQcm9kdWN0c1xQcm9kdWN0TGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Shared/DeleteDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTaGFyZWRcRGVsZXRlRGlhbG9nLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Weather.razor]

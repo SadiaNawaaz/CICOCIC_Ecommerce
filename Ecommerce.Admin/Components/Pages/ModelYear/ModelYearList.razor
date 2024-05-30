@@ -1,0 +1,179 @@
+﻿@page "/ModelYearList"
+@using Ecommerce.Shared.Entities.ModelYears
+@using Ecommerce.Shared.Services.ModelYears
+@inject IModelYearService modelYearService
+@inject ISnackbar snackbar
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@rendermode InteractiveServer
+
+
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ModelYearList">Model Years</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Model Years</li>
+        </ol>
+    </div>
+</div>
+
+<div class="panel panel-inverse">
+    <!-- BEGIN panel-heading -->
+    <div class="panel-heading">
+        <h4 class="panel-title">Model Year - List</h4>
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+        </div>
+    </div>
+    <!-- END panel-heading -->
+    <!-- BEGIN panel-body -->
+    <div class="panel-body">
+        <div class="row fileupload-buttonbar">
+            <div class="col-xl-7">
+                <button type="button" class="btn btn-primary start me-1" @onclick="NavigateToAddEditModelYear">
+                    <i class="fa fa-fw fa-add"></i>
+                    <span>Add new</span>
+                </button>
+                <!-- The global file processing state -->
+                <span class="fileupload-process"></span>
+            </div>
+            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
+                <div class="progress progress-striped active">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <div class="progress-extended">&nbsp;</div>
+            </div>
+        </div>
+        <MudDataGrid T="ModelYear" Items="@modelYears" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+            <ColGroup>
+                <col style="width: 90%;" />
+                <col style="width: 10%;" />
+                <col />
+            </ColGroup>
+            <Columns>
+                <!-- PropertyColumn for the year -->
+                <PropertyColumn Property="x => x.Year" Title="Year" Style="width:90%" />
+                <TemplateColumn CellClass="d-flex justify-end" Style="width:10%">
+                    <HeaderTemplate>
+                        <div>Edit</div>
+                    </HeaderTemplate>
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditModelYear(context.Item)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteModelYear(context.Item)" />
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="ModelYear" PageSizeOptions=@(new int[] { 5, 10, 20 }) />
+            </PagerContent>
+        </MudDataGrid>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private bool _resizeColumn;
+    private IEnumerable<ModelYear> modelYears = new List<ModelYear>();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModelYears();
+    }
+
+    private async Task LoadModelYears()
+    {
+        try
+        {
+            var response = await modelYearService.GetModelYearsAsync();
+            if (response.Success)
+            {
+                modelYears = response.Data;
+            }
+            else
+            {
+                snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add("An error occurred while loading model years: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadModelYears: {ex}");
+        }
+    }
+
+    private void EditModelYear(ModelYear modelYear)
+    {
+        try
+        {
+            navigationManager.NavigateTo($"/AddEditModelYear/{modelYear.Id}");
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add("An error occurred while navigating to edit the model year: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in EditModelYear: {ex}");
+        }
+    }
+
+    private async Task DeleteModelYear(ModelYear modelYear)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("ContentText", "Do you want to confirm?");
+            parameters.Add("ButtonText", "Yes");
+            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+            var result = await dialogresult.Result;
+            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+                await Delete(modelYear);
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add("An error occurred while attempting to delete the model year: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteModelYear: {ex}");
+        }
+    }
+
+
+    private async Task Delete(ModelYear modelYear)
+    {
+        try
+        {
+            var response = await modelYearService.DeleteModelYearAsync(modelYear.Id);
+            if (response.Success)
+            {
+                await LoadModelYears();
+                snackbar.Add(response.Message, Severity.Success);
+            }
+            else
+            {
+                snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add("An error occurred while deleting the model year: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in Delete: {ex}");
+        }
+    }
+
+    private void NavigateToAddEditModelYear()
+    {
+        try
+        {
+            navigationManager.NavigateTo("/AddEditModelYear");
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add("An error occurred while navigating to add or edit a model year: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in NavigateToAddEditModelYear: {ex}");
+        }
+    }
+}
+

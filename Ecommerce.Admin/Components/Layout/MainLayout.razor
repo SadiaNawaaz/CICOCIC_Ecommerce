@@ -55,8 +55,7 @@
 <html lang="en">
 
 <body>
-    <MudDialogProvider @rendermode="InteractiveServer" />
-    <MudSnackbarProvider @rendermode="InteractiveServer" />
+
     <div id="app" class="app app-header-fixed app-sidebar-fixed ">
 
 
@@ -66,11 +65,14 @@
 
 
         <div id="content" class="app-content">
-    
+
 
             @Body
 
         </div>
+        <MudDialogProvider @rendermode="InteractiveServer" />
+        <MudSnackbarProvider @rendermode="InteractiveServer" />
+
         <div class="theme-panel">
             <a href="javascript:;" data-toggle="theme-panel-expand" class="theme-collapse-btn"><i class="fa fa-cog"></i></a>
             <div class="theme-panel-content" data-scrollbar="true" data-height="100%">
