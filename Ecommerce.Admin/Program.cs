@@ -3,7 +3,9 @@ using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.Clusters;
+using Ecommerce.Shared.Services.Features;
 using Ecommerce.Shared.Services.ModelYears;
+using Ecommerce.Shared.Services.Templates;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
@@ -17,6 +19,9 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IClusterService, ClusterService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IModelYearService, ModelYearService>();
+builder.Services.AddScoped<IFeatureService, FeatureService>();
+builder.Services.AddScoped<ITemplateService, TemplateService>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(
  o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 

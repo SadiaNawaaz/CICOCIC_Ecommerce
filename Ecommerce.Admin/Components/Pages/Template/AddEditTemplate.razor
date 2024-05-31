@@ -1,0 +1,138 @@
+﻿@page "/AddEditTemplate"
+@inject IFeatureService FeatureService
+@using Ecommerce.Shared.Services.Features;
+@using Ecommerce.Shared.Services.Clusters;
+@inject IClusterService clusterService
+@rendermode InteractiveServer
+@using Ecommerce.Shared.Entities.Clusters;
+@inject ISnackbar Snackbar
+@using Radzen
+@using Radzen.Blazor
+@inject IDialogService DialogService
+@using Ecommerce.Shared.Entities.Templates;
+@using Ecommerce.Shared.Services.Templates; 
+@inject ITemplateService TemplateService
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Templates</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Template</li>
+        </ol>
+
+    </div>
+</div>
+
+
+<div class="row">
+
+    <div class="col-12">
+    
+        <div class="panel panel-inverse" data-sortable-id="form-stuff-13">
+      
+            <div class="panel-heading">
+                <h4 class="panel-title">Template Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+
+            <div class="panel-body">
+               
+
+
+                <EditForm Model="@TemplateMaster" OnValidSubmit="@SaveTemplateMaster">
+                    <DataAnnotationsValidator />
+                   
+                    <div class="row">
+
+                        <div class="col-8">
+
+                            <InputText id="Name" class="form-control" @bind-Value="TemplateMaster.Name" />
+                            <ValidationMessage For="@(() => TemplateMaster.Name)" class="text-danger"  />
+
+                        </div>
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary w-100">Save</button>
+                        </div>
+                        
+                        </div>
+               </EditForm>
+
+
+
+                    
+               
+                <hr />
+                <div class="row mb-20px">
+
+                    <div class="row fileupload-buttonbar">
+                        <div class="col-md-1">
+                            <legend class="mb-3">Cluster</legend>
+                        </div>
+                        <div class="col-md-1">
+
+                            <button type="submit" class="btn btn-primary start mt-10px" @onclick=@OpenPopup>
+                                <i class="fa fa-fw fa-upload"></i>
+                                <span>Add</span>
+                            </button>
+                        </div>
+                        <div class="col-md-7">
+                         
+                        </div>
+                    </div>
+              
+                </div>
+
+             
+                    <div class="row">                                                
+                        <div class="col-xl-12">
+
+                            @if (clusterTabs != null && clusterTabs.Count > 0)
+                            {
+                                <RadzenAccordion Multiple="true">
+                                                 
+                                    <Items>
+                                        @foreach (var clusterTab in clusterTabs)
+                                        {
+                                            <RadzenAccordionItem Text="@clusterTab.cluster.Name" Icon="account_balance_wallet" >
+                                                <div>
+                                                    <div class="card mb-4 border-0">
+                                                        <ul class="list-group list-group-flush">
+                                                            @foreach (var feature in clusterTab.Features)
+                                                            {
+                                                               
+                                                                <li class="list-group-item">@feature.Feature.Name</li>
+                                                                
+
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </RadzenAccordionItem>
+                                        }
+                                    </Items>
+                                </RadzenAccordion>
+                            }
+
+
+                        </div>
+                       
+                    </div>
+                    <div class="row">
+                       
+                    </div>
+
+                <div class="hljs-wrapper">
+                    <pre><code class="html" data-url="../assets/data/form-elements/code-13.json"></code></pre>
+                </div>
+              
+            </div>
+        
+        </div>
+    
+    </div>
+</div>

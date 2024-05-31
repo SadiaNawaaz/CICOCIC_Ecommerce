@@ -1,0 +1,126 @@
+﻿@page "/FeatureList"
+@using Ecommerce.Shared.Entities.Features
+@using Ecommerce.Shared.Services.Features;
+@inject IFeatureService FeatureService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@using Pages.Shared
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Features</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Features</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <button class="btn btn-primary mb-3" @onclick="NavigateToAddFeature">Add Feature</button>
+                <MudDataGrid T="Feature" Items="@features" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+                    <ColGroup>
+                        <col style="width: 90%;" />
+                        <col style="width: 10%;" />
+                    </ColGroup>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Name" Title="Name" />
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <HeaderTemplate>
+                                <div>Actions</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditFeature(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteFeature(context.Item)" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="Feature" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private bool _resizeColumn = true;
+    private List<Feature> features;
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeatures();
+    }
+
+    private async Task LoadFeatures()
+    {
+        var response = await FeatureService.GetFeaturesAsync();
+        if (response.Success)
+        {
+            features = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private void NavigateToAddFeature()
+    {
+        NavigationManager.NavigateTo("/AddEditFeature");
+    }
+
+    private void EditFeature(long featureId)
+    {
+        NavigationManager.NavigateTo($"/AddEditFeature/{featureId}");
+    }
+
+    private async Task DeleteFeature(Feature feature)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("ContentText", "Do you want to confirm?");
+            parameters.Add("ButtonText", "Yes");
+            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+            var result = await dialogresult.Result;
+            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+                await DeleteFeature(feature.Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while attempting to delete the feature: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteFeature: {ex}");
+        }
+    }
+
+    private async Task DeleteFeature(long featureId)
+    {
+        var response = await FeatureService.DeleteFeatureAsync(featureId);
+        if (response.Success)
+        {
+            Snackbar.Add(response.Message, Severity.Success);
+            await LoadFeatures();
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+}

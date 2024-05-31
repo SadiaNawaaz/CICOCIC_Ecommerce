@@ -44,6 +44,7 @@ F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\Microsoft.SqlServer.Server
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\Mono.TextTemplating.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\MudBlazor.dll
+F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\Radzen.Blazor.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.CodeDom.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Composition.AttributedModel.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Composition.Convention.dll
@@ -53,6 +54,7 @@ F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Composition.TypedPa
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Drawing.Common.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Linq.Dynamic.Core.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Memory.Data.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Runtime.Caching.dll
 F:\CICOCIC_Ecommerce\Ecommerce.Admin\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll

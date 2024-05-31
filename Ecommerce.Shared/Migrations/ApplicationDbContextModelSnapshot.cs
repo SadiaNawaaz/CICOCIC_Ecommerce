@@ -37,7 +37,6 @@ namespace Ecommerce.Shared.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastModifiedBy")
@@ -268,6 +267,103 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("ErrorLogs");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCluster", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ClusterId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("TemplateMasterId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TemplateMasterId");
+
+                    b.ToTable("TemplateClusters");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateClusterFeature", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("FeatureId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("TemplateClusterId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FeatureId");
+
+                    b.HasIndex("TemplateClusterId");
+
+                    b.ToTable("TemplateClusterFeatures");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateMaster", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TemplateMasters");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.User", b =>
                 {
                     b.Property<long>("Id")
@@ -319,9 +415,49 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCluster", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Templates.TemplateMaster", "TemplateMaster")
+                        .WithMany("Clusters")
+                        .HasForeignKey("TemplateMasterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TemplateMaster");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateClusterFeature", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Features.Feature", "feature")
+                        .WithMany()
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Templates.TemplateCluster", "TemplateCluster")
+                        .WithMany("Features")
+                        .HasForeignKey("TemplateClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TemplateCluster");
+
+                    b.Navigation("feature");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Category", b =>
                 {
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCluster", b =>
+                {
+                    b.Navigation("Features");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateMaster", b =>
+                {
+                    b.Navigation("Clusters");
                 });
 #pragma warning restore 612, 618
         }

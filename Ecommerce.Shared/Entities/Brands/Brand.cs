@@ -10,7 +10,7 @@ namespace Ecommerce.Shared.Entities.Brands;
 public class Brand: BaseEntity
 {
     public string Name { get; set; }
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 

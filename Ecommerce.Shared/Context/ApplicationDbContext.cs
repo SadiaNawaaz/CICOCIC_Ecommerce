@@ -6,6 +6,7 @@ using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ModelYears;
 using Ecommerce.Shared.Entities.Shared;
+using Ecommerce.Shared.Entities.Templates;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.Shared.Context;
@@ -29,6 +30,15 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Feature> Features { get; set; }
     public DbSet<Cluster> Clusters { get; set; }
+    public DbSet<TemplateMaster> TemplateMasters { get; set; }
+    public DbSet<TemplateCluster> TemplateClusters { get; set; }
+    public DbSet<TemplateClusterFeature> TemplateClusterFeatures { get; set; }
+
+
+
+
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //base.OnModelCreating(modelBuilder);

@@ -31,22 +31,31 @@
                 <EditForm Model="@brand" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
                     <DataAnnotationsValidator />
                     <div class="row">
-                        <div class="col-6 mb-3">
+                        <div class="col-5 mb-3">
                             <label for="Name">Name</label>
                             <InputText id="Name" class="form-control" @bind-Value="brand.Name" />
                             <ValidationMessage For="@(() => brand.Name)" />
                         </div>
-                        <div class="col-6 mb-3">
+                        <div class="col-5 mb-3">
                             <label for="ImageUrl">Image URL</label>
                             <InputText id="ImageUrl" class="form-control" @bind-Value="brand.ImageUrl" />
                             <ValidationMessage For="@(() => brand.ImageUrl)" />
                         </div>
-                        <div class="col-12">
+                        <div class="col-2 mt-15px">
                             <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
                         </div>
-                    </div>
-                </EditForm>
+
+                            <div class="col-12">
+
+                                <a href="javascript:history.back(-1);" class="btn btn-success">
+                                    <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                                </a>
+                               
+
+
+                            </div>
+                        </div>
+</EditForm>
             </div>
         </div>
     </div>

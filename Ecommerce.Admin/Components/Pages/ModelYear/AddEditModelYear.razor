@@ -38,9 +38,19 @@
                             <InputNumber id="Year" class="form-control" @bind-Value="modelYear.Year" />
                             <ValidationMessage For="@(() => modelYear.Year)" />
                         </div>
-                        <div class="col-12">
+                        <div class="col-2 mt-15px">
                             <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
+                          
+                        </div>
+
+                        <div class="col-12">
+
+                            <a href="javascript:history.back(-1);" class="btn btn-success">
+                                <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                            </a>
+
+
+
                         </div>
                     </div>
                 </EditForm>

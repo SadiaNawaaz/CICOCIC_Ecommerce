@@ -74,6 +74,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Features/AddEditFeature.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xGZWF0dXJlc1xBZGRFZGl0RmVhdHVyZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Features/FeatureList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xGZWF0dXJlc1xGZWF0dXJlTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
@@ -100,6 +108,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Shared/DeleteDialog.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTaGFyZWRcRGVsZXRlRGlhbG9nLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Template/AddEditTemplate.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUZW1wbGF0ZVxBZGRFZGl0VGVtcGxhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Template/TemplateDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUZW1wbGF0ZVxUZW1wbGF0ZURpYWxvZy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Weather.razor]
