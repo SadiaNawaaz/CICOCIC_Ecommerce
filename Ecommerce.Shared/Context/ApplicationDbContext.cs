@@ -34,13 +34,18 @@ public class ApplicationDbContext : DbContext
     public DbSet<TemplateCluster> TemplateClusters { get; set; }
     public DbSet<TemplateClusterFeature> TemplateClusterFeatures { get; set; }
 
+    public DbSet<TemplateCategory> TemplateCategories { get; set; }
 
-
-
+    
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<TemplateCategory>()
+    .HasIndex(tc => new { tc.TemplateMasterId, tc.CategoryId })
+    .IsUnique();
+
         //base.OnModelCreating(modelBuilder);
 
 

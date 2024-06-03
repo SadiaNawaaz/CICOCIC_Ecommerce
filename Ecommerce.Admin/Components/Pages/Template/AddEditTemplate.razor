@@ -1,4 +1,5 @@
 ﻿@page "/AddEditTemplate"
+@page "/AddEditTemplate/{Id:long?}"
 @inject IFeatureService FeatureService
 @using Ecommerce.Shared.Services.Features;
 @using Ecommerce.Shared.Services.Clusters;
@@ -10,8 +11,9 @@
 @using Radzen.Blazor
 @inject IDialogService DialogService
 @using Ecommerce.Shared.Entities.Templates;
-@using Ecommerce.Shared.Services.Templates; 
+@using Ecommerce.Shared.Services.Templates;
 @inject ITemplateService TemplateService
+@inject NavigationManager NavigationManager
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -27,9 +29,9 @@
 <div class="row">
 
     <div class="col-12">
-    
+
         <div class="panel panel-inverse" data-sortable-id="form-stuff-13">
-      
+
             <div class="panel-heading">
                 <h4 class="panel-title">Template Form</h4>
                 <div class="panel-heading-btn">
@@ -41,31 +43,31 @@
             </div>
 
             <div class="panel-body">
-               
 
 
-                <EditForm Model="@TemplateMaster" OnValidSubmit="@SaveTemplateMaster">
+
+                <EditForm Model="@TemplateMaster" OnValidSubmit="@SaveTemplateMaster"  FormName="temlplateForm">
                     <DataAnnotationsValidator />
-                   
+
                     <div class="row">
 
                         <div class="col-8">
 
                             <InputText id="Name" class="form-control" @bind-Value="TemplateMaster.Name" />
-                            <ValidationMessage For="@(() => TemplateMaster.Name)" class="text-danger"  />
+                            <ValidationMessage For="@(() => TemplateMaster.Name)" class="text-danger" />
 
                         </div>
                         <div class="col-2">
                             <button type="submit" class="btn btn-primary w-100">Save</button>
                         </div>
-                        
-                        </div>
-               </EditForm>
+
+                    </div>
+                </EditForm>
 
 
 
-                    
-               
+
+
                 <hr />
                 <div class="row mb-20px">
 
@@ -81,58 +83,74 @@
                             </button>
                         </div>
                         <div class="col-md-7">
-                         
+
                         </div>
                     </div>
-              
+
                 </div>
 
-             
-                    <div class="row">                                                
-                        <div class="col-xl-12">
 
-                            @if (clusterTabs != null && clusterTabs.Count > 0)
-                            {
-                                <RadzenAccordion Multiple="true">
-                                                 
-                                    <Items>
-                                        @foreach (var clusterTab in clusterTabs)
-                                        {
-                                            <RadzenAccordionItem Text="@clusterTab.cluster.Name" Icon="account_balance_wallet" >
-                                                <div>
-                                                    <div class="card mb-4 border-0">
-                                                        <ul class="list-group list-group-flush">
-                                                            @foreach (var feature in clusterTab.Features)
-                                                            {
-                                                               
-                                                                <li class="list-group-item">@feature.Feature.Name</li>
-                                                                
+                <div class="row">
+                    <div class="col-xl-12">
 
-                                                            }
-                                                        </ul>
-                                                    </div>
+                        @if (clusterTabs != null && clusterTabs.Count > 0)
+                        {
+                            <div class="accordion" id="accordionPanelsStayOpenExample">
+                                @foreach (var clusterTab in clusterTabs)
+                                {
+                                    var collapseId = $"collapse{clusterTab.cluster.Name.Replace(" ", "")}";
+                                    var headingId = $"heading{clusterTab.cluster.Name.Replace(" ", "")}";
+
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@headingId">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                                @clusterTab.cluster.Name
+
+
+                                               <i class="fas fa-trash-alt text-danger ml-3 " style="cursor: pointer;" @onclick="() => RemoveCluster(clusterTab)"></i>
+                                            </button>
+                                        </h2>
+                                        <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId">
+                                            <div class="accordion-body">
+                                                <div class="card mb-4 border-0">
+                                                    <ul class="list-group list-group-flush">
+                                                        @foreach (var feature in clusterTab.Features)
+                                                        {
+                                                            <li class="list-group-item">@feature.Feature.Name</li>
+                                                        }
+                                                    </ul>
                                                 </div>
-                                            </RadzenAccordionItem>
-                                        }
-                                    </Items>
-                                </RadzenAccordion>
-                            }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
 
 
-                        </div>
-                       
+
+
+
+
+
                     </div>
-                    <div class="row">
-                       
-                    </div>
+
+                </div>
+                <div class="row">
+
+                </div>
 
                 <div class="hljs-wrapper">
                     <pre><code class="html" data-url="../assets/data/form-elements/code-13.json"></code></pre>
                 </div>
-              
+
             </div>
-        
+
         </div>
-    
+
     </div>
 </div>
+@code
+{
+    [Parameter] public long? Id { get; set; }
+}

@@ -7,9 +7,11 @@ using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Features;
 using Ecommerce.Shared.Services.Shared;
 using Ecommerce.Shared.Services.Templates;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using MudBlazor;
 using Radzen.Blazor;
+using static MudBlazor.CategoryTypes;
 
 namespace Ecommerce.Admin.Components.Pages.Template;
 
@@ -35,6 +37,10 @@ public partial class AddEditTemplate
     #region GetMethods
     protected override async Task OnInitializedAsync()
     {
+        if (Id.HasValue)
+        {
+            await LoadTemplate();
+        }
         await LoadFeatures();
         await LoadClusters();
     }
@@ -104,7 +110,6 @@ public partial class AddEditTemplate
     #endregion
 
 
-
     #region Popup
 
     public async Task OpenPopup()
@@ -158,7 +163,7 @@ public partial class AddEditTemplate
 
                 TemplateMaster.Clusters = clusterTabs;
                 ServiceResponse<TemplateMaster> response;
-                if (TemplateMaster.Id > 0)
+                if (Id.HasValue)
                 {
                     response = await TemplateService.UpdateTemplateMasterAsync(TemplateMaster);
                 }
@@ -169,8 +174,8 @@ public partial class AddEditTemplate
 
                 if (response.Success)
                 {
-
-                    Snackbar.Add("Template Master and Clusters saved successfully", Severity.Success);
+                    Snackbar.Add(response.Message, Severity.Success);
+                    NavigationManager.NavigateTo("/TemplateList");
                 }
                 else
                 {
@@ -188,5 +193,44 @@ public partial class AddEditTemplate
         }
     }
     #endregion
+
+
+    #region Edit
+
+    private async Task LoadTemplate()
+    {
+        var response = await TemplateService.GetTemplateMasterByIdAsync(Id.Value);
+        if (response.Success)
+        {
+            TemplateMaster = response.Data;
+            clusterTabs = TemplateMaster.Clusters.ToList();
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+    #endregion
+
+    #region Delete
+
+    private async Task RemoveCluster(TemplateCluster clusterTab)
+    {
+
+        bool? result = await DialogService.ShowMessageBox(
+          "Confirm Delete",
+          $"Are you sure you want to delete '{clusterTab.cluster.Name}'?",
+          yesText: "Yes", cancelText: "No"
+      );
+        if(result==true)
+        {
+            clusterTabs.Remove(clusterTab);
+            StateHasChanged();
+        }
+     
+    }
+
+    #endregion
+
 }
 

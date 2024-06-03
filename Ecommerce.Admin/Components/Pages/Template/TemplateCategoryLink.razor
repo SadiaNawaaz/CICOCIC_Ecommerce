@@ -1,0 +1,202 @@
+﻿@page "/TemplateCategoryLink"
+@using Ecommerce.Shared.Entities.Templates
+@using Ecommerce.Shared.Services.Templates
+@inject ISnackbar Snackbar
+@using Ecommerce.Shared.Services.Categories;
+@inject ICategoryService CategoryService
+@rendermode InteractiveServer
+@using Radzen
+@using Radzen.Blazor
+@inject ITemplateService TemplateService
+@inject NavigationManager NavigationManager
+@inject ITemplateCategoryService TemplateCategoryService
+@using Ecommerce.Shared.Services.TemplateCategories;
+@using Ecommerce.Shared.Services.Shared;
+
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Template</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Linking</li>
+        </ol>
+        <h1 class="page-header mb-0">Template Link </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-12">
+
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Linking
+            </div>
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-4">
+                        <label class="mb-8px">Group/Category</label>
+                        <RadzenDropDownDataGrid @bind-Value="categoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Name="DropDownDataGridTemplate" class="form-control" TValue="long">
+                            <Template>
+                                @context.Name
+                            </Template>
+                        </RadzenDropDownDataGrid>
+                    </div>
+
+                    <div class="col-4">
+                        <label class="mb-8px">Template</label>
+                        <RadzenDropDownDataGrid @bind-Value="templateId" Data="@templates" TextProperty="Name" ValueProperty="Id" Name="DropDownDataGridTemplate" class="form-control" TValue="long">
+                            <Template>
+                                @context.Name
+                            </Template>
+                        </RadzenDropDownDataGrid>
+                    </div>
+
+
+
+                    <div class="col-2">
+                        <button type="button" class="btn btn-primary w-100 mt-20px" @onclick="HandleValidSubmit">Save</button>
+                    </div>
+                    <p style="margin-top:50px">
+                        <a href="javascript:history.back(-1);" class="btn btn-success">
+                            <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                        </a>
+                    </p>
+
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+@code {
+    public long templateId;
+    public long categoryId;
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private List<TemplateMaster> templates = new List<TemplateMaster>();
+    private List<Category> categories = new List<Category>();
+    private TemplateMaster template = new TemplateMaster();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTemplates();
+        await LoadCategoryTreeAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadTemplates()
+    {
+        var response = await TemplateService.GetTemplateMastersAsync();
+        if (response.Success)
+        {
+            templates = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private async Task LoadCategoryTreeAsync()
+    {
+        try
+        {
+            var response = await CategoryService.GetCategoriesAsync();
+            if (response.Success)
+            {
+                categories = response.Data.Where(a => a.Level == 4).ToList();
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+
+            if(templateId==0)
+            {
+                Snackbar.Add("Please Select Template", Severity.Info);
+                return;
+            }
+            if (categoryId == 0)
+            {
+                Snackbar.Add("Please Select Category", Severity.Info);
+                return;
+            }
+
+            var existingTemplateCategory = await TemplateCategoryService.GetTemplateCategoryByCategoryIdAsync(categoryId);
+
+            if (existingTemplateCategory != null)
+            {
+
+                var result = await DialogService.ShowMessageBox("Confirmation", "A TemplateCategory with the same CategoryId already exists. Do you want to replace it with the new TemplateCategory?", yesText: "Yes", cancelText: "No");
+
+                if (result.Value)
+                {
+
+                    existingTemplateCategory.TemplateMasterId = templateId;
+                    var response = await TemplateCategoryService.UpdateTemplateCategoryAsync(existingTemplateCategory);
+
+                    if (response.Success)
+                    {
+                        Snackbar.Add(response.Message, Severity.Success);
+                    }
+                    else
+                    {
+                        Snackbar.Add(response.Message, Severity.Error);
+                    }
+                }
+                else
+                {
+
+                    Snackbar.Add("Operation canceled by user", Severity.Info);
+                }
+            }
+            else
+            {
+
+                var templateCategory = new TemplateCategory
+                {
+                    TemplateMasterId = templateId,
+                    CategoryId = categoryId
+                };
+
+                var response = await TemplateCategoryService.AddTemplateCategoryAsync(templateCategory);
+
+                if (response.Success)
+                {
+                    Snackbar.Add(response.Message, Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+
+}

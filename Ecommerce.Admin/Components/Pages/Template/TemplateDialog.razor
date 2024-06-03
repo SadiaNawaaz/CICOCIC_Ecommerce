@@ -20,7 +20,7 @@
 
         <div class="col-lg-6 mb-3">
             <label class="form-label" for="templateInput">Cluster</label>
-            <RadzenDropDownDataGrid @bind-Value="cluster.Id" Data="@Clusters" TextProperty="Name" ValueProperty="Id" Name="DropDownDataGridTemplate" class="form-control" TValue="long" Change="@(args => OnClusterChange(args))">
+            <RadzenDropDownDataGrid  Data="@Clusters" TextProperty="Name" ValueProperty="Id" Name="DropDownDataGridTemplate" class="form-control" TValue="long" Change="@(args => OnClusterChange(args))" AllowFiltering="true" AllowClear="true">
                 <Template>
                     @context.Name
                 </Template>
@@ -31,7 +31,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="passwordInput">Feature</label>
-                    <RadzenDropDownDataGrid @bind-Value="objFeature.Id" Data="@Features" TextProperty="Name" ValueProperty="Id" Name="DropDownfeaturesTemplate" class="form-control" TValue="long">
+                    <RadzenDropDownDataGrid @bind-Value="objFeature.Id" Data="@Features" TextProperty="Name" ValueProperty="Id" Name="DropDownfeaturesTemplate" class="form-control" TValue="long"  AllowFiltering="true" AllowClear="true">
                         <Template>
                             @context.Name
                         </Template>
@@ -127,16 +127,38 @@
             Snackbar.Add("Please Select clusters:", Severity.Info);
             return;
         }
-       
+
 
         var result = new { TemplateClusterFeatures, cluster };
         Dialog.Close(DialogResult.Ok(result));
     }
     private void OnClusterChange(object args)
     {
-        long selectedClusterId = Convert.ToInt64(args);
-        selectedCluster = Clusters.FirstOrDefault(c => c.Id == selectedClusterId);
-        cluster = selectedCluster;
-        StateHasChanged();
+
+
+        try
+        {
+            long selectedClusterId = Convert.ToInt64(args);
+            if (selectedClusterId != 0 && selectedClusterId > 0)
+            {
+                selectedCluster = Clusters.FirstOrDefault(c => c.Id == selectedClusterId);
+                cluster = selectedCluster;
+                StateHasChanged();
+
+            }
+
+            else
+            {
+                cluster = new Cluster();
+            }
+        }
+
+        catch(Exception ex)
+
+        {
+
+        }
+
+
     }
 }

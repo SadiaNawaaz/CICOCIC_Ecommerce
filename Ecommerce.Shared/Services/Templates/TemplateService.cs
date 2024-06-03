@@ -54,7 +54,13 @@ public class TemplateService : ITemplateService
     {
         try
         {
-            var templateMaster = await _context.TemplateMasters.FindAsync(id);
+            //var templateMaster = await _context.TemplateMasters.FindAsync(id);
+
+            var templateMaster = await _context.TemplateMasters
+         .Include(tm => tm.Clusters) // Include Clusters
+             .ThenInclude(tc => tc.Features) // Include Features within Clusters
+         .FirstOrDefaultAsync(tm => tm.Id == id); // Ensure correct templateMaster is fetched
+
             if (templateMaster == null)
             {
                 return new ServiceResponse<TemplateMaster>

@@ -267,6 +267,41 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("ErrorLogs");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCategory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("TemplateMasterId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("TemplateMasterId");
+
+                    b.ToTable("TemplateCategories");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCluster", b =>
                 {
                     b.Property<long>("Id")
@@ -294,6 +329,8 @@ namespace Ecommerce.Shared.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
 
                     b.HasIndex("TemplateMasterId");
 
@@ -415,8 +452,33 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCategory", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Templates.TemplateMaster", "TemplateMaster")
+                        .WithMany()
+                        .HasForeignKey("TemplateMasterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("TemplateMaster");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateCluster", b =>
                 {
+                    b.HasOne("Ecommerce.Shared.Entities.Clusters.Cluster", "cluster")
+                        .WithMany()
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Ecommerce.Shared.Entities.Templates.TemplateMaster", "TemplateMaster")
                         .WithMany("Clusters")
                         .HasForeignKey("TemplateMasterId")
@@ -424,11 +486,13 @@ namespace Ecommerce.Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("TemplateMaster");
+
+                    b.Navigation("cluster");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Templates.TemplateClusterFeature", b =>
                 {
-                    b.HasOne("Ecommerce.Shared.Entities.Features.Feature", "feature")
+                    b.HasOne("Ecommerce.Shared.Entities.Features.Feature", "Feature")
                         .WithMany()
                         .HasForeignKey("FeatureId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -440,9 +504,9 @@ namespace Ecommerce.Shared.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TemplateCluster");
+                    b.Navigation("Feature");
 
-                    b.Navigation("feature");
+                    b.Navigation("TemplateCluster");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Category", b =>
