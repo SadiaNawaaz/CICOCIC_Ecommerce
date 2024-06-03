@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ public interface ICategoryService
     Task<ServiceResponse<Category>> AddCategoryAsync(Category category);
     Task<ServiceResponse<Category>> UpdateCategoryAsync(Category category);
     Task<ServiceResponse<bool>> DeleteCategoryAsync(long id);
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoriesDtoAsync();
 }
 
 public class CategoryService : ICategoryService
@@ -200,8 +202,46 @@ public class CategoryService : ICategoryService
     }
 
 
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesDtoAsync()
+    {
+        try
+        {
+            var categories = await _context.Categories.Include(c => c.SubCategories).ToListAsync();
+            var categoryDtos = categories.Select(ToDto).ToList();
+
+            return new ServiceResponse<List<CategoryDto>>
+            {
+                Data = categoryDtos,
+                Success = true,
+                Message = "Categories fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching categories.");
+            return new ServiceResponse<List<CategoryDto>>
+            {
+                Success = false,
+                Message = "Error occurred while fetching categories"
+            };
+        }
+    }
 
 
+    public static CategoryDto ToDto(Category category)
+    {
+        if (category == null) return null;
+
+        return new CategoryDto
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Icon = category.Icon,
+            Level = category.Level,
+            ParentCategoryId = category.ParentCategoryId
+     
+        };
+    }
 
 }
 

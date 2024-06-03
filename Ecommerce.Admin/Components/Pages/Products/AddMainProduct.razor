@@ -2,6 +2,9 @@
 @page "/AddMain"
 @inject ISnackbar Snackbar
 @rendermode InteractiveServer
+@using Ecommerce.Shared.Dto;
+@using Ecommerce.Shared.Services.Categories;
+@inject ICategoryService CategoryService
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -21,21 +24,83 @@
                 <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
             </div>
             <div class="card-body">
-                @*<div class="mb-3">
-                    <label class="form-label">Title</label>
-                    <input type="text" class="form-control" name="title" placeholder="Product name">
-                </div>*@
+
                 <form class="row">
                     <div class="col-md-6">
                         <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Product Title">
                     </div>
-                  
+
                     <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
-                 
+
                 </form>
             </div>
         </div>
-     
+
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Levels
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-lg-0 mb-3">
+                            <label class="form-label"> Type</label>
+                            <select class="form-control" @onchange="OnLevel1Changed">
+                                <option value="">Select Level 1</option>
+                                @foreach (var category in Level1Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-lg-0 mb-3">
+                            <label class="form-label">level 2</label>
+                            <select class="form-control" @onchange="OnLevel2Changed" disabled="@(!Level2Categories.Any())">
+                                <option value="">Select Level 2</option>
+                                @foreach (var category in Level2Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <div class="mb-lg-0 mb-3">
+                                <label class="form-label">Level 3</label>
+                                <select class="form-control" @onchange="OnLevel3Changed" disabled="@(!Level3Categories.Any())">
+                                    <option value="">Select Level 3</option>
+                                    @foreach (var category in Level3Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="mb-lg-0 mb-3">
+                                <label class="form-label">Level 4</label>
+                                <select class="form-control" disabled="@(!Level4Categories.Any())">
+                                    <option value="">Select Level 4</option>
+                                    @foreach (var category in Level4Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
         <div class="card border-0 mb-4">
             <div class="card-header h6 mb-0 bg-none p-3">
                 <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
@@ -48,28 +113,16 @@
 
                 <div class="row align-items-center">
                     <div class="col-lg-6">
-                        <select class="form-control form-select" name="warranty_type_id" @bind="selectedOption">
-                            <option value="Model (Model)">Model (Model)</option>
-                            <option value="Aanbevolen gebruik (Recommended use)">Aanbevolen gebruik (Recommended use)</option>
-                            <option value="Eancode (EAN code)">Eancode (EAN code)</option>
-                            <option value="Garantie (Warranty)">Garantie (Warranty)</option>
-                            <option value="Volumeregeling (Volume control)">Volumeregeling (Volume control)</option>
-                            <option value="Bluetooth (Bluetooth)">Bluetooth (Bluetooth)</option>
-                            <option value="USB-aansluiting (USB connection)">USB-aansluiting (USB connection)</option>
-                            <option value="Aansluiting microfoon (Microphone connection)">Aansluiting microfoon (Microphone connection)</option>
-                            <option value="Microfoontype (Microphone type)">Microfoontype (Microphone type)</option>
-                            <option value="Gewicht (gram) (Weight in grams)">Gewicht (gram) (Weight in grams)</option>
-                            <option value="Snelstartgids (Quick start guide)">Snelstartgids (Quick start guide)</option>
-                        </select>
+
                     </div>
                     <div class="col-lg-4">
-                        <input type="text" @bind="inputText" class="form-control" id="exampleInputPassword2" placeholder="Value">
+                        <input type="text" class="form-control" id="exampleInputPassword2" placeholder="Value">
 
 
                     </div>
                     <div class="col-lg-1">
 
-                        <button class="btn btn-primary" @onclick="AddItem">Add</button>
+                        <button class="btn btn-primary">Add</button>
                     </div>
                 </div>
                 <div>
@@ -85,21 +138,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in selectedItems)
-                                {
-
-                                    <tr>
-
-                                        <td>@item.Name </td>
-                                        <td>@item.Value</td>
-                                        <td nowrap="">
-
-                                            <a href="#" class="btn btn-sm btn-white w-60px" @onclick="() => RemoveItem(item)">Delete</a>
-                                        </td>
-                                    </tr>
-                                }
-
-
                             </tbody>
                         </table>
                     </div>
@@ -111,111 +149,77 @@
 
 
     </div>
-    
+
 </div>
 
 @code {
-    string selectedOption;
-    string inputText;
-    public class ListItem
+
+
+
+    private List<CategoryDto> TreeItems { get; set; } = new List<CategoryDto>();
+
+    private List<CategoryDto> Level1Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level2Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
+
+
+    #region
+
+    protected override async Task OnInitializedAsync()
     {
-        public string Name { get; set; }
-        public string Value { get; set; }
+        await LoadCategoryTreeAsync();
     }
 
-    // Create a list to store selected items
-    List<ListItem> selectedItems = new List<ListItem>();
-
-    // Method to handle Add button click
-    void AddItem()
+    private async Task LoadCategoryTreeAsync()
     {
-        // Get the selected item from the dropdown and the value from the input
-        var selectedItemName = selectedOption;
-        var value = inputText;
-
-        // Create a new ListItem object
-        var newItem = new ListItem
+        try
         {
-            Name = selectedItemName,
-            Value = value
-        };
-
-        // Add the new item to the list
-        selectedItems.Add(newItem);
-
-        // Clear input fields
-        inputText = "";
-        selectedOption = "";
-    }
-    private WarrantyType newWarranty = new WarrantyType();
-    private List<WarrantyType> warranties = new List<WarrantyType>();
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        warranties.Add(new WarrantyType { Type = "Model (Model)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Aanbevolen gebruik (Recommended use)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Eancode (EAN code)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Garantie (Warranty)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Volumeregeling (Volume control)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Bluetooth (Bluetooth)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "USB-aansluiting (USB connection)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Aansluiting microfoon (Microphone connection)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Microfoontype (Microphone type)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Gewicht (gram) (Weight in grams)", Value = "" });
-        warranties.Add(new WarrantyType { Type = "Snelstartgids (Quick start guide)", Value = "" });
-    }
-
-    private string searchString = "";
-
-    private void AddWarranty()
-    {
-        if (!string.IsNullOrWhiteSpace(newWarranty.Type) && !string.IsNullOrWhiteSpace(newWarranty.Value))
-        {
-            warranties.Add(newWarranty);
-            Snackbar.Add($"Added: {newWarranty.Type} - {newWarranty.Value}", Severity.Success);
-            newWarranty = new WarrantyType(); // Reset the form
+            var response = await CategoryService.GetCategoriesDtoAsync();
+            if (response.Success)
+            {
+                TreeItems = response.Data;
+                Level1Categories = TreeItems.Where(c => c.Level == 1).ToList();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Snackbar.Add("Both fields are required.", Severity.Error);
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
         }
     }
 
-    //private Func<WarrantyType, bool> FilterFunc => x => FilterFunc(x, searchString);
+    #endregion
 
-    private bool FilterFunc(WarrantyType warranty, string searchString)
+
+
+    #region level
+    private void OnLevel1Changed(ChangeEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (warranty.Type.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (warranty.Value.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        return false;
+        var selectedLevel1Id = Convert.ToInt64(e.Value);
+        var selectedLevel1 = TreeItems.FirstOrDefault(c => c.Id == selectedLevel1Id);
+        ///Level2Categories = selectedLevel1?.SubCategories.Where(c => c.Level == 2).ToList() ?? new List<CategoryDto>();
+        Level3Categories.Clear();
+        Level4Categories.Clear();
     }
 
-    private Task<IEnumerable<WarrantyType>> Search(string searchTerm)
+    private void OnLevel2Changed(ChangeEventArgs e)
     {
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            return Task.FromResult(Enumerable.Empty<WarrantyType>());
-        }
+        var selectedLevel2Id = Convert.ToInt64(e.Value);
+        var selectedLevel2 = Level2Categories.FirstOrDefault(c => c.Id == selectedLevel2Id);
+        Level3Categories = selectedLevel2?.SubCategories.Where(c => c.Level == 3).ToList() ?? new List<CategoryDto>();
+        Level4Categories.Clear();
+    }
 
-        var products = warranties?
-            .Where(product => product.Type.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
-            ?? Enumerable.Empty<WarrantyType>();
+    private void OnLevel3Changed(ChangeEventArgs e)
+    {
+        var selectedLevel3Id = Convert.ToInt64(e.Value);
+        var selectedLevel3 = Level3Categories.FirstOrDefault(c => c.Id == selectedLevel3Id);
+        Level4Categories = selectedLevel3?.SubCategories.Where(c => c.Level == 4).ToList() ?? new List<CategoryDto>();
+    }
+    #endregion
 
-        return Task.FromResult(products);
-    }
-    public class WarrantyType
-    {
-        public string Type { get; set; }
-        public string Value { get; set; }
-    }
-    void RemoveItem(ListItem item)
-    {
-        selectedItems.Remove(item);
-    }
 }
