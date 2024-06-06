@@ -5,6 +5,7 @@ using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ModelYears;
+using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Entities.Shared;
 using Ecommerce.Shared.Entities.Templates;
 using Microsoft.EntityFrameworkCore;
@@ -33,10 +34,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<TemplateMaster> TemplateMasters { get; set; }
     public DbSet<TemplateCluster> TemplateClusters { get; set; }
     public DbSet<TemplateClusterFeature> TemplateClusterFeatures { get; set; }
-
     public DbSet<TemplateCategory> TemplateCategories { get; set; }
 
-    
+    public DbSet<Product> Products { get; set; }
+    public DbSet<ProductFeatureValue> ProductFeatureValues { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,6 +46,11 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<TemplateCategory>()
     .HasIndex(tc => new { tc.TemplateMasterId, tc.CategoryId })
     .IsUnique();
+        modelBuilder.Entity<ProductFeatureValue>()
+  .HasOne(pfv => pfv.TemplateClusterFeature)
+  .WithMany()
+  .HasForeignKey(pfv => pfv.TemplateClusterFeatureId)
+  .OnDelete(DeleteBehavior.NoAction);
 
         //base.OnModelCreating(modelBuilder);
 

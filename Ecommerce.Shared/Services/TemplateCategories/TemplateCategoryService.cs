@@ -193,8 +193,11 @@ public class TemplateCategoryService : ITemplateCategoryService
     {
         try
         {
+          
             var templateCategory = await _context.TemplateCategories
-                .FirstOrDefaultAsync(tc => tc.CategoryId == categoryId);
+             .Include(tc => tc.TemplateMaster)
+             .Include(tc => tc.Category)
+             .FirstOrDefaultAsync(tc => tc.CategoryId == categoryId);
 
             return templateCategory;
         }
@@ -204,6 +207,8 @@ public class TemplateCategoryService : ITemplateCategoryService
             throw; // Handle the exception appropriately
         }
     }
+
+
 
 }
 

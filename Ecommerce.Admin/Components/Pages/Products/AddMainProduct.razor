@@ -1,10 +1,16 @@
-﻿
-@page "/AddMain"
+﻿@page "/MainProduct"
+@page "/MainProduct/{ProductId:long?}"
 @inject ISnackbar Snackbar
 @rendermode InteractiveServer
 @using Ecommerce.Shared.Dto;
 @using Ecommerce.Shared.Services.Categories;
 @inject ICategoryService CategoryService
+@inject ITemplateCategoryService TemplateCategoryService
+@inject ITemplateService TemplateService
+@using Radzen
+@using Radzen.Blazor
+@inject IProductService IProductService
+
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -15,160 +21,240 @@
         <h1 class="page-header mb-0">Main Product </h1>
     </div>
 </div>
+<EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
+    <DataAnnotationsValidator />
 
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
+                </div>
+                <div class="card-body">
 
-<div class="row">
-    <div class="col-xl-12">
-        <div class="card border-0 mb-4">
-            <div class="card-header h6 mb-0 bg-none p-3">
-                <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
-            </div>
-            <div class="card-body">
-
-                <form class="row">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Product Title">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
-
-                </form>
-            </div>
-        </div>
-
-        <div class="card border-0 mb-4">
-            <div class="card-header h6 mb-0 bg-none p-3">
-                <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Levels
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="mb-lg-0 mb-3">
-                            <label class="form-label"> Type</label>
-                            <select class="form-control" @onchange="OnLevel1Changed">
-                                <option value="">Select Level 1</option>
-                                @foreach (var category in Level1Categories)
-                                {
-                                    <option value="@category.Id">@category.Name</option>
-                                }
-                            </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <InputText @bind-Value="product.Name" class="form-control" id="exampleInputEmail2" placeholder="Product Title" />
+                            <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
                         </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="mb-lg-0 mb-3">
-                            <label class="form-label">level 2</label>
-                            <select class="form-control" @onchange="OnLevel2Changed" disabled="@(!Level2Categories.Any())">
-                                <option value="">Select Level 2</option>
-                                @foreach (var category in Level2Categories)
-                                {
-                                    <option value="@category.Id">@category.Name</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="row mt-3">
+                        <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Levels
+                </div>
+                <div class="card-body">
+                    <div class="row">
                         <div class="col-lg-6">
                             <div class="mb-lg-0 mb-3">
-                                <label class="form-label">Level 3</label>
-                                <select class="form-control" @onchange="OnLevel3Changed" disabled="@(!Level3Categories.Any())">
-                                    <option value="">Select Level 3</option>
-                                    @foreach (var category in Level3Categories)
+                                <label class="form-label"> Main Category</label>
+
+
+                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
+                                    <Columns>
+                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
+
+
+
+
+
+                                @*<select class="form-control" @onchange="OnLevel1Changed">
+                                    <option value="">Select Level 1</option>
+                                    @foreach (var category in Level1Categories)
                                     {
-                                        <option value="@category.Id">@category.Name</option>
+                                        <option value="@category.Id" selected="@category.Id == @selectedLevel1CategoryId">@category.Name</option>
                                     }
-                                </select>
+                                </select>*@
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="mb-lg-0 mb-3">
-                                <label class="form-label">Level 4</label>
-                                <select class="form-control" disabled="@(!Level4Categories.Any())">
-                                    <option value="">Select Level 4</option>
-                                    @foreach (var category in Level4Categories)
-                                    {
-                                        <option value="@category.Id">@category.Name</option>
-                                    }
-                                </select>
+                                <label class="form-label">Sub Category</label>
+
+                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
+                                    <Columns>
+                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
+
+
+
+
+                                @*<select class="form-control" @onchange="OnLevel2Changed" disabled="@(!Level2Categories.Any())">
+            <option value="">Select Level 2</option>
+            @foreach (var category in Level2Categories)
+            {
+             <option value="@category.Id" selected="@category.Id == @selectedLevel2CategoryId">@category.Name</option>
+            }
+        </select>*@
                             </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-lg-6">
+                                <div class="mb-lg-0 mb-3">
+                                    <label class="form-label">Sub Sub Category</label>
+
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+
+
+                                    @*<select class="form-control" @onchange="OnLevel3Changed" disabled="@(!Level3Categories.Any())">
+            <option value="">Select Level 3</option>
+            @foreach (var category in Level3Categories)
+            {
+                <option value="@category.Id" selected="@category.Id == @selectedLevel3CategoryId">@category.Name</option>
+            }
+        </select>*@
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-lg-0 mb-3">
+                                    <label class="form-label">Group Category </label>
+
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+
+
+                                </div>
+                            </div>
+
+
                         </div>
 
 
                     </div>
-
-
                 </div>
             </div>
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        Add features Specifications and thier value. @if (TemplateMaster != null && TemplateMaster.Id > 0)
+                        {
+                            <b>@TemplateMaster.Name</b>
+                        }
+                    </div>
+                    <div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th width="80%">Feature</th>
+                                        <th width="20%">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (clusterTabs != null && clusterTabs.Count > 0)
+                                    {
+                                        @foreach (var clusterTab in clusterTabs)
+                                        {
+                                            var collapseId = $"collapse{clusterTab.cluster.Name.Replace(" ", "")}";
+                                            var headingId = $"heading{clusterTab.cluster.Name.Replace(" ", "")}";
+
+                                            <tr>
+                                                <td colspan="2">
+                                                    <div class="accordion" id="accordionPanelsStayOpenExample">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="@headingId">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                                                    @clusterTab.cluster.Name
+
+                                                                </button>
+                                                            </h2>
+                                                            <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId">
+                                                                <div class="accordion-body">
+                                                                    <div class="card mb-4 border-0">
+                                                                        <ul class="list-group list-group-flush">
+                                                                            @foreach (var feature in clusterTab.Features)
+                                                                            {
+                                                                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                                                                    <span class="mr-2">@feature.Feature.Name</span>
+                                                                                    <input type="text" @bind-value=@feature.Feature.Value class="form-control" style="width: auto; margin-left: 10px;">
+                                                                                </li>
+                                                                            }
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+
         </div>
-
-        <div class="card border-0 mb-4">
-            <div class="card-header h6 mb-0 bg-none p-3">
-                <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
-            </div>
-            <div class="card-body">
-                <div class="alert alert-success">
-                    Add features Specifications and thier value.
-                </div>
-
-
-                <div class="row align-items-center">
-                    <div class="col-lg-6">
-
-                    </div>
-                    <div class="col-lg-4">
-                        <input type="text" class="form-control" id="exampleInputPassword2" placeholder="Value">
-
-
-                    </div>
-                    <div class="col-lg-1">
-
-                        <button class="btn btn-primary">Add</button>
-                    </div>
-                </div>
-                <div>
-                    <h3>Selected Items</h3>
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0 align-middle">
-                            <thead>
-                                <tr>
-
-                                    <th>Feature</th>
-                                    <th>Value</th>
-                                    <th width="1%"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-
-
-                </div>
-            </div>
-        </div>
-
 
     </div>
 
-</div>
-
+</EditForm>
 @code {
 
-
-
-    private List<CategoryDto> TreeItems { get; set; } = new List<CategoryDto>();
-
+    [Parameter]
+    public long ProductId { get; set; }
+    private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
     private List<CategoryDto> Level1Categories { get; set; } = new List<CategoryDto>();
     private List<CategoryDto> Level2Categories { get; set; } = new List<CategoryDto>();
     private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
     private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
+    private TemplateCategory templateCategory = new TemplateCategory();
+    private TemplateMaster TemplateMaster = new TemplateMaster();
+    private List<TemplateCluster> clusterTabs = new List<TemplateCluster>();
+    private List<ProductFeatureValue> productFeatureValues = new List<ProductFeatureValue>();
 
+    private long selectedLevel1CategoryId;
+    private long selectedLevel2CategoryId;
+    private long selectedLevel3CategoryId;
+
+    private Product product = new Product();
 
     #region
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCategoryTreeAsync();
+        if (ProductId > 0)
+        {
+            await LoadProductForEdit();
+
+        }
     }
 
     private async Task LoadCategoryTreeAsync()
@@ -178,8 +264,8 @@
             var response = await CategoryService.GetCategoriesDtoAsync();
             if (response.Success)
             {
-                TreeItems = response.Data;
-                Level1Categories = TreeItems.Where(c => c.Level == 1).ToList();
+                Categories = response.Data;
+                Level1Categories = Categories.Where(c => c.Level == 1).ToList();
             }
             else
             {
@@ -194,31 +280,317 @@
 
     #endregion
 
-
-
     #region level
-    private void OnLevel1Changed(ChangeEventArgs e)
+    private void OnLevel1Changed(object e)
     {
-        var selectedLevel1Id = Convert.ToInt64(e.Value);
-        var selectedLevel1 = TreeItems.FirstOrDefault(c => c.Id == selectedLevel1Id);
-        ///Level2Categories = selectedLevel1?.SubCategories.Where(c => c.Level == 2).ToList() ?? new List<CategoryDto>();
-        Level3Categories.Clear();
-        Level4Categories.Clear();
+
+        try
+        {
+            var selectedLevel1Id = Convert.ToInt64(e);
+            if (selectedLevel1Id > 0)
+            {
+                Level2Categories = Categories.Where(c => c.Level == 2 && c.ParentCategoryId == selectedLevel1Id).ToList() ?? new List<CategoryDto>();
+                Level3Categories.Clear();
+                Level4Categories.Clear();
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+
     }
 
-    private void OnLevel2Changed(ChangeEventArgs e)
+    private void OnLevel2Changed(object e)
     {
-        var selectedLevel2Id = Convert.ToInt64(e.Value);
-        var selectedLevel2 = Level2Categories.FirstOrDefault(c => c.Id == selectedLevel2Id);
-        Level3Categories = selectedLevel2?.SubCategories.Where(c => c.Level == 3).ToList() ?? new List<CategoryDto>();
-        Level4Categories.Clear();
+        try
+        {
+            var selectedLevel2Id = Convert.ToInt64(e);
+            if (selectedLevel2Id > 0)
+            {
+                Level3Categories = Categories.Where(c => c.Level == 3 && c.ParentCategoryId == selectedLevel2Id).ToList() ?? new List<CategoryDto>();
+                Level4Categories.Clear();
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+
+        }
+
+
+
     }
 
-    private void OnLevel3Changed(ChangeEventArgs e)
+    private void OnLevel3Changed(object e)
     {
-        var selectedLevel3Id = Convert.ToInt64(e.Value);
-        var selectedLevel3 = Level3Categories.FirstOrDefault(c => c.Id == selectedLevel3Id);
-        Level4Categories = selectedLevel3?.SubCategories.Where(c => c.Level == 4).ToList() ?? new List<CategoryDto>();
+        try
+        {
+            var selectedLevel3Id = Convert.ToInt64(e);
+            if (selectedLevel3Id > 0)
+            {
+                Level4Categories = Categories.Where(c => c.Level == 4 && c.ParentCategoryId == selectedLevel3Id).ToList() ?? new List<CategoryDto>();
+
+            }
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+        }
+    }
+
+    private async Task OnLevel4Changed(object e)
+    {
+        try
+        {
+
+            long CategoryId = Convert.ToInt64(e);
+            product.CategoryId = CategoryId;
+            if (CategoryId > 0)
+            {
+                var existingTemplateCategory = await TemplateCategoryService.GetTemplateCategoryByCategoryIdAsync(CategoryId);
+
+                if (existingTemplateCategory != null)
+                {
+                    templateCategory = existingTemplateCategory;
+                    await LoadTemplate(templateCategory.TemplateMasterId);
+
+                }
+                else
+                {
+                    Snackbar.Add("Please Link Template", Severity.Info);
+                }
+
+            }
+
+
+
+        }
+
+        catch (Exception ex)
+        {
+            templateCategory = new TemplateCategory();
+
+        }
+
+
+    }
+
+    #endregion
+
+    #region Template
+    private async Task LoadTemplate(long TemplateId,bool edit=false)
+    {
+
+        try
+        {
+            var response = await TemplateService.GetTemplateMasterByIdAsync(TemplateId);
+            if (response.Success)
+            {
+                TemplateMaster = response.Data;
+                product.TemplateMasterId = TemplateMaster.Id;
+                clusterTabs = new List<TemplateCluster>();
+                clusterTabs = TemplateMaster.Clusters.ToList();
+                if(!edit)
+                {
+                    product.FeatureValues = new List<ProductFeatureValue>();
+                }
+
+
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+    }
+
+    #endregion
+
+
+    #region Save
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+
+
+            if (product.TemplateMasterId == 0 || clusterTabs==null || clusterTabs.Count()<1)
+            {
+                Snackbar.Add($"Please select and Link Template", Severity.Info);
+                return;
+            }
+            ServiceResponse<Product> response;
+
+            foreach (var v in clusterTabs)
+            {
+                productFeatureValues.AddRange(v.Features.Select(f => new ProductFeatureValue
+                {
+                    TemplateClusterFeatureId = f.Id,
+                    Value = f.Feature.Value,
+                }));
+            }
+
+
+            if(ProductId>0)
+            {
+                foreach (var featureValue2 in productFeatureValues)
+                {
+                    var featureValueToUpdate = product.FeatureValues.FirstOrDefault(fv => fv.TemplateClusterFeatureId == featureValue2.TemplateClusterFeatureId);
+
+                    if (featureValueToUpdate != null)
+                    {
+                        featureValueToUpdate.Value = featureValue2.Value;
+                    }
+                    else
+                    {
+                        product.FeatureValues.Add(featureValue2);
+
+                    }
+                }
+
+
+                response = await IProductService.UpdateProductAsync(product);
+            }
+            else
+            {
+                product.FeatureValues = productFeatureValues;
+                response = await IProductService.AddProductAsync(product);
+            }
+
+            if (response.Success)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+
+    }
+    #endregion
+
+
+    #region  Edit_Section
+
+    private async Task LoadProductForEdit()
+    {
+        try
+        {
+            var response = await IProductService.GetProductByIdAsync(ProductId);
+            if (response.Success)
+            {
+
+                product = response.Data;
+                var featureValues = product.FeatureValues;
+                await LoadTemplate(product.TemplateMasterId,true);
+
+                //ForEditCase 
+                /// product.FeatureValues = new List<ProductFeatureValue>();
+
+                if (featureValues != null && featureValues.Count>0)
+                {
+                    if(clusterTabs!=null && clusterTabs.Count>0)
+                    {
+                        if (featureValues != null && featureValues.Count > 0 && clusterTabs != null && clusterTabs.Count > 0)
+                        {
+                            foreach (var clusterTab in clusterTabs)
+                            {
+                                foreach (var feature in clusterTab.Features)
+                                {
+                                    var correspondingFeatureValue = featureValues.FirstOrDefault(fv => fv.TemplateClusterFeatureId == feature.Id);
+                                    if (correspondingFeatureValue != null)
+                                    {
+                                        feature.Feature.Value = correspondingFeatureValue.Value;
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+
+
+                }
+                LoadCategories();
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+
+    protected void LoadCategories()
+    {
+
+
+        try
+        {
+            var level4 = Categories.FirstOrDefault(a => a.Id == product.CategoryId);
+
+            if (level4 != null)
+            {
+                Level4Categories.Add(level4);
+
+                var level3 = Categories.FirstOrDefault(c => c.Id == level4.ParentCategoryId);
+                if (level3 != null)
+                {
+                    Level3Categories.Add(level3);
+                    selectedLevel3CategoryId = level3.Id;
+
+                    var level2 = Categories.FirstOrDefault(c => c.Id == level3.ParentCategoryId);
+                    if (level2 != null)
+                    {
+                        selectedLevel2CategoryId = level2.Id;
+                        Level2Categories.Add(level2);
+                        selectedLevel1CategoryId = level2?.ParentCategoryId ?? 0;
+
+                        var level1 = Categories.Where(c => c.Level == 1).ToList();
+                        if (level1 != null)
+                        {
+                            Level1Categories = level1;
+                        }
+                    }
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+
+        }
+
+
+
+
     }
     #endregion
 

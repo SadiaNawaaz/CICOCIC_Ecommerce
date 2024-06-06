@@ -5,6 +5,7 @@ using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Features;
 using Ecommerce.Shared.Services.ModelYears;
+using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.TemplateCategories;
 using Ecommerce.Shared.Services.Templates;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ builder.Services.AddScoped<IModelYearService, ModelYearService>();
 builder.Services.AddScoped<IFeatureService, FeatureService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddScoped<ITemplateCategoryService, TemplateCategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(
  o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));

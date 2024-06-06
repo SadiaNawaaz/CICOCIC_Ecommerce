@@ -2232,7 +2232,7 @@ progress {
         padding: .5rem .5rem;
         color: var(--bs-table-color-state,var(--bs-table-color-type,var(--bs-table-color)));
         background-color: var(--bs-table-bg);
-        border-bottom-width: 1px;
+        border-bottom-width: 0px;
         box-shadow: inset 0 0 0 9999px var(--bs-table-bg-state,var(--bs-table-bg-type,var(--bs-table-accent-bg)))
     }
 
@@ -6104,7 +6104,7 @@ textarea.form-control-lg {
 
 .accordion-item {
     color: var(--bs-accordion-color);
-    background-color: var(--bs-accordion-bg);
+ /*   background-color: var(--bs-accordion-bg);*/
     border: var(--bs-accordion-border-width) solid var(--bs-accordion-border-color)
 }
 
@@ -6138,7 +6138,7 @@ textarea.form-control-lg {
         }
 
 .accordion-body {
-    padding: var(--bs-accordion-body-padding-y) var(--bs-accordion-body-padding-x)
+/*    padding: var(--bs-accordion-body-padding-y) var(--bs-accordion-body-padding-x)*/
 }
 
 .accordion-flush > .accordion-item {

@@ -1,16 +1,15 @@
-﻿@page "/BrandList"
-@using Ecommerce.Shared.Entities.Brands
-@using Ecommerce.Shared.Services.Brands;
-@inject IBrandService BrandService
+﻿@page "/MainProductList"
+@using Ecommerce.Shared.Entities.Products
+@using Ecommerce.Shared.Services.Products;
+@inject IProductService ProductService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
-@using Ecommerce.Admin.Components.Pages.Shared
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active">Brands</li>
+            <li class="breadcrumb-item active">Products</li>
         </ol>
     </div>
 </div>
@@ -18,7 +17,7 @@
     <div class="col-12">
         <div class="panel panel-inverse">
             <div class="panel-heading">
-                <h4 class="panel-title">Brands</h4>
+                <h4 class="panel-title">Products</h4>
                 <div class="panel-heading-btn">
                     <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
                     <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
@@ -27,8 +26,8 @@
                 </div>
             </div>
             <div class="panel-body">
-                <button class="btn btn-primary mb-3" @onclick="NavigateToAddBrand">Add Brand</button>
-                <MudDataGrid T="Brand" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+                <button class="btn btn-primary mb-3" @onclick="NavigateToAddProduct">Add Product</button>
+                <MudDataGrid T="Product" Items="@products" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
                     <ColGroup>
                         <col style="width: 70%;" />
                         <col style="width: 20%;" />
@@ -36,21 +35,24 @@
                     </ColGroup>
                     <Columns>
                         <PropertyColumn Property="x => x.Name" Title="Name" />
-                        <PropertyColumn Property="x => x.ImageUrl" Title="Image URL" />
+                        <PropertyColumn Property="x => x.Category.Name" Title="Category" />
+                        <PropertyColumn Property="x => x.TemplateMaster.Name" Title="Template" />
+
+
                         <TemplateColumn CellClass="d-flex justify-end">
                             <HeaderTemplate>
                                 <div>Actions</div>
                             </HeaderTemplate>
                             <CellTemplate>
                                 <MudStack Row>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditBrand(context.Item.Id)" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditProduct(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteProduct(context.Item)" />
                                 </MudStack>
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>
                     <PagerContent>
-                        <MudDataGridPager T="Brand" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                        <MudDataGridPager T="Product" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
                     </PagerContent>
                 </MudDataGrid>
             </div>
@@ -61,40 +63,47 @@
 @code {
 
     private bool _resizeColumn = true;
-    private List<Brand> brands;
+    private List<Product> products= new List<Product>();
     [Inject]
     public IDialogService DialogService { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadBrands();
+        await LoadProducts();
     }
 
-    private async Task LoadBrands()
+    private async Task LoadProducts()
     {
-        var response = await BrandService.GetBrandsAsync();
-        if (response.Success)
+        try
         {
-            brands = response.Data;
+            var response = await ProductService.GetProductsAsync();
+            if (response.Success)
+            {
+                products = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
         }
-        else
-        {
-            Snackbar.Add(response.Message, Severity.Error);
-        }
+
+        catch(Exception ex)
+            {
+
+            }
     }
 
-    private void NavigateToAddBrand()
+    private void NavigateToAddProduct()
     {
-        NavigationManager.NavigateTo("/AddEditBrand");
+        NavigationManager.NavigateTo("/MainProduct");
     }
 
-    private void EditBrand(long brandId)
+    private void EditProduct(long productId)
     {
-        NavigationManager.NavigateTo($"/AddEditBrand/{brandId}");
+        NavigationManager.NavigateTo($"/MainProduct/{productId}");
     }
 
-
-    private async Task DeleteBrand(Brand cluster)
+    private async Task DeleteProduct(Product product)
     {
         try
         {
@@ -104,26 +113,24 @@
             var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
             var result = await dialogresult.Result;
             if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
-                await DeleteBrand(cluster.Id);
+                await DeleteProduct(product.Id);
         }
         catch (Exception ex)
         {
-            Snackbar.Add("An error occurred while attempting to delete the cluster: " + ex.Message, Severity.Error);
-            Console.Error.WriteLine($"Error in DeleteCluster: {ex}");
+            Snackbar.Add("An error occurred while attempting to delete the product: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteProduct: {ex}");
         }
     }
 
-    private async Task DeleteBrand(long brandId)
+    private async Task DeleteProduct(long productId)
     {
-        var response = await BrandService.DeleteBrandAsync(brandId);
+        var response = await ProductService.DeleteProductAsync(productId);
         if (response.Success)
         {
             Snackbar.Add(response.Message, Severity.Success);
-            await LoadBrands();
+            await LoadProducts();
         }
         else
-        {
             Snackbar.Add(response.Message, Severity.Error);
-        }
     }
 }
