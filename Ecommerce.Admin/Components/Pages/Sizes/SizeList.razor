@@ -1,0 +1,142 @@
+﻿@page "/SizeList"
+@using Ecommerce.Shared.Entities.Sizes
+@using Ecommerce.Shared.Services.Sizes;
+@inject ISizeService SizeService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Sizes</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Sizes</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <button class="btn btn-primary mb-3" @onclick="NavigateToAddSize">Add Size</button>
+                <MudDataGrid T="GeneralSize" Items="@sizes"  RowsPerPage="5" Striped="true" Bordered="true">
+                    <ColGroup>
+                        <col style="width: 70%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                    </ColGroup>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Name" Title="Name" />
+                     
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <HeaderTemplate>
+                                <div>Actions</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditSize(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => ConfirmDelete(context.Item)" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="GeneralSize" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private List<GeneralSize> sizes= new List<GeneralSize>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSizes();
+    }
+
+    private async Task LoadSizes()
+    {
+
+        try
+        {
+            var response = await SizeService.GetSizesAsync();
+            if (response.Success)
+            {
+                sizes = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch(Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void NavigateToAddSize()
+    {
+        NavigationManager.NavigateTo("/AddEditSize");
+    }
+
+    private void EditSize(long sizeId)
+    {
+        NavigationManager.NavigateTo($"/AddEditSize/{sizeId}");
+    }
+
+    private async Task ConfirmDelete(GeneralSize size)
+    {
+
+
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you want to confirm?");
+        parameters.Add("ButtonText", "Yes");
+        var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+        var result = await dialogresult.Result;
+        if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+            await DeleteSize(size.Id);
+       
+    }
+
+    private async Task DeleteSize(long id)
+    {
+
+        try
+        {
+            var response = await SizeService.DeleteSizeAsync(id);
+            if (response.Success)
+            {
+                Snackbar.Add("Size deleted successfully.", Severity.Success);
+                await LoadSizes(); // Refresh the list after deletion
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+
+        }
+        catch(Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+
+    }
+}

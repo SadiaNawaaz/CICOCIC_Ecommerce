@@ -1,0 +1,122 @@
+﻿@page "/ColorList"
+@using Ecommerce.Shared.Entities.Colors;
+@using Ecommerce.Shared.Services.Colors;
+@using Ecommerce.Shared.Entities
+@using Ecommerce.Shared.Services
+@inject IColorService ColorService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@using Ecommerce.Shared.Services;
+@rendermode InteractiveServer
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Colors</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Colors</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <button class="btn btn-primary mb-3" @onclick="NavigateToAddColor">Add Color</button>
+                <MudDataGrid T="GeneralColor" Items="@colors" RowsPerPage="5" Striped="true" Bordered="true">
+                    <ColGroup>
+                        <col style="width: 70%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                    </ColGroup>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Name" Title="Name" />
+                        <PropertyColumn Property="x => x.HexCode" Title="Color" />
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <HeaderTemplate>
+                                <div>Actions</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditColor(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => ConfirmDelete(context.Item)" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="GeneralColor" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private List<GeneralColor> colors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadColors();
+    }
+
+    private async Task LoadColors()
+    {
+        var response = await ColorService.GetColorsAsync();
+        if (response.Success)
+        {
+            colors = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private void NavigateToAddColor()
+    {
+        NavigationManager.NavigateTo("/AddEditColor");
+    }
+
+    private void EditColor(long colorId)
+    {
+        NavigationManager.NavigateTo($"/AddEditColor/{colorId}");
+    }
+
+    private async Task ConfirmDelete(GeneralColor color)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you want to confirm?");
+        parameters.Add("ButtonText", "Yes");
+        var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+        var result = await dialogresult.Result;
+        if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+            await DeleteColor(color.Id);
+
+    }
+
+    private async Task DeleteColor(long id)
+    {
+        var response = await ColorService.DeleteColorAsync(id);
+        if (response.Success)
+        {
+            Snackbar.Add("Color deleted successfully.", Severity.Success);
+            await LoadColors(); // Refresh the list after deletion
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+}

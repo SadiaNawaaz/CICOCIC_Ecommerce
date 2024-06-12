@@ -1,0 +1,120 @@
+﻿@page "/AddEditColor/{ColorId:long?}"
+@using Ecommerce.Shared.Entities
+@using Ecommerce.Shared.Services.Colors;
+@using Ecommerce.Shared.Services
+@inject IColorService ColorService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@using Ecommerce.Shared.Services;
+@rendermode InteractiveServer
+@using Ecommerce.Shared.Entities.Colors;
+@using Radzen
+@using Radzen.Blazor
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ColorList">Colors</a></li>
+            <li class="breadcrumb-item active">@(ColorId.HasValue? "Edit Color" : "Add Color")</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">@(ColorId.HasValue? "Edit Color" : "Add Color")</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <EditForm Model="@color" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-5 mb-3">
+                            <label for="Name">Name</label>
+                            <InputText id="Name" class="form-control" @bind-Value="color.Name" />
+                            <ValidationMessage For="@(() => color.Name)" />
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label for="HexCode">Hex Code</label>
+                            <InputText id="HexCode" class="form-control" @bind-Value="color.HexCode" />
+                            <input type="color" @bind-value="@color.HexCode" />
+                            @*<RadzenColorPicker @bind-value=@color.HexCode ShowHSV=@showHSV ShowRGBA=@showRGBA ShowColors=@showColors ShowButton=@showButton />*@
+
+                            <ValidationMessage For="@(() => color.HexCode)" />
+
+                        </div>
+                        <div class="col-2 mt-15px">
+                            <button type="submit" class="btn btn-primary">@("Save")</button>
+                        </div>
+                        <div class="col-12">
+                            <a href="javascript:history.back(-1);" class="btn btn-success">
+                                <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                            </a>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    bool showHSV = true;
+    bool showRGBA = true;
+    bool showColors = true;
+    bool showButton = false;
+    [Parameter] public long? ColorId { get; set; }
+    private GeneralColor color = new GeneralColor();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ColorId.HasValue)
+        {
+            var response = await ColorService.GetColorByIdAsync(ColorId.Value);
+            if (response.Success)
+            {
+                color = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+                NavigationManager.NavigateTo("/ColorList");
+            }
+        }
+        else
+        {
+            color = new GeneralColor(); // Initialize a new color for Add operation
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        ServiceResponse<GeneralColor> response;
+        if (ColorId.HasValue)
+        {
+            response = await ColorService.UpdateColorAsync(color);
+        }
+        else
+        {
+            response = await ColorService.AddColorAsync(color);
+        }
+
+        if (response.Success)
+        {
+            Snackbar.Add(response.Message, Severity.Success);
+            NavigationManager.NavigateTo("/ColorList");
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+}

@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Shared.Abstraction;
+using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.Templates;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,10 @@ public class Product : BaseEntity
     public Category Category { get; set; }
     public long TemplateMasterId { get; set; }
     public TemplateMaster TemplateMaster { get; set; }
+    [Required]
+    public long BrandId { get; set; }
+    public Brand Brand { get; set; }
+    public double Price { get; set; }
     public List<ProductFeatureValue> FeatureValues { get; set; } = new List<ProductFeatureValue>();
 
 

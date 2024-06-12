@@ -3,10 +3,13 @@
 using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Entities.Clusters;
+using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ModelYears;
 using Ecommerce.Shared.Entities.Products;
+using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Entities.Shared;
+using Ecommerce.Shared.Entities.Sizes;
 using Ecommerce.Shared.Entities.Templates;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,8 +38,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<TemplateCluster> TemplateClusters { get; set; }
     public DbSet<TemplateClusterFeature> TemplateClusterFeatures { get; set; }
     public DbSet<TemplateCategory> TemplateCategories { get; set; }
-
+    public DbSet<GeneralSize> Sizes { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<GeneralColor> Colors { get; set; }
+    public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<ProductFeatureValue> ProductFeatureValues { get; set; }
 
 

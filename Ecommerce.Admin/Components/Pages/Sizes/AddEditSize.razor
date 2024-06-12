@@ -1,0 +1,98 @@
+﻿@page "/AddEditSize/{SizeId:long?}"
+@using Ecommerce.Shared.Entities
+@using Ecommerce.Shared.Services.Sizes;
+@using Ecommerce.Shared.Entities.Sizes;
+@inject ISizeService SizeService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/SizeList">Sizes</a></li>
+            <li class="breadcrumb-item active">@(SizeId.HasValue ? "Edit Size" : "Add Size")</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">@(SizeId.HasValue ? "Edit Size" : "Add Size")</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <EditForm Model="@size" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <label for="Name">Name</label>
+                            <InputText id="Name" class="form-control" @bind-Value="size.Name" />
+                            <ValidationMessage For="@(() => size.Name)" />
+                        </div>
+                        <div class="col-2 mt-15px">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                        <div class="col-12">
+                            <a href="javascript:history.back(-1);" class="btn btn-success">
+                                <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                            </a>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public long? SizeId { get; set; }
+    private GeneralSize size = new GeneralSize();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (SizeId.HasValue)
+        {
+            var response = await SizeService.GetSizeByIdAsync(SizeId.Value);
+            if (response.Success)
+            {
+                size = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        ServiceResponse<GeneralSize> response;
+        if (SizeId.HasValue)
+        {
+            response = await SizeService.UpdateSizeAsync(size);
+        }
+        else
+        {
+            response = await SizeService.AddSizeAsync(size);
+        }
+
+        if (response.Success)
+        {
+            Snackbar.Add(response.Message, Severity.Success);
+             NavigationManager.NavigateTo("/SizeList");
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+}

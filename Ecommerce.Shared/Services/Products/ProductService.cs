@@ -13,6 +13,7 @@ public interface IProductService
     Task<ServiceResponse<Product>> AddProductAsync(Product product);
     Task<ServiceResponse<Product>> UpdateProductAsync(Product product);
     Task<ServiceResponse<bool>> DeleteProductAsync(long id);
+    Task<ServiceResponse<List<Product>>> GetProductsByCategoryIdAsync(long CategoryId);
 }
 
 public class ProductService : IProductService
@@ -40,22 +41,6 @@ public class ProductService : IProductService
                 Success = true,
                 Message = "Products fetched successfully"
             };
-
-
-
-
-
-
-
-
-
-            //var products = await _context.Products.ToListAsync();
-            //return new ServiceResponse<List<Product>>
-            //{
-            //    Data = products,
-            //    Success = true,
-            //    Message = "Products fetched successfully"
-            //};
         }
         catch (Exception ex)
         {
@@ -190,4 +175,30 @@ public class ProductService : IProductService
             };
         }
     }
+
+
+
+    public async Task<ServiceResponse<List<Product>>> GetProductsByCategoryIdAsync(long CategoryId)
+    {
+        try
+        {
+            var products = await _context.Products.Where(a=>a.CategoryId== CategoryId).ToListAsync();
+            return new ServiceResponse<List<Product>>
+            {
+                Data = products,
+                Success = true,
+                Message = "Products fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching products.");
+            return new ServiceResponse<List<Product>>
+            {
+                Success = false,
+                Message = "Error occurred while fetching products"
+            };
+        }
+    }
+
 }

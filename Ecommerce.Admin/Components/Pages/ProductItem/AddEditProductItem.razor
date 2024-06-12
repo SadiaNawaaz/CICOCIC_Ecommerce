@@ -1,0 +1,873 @@
+﻿
+@page "/AddEditProductItem/{Id:long}/{ProductID:long}"
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+@inject ICategoryService CategoryService
+@using Radzen
+@using Radzen.Blazor
+@inject IProductService IProductService
+@inject ITemplateService TemplateService
+@using Ecommerce.Shared.Services.Brands;
+@inject IBrandService BrandService
+@using Ecommerce.Shared.Entities.Brands
+@inject IModelYearService modelYearService
+@using Ecommerce.Shared.Entities.ModelYears
+@using Ecommerce.Shared.Services.ModelYears
+@using Ecommerce.Shared.Services.Sizes;
+@inject ISizeService SizeService
+@using Ecommerce.Shared.Entities.Sizes
+@inject IColorService ColorService
+@using Ecommerce.Shared.Services.Colors;
+@using Ecommerce.Shared.Entities.Colors;
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product Variants</li>
+        </ol>
+        <h1 class="page-header mb-0">Product Variants</h1>
+    </div>
+</div>
+
+
+<!-- The Modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Add New Product </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form>
+
+                    <div class="row mb-15px">
+                        <label class="form-label col-form-label col-md-3">Product Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="card border-0 mb-4">
+                        <div class="card-header h6 mb-0 bg-none p-3">
+                            <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                Add features Specifications and thier value.
+                            </div>
+
+
+
+
+                            <div class="row align-items-center">
+                                <div class="col-lg-6">
+                                    <select class="form-control form-select" name="warranty_type_id" @bind="selectedOption">
+                                        <option value="Model (Model)">Model (Model)</option>
+                                        <option value="Aanbevolen gebruik (Recommended use)">Aanbevolen gebruik (Recommended use)</option>
+                                        <option value="Eancode (EAN code)">Eancode (EAN code)</option>
+                                        <option value="Garantie (Warranty)">Garantie (Warranty)</option>
+                                        <option value="Volumeregeling (Volume control)">Volumeregeling (Volume control)</option>
+                                        <option value="Bluetooth (Bluetooth)">Bluetooth (Bluetooth)</option>
+                                        <option value="USB-aansluiting (USB connection)">USB-aansluiting (USB connection)</option>
+                                        <option value="Aansluiting microfoon (Microphone connection)">Aansluiting microfoon (Microphone connection)</option>
+                                        <option value="Microfoontype (Microphone type)">Microfoontype (Microphone type)</option>
+                                        <option value="Gewicht (gram) (Weight in grams)">Gewicht (gram) (Weight in grams)</option>
+                                        <option value="Snelstartgids (Quick start guide)">Snelstartgids (Quick start guide)</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4">
+                                    <input type="text" @bind="inputText" class="form-control" id="exampleInputPassword2" placeholder="Value">
+
+
+                                </div>
+                                <div class="col-lg-1">
+
+                                    <button class="btn btn-primary" @onclick="AddItem">Add</button>
+                                </div>
+                            </div>
+                            <div>
+                                <h3>Selected Items</h3>
+                                <div class="table-responsive">
+                                    <table class="table table-striped mb-0 align-middle">
+                                        <thead>
+                                            <tr>
+
+                                                <th>Feature</th>
+                                                <th>Value</th>
+                                                <th width="1%"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in selectedItems)
+                                            {
+
+                                                <tr>
+
+                                                    <td>@item.Name </td>
+                                                    <td>@item.Value</td>
+                                                    <td nowrap="">
+
+                                                        <a href="#" class="btn btn-sm btn-white w-60px" @onclick="() => RemoveItem(item)">Delete</a>
+                                                    </td>
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn btn-danger  btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-8">
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" placeholder="Product name">
+                </div>
+                <div class="">
+                    <label class="form-label">Description</label>
+                    <div class="form-control p-0 overflow-hidden">
+                        <textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media
+            </div>
+            <div class="card-body">
+                <div id="dropzone">
+                    <form action="/upload" class="dropzone needsclick" id="demo-upload">
+                        <div class="dz-message needsclick">
+                            Drop files <b>here</b> or <b>click</b> to upload.<br />
+                            <span class="dz-note needsclick">
+                                (This is just a demo dropzone. Selected files are <strong>not</strong> actually uploaded.)
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3">
+                <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+            </div>
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th width="80%">Feature</th>
+                                <th width="20%">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (clusterTabs != null && clusterTabs.Count > 0)
+                            {
+                                @foreach (var clusterTab in clusterTabs)
+                                {
+                                    var collapseId = $"collapse{clusterTab.cluster.Name.Replace(" ", "")}";
+                                    var headingId = $"heading{clusterTab.cluster.Name.Replace(" ", "")}";
+
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="accordion" id="accordionPanelsStayOpenExample">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" id="@headingId">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                                            @clusterTab.cluster.Name
+
+                                                        </button>
+                                                    </h2>
+                                                    <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId">
+                                                        <div class="accordion-body">
+                                                            <div class="card mb-4 border-0">
+                                                                <ul class="list-group list-group-flush">
+                                                                    @foreach (var feature in clusterTab.Features)
+                                                                    {
+                                                                        <li class="list-group-item d-flex align-items-center justify-content-between">
+                                                                            <span class="mr-2">@feature.Feature.Name</span>
+                                                                            <span><label>@feature.Feature.Value</label></span>
+
+
+                                                                        </li>
+                                                                    }
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+        </div>
+
+
+    </div>
+    <div class="col-xl-4">
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Publish</div>
+                </div>
+                <div><a href="#" class="text-decoration-none text-gray-500">Manage</a></div>
+            </div>
+            <div class="card-body fw-bold">
+                <div class="d-flex">
+                    <div class="flex-1 d-flex">
+                        <div class="me-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="widget_todolist_1">
+                            </div>
+                        </div>
+                        <div>Publish to Site</div>
+
+                    </div>
+                    <div class="w-50px text-center"><a href="#" class="text-decoration-none"><i class="fa fa-lg fa-fw fa-calendar"></i></a></div>
+                </div>
+                <hr />
+
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Product Level</div>
+                </div>
+            </div>
+            <div class="card-body fw-bold">
+
+                @*<div class="mb-0">
+                    <label class="form-label">Main Category</label>
+                    <div class="input-group">
+                        <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
+                            <Columns>
+                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                            </Columns>
+                        </RadzenDropDownDataGrid>
+                    </div>
+                </div>
+
+
+                <div class="mb-0">
+                    <label class="form-label">Sub Category</label>
+                    <div class="input-group">
+                        <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
+                            <Columns>
+                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                            </Columns>
+                        </RadzenDropDownDataGrid>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Sub Sub Category</label>
+                    <div class="input-group">
+                        <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
+                            <Columns>
+                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                            </Columns>
+                        </RadzenDropDownDataGrid>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Group Category</label>
+                    <div class="input-group">
+
+                        <RadzenDropDownDataGrid TValue="long" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
+                            <Columns>
+                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                            </Columns>
+                        </RadzenDropDownDataGrid>
+                    </div>
+                </div>*@
+
+                <div class="mb-0 mt-10px">
+                    <label class="form-label">
+                        Product
+                        <a href="/MainProduct" class="text-success me-1 mb-1">  Add New</a>
+                    </label>
+                    <div class="input-group">
+                       <input type="text" value="@Product.Name" class="form-control" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Brand</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center position-relative fw-bold mb-2">
+
+
+                    <RadzenDropDownDataGrid TValue="long" Data=@Brands TextProperty="Name" ValueProperty="Id" Class="form-control">
+                        <Columns>
+                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                        </Columns>
+                    </RadzenDropDownDataGrid>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="card border-0 mb-4">
+            <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                <div class="flex-1">
+                    <div>Variants</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    Add variants if this product comes in multiple versions, like different sizes or colors.
+                </div>
+                <form class="form-horizontal form-bordered">
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Size</label>
+                        <div class="col-lg-8">
+
+                            <select class="form-select">
+                                <option value="">-- Select Size --</option>
+                                @foreach (var size in Sizes)
+                                {
+                                    <option value="@size.Id">@size.Name</option>
+                                }
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Color</label>
+                        <div class="col-lg-8">
+                            <select id="color-select" class="form-control">
+                                <option value="#FF0000" style="color: red; background-color: red;">Red - #FF0000</option>
+                                <option value="#00FF00" style="color: green; background-color: green;">Green - #00FF00</option>
+                                <option value="#0000FF" style="color: blue; background-color: blue;">Blue - #0000FF</option>
+                                <option value="#FFFF00" style="color: yellow; background-color: yellow;">Yellow - #FFFF00</option>
+                                <option value="#FFA500" style="color: orange; background-color: orange;">Orange - #FFA500</option>
+                                <option value="#800080" style="color: purple; background-color: purple;">Purple - #800080</option>
+                                <option value="#000000" style="color: white; background-color: black;">Black - #000000</option>
+                                <option value="#FFFFFF" style="color: black; background-color: white;">White - #FFFFFF</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">SKU</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="masked-input-tid" placeholder="#sku00001">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Price</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="masked-input-pkey" placeholder="300">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">Build Year</label>
+                        <div class="col-lg-8">
+
+                            <select class="form-select">
+                                <option value="">-- Select Model Year --</option>
+                                @foreach (var modelYear in ModelYears)
+                                {
+                                    <option value="@modelYear.Id">@modelYear.Year</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="form-label col-form-label col-lg-4">SSN</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="masked-input-pno" placeholder="AAA-9999-A">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+    [Parameter]
+    public long ProductId { get; set; }
+
+
+    private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level1Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level2Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
+    private long selectedLevel1CategoryId;
+    private long selectedLevel2CategoryId;
+    private long selectedLevel3CategoryId;
+    private Product Product = new Product();
+    private List<Brand> Brands = new List<Brand>();
+    private IEnumerable<ModelYear> ModelYears = new List<ModelYear>();
+    private List<GeneralSize> Sizes = new List<GeneralSize>();
+    private TemplateMaster TemplateMaster = new TemplateMaster();
+    private List<TemplateCluster> clusterTabs = new List<TemplateCluster>();
+    private List<GeneralColor> colors;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await GetProduct();
+        await LoadCategoryTreeAsync();
+        await LoadModelYears();
+        await LoadBrands();
+        await LoadSizes();
+        await LoadColors();
+       await LoadTemplate(Product.TemplateMasterId);
+    }
+
+    private async Task LoadCategoryTreeAsync()
+    {
+        try
+        {
+            var response = await CategoryService.GetCategoriesDtoAsync();
+            if (response.Success)
+            {
+                Categories = response.Data;
+                Level1Categories = Categories.Where(c => c.Level == 1).ToList();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+        }
+    }
+
+
+
+
+    #region level
+    private void OnLevel1Changed(object e)
+    {
+
+        try
+        {
+            var selectedLevel1Id = Convert.ToInt64(e);
+            if (selectedLevel1Id > 0)
+            {
+                Level2Categories = Categories.Where(c => c.Level == 2 && c.ParentCategoryId == selectedLevel1Id).ToList() ?? new List<CategoryDto>();
+                Level3Categories.Clear();
+                Level4Categories.Clear();
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+    }
+
+    private void OnLevel2Changed(object e)
+    {
+        try
+        {
+            var selectedLevel2Id = Convert.ToInt64(e);
+            if (selectedLevel2Id > 0)
+            {
+                Level3Categories = Categories.Where(c => c.Level == 3 && c.ParentCategoryId == selectedLevel2Id).ToList() ?? new List<CategoryDto>();
+                Level4Categories.Clear();
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+
+        }
+
+
+
+    }
+
+    private void OnLevel3Changed(object e)
+    {
+        try
+        {
+            var selectedLevel3Id = Convert.ToInt64(e);
+            if (selectedLevel3Id > 0)
+            {
+                Level4Categories = Categories.Where(c => c.Level == 4 && c.ParentCategoryId == selectedLevel3Id).ToList() ?? new List<CategoryDto>();
+
+            }
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+        }
+    }
+
+    private async Task GetProduct()
+    {
+        try
+        {
+
+
+            var response = await IProductService.GetProductByIdAsync(ProductId);
+            if (response.Success)
+            {
+
+                Product = response.Data;
+
+            }
+
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+
+
+
+        }
+
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+
+        }
+
+
+    }
+
+    //private async Task ProductChanged(object e)
+    //{
+    //    try
+    //    {
+    //        var Id = Convert.ToInt64(e);
+    //        if (Id > 0)
+    //        {
+    //            var product = Products.FirstOrDefault(a => a.Id == Id);
+
+    //            if (product != null && product.Id > 0)
+    //            {
+
+
+    //                var Productresponse = await IProductService.GetProductByIdAsync(Id);
+    //                if (Productresponse.Success)
+    //                {
+    //                    product = Productresponse.Data;
+    //                    await LoadTemplate(product.TemplateMasterId);
+
+    //                    var featureValues = product.FeatureValues;
+
+
+    //                    if (featureValues != null && featureValues.Count > 0)
+    //                    {
+    //                        if (clusterTabs != null && clusterTabs.Count > 0)
+    //                        {
+    //                            if (featureValues != null && featureValues.Count > 0 && clusterTabs != null && clusterTabs.Count > 0)
+    //                            {
+    //                                foreach (var clusterTab in clusterTabs)
+    //                                {
+    //                                    foreach (var feature in clusterTab.Features)
+    //                                    {
+    //                                        var correspondingFeatureValue = featureValues.FirstOrDefault(fv => fv.TemplateClusterFeatureId == feature.Id);
+    //                                        if (correspondingFeatureValue != null)
+    //                                        {
+    //                                            feature.Feature.Value = correspondingFeatureValue.Value;
+    //                                        }
+    //                                    }
+    //                                }
+    //                            }
+
+
+    //                        }
+
+
+    //                    }
+    //                }
+
+
+
+
+    //            }
+
+    //        }
+
+
+    //    }
+
+    //    catch (Exception ex)
+    //    {
+    //        Snackbar.Add(ex.Message, Severity.Error);
+
+    //    }
+
+
+    //}
+
+
+    #endregion
+
+    #region Template
+    private async Task LoadTemplate(long TemplateId)
+    {
+
+        try
+        {
+            var response = await TemplateService.GetTemplateMasterByIdAsync(TemplateId);
+            if (response.Success)
+            {
+                TemplateMaster = response.Data;
+                clusterTabs = new List<TemplateCluster>();
+                clusterTabs = TemplateMaster.Clusters.ToList();
+
+
+
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+    }
+
+    #endregion
+
+    #region Brand
+
+    private async Task LoadBrands()
+    {
+        var response = await BrandService.GetBrandsAsync();
+        if (response.Success)
+        {
+            Brands = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+    #endregion
+
+    #region ModelYear
+    private async Task LoadModelYears()
+    {
+        try
+        {
+            var response = await modelYearService.GetModelYearsAsync();
+            if (response.Success)
+            {
+                ModelYears = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while loading model years: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadModelYears: {ex}");
+        }
+    }
+    #endregion
+
+    #region Sizes
+    private async Task LoadSizes()
+    {
+
+        try
+        {
+            var response = await SizeService.GetSizesAsync();
+            if (response.Success)
+            {
+                Sizes = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+    #endregion
+
+
+    #region Colors
+    private async Task LoadColors()
+    {
+        var response = await ColorService.GetColorsAsync();
+        if (response.Success)
+        {
+            colors = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+    #endregion
+
+
+    string selectedOption;
+    string inputText;
+    public class ListItem
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
+
+    // Create a list to store selected items
+    List<ListItem> selectedItems = new List<ListItem>();
+
+    // Method to handle Add button click
+    void AddItem()
+    {
+        // Get the selected item from the dropdown and the value from the input
+        var selectedItemName = selectedOption;
+        var value = inputText;
+
+        // Create a new ListItem object
+        var newItem = new ListItem
+        {
+            Name = selectedItemName,
+            Value = value
+        };
+
+        // Add the new item to the list
+        selectedItems.Add(newItem);
+
+        // Clear input fields
+        inputText = "";
+        selectedOption = "";
+    }
+    private WarrantyType newWarranty = new WarrantyType();
+    private List<WarrantyType> warranties = new List<WarrantyType>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        warranties.Add(new WarrantyType { Type = "Model (Model)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Aanbevolen gebruik (Recommended use)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Eancode (EAN code)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Garantie (Warranty)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Volumeregeling (Volume control)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Bluetooth (Bluetooth)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "USB-aansluiting (USB connection)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Aansluiting microfoon (Microphone connection)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Microfoontype (Microphone type)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Gewicht (gram) (Weight in grams)", Value = "" });
+        warranties.Add(new WarrantyType { Type = "Snelstartgids (Quick start guide)", Value = "" });
+    }
+
+    private string searchString = "";
+
+    private void AddWarranty()
+    {
+        if (!string.IsNullOrWhiteSpace(newWarranty.Type) && !string.IsNullOrWhiteSpace(newWarranty.Value))
+        {
+            warranties.Add(newWarranty);
+            Snackbar.Add($"Added: {newWarranty.Type} - {newWarranty.Value}", Severity.Success);
+            newWarranty = new WarrantyType(); // Reset the form
+        }
+        else
+        {
+            Snackbar.Add("Both fields are required.", Severity.Error);
+        }
+    }
+
+    //private Func<WarrantyType, bool> FilterFunc => x => FilterFunc(x, searchString);
+
+    private bool FilterFunc(WarrantyType warranty, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (warranty.Type.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (warranty.Value.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private Task<IEnumerable<WarrantyType>> Search(string searchTerm)
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            return Task.FromResult(Enumerable.Empty<WarrantyType>());
+        }
+
+        var products = warranties?
+            .Where(product => product.Type.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+            ?? Enumerable.Empty<WarrantyType>();
+
+        return Task.FromResult(products);
+    }
+    public class WarrantyType
+    {
+        public string Type { get; set; }
+        public string Value { get; set; }
+    }
+    void RemoveItem(ListItem item)
+    {
+        selectedItems.Remove(item);
+    }
+}
+
+

@@ -10,6 +10,9 @@
 @using Radzen
 @using Radzen.Blazor
 @inject IProductService IProductService
+@using Ecommerce.Shared.Services.Brands;
+@inject IBrandService BrandService
+@using Ecommerce.Shared.Entities.Brands
 
 <div class="d-flex align-items-center mb-3">
     <div>
@@ -18,7 +21,7 @@
             <li class="breadcrumb-item"><a href="/ProductList">Main</a></li>
             <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product</li>
         </ol>
-        <h1 class="page-header mb-0">Main Product </h1>
+        <h1 class="page-header mb-0"> Product </h1>
     </div>
 </div>
 <EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
@@ -31,15 +34,22 @@
                     <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
                 </div>
                 <div class="card-body">
-
+                   
                     <div class="row">
                         <div class="col-md-6">
+                            <label class="form-label"> Product Name</label>
                             <InputText @bind-Value="product.Name" class="form-control" id="exampleInputEmail2" placeholder="Product Title" />
                             <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
-
+                        <div class="col-md-2">
+                            <label class="form-label"> Product Price</label>
+                            <InputNumber @bind-Value="product.Price" class="form-control" id="exampleInputEmail2" placeholder="Product Price" />
+                            <span class="text-danger"><ValidationMessage For="@(() => product.Price)" /> </span>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100px me-5px mt-20px">Save</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -66,14 +76,6 @@
 
 
 
-
-                                @*<select class="form-control" @onchange="OnLevel1Changed">
-                                    <option value="">Select Level 1</option>
-                                    @foreach (var category in Level1Categories)
-                                    {
-                                        <option value="@category.Id" selected="@category.Id == @selectedLevel1CategoryId">@category.Name</option>
-                                    }
-                                </select>*@
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -91,13 +93,6 @@
 
 
 
-                                @*<select class="form-control" @onchange="OnLevel2Changed" disabled="@(!Level2Categories.Any())">
-            <option value="">Select Level 2</option>
-            @foreach (var category in Level2Categories)
-            {
-             <option value="@category.Id" selected="@category.Id == @selectedLevel2CategoryId">@category.Name</option>
-            }
-        </select>*@
                             </div>
                         </div>
 
@@ -115,13 +110,6 @@
                                     </RadzenDropDownDataGrid>
 
 
-                                    @*<select class="form-control" @onchange="OnLevel3Changed" disabled="@(!Level3Categories.Any())">
-            <option value="">Select Level 3</option>
-            @foreach (var category in Level3Categories)
-            {
-                <option value="@category.Id" selected="@category.Id == @selectedLevel3CategoryId">@category.Name</option>
-            }
-        </select>*@
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -139,7 +127,21 @@
 
                                 </div>
                             </div>
+                            <div class="col-lg-6">
+                                <div class="mb-lg-0 mb-3">
+                                    <label class="form-label">Brand </label>
 
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="product.BrandId" Data=@Brands TextProperty="Name" ValueProperty="Id" Class="form-control">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.Brand)" /> </span>
+
+                                </div>
+                            </div>
 
                         </div>
 
@@ -238,7 +240,7 @@
     private TemplateMaster TemplateMaster = new TemplateMaster();
     private List<TemplateCluster> clusterTabs = new List<TemplateCluster>();
     private List<ProductFeatureValue> productFeatureValues = new List<ProductFeatureValue>();
-
+    private List<Brand> Brands = new List<Brand>();
     private long selectedLevel1CategoryId;
     private long selectedLevel2CategoryId;
     private long selectedLevel3CategoryId;
@@ -250,6 +252,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadCategoryTreeAsync();
+        await LoadBrands();
         if (ProductId > 0)
         {
             await LoadProductForEdit();
@@ -384,7 +387,7 @@
     #endregion
 
     #region Template
-    private async Task LoadTemplate(long TemplateId,bool edit=false)
+    private async Task LoadTemplate(long TemplateId, bool edit = false)
     {
 
         try
@@ -396,7 +399,7 @@
                 product.TemplateMasterId = TemplateMaster.Id;
                 clusterTabs = new List<TemplateCluster>();
                 clusterTabs = TemplateMaster.Clusters.ToList();
-                if(!edit)
+                if (!edit)
                 {
                     product.FeatureValues = new List<ProductFeatureValue>();
                 }
@@ -417,7 +420,21 @@
     }
 
     #endregion
+    #region Brand
 
+    private async Task LoadBrands()
+    {
+        var response = await BrandService.GetBrandsAsync();
+        if (response.Success)
+        {
+            Brands = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+    #endregion
 
     #region Save
 
@@ -427,9 +444,16 @@
         {
 
 
-            if (product.TemplateMasterId == 0 || clusterTabs==null || clusterTabs.Count()<1)
+            if (product.TemplateMasterId == 0 || clusterTabs == null || clusterTabs.Count() < 1)
             {
                 Snackbar.Add($"Please select and Link Template", Severity.Info);
+                return;
+            }
+
+
+            if (product.BrandId == 0)
+            {
+                Snackbar.Add($"Please select Brand", Severity.Info);
                 return;
             }
             ServiceResponse<Product> response;
@@ -444,7 +468,7 @@
             }
 
 
-            if(ProductId>0)
+            if (ProductId > 0)
             {
                 foreach (var featureValue2 in productFeatureValues)
                 {
@@ -503,14 +527,14 @@
 
                 product = response.Data;
                 var featureValues = product.FeatureValues;
-                await LoadTemplate(product.TemplateMasterId,true);
+                await LoadTemplate(product.TemplateMasterId, true);
 
-                //ForEditCase 
+                //ForEditCase
                 /// product.FeatureValues = new List<ProductFeatureValue>();
 
-                if (featureValues != null && featureValues.Count>0)
+                if (featureValues != null && featureValues.Count > 0)
                 {
-                    if(clusterTabs!=null && clusterTabs.Count>0)
+                    if (clusterTabs != null && clusterTabs.Count > 0)
                     {
                         if (featureValues != null && featureValues.Count > 0 && clusterTabs != null && clusterTabs.Count > 0)
                         {
@@ -582,7 +606,7 @@
             }
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
 
