@@ -343,6 +343,78 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("ProductVariants");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariantFeatureValue", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ProductVariantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TemplateClusterFeatureId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("TemplateClusterFeatureId");
+
+                    b.ToTable("ProductVariantFeatureValues");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariantImages", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ProductVariantId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("productVariantImages");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>
                 {
                     b.Property<long>("Id")
@@ -696,6 +768,36 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariantFeatureValue", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", "ProductVariant")
+                        .WithMany("ProductVariantFeatureValues")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Templates.TemplateClusterFeature", "TemplateClusterFeature")
+                        .WithMany()
+                        .HasForeignKey("TemplateClusterFeatureId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("TemplateClusterFeature");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariantImages", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", "ProductVariant")
+                        .WithMany("productVariantImages")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>
                 {
                     b.HasOne("Ecommerce.Shared.Entities.Brands.Brand", "Brand")
@@ -802,6 +904,13 @@ namespace Ecommerce.Shared.Migrations
             modelBuilder.Entity("Ecommerce.Shared.Entities.Category", b =>
                 {
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", b =>
+                {
+                    b.Navigation("ProductVariantFeatureValues");
+
+                    b.Navigation("productVariantImages");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>

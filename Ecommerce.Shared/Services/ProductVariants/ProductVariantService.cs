@@ -15,7 +15,7 @@ public interface IProductVariantService
     Task<ServiceResponse<ProductVariant>> UpdateProductVariantAsync(ProductVariant productVariant);
     Task<ServiceResponse<bool>> DeleteProductVariantAsync(long id);
     Task<ServiceResponse<ProductVariant>> GetProductVariantByIdAsync(long id);
-    Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync();
+    Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId);
 }
 
 public class ProductVariantService: IProductVariantService
@@ -53,7 +53,7 @@ public class ProductVariantService: IProductVariantService
         }
     }
 
-    public async Task<ServiceResponse<ProductVariant>> UpdateProductVariantAsync(ProductVariant productVariant)
+    public async Task<ServiceResponse<ProductVariant>> UpdateProductVariantAsync1(ProductVariant productVariant)
     {
         try
         {
@@ -67,7 +67,9 @@ public class ProductVariantService: IProductVariantService
                 };
             }
 
-            _context.Entry(existingVariant).CurrentValues.SetValues(productVariant);
+
+
+         
             await _context.SaveChangesAsync();
             return new ServiceResponse<ProductVariant>
             {
@@ -86,7 +88,60 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
+    public async Task<ServiceResponse<ProductVariant>> UpdateProductVariantAsync(ProductVariant updatedProductVariant)
+    {
+        try
+        {
+            // Retrieve the existing product variant with related entities
+            var existingProductVariant = await _context.ProductVariants
+                .Include(pv => pv.ProductVariantFeatureValues)
+                .FirstOrDefaultAsync(pv => pv.Id == updatedProductVariant.Id);
 
+            if (existingProductVariant == null)
+            {
+                return new ServiceResponse<ProductVariant>
+                {
+                    Success = false,
+                    Message = "Product variant not found"
+                };
+            }
+
+            // Update scalar properties
+            existingProductVariant.Name = updatedProductVariant.Name;
+            existingProductVariant.ProductId = updatedProductVariant.ProductId;
+            existingProductVariant.GeneralSizeId = updatedProductVariant.GeneralSizeId;
+            existingProductVariant.GeneralColorId = updatedProductVariant.GeneralColorId;
+            existingProductVariant.Price = updatedProductVariant.Price;
+            existingProductVariant.Sku = updatedProductVariant.Sku;
+            existingProductVariant.Value = updatedProductVariant.Value;
+            existingProductVariant.SSN = updatedProductVariant.SSN;
+            existingProductVariant.Description = updatedProductVariant.Description;
+            existingProductVariant.ModelYearId = updatedProductVariant.ModelYearId;
+            existingProductVariant.Publish = updatedProductVariant.Publish;
+
+
+
+            // Save changes
+            _context.ProductVariants.Update(existingProductVariant);
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<ProductVariant>
+            {
+                Data = existingProductVariant,
+                Success = true,
+                Message = "Product variant updated successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while updating product variant.");
+            return new ServiceResponse<ProductVariant>
+            {
+                Success = false,
+                Message = "Error occurred while updating product variant"
+            };
+        }
+    }
     public async Task<ServiceResponse<bool>> DeleteProductVariantAsync(long id)
     {
         try
@@ -129,6 +184,8 @@ public class ProductVariantService: IProductVariantService
                 .Include(pv => pv.GeneralSize)
                 .Include(pv => pv.GeneralColor)
                 .Include(pv => pv.ModelYear)
+                .Include(fv => fv.ProductVariantFeatureValues)
+                .Include(img => img.productVariantImages)
                 .FirstOrDefaultAsync(pv => pv.Id == id);
 
             if (productVariant == null)
@@ -158,14 +215,14 @@ public class ProductVariantService: IProductVariantService
         }
     }
 
-    public async Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync()
+    public async Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId)
     {
         try
         {
             var productVariants = await _context.ProductVariants
                 .Include(pv => pv.GeneralSize)
                 .Include(pv => pv.GeneralColor)
-                .Include(pv => pv.ModelYear)
+                .Include(pv => pv.ModelYear).Where(a=>a.ProductId== ProductId)
                 .ToListAsync();
 
             return new ServiceResponse<List<ProductVariant>>

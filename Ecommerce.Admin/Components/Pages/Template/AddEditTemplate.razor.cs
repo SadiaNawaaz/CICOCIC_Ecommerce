@@ -1,5 +1,4 @@
-﻿using Ecommerce.Admin.Components.Pages.Categories;
-using Ecommerce.Shared.Entities;
+﻿using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.Templates;

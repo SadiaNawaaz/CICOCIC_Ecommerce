@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240612063921_BRandChanges")]
-    partial class BRandChanges
+    [Migration("20240613092211_Values12")]
+    partial class Values12
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -279,6 +279,111 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("ModelYears");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("GeneralColorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("GeneralSizeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("ModelYearId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("Publish")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SSN")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sku")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GeneralColorId");
+
+                    b.HasIndex("GeneralSizeId");
+
+                    b.HasIndex("ModelYearId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariantFeatureValue", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ProductVariantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TemplateClusterFeatureId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("TemplateClusterFeatureId");
+
+                    b.ToTable("ProductVariantFeatureValues");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>
                 {
                     b.Property<long>("Id")
@@ -308,6 +413,9 @@ namespace Ecommerce.Shared.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
 
                     b.Property<long>("TemplateMasterId")
                         .HasColumnType("bigint");
@@ -600,6 +708,54 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Colors.GeneralColor", "GeneralColor")
+                        .WithMany()
+                        .HasForeignKey("GeneralColorId");
+
+                    b.HasOne("Ecommerce.Shared.Entities.Sizes.GeneralSize", "GeneralSize")
+                        .WithMany()
+                        .HasForeignKey("GeneralSizeId");
+
+                    b.HasOne("Ecommerce.Shared.Entities.ModelYears.ModelYear", "ModelYear")
+                        .WithMany()
+                        .HasForeignKey("ModelYearId");
+
+                    b.HasOne("Ecommerce.Shared.Entities.Products.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GeneralColor");
+
+                    b.Navigation("GeneralSize");
+
+                    b.Navigation("ModelYear");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariantFeatureValue", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", "ProductVariant")
+                        .WithMany("ProductVariantFeatureValues")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Templates.TemplateClusterFeature", "TemplateClusterFeature")
+                        .WithMany()
+                        .HasForeignKey("TemplateClusterFeatureId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("TemplateClusterFeature");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>
                 {
                     b.HasOne("Ecommerce.Shared.Entities.Brands.Brand", "Brand")
@@ -706,6 +862,11 @@ namespace Ecommerce.Shared.Migrations
             modelBuilder.Entity("Ecommerce.Shared.Entities.Category", b =>
                 {
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", b =>
+                {
+                    b.Navigation("ProductVariantFeatureValues");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>

@@ -1,4 +1,5 @@
 using Ecommerce.Admin.Components;
+using Ecommerce.Admin.Services;
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
@@ -11,6 +12,7 @@ using Ecommerce.Shared.Services.ProductVariants;
 using Ecommerce.Shared.Services.Sizes;
 using Ecommerce.Shared.Services.TemplateCategories;
 using Ecommerce.Shared.Services.Templates;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
@@ -31,10 +33,13 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IColorService, ColorService>();
 builder.Services.AddScoped<IProductVariantService,ProductVariantService>();
+builder.Services.AddScoped<ImageResizeService>();
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(
  o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
-
+builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; });
+builder.Services.AddSignalR(opt => opt.MaximumReceiveMessageSize = 102400000);
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;

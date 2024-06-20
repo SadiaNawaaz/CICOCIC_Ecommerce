@@ -43,8 +43,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<GeneralColor> Colors { get; set; }
     public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<ProductFeatureValue> ProductFeatureValues { get; set; }
+    public DbSet<ProductVariantImages> productVariantImages { get; set; }
+    public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
 
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
@@ -56,6 +58,13 @@ public class ApplicationDbContext : DbContext
   .WithMany()
   .HasForeignKey(pfv => pfv.TemplateClusterFeatureId)
   .OnDelete(DeleteBehavior.NoAction);
+
+
+        modelBuilder.Entity<ProductVariantFeatureValue>()
+      .HasOne(pvfv => pvfv.TemplateClusterFeature)
+      .WithMany()
+      .HasForeignKey(pvfv => pvfv.TemplateClusterFeatureId)
+      .OnDelete(DeleteBehavior.NoAction);
 
         //base.OnModelCreating(modelBuilder);
 

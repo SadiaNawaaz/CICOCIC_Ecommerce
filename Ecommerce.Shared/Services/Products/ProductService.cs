@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,9 @@ public interface IProductService
     Task<ServiceResponse<Product>> UpdateProductAsync(Product product);
     Task<ServiceResponse<bool>> DeleteProductAsync(long id);
     Task<ServiceResponse<List<Product>>> GetProductsByCategoryIdAsync(long CategoryId);
-}
+    Task<ServiceResponse<List<ProductDto>>> GetProductsWithVariantsAsync();
+    
+    }
 
 public class ProductService : IProductService
 {
@@ -57,7 +60,7 @@ public class ProductService : IProductService
     {
         try
         {
-            var product = await _context.Products.Include(p => p.FeatureValues).FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _context.Products.Include(p => p.FeatureValues).Include(b=>b.Brand).FirstOrDefaultAsync(p => p.Id == id);
 
             return new ServiceResponse<Product>
             {
@@ -200,5 +203,55 @@ public class ProductService : IProductService
             };
         }
     }
+
+
+    public async Task<ServiceResponse<List<ProductDto>>> GetProductsWithVariantsAsync()
+    {
+        try
+        {
+            FormattableString sql = $@"
+               SELECT 
+                p.Id AS Id,
+                p.Name AS Name,
+                p.Price,
+               b.Name AS Brand,
+                c.Name AS Category,
+                t.Name as Template,
+                COUNT(pv.Id) AS Stock
+                    FROM 
+                     Products p
+                     LEFT JOIN 
+                     ProductVariants pv ON p.Id = pv.ProductId
+                    LEFT JOIN 
+                    Brands b ON p.BrandId = b.Id
+                     LEFT JOIN 
+                      Categories c ON p.CategoryId = c.Id
+                      Left join TemplateMasters t 
+                     ON p.TemplateMasterId = t.Id
+                      GROUP BY 
+                       p.Id, p.Name, b.Name, c.Name,t.Name,p.Price
+                         ";
+
+
+            var products = await _context.Database.SqlQuery<ProductDto>(sql).ToListAsync();
+            return new ServiceResponse<List<ProductDto>>
+            {
+                Data = products,
+                Success = true,
+                Message = "Products and variants fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching products and variants.");
+            return new ServiceResponse<List<ProductDto>>
+            {
+                Success = false,
+                Message = "Error occurred while fetching products and variants"
+            };
+        }
+    }
+
+
 
 }

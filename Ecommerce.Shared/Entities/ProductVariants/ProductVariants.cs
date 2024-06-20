@@ -3,7 +3,9 @@ using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.ModelYears;
 using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Entities.Sizes;
+using Ecommerce.Shared.Entities.Templates;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 
 namespace Ecommerce.Shared.Entities.ProductVariants;
@@ -27,5 +29,34 @@ public class ProductVariant : BaseEntity
     public long? ModelYearId { get; set; }
     public ModelYear? ModelYear { get; set; }
     public bool Publish { get; set; }
+    public List<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; } = new List<ProductVariantFeatureValue>();
+    public List<ProductVariantImages> productVariantImages { get; set; } = new List<ProductVariantImages>();
+}
+public class ProductVariantFeatureValue : BaseEntity
+{
+
+    public long ProductVariantId { get; set; }
+    public virtual ProductVariant ProductVariant { get; set; }
+
+    [ForeignKey("TemplateClusterFeatureId")]
+    public long TemplateClusterFeatureId { get; set; }
+    public TemplateClusterFeature TemplateClusterFeature { get; set; }
+    public string? Value { get; set; }
+}
+
+
+public class ProductVariantImages :BaseEntity
+    {
+
+    public long ProductVariantId { get; set; }
+    public virtual ProductVariant ProductVariant { get; set; }
+    [NotMapped]
+    public byte[] ImageByte { get; set; }
+    [NotMapped]
+    public string ImageUrl { get; set; }
+    public string ImageName { get; set; }
+
+    [NotMapped]
+    public bool IsDeleted { get; set; } = false;
 
 }

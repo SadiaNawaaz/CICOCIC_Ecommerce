@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Ecommerce.Shared.Migrations
 {
     /// <inheritdoc />
-    public partial class Templatecategories : Migration
+    public partial class Values : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,6 +69,24 @@ namespace Ecommerce.Shared.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clusters", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Colors",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HexCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Colors", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -148,6 +166,23 @@ namespace Ecommerce.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Sizes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sizes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TemplateMasters",
                 columns: table => new
                 {
@@ -182,6 +217,45 @@ namespace Ecommerce.Shared.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CategoryId = table.Column<long>(type: "bigint", nullable: false),
+                    TemplateMasterId = table.Column<long>(type: "bigint", nullable: false),
+                    BrandId = table.Column<long>(type: "bigint", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Products_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_TemplateMasters_TemplateMasterId",
+                        column: x => x.TemplateMasterId,
+                        principalTable: "TemplateMasters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -245,6 +319,54 @@ namespace Ecommerce.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductVariants",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GeneralSizeId = table.Column<long>(type: "bigint", nullable: true),
+                    GeneralColorId = table.Column<long>(type: "bigint", nullable: true),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    Sku = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SSN = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModelYearId = table.Column<long>(type: "bigint", nullable: true),
+                    Publish = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductVariants", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductVariants_Colors_GeneralColorId",
+                        column: x => x.GeneralColorId,
+                        principalTable: "Colors",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductVariants_ModelYears_ModelYearId",
+                        column: x => x.ModelYearId,
+                        principalTable: "ModelYears",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductVariants_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductVariants_Sizes_GeneralSizeId",
+                        column: x => x.GeneralSizeId,
+                        principalTable: "Sizes",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TemplateClusterFeatures",
                 columns: table => new
                 {
@@ -274,10 +396,125 @@ namespace Ecommerce.Shared.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProductFeatureValues",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<long>(type: "bigint", nullable: false),
+                    TemplateClusterFeatureId = table.Column<long>(type: "bigint", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductFeatureValues", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductFeatureValues_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductFeatureValues_TemplateClusterFeatures_TemplateClusterFeatureId",
+                        column: x => x.TemplateClusterFeatureId,
+                        principalTable: "TemplateClusterFeatures",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductVariantFeatureValue",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductVariantId = table.Column<long>(type: "bigint", nullable: false),
+                    TemplateClusterFeatureId = table.Column<long>(type: "bigint", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductVariantFeatureValue", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductVariantFeatureValue_ProductVariants_ProductVariantId",
+                        column: x => x.ProductVariantId,
+                        principalTable: "ProductVariants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductVariantFeatureValue_TemplateClusterFeatures_TemplateClusterFeatureId",
+                        column: x => x.TemplateClusterFeatureId,
+                        principalTable: "TemplateClusterFeatures",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_ParentCategoryId",
                 table: "Categories",
                 column: "ParentCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductFeatureValues_ProductId",
+                table: "ProductFeatureValues",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductFeatureValues_TemplateClusterFeatureId",
+                table: "ProductFeatureValues",
+                column: "TemplateClusterFeatureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_BrandId",
+                table: "Products",
+                column: "BrandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CategoryId",
+                table: "Products",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_TemplateMasterId",
+                table: "Products",
+                column: "TemplateMasterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariantFeatureValue_ProductVariantId",
+                table: "ProductVariantFeatureValue",
+                column: "ProductVariantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariantFeatureValue_TemplateClusterFeatureId",
+                table: "ProductVariantFeatureValue",
+                column: "TemplateClusterFeatureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariants_GeneralColorId",
+                table: "ProductVariants",
+                column: "GeneralColorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariants_GeneralSizeId",
+                table: "ProductVariants",
+                column: "GeneralSizeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariants_ModelYearId",
+                table: "ProductVariants",
+                column: "ModelYearId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariants_ProductId",
+                table: "ProductVariants",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TemplateCategories_CategoryId",
@@ -285,9 +522,10 @@ namespace Ecommerce.Shared.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TemplateCategories_TemplateMasterId",
+                name: "IX_TemplateCategories_TemplateMasterId_CategoryId",
                 table: "TemplateCategories",
-                column: "TemplateMasterId");
+                columns: new[] { "TemplateMasterId", "CategoryId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TemplateClusterFeatures_FeatureId",
@@ -314,34 +552,52 @@ namespace Ecommerce.Shared.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Brands");
-
-            migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "ErrorLogs");
 
             migrationBuilder.DropTable(
-                name: "ModelYears");
+                name: "ProductFeatureValues");
+
+            migrationBuilder.DropTable(
+                name: "ProductVariantFeatureValue");
 
             migrationBuilder.DropTable(
                 name: "TemplateCategories");
 
             migrationBuilder.DropTable(
-                name: "TemplateClusterFeatures");
-
-            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "ProductVariants");
+
+            migrationBuilder.DropTable(
+                name: "TemplateClusterFeatures");
+
+            migrationBuilder.DropTable(
+                name: "Colors");
+
+            migrationBuilder.DropTable(
+                name: "ModelYears");
+
+            migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Sizes");
 
             migrationBuilder.DropTable(
                 name: "Features");
 
             migrationBuilder.DropTable(
                 name: "TemplateClusters");
+
+            migrationBuilder.DropTable(
+                name: "Brands");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Clusters");
