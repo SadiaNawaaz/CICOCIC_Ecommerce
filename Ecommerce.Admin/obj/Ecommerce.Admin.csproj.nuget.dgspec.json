@@ -66,6 +66,10 @@
             "Radzen.Blazor": {
               "target": "Package",
               "version": "[4.32.2, )"
+            },
+            "SixLabors.ImageSharp": {
+              "target": "Package",
+              "version": "[3.1.4, )"
             }
           },
           "imports": [

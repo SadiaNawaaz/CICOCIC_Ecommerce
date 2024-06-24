@@ -14,6 +14,7 @@ public interface ICategoryService
     Task<ServiceResponse<Category>> UpdateCategoryAsync(Category category);
     Task<ServiceResponse<bool>> DeleteCategoryAsync(long id);
     Task<ServiceResponse<List<CategoryDto>>> GetCategoriesDtoAsync();
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync();
 }
 
 public class CategoryService : ICategoryService
@@ -227,6 +228,34 @@ public class CategoryService : ICategoryService
         }
     }
 
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync()
+    {
+        try
+        {
+            var categories = await _context.Categories.ToListAsync();
+            var categoryDtos = categories.Select(ToDto).ToList();
+            var categoryTree = BuildCategoryTree(categoryDtos);
+            return new ServiceResponse<List<CategoryDto>>
+            {
+                Data = categoryTree,
+                Success = true,
+                Message = "Categories fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching categories.");
+            return new ServiceResponse<List<CategoryDto>>
+            {
+                Success = false,
+                Message = "Error occurred while fetching categories"
+            };
+        }
+    }
+
+
+
+
 
     public static CategoryDto ToDto(Category category)
     {
@@ -242,7 +271,21 @@ public class CategoryService : ICategoryService
      
         };
     }
+    private List<CategoryDto> BuildCategoryTree(List<CategoryDto> categories)
+    {
+        var lookup = categories.ToLookup(c => c.ParentCategoryId);
+        foreach (var category in categories)
+        {
+            if (category.ParentCategoryId != null)
+            {
+                var parent = categories.FirstOrDefault(c => c.Id == category.ParentCategoryId);
+                parent?.SubCategories.Add(category);
+            }
+        }
 
+        // Return only the root categories (those with no parent)
+        return categories.Where(c => c.ParentCategoryId == null).ToList();
+    }
 }
 
 

@@ -130,6 +130,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQcm9kdWN0VmFyaWFudHNcQWRkRWRpdFByb2R1Y3RWYXJpYW50cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/ProductVariants/ProductVariantsList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQcm9kdWN0VmFyaWFudHNcUHJvZHVjdFZhcmlhbnRzTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/CICOCIC_Ecommerce/Ecommerce.Admin/Components/Pages/Shared/DeleteDialog.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTaGFyZWRcRGVsZXRlRGlhbG9nLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 

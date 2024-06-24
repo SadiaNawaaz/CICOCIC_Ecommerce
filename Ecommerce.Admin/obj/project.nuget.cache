@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "c4F9H15OPlosrlREOefebVuS3sMgRA2i6Wf4eWmeideCOsm1UH1oWrqa6a3Vq0k+m+nf/Cb1a1cwxTRosdY10A==",
+  "dgSpecHash": "royZwHHBCk+/H/E/oOaxtrbDQ6oqVp/v4ZiyofrtOBCZ4VpX1sxLkPSDMg4U4oBpXI6vN6e4iERe1alBQ87LNg==",
   "success": true,
   "projectFilePath": "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Ecommerce.Admin.csproj",
   "expectedPackageFiles": [
@@ -57,6 +57,7 @@
     "C:\\Users\\Z B O O K\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\Z B O O K\\.nuget\\packages\\mudblazor\\6.19.1\\mudblazor.6.19.1.nupkg.sha512",
     "C:\\Users\\Z B O O K\\.nuget\\packages\\radzen.blazor\\4.32.2\\radzen.blazor.4.32.2.nupkg.sha512",
+    "C:\\Users\\Z B O O K\\.nuget\\packages\\sixlabors.imagesharp\\3.1.4\\sixlabors.imagesharp.3.1.4.nupkg.sha512",
     "C:\\Users\\Z B O O K\\.nuget\\packages\\system.codedom\\4.4.0\\system.codedom.4.4.0.nupkg.sha512",
     "C:\\Users\\Z B O O K\\.nuget\\packages\\system.collections.immutable\\6.0.0\\system.collections.immutable.6.0.0.nupkg.sha512",
     "C:\\Users\\Z B O O K\\.nuget\\packages\\system.composition\\6.0.0\\system.composition.6.0.0.nupkg.sha512",

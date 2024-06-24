@@ -1,8 +1,5 @@
-﻿@page "/Product/{Name}"
-@code {
-    [Parameter]
-    public string Name { get; set; }
-}
+﻿@page "/Product/{Id:long?}"
+
 
 <div id="product" class="section-container pt-20px">
     <!-- BEGIN container -->
@@ -605,3 +602,11 @@
 </div>
 
 
+@code
+{
+
+    [Parameter]
+    public long Id { get; set; }
+
+
+}

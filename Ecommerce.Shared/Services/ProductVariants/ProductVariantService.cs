@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.Shared;
@@ -16,6 +17,7 @@ public interface IProductVariantService
     Task<ServiceResponse<bool>> DeleteProductVariantAsync(long id);
     Task<ServiceResponse<ProductVariant>> GetProductVariantByIdAsync(long id);
     Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId);
+    Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId);
 }
 
 public class ProductVariantService: IProductVariantService
@@ -243,5 +245,41 @@ public class ProductVariantService: IProductVariantService
         }
     }
 
+    public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId)
+    {
+        var response = new ServiceResponse<List<ProductVariantDto>>();
+
+        try
+        {
+            var productVariants = await _context.ProductVariants
+                .Where(pv => pv.Product.CategoryId == categoryId)
+                .Select(pv => new ProductVariantDto
+                {
+                    ProductId = pv.ProductId,
+                    Id = pv.Id,
+                    Name = pv.Product.Name,
+                    Category = pv.Product.Category.Name,
+                    Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
+                    Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
+                    VariantPrice = pv.Price,
+                    ProductPrice = pv.Product.Price,
+                    Sku = pv.Sku,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null 
+                })
+                .ToListAsync();
+
+            response.Data = productVariants;
+            response.Success = true;
+            response.Message = "Product variants fetched successfully.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching product variants.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching product variants: {ex.Message}";
+        }
+
+        return response;
+    }
 
 }

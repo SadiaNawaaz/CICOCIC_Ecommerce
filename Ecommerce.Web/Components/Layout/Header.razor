@@ -1,6 +1,9 @@
 ﻿@rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject ICategoryService CategoryService
+@inject IBrandService BrandService
+
 <div id="header" class="header">
     <!-- BEGIN container -->
     <div class="container">
@@ -35,27 +38,25 @@
                                 <b class="caret"></b>
                                 <span class="arrow top"></span>
                             </a>
-                            <!-- BEGIN dropdown-menu -->
+
                             <div class="dropdown-menu p-0">
-                                <!-- BEGIN dropdown-menu-container -->
+
                                 <div class="dropdown-menu-container">
-                                    <!-- BEGIN dropdown-menu-sidebar -->
+
                                     <div class="dropdown-menu-sidebar">
                                         <h4 class="title">Shop By Categories</h4>
-                                        <ul class="dropdown-menu-list">
-                                            <li><a @onclick="@(async () => await GetData("Electronica"))">Electronica</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Huis"))">Huis</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Auto & Fiets"))">Auto & Fiets</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Tuin & Klussen"))">Tuin & Klussen</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Speelgoed & Kids"))">Speelgoed & Kids</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Verzorging"))">Verzorging</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Sporten"))">Sporten</a></li>
-                                            <li><a @onclick="@(async () => await GetData("Sporten"))">Sporten</a></li>
 
+                                        <ul class="dropdown-menu-list">
+                                            @if (Categories != null && Categories.Count > 0)
+                                            {
+                                                foreach (var cat in Categories)
+                                                {
+                                                    <li><a @onclick="@(async () => await GetData(cat))">@cat.Name</a></li>
+                                                }
+
+                                            }
                                         </ul>
                                     </div>
-                                    <!-- END dropdown-menu-sidebar -->
-                                    <!-- BEGIN dropdown-menu-content -->
                                     <div class="dropdown-menu-content">
 
 
@@ -71,7 +72,7 @@
                                                         <option value="0">Huis</option>
                                                         <option value="0">Auto & Fiets</option>
                                                         <option value="0">Verzorging</option>
-                                                        <!-- Add more options for categories as needed -->
+
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2 border">
@@ -82,11 +83,11 @@
                                                         <option value="" disabled selected>Choose distance:</option>
                                                         <option value="0">&lt; 3 km</option>
                                                         <option value="0">&lt; 4 km</option>
-                                                        <!-- Add more options for distances as needed -->
+
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2 border">
-                                                    <a @onclick="@(async () => await fnDetails("Dummy Product"))" class="btn btn-primary" style="width:100%">Search</a>
+                                                    <a @onclick="@(async () => await fnDetails(0))" class="btn btn-primary" style="width:100%">Search</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -95,33 +96,26 @@
                                         <div class="row">
 
 
-                                            @foreach (var category in _subCategory)
+                                            @foreach (var category in SubCategories)
                                             {
                                                 <div class="col-lg-3">
                                                     <span style="text-align:center;margin:5px;font-size:medium"><b>@category.Name</b></span>
-
-
-
                                                     <ul class="dropdown-menu-list" style="margin-top:10px">
-                                                        @if (category.Childs != null)
+                                                        @if (category.SubCategories != null)
                                                         {
-                                                            foreach (var subCategory in category.Childs)
+                                                            foreach (var subCategory in category.SubCategories)
                                                             {
                                                                 <li>
-                                                                    @*<a @onclick="@(async () => await fnDetails(subCategory.Name))">
-                                                        <i class="fa fa-fw fa-angle-right text-muted"></i> @subCategory.Name
-                                                    </a>*@
-
                                                                     <details>
                                                                         <summary>  @subCategory.Name</summary>
                                                                         <div class="details">
-                                                                            @if (subCategory.Childs != null)
+                                                                            @if (subCategory.SubCategories != null)
                                                                             {
                                                                                 <ul>
-                                                                                    @foreach (var subChild in subCategory.Childs)
+                                                                                    @foreach (var subChild in subCategory.SubCategories)
                                                                                     {
                                                                                         <li>
-                                                                                            <a style="font-size:small" @onclick="@(async () => await fnDetails(subChild.Name))">
+                                                                                            <a style="font-size:small" @onclick="@(async () => await fnDetails(subChild.Id))">
                                                                                                 @subChild.Name
                                                                                             </a>
                                                                                         </li>
@@ -130,9 +124,6 @@
                                                                             }
                                                                         </div>
                                                                     </details>
-
-
-
                                                                 </li>
                                                             }
                                                         }
@@ -140,156 +131,84 @@
                                                 </div>
                                             }
                                         </div>
-
-
-
                                         <h4 class="title">Shop By Brand</h4>
                                         <ul class="dropdown-brand-list mb-0">
-                                            <li><a @onclick="@(async () => await fnDetails("Apple"))"><img src="../assets/img/brand/brand-apple.png" alt="" /></a></li>
-                                            <li><a @onclick="@(async () => await fnDetails("samsung"))"><img src="../assets/img/brand/brand-samsung.png" alt="" /></a></li>
-                                            <li><a @onclick="@(async () => await fnDetails("htc"))"><img src="../assets/img/brand/brand-htc.png" alt="" /></a></li>
-                                            <li><a @onclick="@(async () => await fnDetails("microsoft"))"><img src="../assets/img/brand/brand-microsoft.png" alt="" /></a></li>
-                                            <li><a @onclick="@(async () => await fnDetails("nokia"))"><img src="../assets/img/brand/brand-nokia.png" alt="" /></a></li>
-                                            <li><a @onclick="@(async () => await fnDetails("blackberry"))"><img src="../assets/img/brand/brand-blackberry.png" alt="" /></a></li>
-                                            <li><a @onclick="@(async () => await fnDetails("sony"))"><img src="../assets/img/brand/brand-sony.png" alt="" /></a></li>
+
+                                            @if (Brands != null && Brands.Count > 0)
+                                            {
+                                                @foreach (var b in Brands.Take(10))
+                                                {
+                                                    <li><a @onclick="@(async () => await fnBrandDetails(b.Id))"><img src="../assets/img/brand/brand-apple.png" alt="" /></a></li>
+
+                                                }
+
+                                            }
+
+
                                         </ul>
                                     </div>
-                                    <!-- END dropdown-menu-content -->
+
                                 </div>
-                                <!-- END dropdown-menu-container -->
+
                             </div>
-                            <!-- END dropdown-menu -->
-                        </li>
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                Electronica
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
+
                         </li>
 
 
 
-
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                Huis
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
-                        </li>
-
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                Auto & Fiets
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
-                        </li>
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                Tuin & Klussen
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
-                        </li>
-
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                speelgoed & Kids
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
-                        </li>
-                        <li class="dropdown dropdown-hover">
-                            <a href="#" data-bs-toggle="dropdown">
-                                Verzorging
-                                <b class="caret"></b>
-                                <span class="arrow top"></span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                                <a class="dropdown-item" href="product.html">Tablet</a>
-                                <a class="dropdown-item" href="product.html">TV</a>
-                                <a class="dropdown-item" href="product.html">Desktop</a>
-                                <a class="dropdown-item" href="product.html">Laptop</a>
-                                <a class="dropdown-item" href="product.html">Speaker</a>
-                                <a class="dropdown-item" href="product.html">Gadget</a>
-                            </div>
-                        </li>
-
-                        
-
-
-
+                        @if (Categories != null && Categories.Count() > 0)
+                        {
+                            @foreach (var category in Categories.Take(6))
+                            {
+                                <li class="dropdown dropdown-hover">
+                                    <a href="#" data-bs-toggle="dropdown">
+                                        @category.Name
+                                        <b class="caret"></b>
+                                        <span class="arrow top"></span>
+                                    </a>
+                                    @if (category.SubCategories.Any())
+                                    {
+                                        <div class="dropdown-menu">
+                                            @foreach (var subCategory in category.SubCategories)
+                                            {
+                                                <a class="dropdown-item" href="product.html">@subCategory.Name</a>
+                                            }
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        }
                     </ul>
                 </div>
             </div>
-     
+
             <div class="header-nav">
 
                 <ul class="nav justify-content-center">
-                    <li class="dropdown dropdown-hover">
-                        <a href="#" data-bs-toggle="dropdown">
-                            Sporten
-                            <b class="caret"></b>
-                            <span class="arrow top"></span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="product.html">Mobile Phone</a>
-                            <a class="dropdown-item" href="product.html">Tablet</a>
-                            <a class="dropdown-item" href="product.html">TV</a>
-                            <a class="dropdown-item" href="product.html">Desktop</a>
-                            <a class="dropdown-item" href="product.html">Laptop</a>
-                            <a class="dropdown-item" href="product.html">Speaker</a>
-                            <a class="dropdown-item" href="product.html">Gadget</a>
-                        </div>
-                    </li>
+
+
+                    @if (Categories != null && Categories.Count > 6)
+                    {
+                        @foreach (var category in Categories.Skip(6).Take(1))
+                        {
+                            <li class="dropdown dropdown-hover">
+                                <a href="#" data-bs-toggle="dropdown">
+                                    @category.Name
+                                    <b class="caret"></b>
+                                    <span class="arrow top"></span>
+                                </a>
+                                @if (category.SubCategories.Any())
+                                {
+                                    <div class="dropdown-menu">
+                                        @foreach (var subCategory in category.SubCategories)
+                                        {
+                                            <a class="dropdown-item" href="product.html">@subCategory.Name</a>
+                                        }
+                                    </div>
+                                }
+                            </li>
+                        }
+                    }
                     <li style="width:20px">
                         <a href="#" class="header-cart" data-bs-toggle="dropdown">
                             <i class="fa fa-shopping-bag"></i>
@@ -297,355 +216,91 @@
                             <span class="arrow top"></span>
                         </a>
                     </li>
-                   
-                    @*<li class="dropdown dropdown-hover">
-            <a href="#" class="header-cart" data-bs-toggle="dropdown">
-                <i class="fa fa-shopping-bag"></i>
-                <span class="total">2</span>
-                <span class="arrow top"></span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-cart p-0">
-                <div class="cart-header">
-                    <h4 class="cart-title">Shopping Bag (1) </h4>
-                </div>
-                <div class="cart-body">
-                    <ul class="cart-item">
-                        <li>
-                            <div class="cart-item-image"><img src="../assets/img/product/product-ipad.jpg" alt="" /></div>
-                            <div class="cart-item-info">
-                                <h4>iPad Pro Wi-Fi 128GB - Silver</h4>
-                                <p class="price">$699.00</p>
-                            </div>
-                            <div class="cart-item-close">
-                                <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="cart-item-image"><img src="../assets/img/product/product-imac.jpg" alt="" /></div>
-                            <div class="cart-item-info">
-                                <h4>21.5-inch iMac</h4>
-                                <p class="price">$1299.00</p>
-                            </div>
-                            <div class="cart-item-close">
-                                <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="cart-item-image"><img src="../assets/img/product/product-iphone.png" alt="" /></div>
-                            <div class="cart-item-info">
-                                <h4>iPhone 6s 16GB - Silver</h4>
-                                <p class="price">$649.00</p>
-                            </div>
-                            <div class="cart-item-close">
-                                <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="cart-footer">
-                    <div class="row gx-2">
-                        <div class="col-6">
-                            <a href="checkout_cart.html" class="btn btn-default btn-theme d-block">View Cart</a>
-                        </div>
-                        <div class="col-6">
-                            <a href="checkout_cart.html" class="btn btn-dark btn-theme d-block">Checkout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </li>*@
+
                 </ul>
-
-
-                @*<ul class="nav justify-content-end">
-            <li class="dropdown dropdown-hover">
-                <a href="#" class="header-cart" data-bs-toggle="dropdown">
-                    <i class="fa fa-shopping-bag"></i>
-                    <span class="total">2</span>
-                    <span class="arrow top"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-cart p-0">
-                    <div class="cart-header">
-                        <h4 class="cart-title">Shopping Bag (1) </h4>
-                    </div>
-                    <div class="cart-body">
-                        <ul class="cart-item">
-                            <li>
-                                <div class="cart-item-image"><img src="../assets/img/product/product-ipad.jpg" alt="" /></div>
-                                <div class="cart-item-info">
-                                    <h4>iPad Pro Wi-Fi 128GB - Silver</h4>
-                                    <p class="price">$699.00</p>
-                                </div>
-                                <div class="cart-item-close">
-                                    <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="cart-item-image"><img src="../assets/img/product/product-imac.jpg" alt="" /></div>
-                                <div class="cart-item-info">
-                                    <h4>21.5-inch iMac</h4>
-                                    <p class="price">$1299.00</p>
-                                </div>
-                                <div class="cart-item-close">
-                                    <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="cart-item-image"><img src="../assets/img/product/product-iphone.png" alt="" /></div>
-                                <div class="cart-item-info">
-                                    <h4>iPhone 6s 16GB - Silver</h4>
-                                    <p class="price">$649.00</p>
-                                </div>
-                                <div class="cart-item-close">
-                                    <a href="#" data-bs-toggle="tooltip" data-bs-title="Remove">&times;</a>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="cart-footer">
-                        <div class="row gx-2">
-                            <div class="col-6">
-                                <a href="checkout_cart.html" class="btn btn-default btn-theme d-block">View Cart</a>
-                            </div>
-                            <div class="col-6">
-                                <a href="checkout_cart.html" class="btn btn-dark btn-theme d-block">Checkout</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </li>
-            <li class="divider"></li>
-
-        </ul>*@
             </div>
-      
+
         </div>
-      
+
     </div>
 
 </div>
 @code {
+
+
+    #region Veriables
+    private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+    public List<CategoryDto> SubCategories = new List<CategoryDto>();
+    public List<Brand> Brands = new List<Brand>();
+
+    #endregion
+
+
+
+    #region FetchData
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCategoryTreeAsync();
+            await LoadBrands();
+        }
+    }
+    private async Task LoadCategoryTreeAsync()
+    {
+        try
+        {
+            var response = await CategoryService.GetCategoriesTreeDtoAsync();
+            if (response.Success)
+            {
+                Categories = response.Data;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+    #endregion
+
+    #region FetechbyLevel2
+
+    //this is level 2
+
+    private async Task GetData(CategoryDto selectedCate)
+    {
+        MainCat = selectedCate.Name;
+        SubCategories = selectedCate.SubCategories.ToList();
+
+    }
+
+    private async Task LoadBrands()
+    {
+        var response = await BrandService.GetBrandsAsync();
+        if (response.Success)
+        {
+            Brands = response.Data;
+            StateHasChanged();
+        }
+        else
+        {
+
+        }
+    }
+
+    #endregion
+
     public List<SubCategory> _subCategory = new List<SubCategory>();
     public List<SubCategory> _subsubCategory = new List<SubCategory>();
     public string MainCat = "";
-
-    private async Task GetData(string category)
-    {
-        MainCat = category;
-
-        List<SubCategory> dummyData;
-
-        switch (category)
-        {
-            case "Electronica":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Computers", Category = category, Childs = new List<SubCategory>
-                {
-                        //new SubCategory { Name = "Desktops Monitoren", Category = "Computers" },
-                        //new SubCategory { Name = "Computer accessoires", Category = "Computers" },
-                        //new SubCategory { Name = "Laptops ultrabooks", Category = "Computers" },
-                        //new SubCategory { Name = "NetWork", Category = "Computers" },
-                        new SubCategory
-{
-    Name = "Desktops Monitoren",
-    Category = "Computers",
-    Childs = new List<SubCategory>
-    {
-        new SubCategory { Name = "Desktop Computers", Category = "Desktops Monitoren" },
-        new SubCategory { Name = "Monitors", Category = "Desktops Monitoren" },
-        // Add more child categories for "Desktops Monitoren" if needed
-    }
-},
-new SubCategory
-{
-    Name = "Computer accessoires",
-    Category = "Computers",
-    Childs = new List<SubCategory>
-    {
-        new SubCategory { Name = "Keyboards", Category = "Computer accessoires" },
-        new SubCategory { Name = "Mice", Category = "Computer accessoires" },
-        // Add more child categories for "Computer accessoires" if needed
-    }
-},
-new SubCategory
-{
-    Name = "Laptops ultrabooks",
-    Category = "Computers",
-    Childs = new List<SubCategory>
-    {
-        new SubCategory { Name = "Laptops", Category = "Laptops ultrabooks" },
-        new SubCategory { Name = "Ultrabooks", Category = "Laptops ultrabooks" },
-        // Add more child categories for "Laptops ultrabooks" if needed
-    }
-},
-new SubCategory
-{
-    Name = "NetWork",
-    Category = "Computers",
-    Childs = new List<SubCategory>
-    {
-        new SubCategory { Name = "Routers", Category = "NetWork" },
-        new SubCategory { Name = "Switches", Category = "NetWork" },
-        // Add more child categories for "NetWork" if needed
-    }
-},
-
-
-                    }
-                },
-                new SubCategory { Name = "Mobiel", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "GSM tablet accessoires", Category = "Mobile" },
-                        new SubCategory { Name = "GSM's tablets", Category = "Mobile" },
-                        new SubCategory { Name = "GSM's tablets", Category = "Mobile" },
-
-                    }
-                },
-                  new SubCategory { Name = "Beeld en geluid", Category = category, Childs = new List<SubCategory>
-              {
-          new SubCategory { Name = "TV accessoires", Category = "Mobile" },
-          new SubCategory { Name = "GSM's tablets", Category = "Mobile" },
-          new SubCategory { Name = "Portable audio video", Category = "Mobile" },
-              new SubCategory { Name = "Batterijen", Category = "Mobile" },
-                   }
-                 },
-
-
-            };
-                break;
-            case "Huis":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Chair", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Wooden Chair", Category = "Chair" },
-                        new SubCategory { Name = "Plastic Chair", Category = "Chair" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                new SubCategory { Name = "Table", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Coffee Table", Category = "Table" },
-                        new SubCategory { Name = "Dining Table", Category = "Table" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                // Add more subcategories or products as needed
-            };
-                break;
-            case "Auto & Fiets":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Car", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Sedan", Category = "Car" },
-                        new SubCategory { Name = "SUV", Category = "Car" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                new SubCategory { Name = "Bicycle", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Mountain Bike", Category = "Bicycle" },
-                        new SubCategory { Name = "Road Bike", Category = "Bicycle" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                // Add more subcategories or products as needed
-            };
-                break;
-            case "Tuin & Klussen":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Gardening Tools", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Shovel", Category = "Gardening Tools" },
-                        new SubCategory { Name = "Rake", Category = "Gardening Tools" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                new SubCategory { Name = "Power Drill", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Cordless Drill", Category = "Power Drill" },
-                        new SubCategory { Name = "Electric Drill", Category = "Power Drill" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                // Add more subcategories or products as needed
-            };
-                break;
-            case "Speelgoed & Kids":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Dolls", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Barbie", Category = "Dolls" },
-                        new SubCategory { Name = "Action Figure", Category = "Dolls" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                new SubCategory { Name = "Board Games", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Monopoly", Category = "Board Games" },
-                        new SubCategory { Name = "Chess", Category = "Board Games" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                // Add more subcategories or products as needed
-            };
-                break;
-            case "Verzorging":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Shampoo", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Anti-Dandruff", Category = "Shampoo" },
-                        new SubCategory { Name = "Moisturizing", Category = "Shampoo" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                new SubCategory { Name = "Soap", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Hand Soap", Category = "Soap" },
-                        new SubCategory { Name = "Body Wash", Category = "Soap" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                // Add more subcategories or products as needed
-            };
-                break;
-            case "Sporten":
-                dummyData = new List<SubCategory>
-        {
-                new SubCategory { Name = "Running Shoes", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Nike", Category = "Running Shoes" },
-                        new SubCategory { Name = "Adidas", Category = "Running Shoes" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                new SubCategory { Name = "Yoga Mat", Category = category, Childs = new List<SubCategory>
-                {
-                        new SubCategory { Name = "Eco-Friendly", Category = "Yoga Mat" },
-                        new SubCategory { Name = "Non-Slip", Category = "Yoga Mat" },
-                        // Add more subcategories or products as needed
-                    }
-                },
-                // Add more subcategories or products as needed
-            };
-                break;
-            default:
-                dummyData = new List<SubCategory>();
-                break;
-        }
-
-        // Assign the dummy data to the _subCategory list
-        _subCategory = dummyData;
-    }
-
-
-
-
 
     private async Task fnOpenSubsub(SubCategory product)
     {
@@ -653,7 +308,7 @@ new SubCategory
         List<SubCategory> dummyData;
 
         dummyData = new List<SubCategory>
-   {
+{
      new SubCategory { Name = product.Name+"-1" },
      new SubCategory { Name = product.Name+"-2"},
      new SubCategory { Name = product.Name+"-3" }
@@ -673,13 +328,19 @@ new SubCategory
 
     }
 
-    public async Task fnDetails(string Name)
+    public async Task fnDetails(long  id)
     {
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
 
-        NavigationManager.NavigateTo($"/ShowAll/{Name}");
+        NavigationManager.NavigateTo($"/ProductByCategory/{id}");
     }
 
+    public async Task fnBrandDetails(long id)
+    {
 
+        await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
+
+        NavigationManager.NavigateTo($"/ShowAll/{id}");
+    }
 }

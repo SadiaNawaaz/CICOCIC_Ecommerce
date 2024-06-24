@@ -1,4 +1,4 @@
-﻿@page "/ProductVariantList/{ProductId:long}";
+﻿@page "/ProductVariantList";
 @using Ecommerce.Shared.Entities.ProductVariants
 @using Ecommerce.Shared.Services.ProductVariants
 @inject IProductVariantService productVariantService
@@ -49,6 +49,47 @@
                 <PropertyColumn Property="x => x.Price" Title="Price" Style="width:20%" />
                 <PropertyColumn Property="x => x.Sku" Title="SKU" Style="width:20%" />
                 <PropertyColumn Property="x => x.Publish" Title="Publish" Style="width:10%" />
+
+                <TemplateColumn Title="Size" Style="width:10%">
+                    <CellTemplate>
+                        @{
+                            var sizeName = context.Item.GeneralSize?.Name ?? "N/A"; // Provide a default value if null
+                        }
+                        <div>
+                            @sizeName
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Color" Style="width:10%">
+                    <CellTemplate>
+                        @{
+                            var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
+                        }
+                        <div style="background-color:@hexCode; color:@(hexCode == "#000000" ? "#FFFFFF" : "#000000"); padding: 15px; border-radius: 3px;">
+
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+
+                <TemplateColumn Title="Year" Style="width:10%">
+                    <CellTemplate>
+                        @{
+                            var year = context.Item.ModelYear?.Year.ToString() ?? "N/A";
+                        }
+                        <div>
+                            @year
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+
+                <TemplateColumn Title="Publish" Style="width:10%">
+                    <CellTemplate>
+                        @{
+                            var isPublished = context.Item.Publish;
+                        }
+                        <MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />
+                    </CellTemplate>
+                </TemplateColumn>
                 <TemplateColumn CellClass="d-flex justify-end" Style="width:20%">
                     <HeaderTemplate>
                         <div>Actions</div>
@@ -72,12 +113,17 @@
     [Inject]
     public IDialogService DialogService { get; set; }
 
-    [Parameter] public long ProductId { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "ProductId")]
+    public long ProductId { get; set; }
+
     private bool _resizeColumn;
     private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
 
     protected override async Task OnInitializedAsync()
     {
+
         await LoadProductVariants();
     }
 
@@ -156,5 +202,5 @@
         }
     }
 
-    
+
 }
