@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Ecommerce.Shared.Entities
 {
-    internal class productyear
+    public class productyear
     {
 
 //        We have 4 catagories with groups names:

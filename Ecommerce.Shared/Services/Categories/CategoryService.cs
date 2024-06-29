@@ -234,7 +234,7 @@ public class CategoryService : ICategoryService
         {
             var categories = await _context.Categories.ToListAsync();
             var categoryDtos = categories.Select(ToDto).ToList();
-            var categoryTree = BuildCategoryTree(categoryDtos);
+            var categoryTree = await BuildCategoryTree(categoryDtos);
             return new ServiceResponse<List<CategoryDto>>
             {
                 Data = categoryTree,
@@ -268,10 +268,10 @@ public class CategoryService : ICategoryService
             Icon = category.Icon,
             Level = category.Level,
             ParentCategoryId = category.ParentCategoryId
-     
+
         };
     }
-    private List<CategoryDto> BuildCategoryTree(List<CategoryDto> categories)
+    private async Task<List<CategoryDto>> BuildCategoryTree(List<CategoryDto> categories)
     {
         var lookup = categories.ToLookup(c => c.ParentCategoryId);
         foreach (var category in categories)
@@ -286,8 +286,279 @@ public class CategoryService : ICategoryService
         // Return only the root categories (those with no parent)
         return categories.Where(c => c.ParentCategoryId == null).ToList();
     }
+
 }
 
 
 
+//public class CategoryService : ICategoryService
+//{
+//    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+//    private readonly ILogger<CategoryService> _logger;
+
+//    public CategoryService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<CategoryService> logger)
+//    {
+//        _contextFactory = contextFactory;
+//        _logger = logger;
+//    }
+
+//    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync()
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            var categories = await context.Categories.ToListAsync();
+//            var categoryDtos = categories.Select(ToDto).ToList();
+//            var categoryTree = await BuildCategoryTree(categoryDtos);
+//            return new ServiceResponse<List<CategoryDto>>
+//            {
+//                Data = categoryTree,
+//                Success = true,
+//                Message = "Categories fetched successfully"
+//            };
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while fetching categories.");
+//            return new ServiceResponse<List<CategoryDto>>
+//            {
+//                Success = false,
+//                Message = "Error occurred while fetching categories"
+//            };
+//        }
+//    }
+
+//    public async Task<ServiceResponse<List<Category>>> GetCategoriesAsync()
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            var categories = await context.Categories.Include(c => c.SubCategories).ToListAsync();
+//            return new ServiceResponse<List<Category>>
+//            {
+//                Data = categories,
+//                Success = true,
+//                Message = "Categories fetched successfully"
+//            };
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while fetching categories.");
+//            return new ServiceResponse<List<Category>>
+//            {
+//                Success = false,
+//                Message = "Error occurred while fetching categories"
+//            };
+//        }
+//    }
+
+//    public async Task<ServiceResponse<Category>> GetCategoryByIdAsync(long id)
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            var category = await context.Categories.Include(c => c.SubCategories).FirstOrDefaultAsync(c => c.Id == id);
+//            return new ServiceResponse<Category>
+//            {
+//                Data = category,
+//                Success = true,
+//                Message = "Category fetched successfully"
+//            };
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while fetching category by ID.");
+//            return new ServiceResponse<Category>
+//            {
+//                Success = false,
+//                Message = "Error occurred while fetching category by ID"
+//            };
+//        }
+//    }
+
+//    public async Task<ServiceResponse<Category>> AddCategoryAsync(Category category)
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            context.Categories.Add(category);
+//            await context.SaveChangesAsync();
+//            return new ServiceResponse<Category>
+//            {
+//                Data = category,
+//                Success = true,
+//                Message = "Category added successfully"
+//            };
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while adding category.");
+//            return new ServiceResponse<Category>
+//            {
+//                Success = false,
+//                Message = "Error occurred while adding category"
+//            };
+//        }
+//    }
+
+//    public async Task<ServiceResponse<Category>> UpdateCategoryAsync(Category updatedCategory)
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            // Retrieve the existing category from the database
+//            var existingCategory = await context.Categories.FindAsync(updatedCategory.Id);
+
+//            if (existingCategory == null)
+//            {
+//                return new ServiceResponse<Category>
+//                {
+//                    Success = false,
+//                    Message = "Category not found"
+//                };
+//            }
+
+//            existingCategory.Name = updatedCategory.Name;
+//            existingCategory.Icon = updatedCategory.Icon;
+//            existingCategory.Level = updatedCategory.Level;
+//            existingCategory.ParentCategoryId = updatedCategory.ParentCategoryId;
+//            existingCategory.LastModifiedDate = DateTime.Now;
+//            context.Categories.Update(existingCategory);
+//            await context.SaveChangesAsync();
+
+//            return new ServiceResponse<Category>
+//            {
+//                Data = existingCategory,
+//                Success = true,
+//                Message = "Category updated successfully"
+//            };
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while updating category.");
+//            return new ServiceResponse<Category>
+//            {
+//                Success = false,
+//                Message = "Error occurred while updating category"
+//            };
+//        }
+//    }
+
+//    public async Task<ServiceResponse<bool>> DeleteCategoryAsync(long id)
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            using (var transaction = await context.Database.BeginTransactionAsync())
+//            {
+//                var categoriesToDelete = new List<Category>();
+//                await GetCategoriesToDeleteRecursive(id, categoriesToDelete, context);
+
+//                if (!categoriesToDelete.Any())
+//                {
+//                    return new ServiceResponse<bool>
+//                    {
+//                        Success = false,
+//                        Message = "Category not found"
+//                    };
+//                }
+
+//                context.Categories.RemoveRange(categoriesToDelete);
+//                await context.SaveChangesAsync();
+
+//                await transaction.CommitAsync();
+
+//                return new ServiceResponse<bool>
+//                {
+//                    Data = true,
+//                    Success = true,
+//                    Message = "Category and all its subcategories deleted successfully"
+//                };
+//            }
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while deleting category.");
+//            return new ServiceResponse<bool>
+//            {
+//                Success = false,
+//                Message = "Error occurred while deleting category"
+//            };
+//        }
+//    }
+
+//    private async Task GetCategoriesToDeleteRecursive(long id, List<Category> categoriesToDelete, ApplicationDbContext context)
+//    {
+//        // Add the current category to the list of categories to delete
+//        var categoryToDelete = await context.Categories.FindAsync(id);
+//        if (categoryToDelete != null)
+//        {
+//            categoriesToDelete.Add(categoryToDelete);
+
+//            // Fetch the child categories recursively
+//            var childCategories = await context.Categories
+//                .Where(c => c.ParentCategoryId == id)
+//                .ToListAsync();
+
+//            foreach (var childCategory in childCategories)
+//            {
+//                await GetCategoriesToDeleteRecursive(childCategory.Id, categoriesToDelete, context);
+//            }
+//        }
+//    }
+
+//    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesDtoAsync()
+//    {
+//        using var context = _contextFactory.CreateDbContext();
+//        try
+//        {
+//            var categories = await context.Categories.Include(c => c.SubCategories).ToListAsync();
+//            var categoryDtos = categories.Select(ToDto).ToList();
+
+//            return new ServiceResponse<List<CategoryDto>>
+//            {
+//                Data = categoryDtos,
+//                Success = true,
+//                Message = "Categories fetched successfully"
+//            };
+//        }
+//        catch (Exception ex)
+//        {
+//            _logger.LogError(ex, "Error occurred while fetching categories.");
+//            return new ServiceResponse<List<CategoryDto>>
+//            {
+//                Success = false,
+//                Message = "Error occurred while fetching categories"
+//            };
+//        }
+//    }
+
+//    public static CategoryDto ToDto(Category category)
+//    {
+//        if (category == null) return null;
+
+//        return new CategoryDto
+//        {
+//            Id = category.Id,
+//            Name = category.Name,
+//            Icon = category.Icon,
+//            Level = category.Level,
+//            ParentCategoryId = category.ParentCategoryId
+//        };
+//    }
+
+//    private async Task<List<CategoryDto>> BuildCategoryTree(List<CategoryDto> categories)
+//    {
+//        var lookup = categories.ToLookup(c => c.ParentCategoryId);
+//        foreach (var category in categories)
+//        {
+//            if (category.ParentCategoryId != null)
+//            {
+//                var parent = categories.FirstOrDefault(c => c.Id == category.ParentCategoryId);
+//                parent?.SubCategories.Add(category);
+//            }
+//        }
+//        return categories.Where(c => c.ParentCategoryId == null).ToList();
+//    }
+//}
 

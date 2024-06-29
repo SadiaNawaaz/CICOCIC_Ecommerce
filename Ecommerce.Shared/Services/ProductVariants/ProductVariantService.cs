@@ -18,6 +18,9 @@ public interface IProductVariantService
     Task<ServiceResponse<ProductVariant>> GetProductVariantByIdAsync(long id);
     Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId);
+    Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long categoryId);
+    Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long templateMasterId,long productVariantId);
+    Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId);
 }
 
 public class ProductVariantService: IProductVariantService
@@ -281,5 +284,198 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
+
+
+    public async Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long Id)
+    {
+        var response = new ServiceResponse<ProductVariantDetailDto>();
+
+        try
+        {
+            var productVariant = await _context.ProductVariants
+                .Include(p => p.Product)
+                .Include(p => p.Product.Category)
+                .Include(p => p.GeneralColor)
+                .Include(p => p.GeneralSize)
+                .Include(p => p.ProductVariantFeatureValues)
+                .Include(p => p.productVariantImages) 
+                .Where(pv => pv.Id == Id)
+                .Select(pv => new ProductVariantDetailDto
+                {
+                    ProductId = pv.ProductId,
+                    Id = pv.Id,
+                    Name = pv.Name,
+                    Category = pv.Product.Category.Name,
+                    Color = pv.GeneralColor != null ? pv.GeneralColor.Name : null,
+                    Size = pv.GeneralSize != null ? pv.GeneralSize.Name : null,
+                    VariantPrice = pv.Price,
+                    ProductPrice = pv.Product.Price,
+                    Sku = pv.Sku,
+                    Description=pv.Description,
+                    ProductVariantFeatureValues = pv.ProductVariantFeatureValues,
+                    year = pv.ModelYear != null ? pv.ModelYear.Year : 0,
+                    TemplateMasterId=pv.Product.TemplateMasterId,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null,
+                    productVariantImages = pv.productVariantImages.Select(vi => new ProductVariantImages
+                    {
+                        ImageName = vi.ImageName 
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (productVariant == null)
+            {
+                response.Success = false;
+                response.Message = "Product variant not found.";
+            }
+            else
+            {
+                if(productVariant.ProductPrice>0&& productVariant.VariantPrice>0)
+                {
+                    double discount = productVariant.ProductPrice - productVariant.VariantPrice;
+                    int discountPercentage = (int)Math.Round((discount / productVariant.ProductPrice) * 100);
+                    productVariant.discountPercentage=discountPercentage;
+                }
+
+                response.Data = productVariant;
+                response.Success = true;
+                response.Message = "Product variant fetched successfully.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching product variant.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching product variant: {ex.Message}";
+        }
+
+        return response;
+    }
+
+
+
+    public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync1(long templateMasterId)
+    {
+        var response = new ServiceResponse<List<ClusterFeatureDto>>();
+
+        try
+        {
+            var clusterFeatures = await _context.Set<ClusterFeatureDto>()
+                .FromSqlRaw("SELECT c.Name AS Cluster, f.Name AS Feature, c.Id AS ClusterId FROM TemplateClusters tc " +
+                            "INNER JOIN Clusters c ON tc.ClusterId = c.Id " +
+                            "INNER JOIN TemplateClusterFeatures tf ON tc.Id = tf.TemplateClusterId " +
+                            "INNER JOIN Features f ON tf.FeatureId = f.Id " +
+                            "WHERE TemplateMasterId = {0}", templateMasterId)
+                .ToListAsync();
+
+            var groupedData = clusterFeatures
+                .GroupBy(cf => new { cf.Cluster, cf.ClusterId })
+                .Select(g => new ClusterFeatureDto
+                {
+                    Cluster = g.Key.Cluster,
+                    ClusterId = g.Key.ClusterId,
+                })
+                .ToList();
+
+            response.Data = groupedData;
+            response.Success = true;
+            response.Message = "Cluster features fetched successfully.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching cluster features.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching cluster features: {ex.Message}";
+        }
+
+        return response;
+    }
+
+
+    public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long templateMasterId, long productVariantId)
+    {
+        var response = new ServiceResponse<List<ClusterFeatureDto>>();
+
+        try
+        {
+            var clusterFeatures = await _context.Set<RawClusterFeatureDto>()
+                .FromSqlRaw("SELECT c.Name AS Cluster, f.Name AS Feature, c.Id AS ClusterId, f.Id AS FeatureId, fv.Value FROM TemplateClusters tc " +
+                            "INNER JOIN Clusters c ON tc.ClusterId = c.Id " +
+                            "INNER JOIN TemplateClusterFeatures tf ON tc.Id = tf.TemplateClusterId " +
+                            "INNER JOIN Features f ON tf.FeatureId = f.Id " +
+                            "INNER JOIN ProductVariantFeatureValues fv ON tf.Id = fv.TemplateClusterFeatureId " +
+                            "WHERE tc.TemplateMasterId = {0} AND fv.ProductVariantId = {1}", templateMasterId, productVariantId)
+                .ToListAsync();
+
+            var groupedData = clusterFeatures
+                .GroupBy(cf => new { cf.Cluster, cf.ClusterId })
+                .Select(g => new ClusterFeatureDto
+                {
+                    Cluster = g.Key.Cluster,
+                    ClusterId = g.Key.ClusterId,
+                    Features = g.Select(cf => new FeatureValuePair
+                    {
+                        Feature = cf.Feature,
+                        Value = cf.Value
+                    }).ToList()
+                })
+                .ToList();
+
+            response.Data = groupedData;
+            response.Success = true;
+            response.Message = "Cluster features fetched successfully.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching cluster features.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching cluster features: {ex.Message}";
+        }
+
+        return response;
+    }
+
+
+
+    public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId)
+    {
+        var response = new ServiceResponse<List<ProductVariantDto>>();
+
+        try
+        {
+            var productVariants = await _context.ProductVariants
+                .Where(pv => pv.Product.BrandId == brandId)
+                .Select(pv => new ProductVariantDto
+                {
+                    ProductId = pv.ProductId,
+                    Id = pv.Id,
+                    Name = pv.Product.Name,
+                    Category = pv.Product.Category.Name,
+                    Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
+                    Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
+                    VariantPrice = pv.Price,
+                    ProductPrice = pv.Product.Price,
+                    Sku = pv.Sku,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null
+                })
+                .ToListAsync();
+
+            response.Data = productVariants;
+            response.Success = true;
+            response.Message = "Product variants fetched successfully.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching product variants.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching product variants: {ex.Message}";
+        }
+
+        return response;
+    }
+
+
+
+
 
 }

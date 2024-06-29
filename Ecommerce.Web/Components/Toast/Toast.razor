@@ -1,0 +1,35 @@
+﻿@using Ecommerce.Web.Services;
+@inject ToastService ToastService
+@inherits ToastBase
+@rendermode InteractiveServer
+
+
+<div class="toast @(IsVisible ? "toast-visible" : null) @BackgroundCssClass">
+    <div class="toast-icon">
+        <i class="fa fa-@IconCssClass" aria-hidden="true"></i>
+    </div>
+    <div class="toast-body">
+        <h5>@Heading</h5>
+        <p>@Message   fdsfsdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd</p>
+    </div>
+</div>
+
+
+@if (BackgroundCssClass != null)
+{
+
+
+}
+
+
+@code
+{
+
+     protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+        }
+    }
+}

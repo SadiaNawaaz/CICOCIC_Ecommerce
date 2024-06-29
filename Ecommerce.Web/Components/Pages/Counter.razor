@@ -1,165 +1,676 @@
-﻿@page "/counter/{Name}"
+﻿@page "/counter"
 @rendermode InteractiveServer
+@inject IProductVariantService productVariantService
+@using Ecommerce.Shared.Entities;
+@using Ecommerce.Web.Services;
+@inject ICartService CartService
+@inject NavigationManager NavigationManager
+<style>
+    /* Custom style */
+    .accordion-button {
+        background-color: #348fe2; /* Blue background color */
+        color: white; /* White text color */
+        border: none; /* Remove border */
+    }
 
-<button @onclick="SaveTree">fl;sdkfldskf;lsdkf;lsdkf;ldskf;lsdkf;</button>
-<div class="row">
-    <!-- BEGIN col-6 -->
-    <div class="col-xl-6">
-        <!-- BEGIN panel -->
-        <div class="panel panel-inverse" data-sortable-id="tree-view-3">
-            <div class="panel-heading">
-                <h4 class="panel-title">Contextual Menu with Drag & Drop</h4>
-                <div class="panel-heading-btn">
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+        .accordion-button:not(.collapsed) {
+            background-color: #d0d1d2; /* Darker blue when expanded */
+        }
+
+        .accordion-button::after {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23fff' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill-rule='evenodd' d='M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z' clip-rule='evenodd'/%3e%3c/svg%3e");
+            transform: scale(.7) !important;
+        }
+
+        .accordion-button:not(.collapsed)::after {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23fff' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill-rule='evenodd' d='M0 8a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H1a1 1 0 0 1-1-1z' clip-rule='evenodd'/%3e%3c/svg%3e");
+        }
+
+    .accordion-body {
+        border-top: none; /* Remove top border */
+    }
+
+    .table.table-product {
+        line-height: 0.1 !important;
+    }
+</style>
+
+
+
+@if (ProductVariant != null && ProductVariant.Id > 0)
+{
+
+
+    <div id="product" class="section-container pt-20px">
+        <!-- BEGIN container -->
+        <div class="container">
+            <!-- BEGIN breadcrumb -->
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">Mobile Phone</a></li>
+                <li class="breadcrumb-item"><a href="#">Apple</a></li>
+                <li class="breadcrumb-item active">iPhone 6S Plus</li>
+            </ul>
+            <!-- END breadcrumb -->
+            <!-- BEGIN product -->
+            <div class="product">
+                <!-- BEGIN product-detail -->
+                <div class="product-detail">
+                    <!-- BEGIN product-image -->
+                    <div class="product-image">
+                        <!-- BEGIN product-thumbnail -->
+                        <div class="product-thumbnail">
+                            <ul class="product-thumbnail-list">
+                                <li class="active"><a href="#" data-click="show-main-image" data-url="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)"><img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" /></a></li>
+
+                                @if (ProductVariant.productVariantImages != null && ProductVariant.productVariantImages.Count() > 0)
+                                {
+                                    foreach (var variant in ProductVariant.productVariantImages)
+                                    {
+
+                                        <li><a href="#" data-click="show-main-image" data-url="@UrlHelper.GetImageUrl(ProductVariant.Id, variant.ImageName)"><img src="@UrlHelper.GetImageUrl(ProductVariant.Id, variant.ImageName)" alt="" /></a></li>
+
+                                    }
+
+                                }
+
+                            </ul>
+                        </div>
+                        <!-- END product-thumbnail -->
+                        <!-- BEGIN product-main-image -->
+                        <div class="product-main-image" data-id="main-image">
+
+
+                            <img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" />
+                        </div>
+                        <!-- END product-main-image -->
+                    </div>
+                    <!-- END product-image -->
+                    <!-- BEGIN product-info -->
+                    <div class="product-info">
+                        <!-- BEGIN product-info-header -->
+                        <div class="product-info-header">
+
+                            <h1 class="product-title">
+                                @if (ProductVariant.discountPercentage > 0)
+                                {
+                                    <span class="badge bg-primary">@ProductVariant.discountPercentage % OFF</span>
+                                }
+                                @ProductVariant.Name - #@ProductVariant.Sku
+                            </h1>
+                            <ul class="product-category">
+                                <li><a href="#">iPhone</a></li>
+                                <li>/</li>
+                                <li><a href="#">mobile phone</a></li>
+                                <li>/</li>
+                                <li><a href="#">electronics</a></li>
+                                <li>/</li>
+                                <li><a href="#">lifestyle</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="product-warranty">
+                            <div class="pull-right">Availability: In stock</div>
+                            @if (ProductVariant.year > 0)
+                            {
+                                <div><b>Build Year</b> @ProductVariant.year</div>
+                            }
+                            @if (ProductVariant.Color != null)
+                            {
+                                <div>
+                                    <b>Color:</b>
+
+                                    <button class="btn btn-outline-secondary btn-sm m-1" style="background-color:@(ProductVariant.Color); height:20px">
+                                    </button>
+
+                                </div>
+                            }
+
+                            @if (ProductVariant.Size != null)
+                            {
+
+
+                                <div> <b>Size: &nbsp;&nbsp;&nbsp;</b> @ProductVariant.Size</div>
+
+
+                            }
+                            @if (ProductVariant.Sku != null)
+                            {
+                                <div><b>SKU: &nbsp;&nbsp;&nbsp;</b> @ProductVariant.Sku</div>
+
+
+                            }
+                        </div>
+
+                        <ul class="product-info-list">
+                            <li><i class="fa fa-circle"></i> ...........</li>
+                            <li><i class="fa fa-circle"></i> ...........</li>
+                            <li><i class="fa fa-circle"></i> ...........</li>
+
+                        </ul>
+
+                        <div class="product-social">
+                            <ul>
+                                <li><a href="javascript:;" class="facebook" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-title="Facebook" data-bs-placement="top"><i class="fab fa-facebook-f"></i></a></li>
+                                <li><a href="javascript:;" class="twitter" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-title="Twitter" data-bs-placement="top"><i class="fab fa-twitter"></i></a></li>
+                                <li><a href="javascript:;" class="google-plus" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-title="Google Plus" data-bs-placement="top"><i class="fab fa-google-plus-g"></i></a></li>
+                                <li><a href="javascript:;" class="whatsapp" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-title="Whatsapp" data-bs-placement="top"><i class="fab fa-whatsapp"></i></a></li>
+                                <li><a href="javascript:;" class="tumblr" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-title="Tumblr" data-bs-placement="top"><i class="fab fa-tumblr"></i></a></li>
+                            </ul>
+                        </div>
+                        <!-- END product-social -->
+                        <!-- BEGIN product-purchase-container -->
+                        <div class="product-purchase-container">
+                            <div class="product-discount">
+                                <span class="discount">€@ProductVariant.ProductPrice</span>
+                            </div>
+                            <div class="product-price">
+                                <div class="price">€@ProductVariant.VariantPrice</div>
+                            </div>
+                            <button type="button" @onclick="@AddToCart" class="btn btn-dark btn-theme btn-lg w-200px">ADD TO CART</button>
+                        </div>
+                        <!-- END product-purchase-container -->
+                    </div>
+                    <!-- END product-info -->
+                </div>
+                <!-- END product-detail -->
+                <!-- BEGIN product-tab -->
+                <div class="product-tab">
+                    <!-- BEGIN #product-tab -->
+                    <ul id="product-tab" class="nav nav-tabs">
+                        <li class="nav-item"><a class="nav-link active" href="#product-desc" data-bs-toggle="tab">Product Description</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#product-info" data-bs-toggle="tab">Additional Information</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#product-reviews" data-bs-toggle="tab">Rating & Reviews (5)</a></li>
+                    </ul>
+                    <!-- END #product-tab -->
+                    <!-- BEGIN #product-tab-content -->
+                    <div id="product-tab-content" class="tab-content">
+                        <!-- BEGIN #product-desc -->
+                        <div class="tab-pane fade active show" id="product-desc">
+                            <!-- BEGIN product-desc -->
+                            <div class="product-desc">
+                                <div class="image">
+                                    <img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" />
+                                </div>
+                                <div class="desc">
+                                    <h4>@ProductVariant.Name</h4>
+                                    <p>
+                                        @ProductVariant.Description
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- Template -->
+
+                        <div class="tab-pane fade" id="product-info">
+                            <!-- BEGIN table-responsive -->
+                            <div class="accordion" id="accordionExample">
+                                @if (clusters != null && clusters.Count() > 0)
+                                {
+                                    @foreach (var cluster in clusters)
+                                    {
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="heading-@cluster.ClusterId">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@cluster.ClusterId" aria-expanded="false" aria-controls="collapse-@cluster.ClusterId">
+                                                    @cluster.Cluster
+                                                </button>
+                                            </h2>
+                                            <div id="collapse-@cluster.ClusterId" class="accordion-collapse collapse" aria-labelledby="heading-@cluster.ClusterId" data-bs-parent="#accordionExample">
+                                                <div class="accordion-body">
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-product table-striped">
+
+                                                            <tbody>
+                                                                @foreach (var feature in cluster.Features)
+                                                                {
+                                                                    <tr>
+                                                                        <td>@feature.Feature</td>
+                                                                        <td>@feature.Value</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+
+                            <!-- END table-responsive -->
+                        </div>
+                        <!-- END #product-info -->
+                        <!-- BEGIN #product-reviews -->
+                        <div class="tab-pane fade" id="product-reviews">
+                            <!-- BEGIN row -->
+                            <div class="row row-space-30">
+                                <!-- BEGIN col-7 -->
+                                <div class="col-md-7 mb-4 mb-lg-0">
+                                    <!-- BEGIN review -->
+                                    <div class="review">
+                                        <div class="review-info">
+                                            <div class="review-icon"><img src="../assets/img/user/user-1.jpg" alt="" /></div>
+                                            <div class="review-rate">
+                                                <ul class="review-star">
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class=""><i class="far fa-star"></i></li>
+                                                </ul>
+                                                (4/5)
+                                            </div>
+                                            <div class="review-name">Terry</div>
+                                            <div class="review-date">24/05/2024 7:40am</div>
+                                        </div>
+                                        <div class="review-title">
+                                            What does “SIM-free” mean?
+                                        </div>
+                                        <div class="review-message">
+                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi in imperdiet augue. Integer non aliquam eros. Cras vehicula nec sapien pretium sagittis. Pellentesque feugiat lectus non malesuada aliquam. Etiam id tortor pretium, dictum leo at, malesuada tortor.
+                                        </div>
+                                    </div>
+                                    <!-- END review -->
+                                    <!-- BEGIN review -->
+                                    <div class="review">
+                                        <div class="review-info">
+                                            <div class="review-icon"><img src="../assets/img/user/user-2.jpg" alt="" /></div>
+                                            <div class="review-rate">
+                                                <ul class="review-star">
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class=""><i class="far fa-star"></i></li>
+                                                    <li class=""><i class="far fa-star"></i></li>
+                                                </ul>
+                                                (3/5)
+                                            </div>
+                                            <div class="review-name">George</div>
+                                            <div class="review-date">24/05/2024 8:40am</div>
+                                        </div>
+                                        <div class="review-title">
+                                            When I buy iPhone from apple.com, is it tied to a carrier or does it come “unlocked”?
+                                        </div>
+                                        <div class="review-message">
+                                            In mauris leo, maximus at pellentesque vel, pharetra vel risus. Aenean in semper velit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Morbi volutpat mattis neque, at molestie tellus ultricies quis. Ut lobortis odio nec nunc ullamcorper, vitae faucibus augue semper. Sed luctus lobortis nulla ac volutpat. Mauris blandit scelerisque sem.
+                                        </div>
+                                    </div>
+                                    <!-- END review -->
+                                    <!-- BEGIN review -->
+                                    <div class="review">
+                                        <div class="review-info">
+                                            <div class="review-icon"><img src="../assets/img/user/user-3.jpg" alt="" /></div>
+                                            <div class="review-rate">
+                                                <ul class="review-star">
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                </ul>
+                                                (5/5)
+                                            </div>
+                                            <div class="review-name">Steve</div>
+                                            <div class="review-date">23/05/2024 8:40am</div>
+                                        </div>
+                                        <div class="review-title">
+                                            Where is the iPhone Upgrade Program available?
+                                        </div>
+                                        <div class="review-message">
+                                            Duis ut nunc sem. Integer efficitur, justo sit amet feugiat hendrerit, arcu nisl elementum dui, in ultricies erat quam at mauris. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec nec ultrices tellus. Mauris elementum venenatis volutpat.
+                                        </div>
+                                    </div>
+                                    <!-- END review -->
+                                    <!-- BEGIN review -->
+                                    <div class="review">
+                                        <div class="review-info">
+                                            <div class="review-icon"><img src="../assets/img/user/user-4.jpg" alt="" /></div>
+                                            <div class="review-rate">
+                                                <ul class="review-star">
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class=""><i class="far fa-star"></i></li>
+                                                    <li class=""><i class="far fa-star"></i></li>
+                                                    <li class=""><i class="far fa-star"></i></li>
+                                                </ul>
+                                                (2/5)
+                                            </div>
+                                            <div class="review-name">Alfred</div>
+                                            <div class="review-date">23/05/2024 10.02am</div>
+                                        </div>
+                                        <div class="review-title">
+                                            Can I keep my current service plan if I choose the iPhone Upgrade Program?
+                                        </div>
+                                        <div class="review-message">
+                                            Donec vel fermentum quam. Vivamus scelerisque enim eget tristique auctor. Vivamus tempus, turpis iaculis tempus egestas, leo augue hendrerit tellus, et efficitur neque massa at neque. Aenean efficitur eleifend orci at ornare.
+                                        </div>
+                                    </div>
+                                    <!-- END review -->
+                                    <!-- BEGIN review -->
+                                    <div class="review">
+                                        <div class="review-info">
+                                            <div class="review-icon"><img src="../assets/img/user/user-5.jpg" alt="" /></div>
+                                            <div class="review-rate">
+                                                <ul class="review-star">
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                    <li class="active"><i class="fa fa-star"></i></li>
+                                                </ul>
+                                                (5/5)
+                                            </div>
+                                            <div class="review-name">Edward</div>
+                                            <div class="review-date">22/05/2024 9.30pm</div>
+                                        </div>
+                                        <div class="review-title">
+                                            I have an existing carrier contract or installment plan. Can I purchase with the iPhone Upgrade Program
+                                        </div>
+                                        <div class="review-message">
+                                            Aliquam consequat ut turpis non interdum. Integer blandit erat nec sapien sollicitudin, a fermentum dui venenatis. Nullam consequat at enim et aliquet. Cras mattis turpis quis eros volutpat tristique vel a ligula. Proin aliquet leo mi, et euismod metus placerat sit amet.
+                                        </div>
+                                    </div>
+                                    <!-- END review -->
+                                </div>
+                                <!-- END col-7 -->
+                                <!-- BEGIN col-5 -->
+                                <div class="col-md-5">
+                                    <!-- BEGIN review-form -->
+                                    <div class="review-form">
+                                        <form action="product_detail.html" name="review_form" method="POST">
+                                            <h2>Write a review</h2>
+                                            <div class="mb-3">
+                                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="name" />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Title <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="email" />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="review" class="form-label">Review <span class="text-danger">*</span></label>
+                                                <textarea class="form-control" rows="8" id="review"></textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Rating  <span class="text-danger">*</span></label>
+                                                <div class="rating rating-selection" data-rating="true" data-target="rating">
+                                                    <i class="far fa-star" data-value="2"></i>
+                                                    <i class="far fa-star" data-value="4"></i>
+                                                    <i class="far fa-star" data-value="6"></i>
+                                                    <i class="far fa-star" data-value="8"></i>
+                                                    <i class="far fa-star" data-value="10"></i>
+                                                    <span class="rating-comment">
+                                                        <span class="rating-comment-tooltip">Click to rate</span>
+                                                    </span>
+                                                </div>
+                                                <select name="rating" class="hide">
+                                                    <option value="2">2</option>
+                                                    <option value="4">4</option>
+                                                    <option value="6">6</option>
+                                                    <option value="8">8</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-dark btn-theme btn-lg">Submit Review</button>
+                                        </form>
+                                    </div>
+                                    <!-- END review-form -->
+                                </div>
+                                <!-- END col-5 -->
+                            </div>
+                            <!-- END row -->
+                        </div>
+                        <!-- END #product-reviews -->
+                    </div>
+                    <!-- END #product-tab-content -->
+                </div>
+                <!-- END product-tab -->
+            </div>
+            <!-- END product -->
+            <!-- BEGIN similar-product -->
+            <h4 class="mb-15px mt-30px">You Might Also Like</h4>
+            <div class="row gx-2">
+                <div class="col-lg-2 col-md-4">
+                    <!-- BEGIN item -->
+                    <div class="item item-thumbnail">
+                        <a href="product_detail.html" class="item-image">
+                            <img src="../assets/img/product/product-iphone.png" alt="">
+                            <div class="discount">15% OFF</div>
+                        </a>
+                        <div class="item-info">
+                            <h4 class="item-title">
+                                <a href="product_detail.html">iPhone 6s Plus<br>16GB</a>
+                            </h4>
+                            <p class="item-desc">3D Touch. 12MP photos. 4K video.</p>
+                            <div class="item-price">$649.00</div>
+                            <div class="item-discount-price">$739.00</div>
+                        </div>
+                    </div>
+                    <!-- END item -->
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <!-- BEGIN item -->
+                    <div class="item item-thumbnail">
+                        <a href="product_detail.html" class="item-image">
+                            <img src="../assets/img/product/product-samsung-note5.png" alt="">
+                            <div class="discount">32% OFF</div>
+                        </a>
+                        <div class="item-info">
+                            <h4 class="item-title">
+                                <a href="product.html">Samsung Galaxy Note 5<br>Black</a>
+                            </h4>
+                            <p class="item-desc">Super. Computer. Now in two sizes.</p>
+                            <div class="item-price">$599.00</div>
+                            <div class="item-discount-price">$799.00</div>
+                        </div>
+                    </div>
+                    <!-- END item -->
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <!-- BEGIN item -->
+                    <div class="item item-thumbnail">
+                        <a href="product_detail.html" class="item-image">
+                            <img src="../assets/img/product/product-iphone-se.png" alt="">
+                            <div class="discount">20% OFF</div>
+                        </a>
+                        <div class="item-info">
+                            <h4 class="item-title">
+                                <a href="product.html">iPhone SE<br>32/64Gb</a>
+                            </h4>
+                            <p class="item-desc">A big step for small.</p>
+                            <div class="item-price">$499.00</div>
+                            <div class="item-discount-price">$599.00</div>
+                        </div>
+                    </div>
+                    <!-- END item -->
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <!-- BEGIN item -->
+                    <div class="item item-thumbnail">
+                        <a href="product_detail.html" class="item-image">
+                            <img src="../assets/img/product/product-zenfone2.png" alt="">
+                            <div class="discount">15% OFF</div>
+                        </a>
+                        <div class="item-info">
+                            <h4 class="item-title">
+                                <a href="product_detail.html">Assus ZenFone 2<br>‏(ZE550ML)</a>
+                            </h4>
+                            <p class="item-desc">See What Others Can’t See</p>
+                            <div class="item-price">$399.00</div>
+                            <div class="item-discount-price">$453.00</div>
+                        </div>
+                    </div>
+                    <!-- END item -->
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <!-- BEGIN item -->
+                    <div class="item item-thumbnail">
+                        <a href="product_detail.html" class="item-image">
+                            <img src="../assets/img/product/product-xperia-z.png" alt="">
+                            <div class="discount">32% OFF</div>
+                        </a>
+                        <div class="item-info">
+                            <h4 class="item-title">
+                                <a href="product.html">Sony Xperia Z<br>Black Color</a>
+                            </h4>
+                            <p class="item-desc">For unexpectedly beautiful moments</p>
+                            <div class="item-price">$599.00</div>
+                            <div class="item-discount-price">$799.00</div>
+                        </div>
+                    </div>
+                    <!-- END item -->
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <!-- BEGIN item -->
+                    <div class="item item-thumbnail">
+                        <a href="product_detail.html" class="item-image">
+                            <img src="../assets/img/product/product-lumia-532.png" alt="">
+                            <div class="discount">20% OFF</div>
+                        </a>
+                        <div class="item-info">
+                            <h4 class="item-title">
+                                <a href="product.html">Microsoft Lumia 531<br>Smartphone Orange</a>
+                            </h4>
+                            <p class="item-desc">1 Year Local Manufacturer Warranty</p>
+                            <div class="item-price">$99.00</div>
+                            <div class="item-discount-price">$199.00</div>
+                        </div>
+                    </div>
+                    <!-- END item -->
                 </div>
             </div>
-
-            <div class="panel-body">
-                <div id="jstree-drag-and-drop">
-
-                </div>
-            </div>
-            <!-- BEGIN hljs-wrapper -->
-            <div class="hljs-wrapper">
-                <pre><code class="html" data-url="../assets/data/ui-tree/code-3.json"></code></pre>
-            </div>
-
+            <!-- END similar-product -->
         </div>
-
+        <!-- END container -->
     </div>
 
+}
 
-</div>
+else
+{
 
-
-
-@code {
-
-
+}
 
 
-    public class TreeNode
-    {
-        public string Id { get; set; }
-        public string Text { get; set; }
-        public string Icon { get; set; }
-        public bool Disabled { get; set; }
-        public TreeNodeState State { get; set; }
-        public string ParentId { get; set; }
-        public List<TreeNode> Children { get; set; } = new();
-    }
-
-    public class TreeNodeState
-    {
-        public bool Selected { get; set; }
-        public bool Opened { get; set; }
-        public bool Disabled { get; set; }
-    }
+@code
+{
 
 
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "Id")]
+    public long Id { get; set; }
+    private ProductVariantDetailDto ProductVariant = new ProductVariantDetailDto();
+    private List<ClusterFeatureDto> clusters;
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            try
+            {
+                await LoadProductVariants(Id);
+            }
+            catch (Exception ex)
+            {
 
-            // await JSRuntime.InvokeVoidAsync("handleJstreeDragAndDrop", treeData);
+                Console.WriteLine("Error loading cart items: " + ex.Message);
+            }
+
         }
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
-    private async Task SaveTree()
+    private async Task LoadProductVariants(long Id)
     {
-
         try
         {
-            // var updatedTreeData = await JSRuntime.InvokeAsync<List<TreeNode>>("getUpdatedTree");
+            var response = await productVariantService.GetProductVariantDetailByIdAsync(Id);
+            if (response.Success)
+            {
+                ProductVariant = response.Data;
+                StateHasChanged();
+                await LoadProductVariantFeatures(ProductVariant.TemplateMasterId);
+            }
+            else
+            {
 
-            // // Create a TreeNodeMapper instance
-
-            // // Map TreeNode objects to Category objects
-            //// var categories = mapper.MapTreeNodesToCategories(updatedTreeData);
-
-            // if (updatedTreeData == null)
-            // {
-            //     Console.WriteLine("Updated tree data is null");
-            //     return;
-            // }
-
+            }
         }
         catch (Exception ex)
         {
 
         }
+    }
 
+    private async Task LoadProductVariantFeatures(long TemplateId)
+    {
+        try
+        {
+            var response = await productVariantService.GetClusterFeaturesAsync(TemplateId, Id);
+            if (response.Success)
+            {
+                clusters = response.Data;
+                StateHasChanged();
+            }
+            else
+            {
+
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+
+    private async Task AddToCart()
+    {
+        try
+        {
+            var currentCartItems = await CartService.GetItems();
+            var existingItem = currentCartItems.FirstOrDefault(item => item.VariantId == ProductVariant.Id);
+
+            if (existingItem == null)
+            {
+
+                var cartItem = new CartItemDto
+                {
+                    VariantId = ProductVariant.Id,
+                    ProductId = ProductVariant.ProductId,
+                    VariantName = ProductVariant.Name,
+                    Qty = 1,
+                    VariantPrice = ProductVariant.VariantPrice,
+                    ProducrPrice = ProductVariant.ProductPrice,
+                    ImageName = ProductVariant.DefaultImageUrl,
+                    Color = ProductVariant.Color
+                };
+                await CartService.AddItem(cartItem);
+
+            }
+            else
+            {
+
+            }
+            NavigationManager.NavigateTo("/Checkout");
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error adding item to cart: " + ex.Message);
+        }
     }
 
 
 
-    //public class TreeNodeMapper
-    //{
-    //    public List<Category> MapTreeNodesToCategories(List<TreeNode> treeNodes)
-    //    {
-    //        var categories = new List<Category>();
-
-    //        foreach (var topLevelNode in treeNodes)
-    //        {
-    //            categories.Add(MapTreeNodeToCategory(topLevelNode, treeNodes));
-    //        }
-
-    //        return categories;
-    //    }
-
-    //    private Category MapTreeNodeToCategory(TreeNode treeNode, List<TreeNode> allNodes)
-    //    {
-    //        string[] nodeIdParts = treeNode.Id.Split('_');
-    //        int level = int.Parse(nodeIdParts[0].Substring(1)); // Assuming prefix starts with "J"
-
-    //        string parentId = treeNode.ParentId;
-    //        if (string.IsNullOrEmpty(parentId))
-    //        {
-    //            parentId = GetParentIdFromHierarchy(treeNode, allNodes);
-    //        }
-
-    //        var category = new Category
-    //        {
-    //            Name = treeNode.Text,
-    //            Level = level,
-    //            ParentCategoryId = parentId != null ? long.Parse(parentId) : (long?)null
-    //        };
-
-    //        // Recursively map child nodes
-    //        if (treeNode.Children != null && treeNode.Children.Any())
-    //        {
-    //            category.SubCategories = new List<Category>();
-    //            foreach (var childNode in treeNode.Children)
-    //            {
-    //                category.SubCategories.Add(MapTreeNodeToCategory(childNode, allNodes));
-    //            }
-    //        }
-
-    //        return category;
-    //    }
-
-    //    private string GetParentIdFromHierarchy(TreeNode node, List<TreeNode> allNodes)
-    //    {
-    //        // Recursive function to find parent ID based on hierarchy (optional if ParentId is always available)
-    //        foreach (var parentNode in allNodes)
-    //        {
-    //            if (parentNode.Children != null && parentNode.Children.Any(child => child.Id == node.Id))
-    //            {
-    //                return parentNode.Id;
-    //            }
-    //        }
-
-    //        return null; // Handle cases where no parent is found
-    //    }
-    //}
-
 
 }
-
-

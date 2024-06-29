@@ -1,8 +1,11 @@
+using Blazored.LocalStorage;
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.ProductVariants;
+using Ecommerce.Web;
 using Ecommerce.Web.Components;
+using Ecommerce.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,13 +13,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductVariantService, ProductVariantService>();
-builder.Services.AddDbContext<ApplicationDbContext>(
- o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ToastService>();
+//builder.Services.AddDbContext<ApplicationDbContext>(
+// o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")),
+    ServiceLifetime.Transient);
+builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();
-
+string serverlessBaseURI = builder.Configuration["ApiUrl"];
+UrlHelper.Initialize(serverlessBaseURI);
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

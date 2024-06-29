@@ -1,9 +1,8 @@
-﻿
-@page "/ProductByCategory/{Id:long?}"
+﻿@page "/Brand/{Id:long?}"
 @rendermode InteractiveServer
 @inject IProductVariantService productVariantService
-@inject ICategoryService CategoryService
-@using Ecommerce.Shared.Entities; 
+@inject IBrandService BrandService
+@using Ecommerce.Shared.Entities;
 <div id="search-results" class="section-container">
     <!-- BEGIN container -->
     <div class="container">
@@ -12,10 +11,10 @@
             <!-- BEGIN search-sidebar -->
             <div class="search-sidebar">
                 <h4 class="title">Filter By</h4>
-                <div >
+                <div>
                     <div class="mb-3">
                         <label class="form-label">Keywords</label>
-                        <input type="text" class="form-control input-sm" name="keyword" value="@_Category.Name" placeholder="Enter Keywords" />
+                        <input type="text" class="form-control input-sm" name="keyword" value="@_Brand.Name" placeholder="Enter Keywords" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Price</label>
@@ -53,7 +52,7 @@
                         <div class="col-lg-6">
 
 
-                            <h4>We found @ProductVariants.Count() Items For @_Category.Name </h4>
+                            <h4>We found @ProductVariants.Count() Items For @_Brand.Name </h4>
                         </div>
                         <!-- END col-6 -->
                         <!-- BEGIN col-6 -->
@@ -83,8 +82,8 @@
                         <div class="item-row">
                             @foreach (var variant in ProductVariants)
                             {
-                                
-                                
+
+
 
                                 <div class="col-md-4">
                                     <div class="item item-thumbnail">
@@ -107,7 +106,7 @@
                                             <h4 class="item-title">
                                                 <NavLink href="@GetProductUrl(variant.Id)">@variant.Name<br /></NavLink>
 
-                                               
+
                                             </h4>
                                             <p class="item-desc">3D Touch. 12MP photos. 4K video.</p>
                                             <div class="item-price">@variant.VariantPrice</div>
@@ -153,16 +152,16 @@
 
 
     private IEnumerable<ProductVariantDto> ProductVariants = new List<ProductVariantDto>();
-    private Category _Category= new Category();
+    private Brand _Brand = new Brand();
 
 
     protected override async Task OnInitializedAsync()
     {
 
         await LoadProductVariants();
-        if(Id>0)
+        if (Id > 0)
         {
-            await LoadCategoryTreeAsync();
+            await LoadBrandAsync();
         }
 
     }
@@ -171,7 +170,7 @@
     {
         try
         {
-            var response = await productVariantService.GetProductVariantsByCategoryAsync(Id);
+            var response = await productVariantService.GetProductVariantsByBrandAsync(Id);
             if (response.Success)
             {
                 ProductVariants = response.Data;
@@ -187,21 +186,21 @@
         }
     }
 
-    private async Task LoadCategoryTreeAsync()
+    private async Task LoadBrandAsync()
     {
         try
         {
-            var response = await CategoryService.GetCategoryByIdAsync(Id);
+            var response = await BrandService.GetBrandByIdAsync(Id);
             if (response.Success)
             {
-                _Category = response.Data;
+                _Brand = response.Data;
                 StateHasChanged();
             }
 
         }
         catch (Exception ex)
         {
-            _Category = new Category();
+            _Brand = new Brand();
         }
     }
     private string GetProductUrl(long productId)

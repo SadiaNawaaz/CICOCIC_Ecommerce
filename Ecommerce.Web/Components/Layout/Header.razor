@@ -138,7 +138,9 @@
                                             {
                                                 @foreach (var b in Brands.Take(10))
                                                 {
-                                                    <li><a @onclick="@(async () => await fnBrandDetails(b.Id))"><img src="../assets/img/brand/brand-apple.png" alt="" /></a></li>
+                                                    <li><a @onclick="@(async () => await fnBrandDetails(b.Id))">
+                                                     <img src="@UrlHelper.GetBrandImageUrl(b.Id, b.ImageUrl)" alt="@b.Name" />
+                                                   </a></li>
 
                                                 }
 
@@ -233,6 +235,9 @@
     public List<CategoryDto> SubCategories = new List<CategoryDto>();
     public List<Brand> Brands = new List<Brand>();
 
+
+
+
     #endregion
 
 
@@ -241,17 +246,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        await LoadCategoryTreeAsync();
+        await LoadBrands();
     }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await LoadCategoryTreeAsync();
-            await LoadBrands();
+
         }
     }
+
+
+
     private async Task LoadCategoryTreeAsync()
     {
         try
@@ -341,6 +348,6 @@
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
 
-        NavigationManager.NavigateTo($"/ShowAll/{id}");
+        NavigationManager.NavigateTo($"/Brand/{id}");
     }
 }

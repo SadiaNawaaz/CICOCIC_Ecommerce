@@ -1,5 +1,6 @@
 ﻿
 
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Entities.Clusters;
@@ -12,6 +13,7 @@ using Ecommerce.Shared.Entities.Shared;
 using Ecommerce.Shared.Entities.Sizes;
 using Ecommerce.Shared.Entities.Templates;
 using Microsoft.EntityFrameworkCore;
+using static Ecommerce.Shared.Services.ProductVariants.ProductVariantService;
 
 namespace Ecommerce.Shared.Context;
 
@@ -45,8 +47,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductFeatureValue> ProductFeatureValues { get; set; }
     public DbSet<ProductVariantImages> productVariantImages { get; set; }
     public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
+    //public DbSet<ClusterFeatureDto> ClusterFeatureDtos { get; set; }
 
-    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
@@ -65,7 +67,7 @@ public class ApplicationDbContext : DbContext
       .WithMany()
       .HasForeignKey(pvfv => pvfv.TemplateClusterFeatureId)
       .OnDelete(DeleteBehavior.NoAction);
-
+        modelBuilder.Entity<RawClusterFeatureDto>().HasNoKey();
         //base.OnModelCreating(modelBuilder);
 
 
@@ -75,3 +77,4 @@ public class ApplicationDbContext : DbContext
         //    .HasForeignKey(c => c.ParentCategoryId);
     }
 }
+

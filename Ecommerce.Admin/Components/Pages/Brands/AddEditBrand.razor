@@ -6,6 +6,7 @@
 @using Ecommerce.Shared.Services.Brands;
 @using Ecommerce.Shared.Services.Shared;
 @rendermode InteractiveServer
+@inject ImageResizeService ImageResizeService
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -37,25 +38,51 @@
                             <ValidationMessage For="@(() => brand.Name)" />
                         </div>
                         <div class="col-5 mb-3">
-                            <label for="ImageUrl">Image URL</label>
-                            <InputText id="ImageUrl" class="form-control" @bind-Value="brand.ImageUrl" />
+                            <label for="ImageUrl">Image /Logo</label>
+                            @*<InputText id="ImageUrl" class="form-control" @bind-Value="brand.ImageUrl" />*@
+
+
+                            <InputFile id="productImage" OnChange="@HandleFileChange" class="form-control" />
+
                             <ValidationMessage For="@(() => brand.ImageUrl)" />
                         </div>
+
                         <div class="col-2 mt-15px">
                             <button type="submit" class="btn btn-primary">Save</button>
                         </div>
 
-                            <div class="col-12">
-
-                                <a href="javascript:history.back(-1);" class="btn btn-success">
-                                    <i class="fa fa-arrow-circle-left"></i> Back to previous page
-                                </a>
-                               
 
 
+
+                        <div class="col-xxl-3 col-md-6">
+                            <div>
+
+
+
+                                @if (brand.ImageUrl != null)
+                                {
+
+                                    <div style="display:inline-block; margin: 10px; position: relative;">
+                                        <img src="@(!string.IsNullOrEmpty(imageUrl) ? imageUrl : brand.ImageUrl)" alt="Image Preview" style="height:150px;width:150px" />
+                                        <button type="button" @onclick="DeleteImage" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
+                                    </div>
+
+
+                                }
                             </div>
                         </div>
-</EditForm>
+
+                        <div class="col-12">
+
+                            <a href="javascript:history.back(-1);" class="btn btn-success">
+                                <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                            </a>
+
+
+
+                        </div>
+                    </div>
+                </EditForm>
             </div>
         </div>
     </div>
@@ -64,7 +91,10 @@
 @code {
     [Parameter] public long? BrandId { get; set; }
     private Brand brand = new Brand();
-
+    private IBrowserFile file;
+    private string imageUrl = null;
+    private bool ImageDel = false;
+    private string ImageDelPath = null;
     protected override async Task OnInitializedAsync()
     {
         if (BrandId.HasValue)
@@ -73,6 +103,8 @@
             if (response.Success)
             {
                 brand = response.Data;
+                brand.ImageUrl = "/Brands/"+brand.Id + "/" + brand.ImageUrl;
+                StateHasChanged();
             }
             else
             {
@@ -97,8 +129,32 @@
 
             if (response.Success)
             {
-                Snackbar.Add(response.Message, Severity.Success);
-                NavigationManager.NavigateTo("/BrandList");
+                var brandImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Brands", brand.Id.ToString());
+
+                if (!Directory.Exists(brandImagesPath))
+                {
+                    Directory.CreateDirectory(brandImagesPath);
+                }
+
+                if (ImageDel)
+                {
+                    var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    var DelImagePath = wwwRootPath + ImageDelPath;
+                    if (File.Exists(DelImagePath))
+                    {
+                        File.Delete(DelImagePath);
+                    }
+                }
+
+                if (brand.ImageByte!=null)
+                {
+                    var filePath = Path.Combine(brandImagesPath, brand.ImageUrl);
+                    await File.WriteAllBytesAsync(filePath, brand.ImageByte);
+                    brand.ImageUrl = $"/brands/{brand.Id}/{brand.ImageUrl}";
+                    Snackbar.Add(response.Message, Severity.Success);
+                    NavigationManager.NavigateTo("/BrandList");
+                }
+
             }
             else
             {
@@ -114,5 +170,49 @@
     private void GoBack()
     {
         NavigationManager.NavigateTo("/BrandList");
+    }
+
+    async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        var maxSizeBytes = 512000; // Maximum allowed size in bytes (500 KB)
+
+
+
+        try
+        {
+            file = e.File;
+
+            if (file.Size <= maxSizeBytes)
+            {
+                using var memoryStream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
+                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
+                memoryStream.Position = 0;
+                imageUrl = await ImageResizeService.ResizeImage(memoryStream, file.ContentType, 150, 150);
+                memoryStream.Position = 0;
+                var buffer = memoryStream.ToArray();
+                brand.ImageByte = buffer;
+                brand.ImageUrl = uniqueFileName;
+            }
+            else
+            {
+                Snackbar.Add("Please Choose file under limit  (500 KB)", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    void DeleteImage()
+    {
+        ImageDelPath = brand.ImageUrl;
+        file = null;
+        imageUrl = null;
+        brand.ImageUrl = null;
+        ImageDel = true;
+
+
     }
 }

@@ -1,18 +1,21 @@
 ﻿@inherits LayoutComponentBase
+@using Ecommerce.Web.Components.Toast
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject ICategoryService CategoryService
+@inject IBrandService BrandService
 
 
 
+<div id="app" class="fade show">
+    <NavMenu></NavMenu>
+    <Header></Header>
 
-<body>
-  
-    <div id="app" class="fade show">
-        <NavMenu></NavMenu>
-        <Header></Header>
-        @Body
-        <Footer></Footer>
-    </div>
+    @Body
+    <Footer></Footer>
+</div>
 
-    <div class="theme-panel">
+@*<div class="theme-panel">
         <a href="javascript:;" data-toggle="theme-panel-expand" class="theme-collapse-btn"><i class="fa fa-cog"></i></a>
         <div class="theme-panel-content">
             <div class="theme-list clearfix">
@@ -47,8 +50,8 @@
                 </div>
             </div>
         </div>
-    </div>
-</body>
+    </div>*@
+
 
 
 <div id="blazor-error-ui">
@@ -56,3 +59,48 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+@code {
+    private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+    private List<Brand> Brands { get; set; } = new List<Brand>();
+    private bool dataLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!dataLoaded)
+        {
+
+        }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //await LoadDataAsync();
+            //dataLoaded = true;
+        }
+    }
+    private async Task LoadDataAsync()
+    {
+        await LoadCategoriesAsync();
+        await LoadBrandsAsync();
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        var response = await CategoryService.GetCategoriesTreeDtoAsync();
+        if (response.Success)
+        {
+            Categories = response.Data;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadBrandsAsync()
+    {
+        var response = await BrandService.GetBrandsAsync();
+        if (response.Success)
+        {
+            Brands = response.Data;
+        }
+    }
+}
