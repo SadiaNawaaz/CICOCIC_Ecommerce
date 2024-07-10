@@ -7,6 +7,7 @@
 @using Ecommerce.Shared.Services.Shared;
 @rendermode InteractiveServer
 @inject ImageResizeService ImageResizeService
+@inherits AuthenticatedComponent
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -97,13 +98,14 @@
     private string ImageDelPath = null;
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         if (BrandId.HasValue)
         {
             var response = await BrandService.GetBrandByIdAsync(BrandId.Value);
             if (response.Success)
             {
                 brand = response.Data;
-                brand.ImageUrl = "/Brands/"+brand.Id + "/" + brand.ImageUrl;
+                brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;
                 StateHasChanged();
             }
             else
@@ -120,10 +122,13 @@
             ServiceResponse<Brand> response;
             if (BrandId.HasValue)
             {
+                brand.LastModifiedBy = UserId;
                 response = await BrandService.UpdateBrandAsync(brand);
             }
             else
             {
+                brand.CreatedBy = UserId;
+
                 response = await BrandService.AddBrandAsync(brand);
             }
 
@@ -146,14 +151,16 @@
                     }
                 }
 
-                if (brand.ImageByte!=null)
+                if (brand.ImageByte != null)
                 {
                     var filePath = Path.Combine(brandImagesPath, brand.ImageUrl);
                     await File.WriteAllBytesAsync(filePath, brand.ImageByte);
                     brand.ImageUrl = $"/brands/{brand.Id}/{brand.ImageUrl}";
-                    Snackbar.Add(response.Message, Severity.Success);
-                    NavigationManager.NavigateTo("/BrandList");
+
                 }
+                Snackbar.Add(response.Message, Severity.Success);
+                await Task.Delay(1000);
+                NavigationManager.NavigateTo("/BrandList");
 
             }
             else

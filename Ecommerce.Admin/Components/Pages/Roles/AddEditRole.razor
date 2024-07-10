@@ -1,0 +1,116 @@
+﻿@page "/AddEditRole/{RoleId:long?}"
+@using Ecommerce.Shared.Entities
+@using Ecommerce.Shared.Services.Roles
+@inject IRoleService roleService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/RoleList">Roles</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Role</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 ui-sortable">
+        <div class="panel panel-inverse" data-sortable-id="form-stuff-13">
+            <div class="panel-heading ui-sortable-handle">
+                <h4 class="panel-title">Role Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <EditForm Model="@newRole" OnValidSubmit="@HandleValidSubmit" FormName="roleForm">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-4">
+                            <InputText id="Name" class="form-control" @bind-Value="newRole.Name" placeholder="Role Name" />
+                            <span class="text-danger"> <ValidationMessage For="@(() => newRole.Name)" /></span>
+                        </div>
+                        <div class="col-4">
+                            <InputText id="Description" class="form-control" @bind-Value="newRole.Description" placeholder="Role Description" />
+                            <ValidationMessage For="@(() => newRole.Description)" />
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary w-100px me-5px">Save</button>
+                        </div>
+                    </div>
+                    <p style="margin-top:30px">
+                        <a href="javascript:history.back(-1);" class="btn btn-success">
+                            <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                        </a>
+                    </p>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public long? RoleId { get; set; }
+    private Role newRole = new Role();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (RoleId.HasValue)
+        {
+            var response = await roleService.GetRoleByIdAsync(RoleId.Value);
+            if (response.Success)
+            {
+                newRole = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (RoleId.HasValue)
+            {
+                var response = await roleService.UpdateRoleAsync(newRole);
+                if (response.Success)
+                {
+                    Snackbar.Add(response.Message, Severity.Success);
+                    await Task.Delay(1000);
+                    NavigationManager.NavigateTo("/RoleList");
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+            else
+            {
+                var response = await roleService.AddRoleAsync(newRole);
+                if (response.Success)
+                {
+                    Snackbar.Add(response.Message, Severity.Success);
+                    await Task.Delay(1000);
+                    NavigationManager.NavigateTo("/RoleList");
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+}

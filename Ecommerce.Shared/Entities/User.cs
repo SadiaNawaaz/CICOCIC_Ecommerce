@@ -1,17 +1,35 @@
 ﻿
 
 using Ecommerce.Shared.Abstraction;
+using Ecommerce.Shared.Entities.Roles;
 using System.ComponentModel.DataAnnotations;
 namespace Ecommerce.Shared.Entities;
 
 public class User: BaseEntity
 {
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-    public required string Email { get; set; }
+    [Required]
+    public string FirstName { get; set; }
 
+    [Required]
+    public string LastName { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    public string? ExtraEmail { get; set; }
+
+    [Required]
     [StringLength(100)]
     [DataType(DataType.Password)]
-    public required string Password { get; set; }
+    public string Password { get; set; }
+
+
+    public long RoleId { get; set; }
+    public Role Role { get; set; }
+
+    public bool IsAgent { get; set; }
+
+
 
 }

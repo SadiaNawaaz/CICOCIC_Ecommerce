@@ -1,0 +1,166 @@
+﻿@page "/Login"
+@using Layout
+@layout LoginLayout
+@inject NavigationManager NavigationManager
+@using  Ecommerce.Shared.Services.Users;
+@rendermode InteractiveServer
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.WebUtilities
+
+<div id="app" class="app">
+    <!-- BEGIN login -->
+    <div class="login login-with-news-feed">
+        <!-- BEGIN news-feed -->
+        <div class="news-feed">
+            <div class="news-image" style="background-image: url(../assets/img/login-bg/login-bg-18.jpg)"></div>
+            <div class="news-caption">
+                <h4 class="caption-title"><b>Cicocic</b> Admin App</h4>
+                <p>
+                    Login and upload youre Assests
+                </p>
+            </div>
+        </div>
+        <!-- END news-feed -->
+        <!-- BEGIN login-container -->
+        <div class="login-container">
+            <!-- BEGIN login-header -->
+            <div class="login-header mb-30px">
+                <div class="brand">
+                    <div class="d-flex align-items-center">
+
+                        <img src="/assets/img/logo/logocico3.png" style="max-height:100px;max-width:200px" />
+                    </div>
+
+                </div>
+                <div class="icon">
+                    <i class="fa fa-sign-in-alt"></i>
+                </div>
+            </div>
+            <!-- END login-header -->
+            <!-- BEGIN login-content -->
+            <div class="login-content">
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div>
+                        <div class="alert alert-danger alert-dismissible fade show h-100 mb-1">
+                            <span class="alert-link">@errorMessage</span>.
+
+                        </div>
+                    </div>
+
+
+
+                }
+                <form action="/Auth/CookieLogin" method="post">
+
+                    <div class="form-floating mb-20px">
+                        <input type="email" class="form-control fs-13px h-45px" id="emailAddress" placeholder="Email Address" name="Email">
+                        <label for="emailAddress" class="d-flex align-items-center">Email Address</label>
+                    </div>
+                    <div class="form-floating mb-20px">
+                        <input type="password" class="form-control fs-13px h-45px" id="password" placeholder="Password" name="Password">
+                        <label for="password" class="d-flex align-items-center">Password</label>
+                    </div>
+
+
+
+                    <div class="mb-15px">
+                        <button type="submit" class="btn btn-primary d-block h-45px w-100 btn-lg fs-14px">Sign me in</button>
+                    </div>
+                </form>
+
+
+                @*<EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit" FormName="loginForm">
+            <DataAnnotationsValidator />
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div>
+                    <div class="alert alert-danger alert-dismissible fade show h-100 mb-1">
+                        <span class="alert-link">@errorMessage</span>.
+
+                    </div>
+                </div>
+
+
+
+            }
+
+            <div class="form-floating mb-15px">
+                <InputText id="emailAddress" class="form-control h-45px fs-13px" placeholder="Email Address" @bind-Value="loginModel.Email" />
+                <label for="emailAddress" class="d-flex align-items-center fs-13px text-gray-600">Email Address</label>
+                <span class="text-danger">   <ValidationMessage For="@(() => loginModel.Email)" /></span>
+            </div>
+            <div class="form-floating mb-15px">
+                <InputText id="password" class="form-control h-45px fs-13px" placeholder="Password" @bind-Value="loginModel.Password" type="password" />
+                <label for="password" class="d-flex align-items-center fs-13px text-gray-600">Password</label>
+                <span class="text-danger"> <ValidationMessage For="@(() => loginModel.Password)" /></span>
+            </div>
+
+            <div class="mb-15px">
+                <button type="submit" class="btn btn-primary d-block h-45px w-100 btn-lg fs-14px">Sign me in</button>
+            </div>
+            <div class="mb-40px pb-40px text-dark">
+                Not a member yet? Click <a href="#" class="text-primary">here</a> to register.
+            </div>
+            <hr class="bg-gray-600 opacity-2" />
+            <div class="text-gray-600 text-center mb-0">
+                &copy; Cicocic All Right Reserved 2024
+            </div>
+        </EditForm>*@
+            </div>
+            <!-- END login-content -->
+        </div>
+        <!-- END login-container -->
+    </div>
+
+    <!-- END scroll-top-btn -->
+</div>
+
+@code {
+    private LoginDto loginModel = new LoginDto();
+    private string errorMessage;
+
+
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("error", out var error))
+        {
+            if ( error !="")
+            {
+                errorMessage = error;
+                StateHasChanged();
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    //private async Task HandleValidSubmit()
+    //{
+    //    var result = await AuthenticationService.LoginAsync(loginModel);
+    //    if (result.Success)
+    //    {
+
+
+    //        //await AuthenticationManager.MarkUserAsLogedIn(result.Data);
+    //        NavigationManager.NavigateTo("/");
+    //    }
+    //    else
+    //    {
+    //        errorMessage = result.Message;
+    //    }
+    //}
+
+
+}

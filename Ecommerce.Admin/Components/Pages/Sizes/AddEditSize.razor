@@ -88,7 +88,8 @@
         if (response.Success)
         {
             Snackbar.Add(response.Message, Severity.Success);
-             NavigationManager.NavigateTo("/SizeList");
+            await Task.Delay(1000);
+            NavigationManager.NavigateTo("/SizeList");
         }
         else
         {

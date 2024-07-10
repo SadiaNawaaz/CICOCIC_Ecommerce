@@ -1,13 +1,13 @@
 ﻿
 @page "/AddCategory"
 @page "/category-tree"
-@rendermode InteractiveServer
 @using Ecommerce.Shared.Dto;
 @inject IDialogService DialogService
 @using Ecommerce.Shared.Services.Categories;
 @inject ICategoryService CategoryService
 @inject ISnackbar Snackbar
-@using Ecommerce.Shared.Services.Shared; 
+@using Ecommerce.Shared.Services.Shared;
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 <div class="col-xl-12">
 
     <div class="panel panel-inverse" data-sortable-id="tree-view-1" style="min-height:500px">
@@ -32,7 +32,12 @@
                     </span>
                 </button>
             </div>
-
+            @if (IsLoading)
+            {
+                <div class="text-center">
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                </div>
+            }
             <MudTreeView Items="@TreeItems" Hover="true" Width="100%">
                 <ItemTemplate Context="item">
                     <MudTreeViewItem Items="@item.SubCategories" Icon="@Icons.Material.Filled.Folder" sm="6">
@@ -44,12 +49,12 @@
                                     <MudTooltip Text="Edit">
                                         <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="text-success btn btn-sm" OnClick="() => OpenAddDialog(item)" />
                                     </MudTooltip>
-                                        <MudTooltip Text="Edit">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" class="text-warning btn btn-sm" OnClick="() => OpenEditDialog(item)" />
-                                        </MudTooltip>
-                                        <MudTooltip Text="Delete">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" class="text-danger btn btn-sm" OnClick="() => ConfirmRemoveDialog(item)" />
-                                        </MudTooltip>
+                                    <MudTooltip Text="Edit">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" class="text-warning btn btn-sm" OnClick="() => OpenEditDialog(item)" />
+                                    </MudTooltip>
+                                    <MudTooltip Text="Delete">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" class="text-danger btn btn-sm" OnClick="() => ConfirmRemoveDialog(item)" />
+                                    </MudTooltip>
                                 </div>
                             </div>
                         </BodyContent>
@@ -67,11 +72,12 @@
 @code {
 
     private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
+    private bool IsLoading { get; set; } = false;
 
 
 
 
-    #region 
+    #region
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,6 +88,7 @@
     {
         try
         {
+            IsLoading = true;
             var response = await CategoryService.GetCategoriesAsync();
             if (response.Success)
             {
@@ -98,6 +105,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
@@ -130,7 +141,7 @@
                         };
 
                         await SaveOrUpdateCategoryAsync(category);
-                        TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id,ParentCategoryId= category.ParentCategoryId });
+                        TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId });
                     }
                     else
                     {
@@ -149,7 +160,7 @@
         }
 
 
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
@@ -161,7 +172,7 @@
         {
             var options = new DialogOptions { CloseButton = true, FullWidth = true };
             var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto(), ["IsEdit"] = true };
-            var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;          
+            var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
 
             if (!result.Cancelled)
             {
@@ -227,7 +238,7 @@
             Name = category.Name,
             Icon = category.Icon,
             Level = category.Level,
-            ParentCategoryId=category.ParentCategoryId,
+            ParentCategoryId = category.ParentCategoryId,
             SubCategories = category.SubCategories?.Select(MapToCategoryDto).ToHashSet()
         };
     }

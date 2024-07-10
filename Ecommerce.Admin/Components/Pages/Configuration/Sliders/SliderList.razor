@@ -1,0 +1,157 @@
+﻿@page "/SliderList"
+@using Ecommerce.Shared.Entities.Configurations
+@using Ecommerce.Shared.Services.Configurations
+@inject ISliderService SliderService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@using Ecommerce.Admin.Components.Pages.Shared
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Sliders</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Sliders</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <button class="btn btn-primary mb-3" @onclick="NavigateToAddSlider">Add Slider</button>
+                <MudDataGrid T="Slider" Items="@sliders" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+                    <ColGroup>
+                        <col style="width: 30%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 30%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 10%;" />
+                    </ColGroup>
+                    <Columns>
+
+                        <PropertyColumn Property="x => x.Text" Title="Text" />
+                        <PropertyColumn Property="x => x.Active" Title="Active" />
+
+                        <PropertyColumn Property="x => x.OrderNo" Title="Order" />
+                        <TemplateColumn>
+                            <HeaderTemplate>
+                                <div>Background Image</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <img src="@("/Slider/"+context.Item.Id+"/"+context.Item.BackgroundImageUrl)" alt="Background Image" style="height:50px;width:50px;" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+
+
+                        <TemplateColumn>
+                            <HeaderTemplate>
+                                <div>Front Image</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <img src="@("/Slider/"+context.Item.Id+"/"+context.Item.FrontImageUrl)" alt="Background Image" style="height:50px;width:50px;" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <HeaderTemplate>
+                                <div>Actions</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditSlider(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteSlider(context.Item)" />
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="Slider" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _resizeColumn = true;
+    private List<Slider> sliders;
+    [Inject]
+    public IDialogService DialogService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSliders();
+    }
+
+    private async Task LoadSliders()
+    {
+        var response = await SliderService.GetSlidersAsync();
+        if (response.Success)
+        {
+            sliders = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private void NavigateToAddSlider()
+    {
+        NavigationManager.NavigateTo("/AddEditSlider");
+    }
+
+    private void EditSlider(long sliderId)
+    {
+        NavigationManager.NavigateTo($"/AddEditSlider/{sliderId}");
+    }
+
+    private async Task DeleteSlider(Slider slider)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("ContentText", "Do you want to confirm?");
+            parameters.Add("ButtonText", "Yes");
+            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+            var result = await dialogresult.Result;
+            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+                await DeleteSlider(slider.Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while attempting to delete the slider: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteSlider: {ex}");
+        }
+    }
+
+    private async Task DeleteSlider(long sliderId)
+    {
+        var response = await SliderService.DeleteSliderAsync(sliderId);
+        if (response.Success)
+        {
+            Snackbar.Add(response.Message, Severity.Success);
+            await LoadSliders();
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+}

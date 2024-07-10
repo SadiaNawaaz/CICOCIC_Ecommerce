@@ -1,31 +1,94 @@
 ﻿@page "/weather"
-<body>
-    <div class="accordion_outer">
-        <div class="container">
-            <details>
-                <summary>Section 1</summary>
-                <div class="details">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                </div>
-            </details>
-            <details>
-                <summary>Section 2</summary>
-                <div class="details">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                </div>
-            </details>
-            <details>
-                <summary>Section 3</summary>
-                <div class="details">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                </div>
-            </details>
-            <details>
-                <summary>Section 4</summary>
-                <div class="details">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                </div>
-            </details>
-        </div>
-    </div>
-</body>
+@page "/dynamic-mask"
+@using System.Collections.Generic
+@using System.Text.RegularExpressions
+
+<h3>Dynamic Masked Input</h3>
+
+<select @onchange="UpdateMask">
+    @foreach (var company in Companies)
+    {
+        <option value="@company.Key">@company.Value</option>
+    }
+</select>
+
+<input @bind="InputText"  @oninput="OnInput" class="@InputClass" />
+
+<p>Current Mask: @SelectedMask</p>
+<p>Input Text: @InputText</p>
+
+<style>
+    .valid-input {
+        border-color: green;
+    }
+
+    .invalid-input {
+        border-color: red;
+    }
+</style>
+
+@code {
+    private string InputText { get; set; } = string.Empty;
+    private string SelectedMask { get; set; } = string.Empty;
+    private string InputClass { get; set; } = string.Empty;
+
+    private Dictionary<string, string> Companies = new()
+{
+        { "CompanyA", @"^[0-9]{9}$" }, // Example mask for Company A (999-999-9999)
+        { "CompanyB", @"^[0-9]{2}$" } , // Example mask for Company B (ABC-123)
+        { "Companyc", @"^[0-9]{3}$" }  // Example mask for Company B (ABC-123)
+    };
+
+    private void UpdateMask(ChangeEventArgs e)
+    {
+        var selectedCompany = e.Value.ToString();
+        if (Companies.ContainsKey(selectedCompany))
+        {
+            SelectedMask = Companies[selectedCompany];
+        }
+        else
+        {
+            SelectedMask = string.Empty;
+        }
+        InputText = string.Empty; // Clear the input text when mask changes
+        UpdateInputClass();
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+        if (string.IsNullOrEmpty(SelectedMask) || Regex.IsMatch(input, SelectedMask))
+        {
+            InputText = input;
+            InputClass = "valid-input";
+        }
+        else
+        {
+            // Revert the input text if it doesn't match the mask
+          
+            InputClass = "invalid-input";
+        }
+    }
+
+    private string RemoveInvalidCharacters(string input, string mask)
+    {
+        var match = Regex.Match(input, mask);
+        return match.Success ? match.Value : string.Empty;
+    }
+
+    private void UpdateInputClass()
+    {
+        if (string.IsNullOrEmpty(InputText))
+        {
+            InputClass = string.Empty;
+        }
+        else if (Regex.IsMatch(InputText, SelectedMask))
+        {
+            InputClass = "valid-input";
+        }
+        else
+        {
+            InputClass = "invalid-input";
+        }
+    }
+}

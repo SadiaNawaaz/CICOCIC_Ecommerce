@@ -1,0 +1,151 @@
+﻿@page "/RoleList"
+@using Ecommerce.Shared.Entities
+@using Ecommerce.Shared.Services.Roles
+@inject IRoleService roleService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/RoleList">Roles</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Roles</li>
+        </ol>
+    </div>
+</div>
+
+<div class="panel panel-inverse">
+    <div class="panel-heading">
+        <h4 class="panel-title">Role - List</h4>
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row fileupload-buttonbar">
+            <div class="col-xl-7">
+                <button type="button" class="btn btn-primary start me-1" @onclick="NavigateToAddEditRole">
+                    <i class="fa fa-fw fa-add"></i>
+                    <span>Add new</span>
+                </button>
+                <span class="fileupload-process"></span>
+            </div>
+            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
+                <div class="progress progress-striped active">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <div class="progress-extended">&nbsp;</div>
+            </div>
+        </div>
+        <MudDataGrid T="Role" Items="@roles" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+            <ColGroup>
+                <col style="width: 90%;" />
+                <col style="width: 10%;" />
+                <col />
+            </ColGroup>
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Name" Style="width:90%" />
+                <PropertyColumn Property="x => x.Description" Title="Description" Style="width:90%" />
+                <TemplateColumn CellClass="d-flex justify-end" Style="width:10%">
+                    <HeaderTemplate>
+                        <div>Edit</div>
+                    </HeaderTemplate>
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditRole(context.Item)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteRole(context.Item)" />
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Role" PageSizeOptions=@(new int[] {5, 10, 20}) />
+            </PagerContent>
+        </MudDataGrid>
+    </div>
+</div>
+
+@code {
+    private bool _resizeColumn;
+    private IEnumerable<Role> roles = new List<Role>();
+    private string _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            var response = await roleService.GetRolesAsync();
+            if (response.Success)
+            {
+                roles = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while loading roles: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+        }
+    }
+
+    private void EditRole(Role role)
+    {
+        try
+        {
+            NavigationManager.NavigateTo($"/AddEditRole/{role.Id}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while navigating to edit the role: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in EditRole: {ex}");
+        }
+    }
+
+    private async Task DeleteRole(Role role)
+    {
+        try
+        {
+            var response = await roleService.DeleteRoleAsync(role.Id);
+            if (response.Success)
+            {
+                await LoadRoles();
+                Snackbar.Add(response.Message, Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while deleting the role: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in DeleteRole: {ex}");
+        }
+    }
+
+    private void NavigateToAddEditRole()
+    {
+        try
+        {
+            NavigationManager.NavigateTo("/AddEditRole");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while navigating to add or edit a role: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in NavigateToAddEditRole: {ex}");
+        }
+    }
+}

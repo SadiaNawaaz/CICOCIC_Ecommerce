@@ -73,8 +73,8 @@
     <script src="_framework/blazor.web.js"></script>
 
     <!-- ================== BEGIN BASE JS ================== -->
-    @*<script src="/assets/js/e-commerce/vendor.min.js"></script>
-    <script src="/assets/js/e-commerce/app.min.js"></script>*@
+    <script src="/assets/js/e-commerce/vendor.min.js"></script>
+    <script src="/assets/js/e-commerce/app.min.js"></script>
 </body>
 <script>
 window.closeDropdownMenu = function () {
@@ -91,6 +91,9 @@ window.closeDropdownMenu = function () {
     });
 };
 
+ $('.carousel').carousel({
+  interval: 2000
+})
 </script>
 
 </html>

@@ -16,8 +16,9 @@ public interface IProductService
     Task<ServiceResponse<bool>> DeleteProductAsync(long id);
     Task<ServiceResponse<List<Product>>> GetProductsByCategoryIdAsync(long CategoryId);
     Task<ServiceResponse<List<ProductDto>>> GetProductsWithVariantsAsync();
-    
-    }
+    Task<ServiceResponse<long?>> GetMinimumVariantPriceAsync(long productId);
+
+}
 
 public class ProductService : IProductService
 {
@@ -252,6 +253,30 @@ public class ProductService : IProductService
         }
     }
 
+    public async Task<ServiceResponse<long?>> GetMinimumVariantPriceAsync(long productId)
+    {
+        try
+        {
+            var minPrice = await _context.ProductVariants
+                                         .Where(v => v.ProductId == productId)
+                                         .MinAsync(v => (long?)v.Price);
 
+            return new ServiceResponse<long?>
+            {
+                Data = minPrice,
+                Success = true,
+                Message = "Minimum variant price fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching minimum variant price.");
+            return new ServiceResponse<long?>
+            {
+                Success = false,
+                Message = "Error occurred while fetching minimum variant price"
+            };
+        }
+    }
 
 }

@@ -1,0 +1,474 @@
+﻿@page "/AddEditSlider/{SliderId:long?}"
+@using Ecommerce.Shared.Services.Products;
+@inject IProductService ProductService
+@inject ISnackbar Snackbar
+@using Radzen
+@using Radzen.Blazor
+@using Ecommerce.Shared.Entities.Configurations;
+@rendermode InteractiveServer
+@inject ImageResizeService ImageResizeService
+@using Ecommerce.Shared.Services.Configurations
+@inject ISliderService SliderService
+@inject NavigationManager NavigationManager
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/BrandList">Configuration</a></li>
+            <li class="breadcrumb-item active">Slider</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Slider Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+
+
+
+
+                <EditForm Model="@slider" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
+                    <DataAnnotationsValidator />
+
+                    <div class="row">
+
+
+                        <div class="col-lg-4  mt-2px">
+
+                            <label class="form-label">Text</label>
+                            <InputText id="Name" class="form-control" @bind-Value="slider.Text" />
+                            <span class="text-danger"><ValidationMessage For="@(() => slider.Text)" /></span>
+
+                        </div>
+
+
+                        <div class="col-lg-4">
+
+                            <label class="form-label">Product</label>
+
+                            <RadzenDropDownDataGrid TValue="long" @bind-Value="slider.ProductId" Data=@products TextProperty="Name" ValueProperty="Id" Change="@(args => OnGetPrice(args))" Class="form-control">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+
+
+
+                        </div>
+                        <div class="col-lg-4  mt-2px">
+
+                            <label class="form-label">Starting From</label>
+                            <InputNumber id="Name" class="form-control" @bind-Value="slider.StartingFrom" />
+                            <ValidationMessage For="@(() => slider.StartingFrom)" />
+
+                        </div>
+
+
+
+
+                        <div class="row">
+                            <div class="col-lg-12 mt-15px">
+
+                                <label class="btn btn-primary start me-1">
+                                    <i class="fa fa-fw fa-upload"></i> Upload Background Image<InputFile OnChange="@(e => HandleFileChange(e, "background"))" style="display: none;" name="image" />
+                                </label>
+
+                                <button type="button" class="btn btn-default delete me-1" @onclick="@(e => DeleteImage("background"))">
+                                    <i class="fa fa-fw fa-trash"></i>
+                                    <span>Delete</span>
+                                </button>
+
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table table-panel text-nowrap mb-0">
+                                        <thead></thead>
+                                        <tbody class="files">
+                                            @if (string.IsNullOrEmpty(slider.BackgroundImageUrl) && string.IsNullOrEmpty(BackgroundimageUrl))
+                                            {
+                                                <tr data-id="empty">
+                                                    <td colspan="4" class="text-center text-gray-500 py-30px">
+                                                        <div class="mb-10px"><i class="fa fa-image fa-3x"></i></div>
+                                                        <div class="fw-bold">No Image selected</div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="4" class="text-center">
+                                                        <img src="@(!string.IsNullOrEmpty(BackgroundimageUrl) ? BackgroundimageUrl : slider.BackgroundImageUrl)" style="max-height:400px;max-width:1200px" alt="Background Image" class="img-fluid" />
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+
+                        <div class="row">
+                            <div class="col-lg-12 mt-15px">
+
+                                <label class="btn btn-primary start me-1">
+                                    <i class="fa fa-fw fa-upload"></i> Upload Slider Front Image<InputFile OnChange="@(e => HandleFileChange(e, "front"))" style="display: none;" name="image" />
+                                </label>
+
+                                <button type="button" class="btn btn-default delete me-1" @onclick="@(e => DeleteImage("front"))">
+                                    <i class="fa fa-fw fa-trash"></i>
+                                    <span>Delete</span>
+                                </button>
+
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table table-panel text-nowrap mb-0">
+                                        <thead></thead>
+                                        <tbody class="files">
+                                            @if (string.IsNullOrEmpty(slider.FrontImageUrl))
+                                            {
+                                                <tr data-id="empty">
+                                                    <td colspan="4" class="text-center text-gray-500 py-30px">
+                                                        <div class="mb-10px"><i class="fa fa-image fa-3x"></i></div>
+                                                        <div class="fw-bold">No image selected</div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="4" class="text-center">
+                                                        <img src="@(!string.IsNullOrEmpty(FrontimageUrl) ? FrontimageUrl : slider.FrontImageUrl)" alt="front Image" class="img-fluid" style="max-height:400px;max-width:1200px" />
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+                        <div class="row">
+
+                            <div class="col-3">
+                                <label>Sequence/Order No </label>
+                                <InputNumber class="form-control" @bind-Value="slider.OrderNo" Min="1" />
+                            </div>
+
+                            <div class="col-8 mt-20px">
+                                <div class="form-check">
+                                    <InputCheckbox class="form-check-input" @bind-Value="slider.Active" />
+                                    <label class="form-check-label" for="inline_form_checkbox">Active</label>
+                                    &nbsp;   &nbsp;   &nbsp;   &nbsp;
+                                    <span class="text-danger">Note:If This order Number will exist then other banner will be DeActive </span>
+
+                                </div>
+                            </div>
+                            <div class="col-1 mt-10px">
+                                <button type="submit" class="btn btn-primary w-100px">Save</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </EditForm>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public long? SliderId { get; set; }
+    private List<Product> products = new List<Product>();
+
+    private Slider slider = new Slider();
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    public string backgrounddeleted = null;
+    public string frontdeleted = null;
+
+    private string FrontimageUrl = null;
+    private string BackgroundimageUrl = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        if (SliderId.HasValue)
+        {
+            var response = await SliderService.GetSliderByIdAsync(SliderId.Value);
+            if (response.Success)
+            {
+                slider = response.Data;
+                BackgroundimageUrl = "/Slider/" + slider.Id + "/" + slider.BackgroundImageUrl;
+                FrontimageUrl = "/Slider/" + slider.Id + "/" + slider.FrontImageUrl;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+
+
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            var response = await ProductService.GetProductsAsync();
+            if (response.Success)
+            {
+                products = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        ServiceResponse<Slider> response;
+        try
+        {
+            if (slider.ProductId == 0)
+            {
+                Snackbar.Add("Please Link Product with Banner", Severity.Info);
+                return;
+            }
+
+
+            if (SliderId.HasValue)
+            {
+                response = await SliderService.UpdateSliderAsync(slider);
+            }
+            else
+            {
+                response = await SliderService.AddSliderAsync(slider);
+            }
+
+
+
+            if (response.Success)
+            {
+                slider = response.Data;
+                #region PathSave
+
+
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Slider", slider.Id.ToString());
+                var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                if (!Directory.Exists(bannerPath))
+                {
+                    Directory.CreateDirectory(bannerPath);
+                }
+
+
+                if (!string.IsNullOrEmpty(backgrounddeleted))
+                {
+
+                    var DelImagePath = wwwRootPath + backgrounddeleted;
+                    if (File.Exists(DelImagePath))
+                    {
+                        File.Delete(DelImagePath);
+                    }
+                }
+                if (!string.IsNullOrEmpty(frontdeleted))
+                {
+
+                    var DelImagePath = wwwRootPath + frontdeleted;
+                    if (File.Exists(DelImagePath))
+                    {
+                        File.Delete(DelImagePath);
+                    }
+                }
+
+                if (slider.BackgroundImageByte != null)
+                {
+                    var filePath = Path.Combine(bannerPath, slider.BackgroundImageUrl);
+                    await File.WriteAllBytesAsync(filePath, slider.BackgroundImageByte);
+                    slider.BackgroundImageUrl = $"/Slider/{slider.Id}/{slider.BackgroundImageUrl}";
+                    BackgroundimageUrl = slider.BackgroundImageUrl;
+
+                }
+
+                if (slider.FrontImageByte != null)
+                {
+                    var filePath = Path.Combine(bannerPath, slider.FrontImageUrl);
+                    await File.WriteAllBytesAsync(filePath, slider.FrontImageByte);
+                    slider.FrontImageUrl = $"/Slider/{slider.Id}/{slider.FrontImageUrl}";
+                    FrontimageUrl = slider.FrontImageUrl;
+
+                }
+
+
+
+
+                #endregion
+
+
+                backgrounddeleted = null;
+                frontdeleted = null;
+
+                Snackbar.Add(response.Message, Severity.Success);
+                slider = new Slider();
+                await Task.Delay(1000);
+                NavigationManager.NavigateTo("/SliderList",true);
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+
+
+    }
+
+    async Task HandleFileChange(InputFileChangeEventArgs e, string imageType)
+    {
+
+        var maxSizeBytes = 5 * 1024 * 1024;
+        try
+        {
+            var file = e.File;
+
+            if (file.Size <= maxSizeBytes)
+            {
+                using var memoryStream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
+                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
+                memoryStream.Position = 0;
+                var buffer = memoryStream.ToArray();
+
+                if (imageType == "background")
+                {
+
+                    DeleteImage("background");
+                    slider.BackgroundImageUrl = uniqueFileName;
+                    BackgroundimageUrl = await ImageResizeService.ResizeImage(memoryStream, file.ContentType, 800, 300);
+                    slider.BackgroundImageByte = buffer;
+
+                }
+                else if (imageType == "front")
+                {
+
+                    DeleteImage("front");
+                    FrontimageUrl = await ImageResizeService.ResizeImage(memoryStream, file.ContentType, 800, 300);
+                    slider.FrontImageByte = buffer;
+                    slider.FrontImageUrl = uniqueFileName;
+                }
+
+
+            }
+            else
+            {
+                Snackbar.Add("Please choose a file under the limit (500 KB)", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+
+    private async Task OnGetPrice(object e)
+    {
+
+        try
+        {
+            long? minimumVariantPrice;
+            var Id = Convert.ToInt64(e);
+            if (Id > 0)
+            {
+
+                var response = await ProductService.GetMinimumVariantPriceAsync(Id);
+                if (response.Success)
+                {
+                    minimumVariantPrice = response.Data;
+                    slider.StartingFrom = minimumVariantPrice ?? 0;
+
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+    }
+
+
+
+
+    void DeleteImage(string imageType)
+    {
+
+
+
+        if (imageType == "background")
+        {
+
+            backgrounddeleted = BackgroundimageUrl;
+            slider.BackgroundImageUrl = null;
+            BackgroundimageUrl = null;
+            slider.BackgroundImageByte = null;
+
+        }
+        else if (imageType == "front")
+        {
+
+            frontdeleted = FrontimageUrl;
+            FrontimageUrl = null;
+            slider.FrontImageByte = null;
+            slider.FrontImageUrl = null;
+
+        }
+
+
+    }
+
+}

@@ -1,0 +1,171 @@
+﻿@page "/AddEditUser/{UserId:long?}"
+@using Ecommerce.Shared.Services.Users;
+@inject IUserService UserService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IRoleService roleService
+@using Ecommerce.Shared.Services.Roles
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/UserList">Users</a></li>
+            <li class="breadcrumb-item active">User</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">User Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <EditForm Model="@user" OnValidSubmit="@HandleValidSubmit" FormName="userForm">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-5 mb-3">
+                            <label for="FirstName">First Name</label>
+                            <InputText id="FirstName" class="form-control" @bind-Value="user.FirstName" />
+                            <span class="text-danger"><ValidationMessage For="@(() => user.FirstName)" /></span>
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label for="LastName">Last Name</label>
+                            <InputText id="LastName" class="form-control" @bind-Value="user.LastName" />
+                            <span class="text-danger"><ValidationMessage For="@(() => user.LastName)" /></span>
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label for="Email">Email</label>
+                            <InputText id="Email" class="form-control" @bind-Value="user.Email" />
+                            <span class="text-danger"><ValidationMessage For="@(() => user.Email)" /></span>
+                        </div>
+
+                        <div class="col-5 mb-3">
+                            <label for="Email">Extra Email</label>
+                            <InputText id="Email" class="form-control" @bind-Value="user.ExtraEmail" />
+                            <span class="text-danger"><ValidationMessage For="@(() => user.ExtraEmail)" /></span>
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label for="Password">Password</label>
+                            <InputText id="Password" class="form-control" @bind-Value="user.Password" type="password" />
+                            <span class="text-danger"><ValidationMessage For="@(() => user.Password)" /></span>
+                        </div>
+
+                        <div class="col-5 mb-3">
+                            <label for="Role">Role</label>
+                            <InputSelect id="Role" class="form-control" @bind-Value="user.RoleId">
+                                <option value="">Select Role</option>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.Id">@role.Name</option>
+                                }
+                            </InputSelect>
+                            <span class="text-danger"><ValidationMessage For="@(() => user.RoleId)" /></span>
+                        </div>
+
+
+                        <div class="col-9 mb-3">
+                            <label for="Role">Is Agent</label>
+                            <InputCheckbox  @bind-Value="user.IsAgent" />
+                        </div>
+
+                        <div class="col-2 mt-15px ml-5">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <a href="javascript:history.back(-1);" class="btn btn-success">
+                                <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                            </a>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public long? UserId { get; set; }
+    private User user = new User();
+    private List<Role> roles = new List<Role>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await LoadRoles();
+        if (UserId.HasValue)
+        {
+            var response = await UserService.GetUserByIdAsync(UserId.Value);
+            if (response.Success)
+            {
+                user = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        ServiceResponse<User> response;
+
+        if (user.RoleId == 0)
+        {
+            Snackbar.Add("Please Select Role", Severity.Info);
+
+            return;
+        }
+
+        if (UserId.HasValue)
+        {
+            response = await UserService.UpdateUserAsync(user);
+        }
+        else
+        {
+            response = await UserService.AddUserAsync(user);
+        }
+
+        if (response.Success)
+        {
+            Snackbar.Add(response.Message, Severity.Success);
+            await Task.Delay(1000);
+            NavigationManager.NavigateTo("/UserList");
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            var response = await roleService.GetRolesAsync();
+            if (response.Success)
+            {
+                roles = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while loading roles: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+        }
+    }
+
+}

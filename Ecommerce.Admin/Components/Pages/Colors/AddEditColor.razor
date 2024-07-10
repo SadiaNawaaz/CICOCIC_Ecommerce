@@ -110,6 +110,7 @@
         if (response.Success)
         {
             Snackbar.Add(response.Message, Severity.Success);
+            await Task.Delay(1000);
             NavigationManager.NavigateTo("/ColorList");
         }
         else

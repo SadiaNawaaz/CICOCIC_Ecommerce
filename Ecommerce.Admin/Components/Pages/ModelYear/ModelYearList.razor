@@ -5,7 +5,7 @@
 @inject ISnackbar snackbar
 @inject NavigationManager navigationManager
 @inject IJSRuntime jsRuntime
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 
 

@@ -4,7 +4,7 @@
 @inject IProductService ProductService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -69,7 +69,7 @@
 @code {
 
     private bool _resizeColumn = true;
-    private List<ProductDto> products= new List<ProductDto>();
+    private List<ProductDto> products = new List<ProductDto>();
 
     [Inject]
     public IDialogService DialogService { get; set; }
@@ -94,7 +94,7 @@
             }
         }
 
-        catch(Exception ex)
+        catch (Exception ex)
         {
 
         }
@@ -120,7 +120,7 @@
         NavigationManager.NavigateTo($"/ProductVariantList?ProductId={ProductId}");
     }
 
-    
+
     private void EditProduct(long productId)
     {
         NavigationManager.NavigateTo($"/MainProduct/{productId}");
