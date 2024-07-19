@@ -3,7 +3,8 @@
 @inject IJSRuntime JSRuntime
 @inject ICategoryService CategoryService
 @inject IBrandService BrandService
-
+@using Ecommerce.Shared.Services.Configurations
+@inject ISliderService SliderService
 <div id="header" class="header">
     <!-- BEGIN container -->
     <div class="container">
@@ -138,9 +139,11 @@
                                             {
                                                 @foreach (var b in Brands.Take(10))
                                                 {
-                                                    <li><a @onclick="@(async () => await fnBrandDetails(b.Id))">
-                                                     <img src="@UrlHelper.GetBrandImageUrl(b.Id, b.ImageUrl)" alt="@b.Name" />
-                                                   </a></li>
+                                                    <li>
+                                                        <a @onclick="@(async () => await fnBrandDetails(b.Id))">
+                                                            <img src="@UrlHelper.GetBrandImageUrl(b.Id, b.ImageUrl)" alt="@b.Name" />
+                                                        </a>
+                                                    </li>
 
                                                 }
 
@@ -160,7 +163,7 @@
 
                         @if (Categories != null && Categories.Count() > 0)
                         {
-                            @foreach (var category in Categories.Take(6))
+                            @foreach (var category in Categories.Take(6).OrderBy(a=>a.Order))
                             {
                                 <li class="dropdown dropdown-hover">
                                     <a href="#" data-bs-toggle="dropdown">
@@ -191,7 +194,7 @@
 
                     @if (Categories != null && Categories.Count > 6)
                     {
-                        @foreach (var category in Categories.Skip(6).Take(1))
+                        @foreach (var category in Categories.Skip(6).Take(1).OrderBy(a=>a.Order))
                         {
                             <li class="dropdown dropdown-hover">
                                 <a href="#" data-bs-toggle="dropdown">
@@ -234,7 +237,7 @@
     private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
     public List<CategoryDto> SubCategories = new List<CategoryDto>();
     public List<Brand> Brands = new List<Brand>();
-
+    private List<Ecommerce.Shared.Entities.Configurations.Slider> sliders= new List<Ecommerce.Shared.Entities.Configurations.Slider>();
 
 
 
@@ -248,6 +251,7 @@
     {
         await LoadCategoryTreeAsync();
         await LoadBrands();
+       
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -335,7 +339,7 @@
 
     }
 
-    public async Task fnDetails(long  id)
+    public async Task fnDetails(long id)
     {
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");

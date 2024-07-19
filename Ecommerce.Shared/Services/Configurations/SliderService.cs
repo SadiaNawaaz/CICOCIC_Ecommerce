@@ -18,6 +18,7 @@ public interface ISliderService
     Task<ServiceResponse<Slider>> AddSliderAsync(Slider slider);
     Task<ServiceResponse<Slider>> UpdateSliderAsync(Slider slider);
     Task<ServiceResponse<bool>> DeleteSliderAsync(long id);
+    Task<ServiceResponse<List<Slider>>> GetActiveSlidersAsync();
 }
 public class SliderService : ISliderService
 {
@@ -53,6 +54,30 @@ public class SliderService : ISliderService
         }
     }
 
+
+
+    public async Task<ServiceResponse<List<Slider>>> GetActiveSlidersAsync()
+    {
+        try
+        {
+            var sliders = await _context.Sliders.Where(a=>a.Active==true).OrderBy(s => s.OrderNo).Include(s => s.Product).ToListAsync();
+            return new ServiceResponse<List<Slider>>
+            {
+                Data = sliders,
+                Success = true,
+                Message = "Sliders fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching sliders.");
+            return new ServiceResponse<List<Slider>>
+            {
+                Success = false,
+                Message = "Error occurred while fetching sliders"
+            };
+        }
+    }
     public async Task<ServiceResponse<Slider>> GetSliderByIdAsync(long id)
     {
         try
@@ -80,6 +105,16 @@ public class SliderService : ISliderService
     {
         try
         {
+
+            var existingSliderWithSameOrderNo = await _context.Sliders
+        .Where(s => s.OrderNo == slider.OrderNo && s.Active)
+        .ToListAsync();
+
+            foreach (var existingSlider in existingSliderWithSameOrderNo)
+            {
+                existingSlider.Active = false;
+            }
+
             _context.Sliders.Add(slider);
             await _context.SaveChangesAsync();
             return new ServiceResponse<Slider>
@@ -115,7 +150,18 @@ public class SliderService : ISliderService
                 };
             }
 
-      
+            var otherSlidersWithSameOrderNo = await _context.Sliders
+                 .Where(s => s.OrderNo == updatedSlider.OrderNo && s.Id != updatedSlider.Id && s.Active)
+                 .ToListAsync();
+
+            foreach (var otherSlider in otherSlidersWithSameOrderNo)
+            {
+                otherSlider.Active = false;
+            }
+
+
+
+
             existingSlider.BackgroundImageUrl = updatedSlider.BackgroundImageUrl;
             existingSlider.FrontImageUrl = updatedSlider.FrontImageUrl;
             existingSlider.Text = updatedSlider.Text;

@@ -1,0 +1,247 @@
+﻿@page "/AddEditTrendingItems"
+@using Ecommerce.Shared.Services.Products;
+@using Ecommerce.Shared.Services.ProductVariants
+@inject IProductService ProductService
+@inject ISnackbar Snackbar
+@inject IProductVariantService productVariantService
+@inject ISnackbar snackbar
+@using Radzen
+@using Radzen.Blazor
+@using Ecommerce.Shared.Entities.TrendingProducts;
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Configuration</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Trending Items</li>
+        </ol>
+        <h1 class="page-header mb-0"> Product </h1>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Trending Form</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row mt-3">
+                    <div class="col-lg-5">
+                        <div class="mb-lg-0 mb-3">
+                            <label class="form-label">Products</label>
+
+                            <RadzenDropDownDataGrid TValue="long" Data=@products TextProperty="Name" ValueProperty="Id" Change="@(args => ProductChanged(args))" Class="form-control">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+
+
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="mb-lg-0 mb-3">
+                            <label class="form-label">Variants</label>
+
+                            <RadzenDropDownDataGrid TValue="long" @bind-Value="@trendingProduct.ProductVariantId" Data=@productVariants TextProperty="Name" ValueProperty="Id" Class="form-control">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                                    <RadzenDropDownDataGridColumn Property="Sku" Title="Sku" Width="100px" />
+                                </Columns>
+                             
+                            </RadzenDropDownDataGrid>
+
+
+                        </div>
+                    </div>
+                    <div class="col-2 mt-15px">
+                        <button class="btn btn-primary mt-5px" @onclick="@MarkProduct">Add To List</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var trendingProduct in trendingProducts)
+            {
+                <div class="col-xl-3">
+                    <div class="card border-0">
+                        <img class="card-img-top" src="@trendingProduct.DefaultImageUrl" alt="" style="width:100%; height:auto; max-height:200px; object-fit:contain;">
+                        <div class="card-body">
+                            <h4 class="card-title mb-10px">@trendingProduct.Name  <a href="javascript:;" class="btn btn-danger btn-icon btn-circle btn-sm" @onclick="() => RemoveTrendingProduct(trendingProduct.Id)"><i class="fa fa-times"></i></a></h4>
+                            <p class="card-text">Category: @trendingProduct.Category</p>
+                            <p class="card-text">Price: @trendingProduct.VariantPrice</p>
+                            <p class="card-text">SKU: @trendingProduct.Sku</p>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            }
+        </div>
+       
+    </div>
+</div>
+
+
+
+
+
+@code {
+    private List<ProductDto> products = new List<ProductDto>();
+    private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
+    private TrendingProduct trendingProduct = new TrendingProduct();
+    private List<TrendingProductDto> trendingProducts = new List<TrendingProductDto>();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTrendingProduct();
+        await LoadProducts();
+    }
+
+    private async Task LoadTrendingProduct()
+    {
+        try
+        {
+            var response = await productVariantService.GetTrendingProductVariantsAsync();
+            if (response.Success)
+            {
+                trendingProducts = response.Data;
+                trendingProducts.ToList().ForEach(image =>
+                {
+                    image.DefaultImageUrl = $"/ProductVariants/{image.ProductVariantId}/{image.DefaultImageUrl}";
+                });
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            var response = await ProductService.GetProductsWithVariantsAsync();
+            if (response.Success)
+            {
+                products = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+        catch (Exception ex)
+        {
+
+        }
+    }
+    private async void ProductChanged(object e)
+    {
+        try
+        {
+
+            var ProductId = Convert.ToInt64(e);
+            if (ProductId > 0)
+            {
+                var response = await productVariantService.GetAllProductVariantsAsync(ProductId);
+                if (response.Success)
+                {
+                    productVariants = response.Data;
+                    StateHasChanged();
+                }
+                else
+                {
+                    snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+
+
+
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+        }
+    }
+
+    private async Task MarkProduct()
+    {
+        try
+        {
+            if (trendingProduct.ProductVariantId == 0)
+            {
+                Snackbar.Add("Please select a product variant.", Severity.Warning);
+                return;
+            }
+
+            if (trendingProducts.Any(tp => tp.ProductVariantId == trendingProduct.ProductVariantId))
+            {
+                Snackbar.Add("This product variant is already marked as trending.", Severity.Warning);
+                return;
+            }
+
+            ServiceResponse<TrendingProduct> response;
+            response = await productVariantService.AddTrendingProdutc(trendingProduct);
+
+            if (response.Success)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+                trendingProduct = new TrendingProduct();
+                await LoadTrendingProduct();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+
+            }
+        }
+        catch(Exception ex)
+        {
+
+        }
+
+    }
+
+    private async Task RemoveTrendingProduct(long productVariantId)
+    {
+        try
+        {
+            var response = await productVariantService.RemoveTrendingProduct(productVariantId);
+            if (response.Success)
+            {
+                Snackbar.Add("Product removed from trending list successfully.", Severity.Success);
+                await LoadTrendingProduct();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while removing the product from the trending list.", Severity.Error);
+        }
+    }
+}

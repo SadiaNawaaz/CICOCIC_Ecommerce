@@ -40385,3 +40385,41 @@ body .sp-container {
     width: 100% !important;
     overflow-y: auto !important;
 }
+
+
+.mud-table-striped .mud-table-container .mud-table-root .mud-table-body .mud-table-row:nth-of-type(odd) {
+    background-color: #e9ecef !important;
+}
+
+.mud-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+    .mud-table th,
+    .mud-table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .mud-table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .mud-table tbody + tbody {
+        border-top: 2px solid #dee2e6;
+    }
+
+    .mud-table .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    /* site.css */
+
+    .mud-table th {
+        font-weight: 600;
+    }

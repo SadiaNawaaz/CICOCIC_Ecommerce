@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities.ProductVariants;
+using Ecommerce.Shared.Entities.TrendingProducts;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,10 @@ public interface IProductVariantService
     Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long categoryId);
     Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long templateMasterId,long productVariantId);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId);
+    Task<ServiceResponse<TrendingProduct>> AddTrendingProdutc(TrendingProduct productVariant);
+    Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync();
+    Task<ServiceResponse<bool>> RemoveTrendingProduct(long id);
+
 }
 
 public class ProductVariantService: IProductVariantService
@@ -57,7 +62,6 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
-
     public async Task<ServiceResponse<ProductVariant>> UpdateProductVariantAsync1(ProductVariant productVariant)
     {
         try
@@ -180,7 +184,6 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
-
     public async Task<ServiceResponse<ProductVariant>> GetProductVariantByIdAsync(long id)
     {
         try
@@ -219,7 +222,6 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
-
     public async Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId)
     {
         try
@@ -247,7 +249,6 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
-
     public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId)
     {
         var response = new ServiceResponse<List<ProductVariantDto>>();
@@ -284,8 +285,6 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-
-
     public async Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long Id)
     {
         var response = new ServiceResponse<ProductVariantDetailDto>();
@@ -351,9 +350,6 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-
-
-
     public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync1(long templateMasterId)
     {
         var response = new ServiceResponse<List<ClusterFeatureDto>>();
@@ -390,8 +386,6 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-
-
     public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long templateMasterId, long productVariantId)
     {
         var response = new ServiceResponse<List<ClusterFeatureDto>>();
@@ -434,9 +428,6 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-
-
-
     public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId)
     {
         var response = new ServiceResponse<List<ProductVariantDto>>();
@@ -473,9 +464,113 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
+    public async Task<ServiceResponse<TrendingProduct>> AddTrendingProdutc(TrendingProduct product)
+    {
+        try
+        {
+            _context.TrendingProducts.Add(product);
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<TrendingProduct>
+            {
+                Data = product,
+                Success = true,
+                Message = "Product  added successfully."
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding Trending variant.");
+            return new ServiceResponse<TrendingProduct>
+            {
+                Success = false,
+                Message = $"An error occurred while adding the Trending product : {ex.Message}"
+            };
+        }
+    }
+    public async Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync()
+    {
+        var response = new ServiceResponse<List<TrendingProductDto>>();
 
+        try
+        {
+            var trendingProductVariants = await _context.TrendingProducts
+                .Include(tp => tp.ProductVariant)
+                .ThenInclude(pv => pv.Product)
+                .ThenInclude(p => p.Category)
+                .Include(tp => tp.ProductVariant.productVariantImages)
+                .Select(tp => new TrendingProductDto
+                {
+                    ProductId = tp.ProductVariant.ProductId,
+                    Id = tp.Id,
+                    ProductVariantId= tp.ProductVariant.Id,
+                    Name = tp.ProductVariant.Product.Name,
+                    Description = tp.ProductVariant.Description,
+                    Category = tp.ProductVariant.Product.Category.Name,
+                    VariantPrice = tp.ProductVariant.Price,
+                    ProductPrice = tp.ProductVariant.Product.Price,
+                    Sku = tp.ProductVariant.Sku,
+                    DefaultImageUrl = tp.ProductVariant.productVariantImages.FirstOrDefault() != null ? tp.ProductVariant.productVariantImages.FirstOrDefault().ImageName : null
+                })
+                .ToListAsync();
 
+            // Calculate discount percentage for each product variant
+            foreach (var productVariant in trendingProductVariants)
+            {
+                if (productVariant.ProductPrice > 0 && productVariant.VariantPrice > 0)
+                {
+                    double discount = productVariant.ProductPrice - productVariant.VariantPrice;
+                    int discountPercentage = (int)Math.Round((discount / productVariant.ProductPrice) * 100);
+                    productVariant.discountPercentage = discountPercentage;
+                }
+            }
 
+            response.Data = trendingProductVariants;
+            response.Success = true;
+            response.Message = "Trending product variants fetched successfully.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching trending product variants.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching trending product variants: {ex.Message}";
+        }
 
+        return response;
+    }
+
+  
+    public async Task<ServiceResponse<bool>> RemoveTrendingProduct(long id)
+    {
+        try
+        {
+            var tproductVariant = await _context.TrendingProducts.FindAsync(id);
+            if (tproductVariant == null)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Product  not found."
+                };
+            }
+
+            _context.TrendingProducts.Remove(tproductVariant);
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<bool>
+            {
+                Data = true,
+                Success = true,
+                Message = "Product  deleted successfully."
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting product .");
+            return new ServiceResponse<bool>
+            {
+                Success = false,
+                Message = $"An error occurred while deleting the product variant: {ex.Message}"
+            };
+        }
+    }
 
 }

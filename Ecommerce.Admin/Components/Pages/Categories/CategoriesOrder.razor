@@ -1,0 +1,192 @@
+﻿
+@page "/CategoriesOrder"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject ISnackbar Snackbar
+@using Ecommerce.Shared.Services.Categories;
+@inject ICategoryService CategoryService
+<style>
+    .widget {
+        padding: 0 !important;
+    }
+</style>
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/BrandList">Categories </a></li>
+            <li class="breadcrumb-item active">Order</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Category Order</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <div class="container mt-3">
+
+                    <div>
+                        <div class="widget-list rounded mb-4" data-id="widget">
+                            <ul class="list-group" ondragover="event.preventDefault();">
+                                @foreach (var item in Models.OrderBy(x => x.Order))
+                                {
+                                    <li style="cursor: grab;" class="widget widget-stats bg-gray-300 mb-7px"
+                                        @ondrop="()=>HandleDrop(item)"
+                                        @key="item">
+                                        <div class="widget-list-item" @ondragleave="@(()=> {item.IsDragOver = false;})"
+                                             @ondragenter="@(()=>{item.IsDragOver = true;})"
+                                             style="border-style: solid; border-color:@(item.IsDragOver ? "red" : "transparent"); border-width:@(item.IsDragOver ? "2px" : "1px"); transition: border-color 0.2s ease;"
+                                             @ondragstart="() => draggingModel = item"
+                                             @ondragend="()=> draggingModel = null" draggable="true">
+                                            <div class="widget-list-media">
+                                                <img src="../assets/img/user/elect.png" width="50" alt="" class="rounded">
+                                            </div>
+                                            <div class="widget-list-content">
+                                                <div>
+                                                    <b>@item.Name</b>
+                                                </div>
+                                            </div>
+                                            <div class="widget-list-action">
+
+                                            </div>
+                                        </div>
+                                    </li>
+
+
+
+
+
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row button-row">
+                    <div class="col-8">
+                        <!-- Empty column for spacing -->
+                        <a href="javascript:history.back(-1);" class="btn btn-success">
+                            <i class="fa fa-arrow-circle-left"></i> Back to previous page
+                        </a>
+                    </div>
+                    <div class="col-2">
+
+                    </div>
+                    <div class="col-2">
+                        <button @onclick="Save" type="submit" class="btn btn-primary ml-10">Save Order List</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@code {
+
+
+    private List<CategoryDto> Models { get; set; } = new List<CategoryDto>();
+
+    public class Model
+    {
+        public int Order { get; set; }
+        public string Name { get; set; } = "";
+        public bool IsDragOver { get; set; }
+    }
+
+    protected override void OnInitialized()
+    {
+        LoadCategoryTreeAsync();
+        base.OnInitialized();
+    }
+
+    private async Task LoadCategoryTreeAsync()
+    {
+        try
+        {
+
+            var response = await CategoryService.GetCategoriesTopLevelDtoAsync();
+            if (response.Success)
+            {
+                Models = response.Data;
+                StateHasChanged();
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+
+        }
+    }
+
+
+    private void HandleDrop(CategoryDto landingModel)
+    {
+        if (draggingModel == null) return;
+        int originalOrder = landingModel.Order;
+        Models.Where(x => x.Order >= originalOrder).ToList().ForEach(x => x.Order++);
+        draggingModel.Order = originalOrder;
+
+        int index = 0;
+        foreach (var model in Models.OrderBy(x => x.Order))
+        {
+            model.Order = index++;
+            model.IsDragOver = false;
+        }
+    }
+
+    private CategoryDto? draggingModel;
+
+
+    private async Task Save()
+    {
+
+        try
+        {
+            var orderedCategories = Models.OrderBy(c => c.Order).ToList();
+            foreach (var cat in orderedCategories)
+            {
+                var updateResult = await CategoryService.UpdateCategoryOrderAsync(cat.Id, cat.Order);
+                if (!updateResult.Success)
+                {
+                    Snackbar.Add(updateResult.Message, Severity.Error);
+                    return;
+                }
+            }
+            Snackbar.Add("Categories updated successfully!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+
+    }
+
+
+}

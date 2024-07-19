@@ -14,6 +14,7 @@ using Ecommerce.Shared.Entities.Roles;
 using Ecommerce.Shared.Entities.Shared;
 using Ecommerce.Shared.Entities.Sizes;
 using Ecommerce.Shared.Entities.Templates;
+using Ecommerce.Shared.Entities.TrendingProducts;
 using Microsoft.EntityFrameworkCore;
 using static Ecommerce.Shared.Services.ProductVariants.ProductVariantService;
 
@@ -49,10 +50,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductFeatureValue> ProductFeatureValues { get; set; }
     public DbSet<ProductVariantImages> productVariantImages { get; set; }
     public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
-    
+    public DbSet<TrendingProduct> TrendingProducts { get; set; }
 
 
-   public DbSet<Slider> Sliders { get; set; }
+    public DbSet<Slider> Sliders { get; set; }
     public DbSet<Role> Roles { get; set; }
 
     //public DbSet<ClusterFeatureDto> ClusterFeatureDtos { get; set; }

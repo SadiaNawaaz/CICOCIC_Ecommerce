@@ -10,6 +10,9 @@ public class CategoryDto
         public int Level { get; set; }
         public long? ParentCategoryId { get; set; }
         public HashSet<CategoryDto> SubCategories { get; set; } = new HashSet<CategoryDto>();
-        
-    
+        public int Order { get; set; }
+        public bool IsDragOver { get; set; }
+
+
+
 }

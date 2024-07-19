@@ -39,9 +39,37 @@
                     <Columns>
 
                         <PropertyColumn Property="x => x.Text" Title="Text" />
-                        <PropertyColumn Property="x => x.Active" Title="Active" />
 
-                        <PropertyColumn Property="x => x.OrderNo" Title="Order" />
+
+
+
+                        <TemplateColumn>
+                            <HeaderTemplate>
+                                <div>Active</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                @if (context.Item.Active)
+                                {
+                                    <span class="text-success">  <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Success" /></span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">
+                                        <MudIcon Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
+                                    </span>
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+
+
+
+
+                        <PropertyColumn Property="x => x.OrderNo" Title="Order No" />
+
+
+
+
+
                         <TemplateColumn>
                             <HeaderTemplate>
                                 <div>Background Image</div>

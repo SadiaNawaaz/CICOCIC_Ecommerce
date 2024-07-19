@@ -24,7 +24,7 @@ public class ProductVariantDto
     public string? Value { get; set; }
     public string? SSN { get; set; }
     public string? Description { get; set; }
-
+    public int discountPercentage { get; set; } = 0;
     public bool Publish { get; set; }
     public string ?DefaultImageUrl { get; set; }
     public List<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; } = new List<ProductVariantFeatureValue>();

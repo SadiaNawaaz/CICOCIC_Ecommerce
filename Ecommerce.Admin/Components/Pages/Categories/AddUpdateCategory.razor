@@ -255,7 +255,16 @@
 
         if (result == true)
         {
-            await RemoveCategoryAndDeleteAsync(TreeItems, item.Id);
+
+
+
+            var success = await DeleteCategoryAsync(item.Id);
+            if (success)
+            {
+                Snackbar.Add("Category deleted successfully", Severity.Success);
+                await LoadCategoryTreeAsync();
+            }
+
         }
     }
 
@@ -284,6 +293,8 @@
             if (await DeleteCategoryAsync(id))
             {
                 categories.Remove(itemToRemove);
+
+                Snackbar.Add(itemToRemove.Name+ "Category deleted successfully", Severity.Success);
                 return true;
             }
             else
@@ -306,6 +317,16 @@
 
         Snackbar.Add("Category not found", Severity.Warning);
         return false;
+    }
+
+
+    private void CollectCategoriesToDelete(CategoryDto category, HashSet<CategoryDto> categoriesToDelete)
+    {
+        categoriesToDelete.Add(category);
+        foreach (var subCategory in category.SubCategories)
+        {
+            CollectCategoriesToDelete(subCategory, categoriesToDelete);
+        }
     }
 
     #endregion

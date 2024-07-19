@@ -23,5 +23,10 @@ public static class UrlHelper
     {
         return $"{_baseUrl}/Brands/{productId}/{imageUrl}";
     }
+
+    public static string GetSliderImageUrl(long productId, string imageUrl)
+    {
+        return $"{_baseUrl}/Slider/{productId}/{imageUrl}";
+    }
 }
 

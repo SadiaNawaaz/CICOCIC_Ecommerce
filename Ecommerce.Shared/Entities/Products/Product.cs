@@ -17,6 +17,10 @@ public class Product : BaseEntity
 {
     [Required]
     public string Name { get; set; }
+    public string? Slug { get; set; }
+    public string? Code { get; set; }
+
+    public string? Thumbnail { get; set; }   
     public long CategoryId { get; set; }
     public Category Category { get; set; }
     public long TemplateMasterId { get; set; }

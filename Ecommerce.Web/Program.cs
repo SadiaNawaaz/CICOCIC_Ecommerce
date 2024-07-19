@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
+using Ecommerce.Shared.Services.Configurations;
 using Ecommerce.Shared.Services.ProductVariants;
 using Ecommerce.Web;
 using Ecommerce.Web.Components;
@@ -18,6 +19,7 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductVariantService, ProductVariantService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<ISliderService, SliderService>();
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
