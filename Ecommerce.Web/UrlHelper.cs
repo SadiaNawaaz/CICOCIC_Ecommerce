@@ -28,5 +28,9 @@ public static class UrlHelper
     {
         return $"{_baseUrl}/Slider/{productId}/{imageUrl}";
     }
+    public static string GetMenuIconImageUrl(long productId, string imageUrl)
+    {
+        return $"{_baseUrl}/Category/{productId}/{imageUrl}";
+    }
 }
 
