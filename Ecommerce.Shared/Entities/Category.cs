@@ -17,4 +17,7 @@ public class Category: BaseEntity
     public Category? ParentCategory { get; set; }
     public int Order { get; set; }
     public ICollection<Category> SubCategories { get; set; } = new List<Category>();
+
+    [NotMapped]
+    public byte[] ImageByte { get; set; }
 }

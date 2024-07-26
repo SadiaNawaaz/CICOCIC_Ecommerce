@@ -5,6 +5,24 @@
 @inject IBrandService BrandService
 @using Ecommerce.Shared.Services.Configurations
 @inject ISliderService SliderService
+
+<style>
+    details summary {
+        list-style: none;
+    }
+
+
+    details[open] summary .fa-angle-right {
+        transform: rotate(90deg);
+    }
+
+    a:hover {
+        color: #348fe2 !important;
+        text-decoration: none; 
+    }
+</style>
+
+
 <div id="header" class="header">
     <!-- BEGIN container -->
     <div class="container">
@@ -35,7 +53,7 @@
                         @*<li class="active"><a href="/">Home</a></li>*@
                         <li class="dropdown dropdown-full-width dropdown-hover">
                             <a href="#" data-bs-toggle="dropdown">
-                                All Categories
+                                 Categories
                                 <b class="caret"></b>
                                 <span class="arrow top"></span>
                             </a>
@@ -52,7 +70,16 @@
                                             {
                                                 foreach (var cat in Categories)
                                                 {
-                                                    <li><a @onclick="@(async () => await GetData(cat))">@cat.Name</a></li>
+                                                    <li>
+
+
+                                                        <a style="border-top: 1px solid var(--bs-component-dropdown-border-color);padding:7px" @onclick="@(async () => await GetData(cat))">
+
+                                                            <img src="@UrlHelper.GetMenuIconImageUrl(cat.Id, cat.Icon)" alt="" style="height:20px;width:20px" />
+                                                            @cat.Name
+                                                        </a>
+                                                    </li>
+
                                                 }
 
                                             }
@@ -100,7 +127,11 @@
                                             @foreach (var category in SubCategories)
                                             {
                                                 <div class="col-lg-3">
-                                                    <span style="text-align:center;margin:5px;font-size:medium"><b>@category.Name</b></span>
+                                                    <span style="text-align:center;margin:5px;font-size:medium">
+                                                        <b>
+                                                            <img src="@UrlHelper.GetMenuIconImageUrl(category.Id, category.Icon)" alt="" style="height:20px;width:20px" /> @category.Name
+                                                        </b>
+                                                    </span>
                                                     <ul class="dropdown-menu-list" style="margin-top:10px">
                                                         @if (category.SubCategories != null)
                                                         {
@@ -108,7 +139,12 @@
                                                             {
                                                                 <li>
                                                                     <details>
-                                                                        <summary>  @subCategory.Name</summary>
+                                                                        <summary>
+                                                                            <i class="fa fa-angle-right"></i>
+
+
+                                                                            &nbsp;@subCategory.Name
+                                                                        </summary>
                                                                         <div class="details">
                                                                             @if (subCategory.SubCategories != null)
                                                                             {
@@ -163,11 +199,13 @@
 
                         @if (Categories != null && Categories.Count() > 0)
                         {
-                            @foreach (var category in Categories.Take(6).OrderBy(a=>a.Order))
+                            @foreach (var category in Categories.Take(6).OrderBy(a => a.Order))
                             {
                                 <li class="dropdown dropdown-hover">
                                     <a href="#" data-bs-toggle="dropdown">
+
                                         @category.Name
+
                                         <b class="caret"></b>
                                         <span class="arrow top"></span>
                                     </a>
@@ -176,7 +214,10 @@
                                         <div class="dropdown-menu">
                                             @foreach (var subCategory in category.SubCategories)
                                             {
-                                                <a class="dropdown-item" href="product.html">@subCategory.Name</a>
+
+
+
+                                                <a class="dropdown-item" href="#">@subCategory.Name</a>
                                             }
                                         </div>
                                     }
@@ -194,10 +235,11 @@
 
                     @if (Categories != null && Categories.Count > 6)
                     {
-                        @foreach (var category in Categories.Skip(6).Take(1).OrderBy(a=>a.Order))
+                        @foreach (var category in Categories.Skip(6).Take(1).OrderBy(a => a.Order))
                         {
                             <li class="dropdown dropdown-hover">
                                 <a href="#" data-bs-toggle="dropdown">
+
                                     @category.Name
                                     <b class="caret"></b>
                                     <span class="arrow top"></span>
@@ -237,7 +279,7 @@
     private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
     public List<CategoryDto> SubCategories = new List<CategoryDto>();
     public List<Brand> Brands = new List<Brand>();
-    private List<Ecommerce.Shared.Entities.Configurations.Slider> sliders= new List<Ecommerce.Shared.Entities.Configurations.Slider>();
+    private List<Ecommerce.Shared.Entities.Configurations.Slider> sliders = new List<Ecommerce.Shared.Entities.Configurations.Slider>();
 
 
 
@@ -251,7 +293,7 @@
     {
         await LoadCategoryTreeAsync();
         await LoadBrands();
-       
+
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

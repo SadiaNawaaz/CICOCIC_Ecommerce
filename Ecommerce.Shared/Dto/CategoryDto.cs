@@ -12,6 +12,8 @@ public class CategoryDto
         public HashSet<CategoryDto> SubCategories { get; set; } = new HashSet<CategoryDto>();
         public int Order { get; set; }
         public bool IsDragOver { get; set; }
+        public string? IconPath { get; set; } = "";
+        public byte[] ImageByte { get; set; } = null;
 
 
 

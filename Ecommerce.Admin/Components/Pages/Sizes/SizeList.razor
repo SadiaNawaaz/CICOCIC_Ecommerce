@@ -30,9 +30,9 @@
                 <button class="btn btn-primary mb-3" @onclick="NavigateToAddSize">Add Size</button>
                 <MudDataGrid T="GeneralSize" Items="@sizes" RowsPerPage="5" Striped="true" Bordered="true">
                     <ColGroup>
-                        <col style="width: 70%;" />
+                        <col style="width: 80%;" />
                         <col style="width: 20%;" />
-                        <col style="width: 10%;" />
+                        
                     </ColGroup>
                     <Columns>
                         <PropertyColumn Property="x => x.Name" Title="Name" />

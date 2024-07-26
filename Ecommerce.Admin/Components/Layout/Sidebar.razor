@@ -1,4 +1,8 @@
-﻿<div id="sidebar" class="app-sidebar" data-bs-theme="dark">
+﻿
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div id="sidebar" class="app-sidebar" data-bs-theme="dark">
     <!-- BEGIN scrollbar -->
     <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
         <!-- BEGIN menu -->
@@ -12,11 +16,11 @@
                     <div class="menu-profile-info">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                Sean Ngu
+                                @UserName
                             </div>
                             <div class="menu-caret ms-auto"></div>
                         </div>
-                        <small>Frontend developer</small>
+                        <small>Administrator</small>
                     </div>
                 </a>
             </div>
@@ -148,7 +152,7 @@
                 </a>
             </div>
 
-            
+
             <div class="menu-item has-sub">
                 <a href="javascript:;" class="menu-link">
                     <div class="menu-icon">
@@ -205,3 +209,28 @@
 </div>
 <div class="app-sidebar-bg" data-bs-theme="dark"></div>
 <div class="app-sidebar-mobile-backdrop"><a href="#" data-dismiss="app-sidebar-mobile" class="stretched-link"></a></div>
+
+@code {
+    public string UserName = "";
+    protected override async Task OnInitializedAsync()
+    {
+
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+
+                UserName = user.Identity.Name;
+
+            }
+        }
+        catch(Exception ex)
+            {
+
+            }
+
+    }
+}

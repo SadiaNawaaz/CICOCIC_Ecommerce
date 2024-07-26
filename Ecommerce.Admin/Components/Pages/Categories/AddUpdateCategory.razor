@@ -8,11 +8,29 @@
 @inject ISnackbar Snackbar
 @using Ecommerce.Shared.Services.Shared;
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<style>
+    .custom-tree-item {
+        color: gray;
+        font-weight: bold;
+    }
+
+    .custom-tree-item-selected {
+        color: rgb(13 16 18);
+        background-color: rgb(185 207 231 / 10%);
+        font-weight: bold;
+    }
+
+</style>
+
+
 <div class="col-xl-12">
 
     <div class="panel panel-inverse" data-sortable-id="tree-view-1" style="min-height:500px">
         <div class="panel-heading">
-            <h4 class="panel-title">Category</h4>
+            <h4 class="panel-title">Category
+               
+            </h4>
             <div class="panel-heading-btn">
                 <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
                 <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
@@ -38,13 +56,30 @@
                     <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                 </div>
             }
+
+       
             <MudTreeView Items="@TreeItems" Hover="true" Width="100%">
                 <ItemTemplate Context="item">
-                    <MudTreeViewItem Items="@item.SubCategories" Icon="@Icons.Material.Filled.Folder" sm="6">
+                    <MudTreeViewItem Class="@GetItemClass(item)" @onclick="() => SelectItem(item)" Items="@item.SubCategories" sm="6">                                                       
                         <BodyContent>
+                            @if (!string.IsNullOrEmpty(item.Icon))
+                            {
+
+                                var icon = "/Category/" + item.Id.ToString() + "/" + item.Icon;
+
+                                <img src="@icon" alt="@icon" style="height: 24px; width: 24px" />
+                            }
+                            else
+                            {
+                                <i class="fas fa-lg fa-fw me-10px fa-folder-open"></i>
+                            }
                             <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
-                                <MudText Style="justify-self: start;">@item.Name</MudText>
+
+                                <MudText Style="justify-self: start;">&nbsp;&nbsp;&nbsp; @item.Name </MudText>
                                 <div style="justify-self: end;">
+
+
+
 
                                     <MudTooltip Text="Edit">
                                         <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="text-success btn btn-sm" OnClick="() => OpenAddDialog(item)" />
@@ -73,9 +108,6 @@
 
     private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
     private bool IsLoading { get; set; } = false;
-
-
-
 
     #region
 
@@ -125,7 +157,12 @@
             string value = result.Data as string ?? string.Empty;
             if (!result.Cancelled && value != null)
             {
-                string newCategoryName = value;
+
+
+                var data = result.Data as dynamic;
+                string newCategoryName = data.Name ?? string.Empty;
+                string newCategoryIcon = data.Icon ?? string.Empty;
+                byte[] newCategoryImageByte = data.ImageByte ?? Array.Empty<byte>();
 
                 if (!string.IsNullOrEmpty(newCategoryName))
                 {
@@ -134,26 +171,42 @@
                     {
                         var category = new Category
                         {
-                            Name = value,
-                            Icon = "",
+                            Name = newCategoryName,
+
                             Level = 1,
-                            ParentCategoryId = null
+                            ParentCategoryId = null,
+                            Icon = newCategoryIcon ?? string.Empty,
+                            ImageByte = newCategoryImageByte,
+
+
+
+
                         };
 
-                        await SaveOrUpdateCategoryAsync(category);
-                        TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId });
+                        Category cate= await SaveOrUpdateCategoryAsync(category);
+                        if(cate!=null)
+                        {
+                            TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId,Icon= cate.Icon });
+                        }
+
                     }
                     else
                     {
                         var category = new Category
                         {
                             Name = newCategoryName,
-                            Icon = "",
+                            Icon = newCategoryIcon ?? string.Empty,
+                            ImageByte = newCategoryImageByte,
                             Level = item.Level + 1,
                             ParentCategoryId = item.Id
                         };
-                        await SaveOrUpdateCategoryAsync(category);
-                        item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId });
+                        Category cate = await SaveOrUpdateCategoryAsync(category);
+
+                        if (cate != null)
+                        {
+                            item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId,Icon = cate.Icon });
+                        }
+
                     }
                 }
             }
@@ -176,7 +229,12 @@
 
             if (!result.Cancelled)
             {
-                var newName = result.Data as string ?? string.Empty;
+
+                var data = result.Data as dynamic;
+                string newName = data.Name ?? string.Empty;
+                string newCategoryIcon = data.Icon ?? string.Empty;
+                byte[] newCategoryImageByte = data.ImageByte ?? Array.Empty<byte>();
+
                 if (!string.IsNullOrEmpty(newName))
                 {
                     item.Name = newName;
@@ -185,9 +243,11 @@
                     {
                         Id = item.Id,
                         Name = item.Name,
-                        Icon = item.Icon,
+                        Icon = newCategoryIcon ?? string.Empty,
+                        ImageByte = newCategoryImageByte,
                         Level = item.Level,
-                        ParentCategoryId = item.ParentCategoryId
+                        ParentCategoryId = item.ParentCategoryId,
+
                     };
 
                     await SaveOrUpdateCategoryAsync(category);
@@ -201,7 +261,7 @@
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
     }
-    private async Task SaveOrUpdateCategoryAsync(Category category)
+    private async Task<Category> SaveOrUpdateCategoryAsync(Category category)
     {
         try
         {
@@ -217,15 +277,45 @@
             if (response.Success)
             {
                 Snackbar.Add(response.Message, Severity.Success);
+
+
+                var CategoryImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Category", category.Id.ToString());
+
+
+                if (category.ImageByte != null && category.ImageByte.Length > 0)
+                {
+
+
+                    if (Directory.Exists(CategoryImagesPath))
+                    {
+                        Directory.Delete(CategoryImagesPath, true);
+                    }
+
+                    if (!Directory.Exists(CategoryImagesPath))
+                    {
+                        Directory.CreateDirectory(CategoryImagesPath);
+                    }
+
+                    var filePath = Path.Combine(CategoryImagesPath, category.Icon);
+                    await File.WriteAllBytesAsync(filePath, category.ImageByte);
+
+                    category.Icon = category.Icon;
+                }
+
+
+
+                return category;
             }
             else
             {
                 Snackbar.Add(response.Message, Severity.Error);
+                return null;
             }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            return null;
         }
     }
     #endregion
@@ -262,6 +352,15 @@
             if (success)
             {
                 Snackbar.Add("Category deleted successfully", Severity.Success);
+
+                var CategoryImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Category", item.Id.ToString());
+
+
+                if (Directory.Exists(CategoryImagesPath))
+                {
+                    Directory.Delete(CategoryImagesPath, true);
+                }
+
                 await LoadCategoryTreeAsync();
             }
 
@@ -330,4 +429,21 @@
     }
 
     #endregion
+
+
+    private CategoryDto _selectedItem;
+    private string GetItemClass(CategoryDto item)
+    {
+        return item == _selectedItem ? "custom-tree-item custom-tree-item-selected" : "custom-tree-item";
+    }
+
+    private string GetIcon(CategoryDto item)
+    {
+        return item.Icon; ;
+    }
+
+    private void SelectItem(CategoryDto item)
+    {
+        _selectedItem = item;
+    }
 }
