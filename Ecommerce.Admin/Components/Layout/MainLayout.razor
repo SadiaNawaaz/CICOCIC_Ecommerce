@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
+@using Ecommerce.Admin.Components.Pages.Auth.Logins 
 <style>
 
     #blazor-error-ui {
@@ -306,7 +307,7 @@
                 </div>
             </Authorized>
             <NotAuthorized>
-                <Ecommerce.Admin.Components.Pages.Auth.Login></Ecommerce.Admin.Components.Pages.Auth.Login>
+                <Login></Login>
             </NotAuthorized>
         </AuthorizeView>
 

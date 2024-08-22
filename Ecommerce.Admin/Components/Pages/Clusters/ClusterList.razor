@@ -39,9 +39,9 @@
         <div class="row fileupload-buttonbar">
             <div class="col-xl-7">
 
-                <button type="button" class="btn btn-primary start me-1" @onclick="NavigateToAddEditCluster">
+                <button type="button" class="btn btn-primary start me-1  mb-3" @onclick="NavigateToAddEditCluster">
                     <i class="fa fa-fw fa-add"></i>
-                    <span>Add new</span>
+                    <span>Add Cluster</span>
                 </button>
 
                 <!-- The global file processing state -->
@@ -102,7 +102,7 @@
     private List<string> _events = new();
     [Inject]
     public IDialogService DialogService { get; set; }
-    
+
 
     // Quick filter - filter globally across multiple columns with the same input
     private Func<Cluster, bool> _quickFilter => x =>
@@ -142,7 +142,7 @@
         }
     }
 
-  
+
 
     private void EditCluster(Cluster cluster)
     {

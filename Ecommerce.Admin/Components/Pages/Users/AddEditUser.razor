@@ -6,6 +6,8 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IRoleService roleService
 @using Ecommerce.Shared.Services.Roles
+@using Radzen
+@using Radzen.Blazor
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -31,49 +33,55 @@
                 <EditForm Model="@user" OnValidSubmit="@HandleValidSubmit" FormName="userForm">
                     <DataAnnotationsValidator />
                     <div class="row">
-                        <div class="col-5 mb-3">
+                        <div class="col-4 mb-3">
                             <label for="FirstName">First Name</label>
                             <InputText id="FirstName" class="form-control" @bind-Value="user.FirstName" />
                             <span class="text-danger"><ValidationMessage For="@(() => user.FirstName)" /></span>
                         </div>
-                        <div class="col-5 mb-3">
+                        <div class="col-4 mb-3">
                             <label for="LastName">Last Name</label>
                             <InputText id="LastName" class="form-control" @bind-Value="user.LastName" />
                             <span class="text-danger"><ValidationMessage For="@(() => user.LastName)" /></span>
                         </div>
-                        <div class="col-5 mb-3">
+
+                        <div class="col-4 mb-3">
+                            <label for="Email">Username</label>
+                            <InputText id="Email" class="form-control" @bind-Value="user.UserName" />
+                            <span class="text-danger"><ValidationMessage For="@(() => user.UserName)" /></span>
+                        </div>
+
+                        <div class="col-4 mb-3">
                             <label for="Email">Email</label>
                             <InputText id="Email" class="form-control" @bind-Value="user.Email" />
                             <span class="text-danger"><ValidationMessage For="@(() => user.Email)" /></span>
                         </div>
 
-                        <div class="col-5 mb-3">
+                        <div class="col-4 mb-3">
                             <label for="Email">Extra Email</label>
                             <InputText id="Email" class="form-control" @bind-Value="user.ExtraEmail" />
                             <span class="text-danger"><ValidationMessage For="@(() => user.ExtraEmail)" /></span>
                         </div>
-                        <div class="col-5 mb-3">
+                        <div class="col-4 mb-3">
+                            <label for="Role">Role</label>                        
+
+                            <RadzenDropDown @bind-Value=@userRoles Data=@roles TextProperty="@nameof(Role.Name)" ValueProperty="@nameof(Role.Id)" Name="DropDownMultipleChips"
+                                            Multiple=true AllowClear=true Placeholder="Select Role" Chips=true Style="width: 100%; max-width: 400px;" Class="form-control" />
+
+                        </div>
+
+                        <div class="col-4 mb-3">
                             <label for="Password">Password</label>
                             <InputText id="Password" class="form-control" @bind-Value="user.Password" type="password" />
                             <span class="text-danger"><ValidationMessage For="@(() => user.Password)" /></span>
                         </div>
-
                         <div class="col-5 mb-3">
-                            <label for="Role">Role</label>
-                            <InputSelect id="Role" class="form-control" @bind-Value="user.RoleId">
-                                <option value="">Select Role</option>
-                                @foreach (var role in roles)
-                                {
-                                    <option value="@role.Id">@role.Name</option>
-                                }
-                            </InputSelect>
-                            <span class="text-danger"><ValidationMessage For="@(() => user.RoleId)" /></span>
-                        </div>
-
-
-                        <div class="col-9 mb-3">
-                            <label for="Role">Is Agent</label>
-                            <InputCheckbox  @bind-Value="user.IsAgent" />
+                            
+                           
+                            <div class="form-check mt-20px" >
+                             
+                                <InputCheckbox @bind-Value="user.IsAgent"  class="form-check-input"  />
+                                <label class="form-check-label" for="mincheck1">Is Agent</label>
+                            </div>
                         </div>
 
                         <div class="col-2 mt-15px ml-5">
@@ -85,16 +93,19 @@
                             </a>
                         </div>
                     </div>
-                </EditForm>
+</EditForm>
             </div>
         </div>
     </div>
 </div>
 
 @code {
+
+
     [Parameter] public long? UserId { get; set; }
     private User user = new User();
     private List<Role> roles = new List<Role>();
+    IList<long> userRoles = new long[] {  };
 
     protected override async Task OnInitializedAsync()
     {
@@ -106,6 +117,7 @@
             if (response.Success)
             {
                 user = response.Data;
+                userRoles = user.UserRoles.Select(ur => ur.RoleId).ToList();
             }
             else
             {
@@ -118,13 +130,13 @@
     {
         ServiceResponse<User> response;
 
-        if (user.RoleId == 0)
+        if (userRoles.Count()<1)
         {
             Snackbar.Add("Please Select Role", Severity.Info);
 
             return;
         }
-
+        user.UserRoles = userRoles.Select(roleId => new UserRole { UserId = user.Id, RoleId = roleId }).ToList();
         if (UserId.HasValue)
         {
             response = await UserService.UpdateUserAsync(user);

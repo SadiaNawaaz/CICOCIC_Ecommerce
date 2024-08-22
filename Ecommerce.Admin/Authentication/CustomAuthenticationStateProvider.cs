@@ -38,7 +38,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
         var claims = new[]
         {
                 new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.Name)
+                //new Claim(ClaimTypes.Role, user.Role.Name)
             };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -88,7 +88,7 @@ public class CustomAuthenticationStateProviderss : AuthenticationStateProvider
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.Name)
+            //new Claim(ClaimTypes.Role, user.Role.Name)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

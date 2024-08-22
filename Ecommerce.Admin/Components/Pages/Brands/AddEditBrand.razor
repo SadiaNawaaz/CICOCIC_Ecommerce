@@ -52,14 +52,8 @@
                             <button type="submit" class="btn btn-primary">Save</button>
                         </div>
 
-
-
-
                         <div class="col-xxl-3 col-md-6">
                             <div>
-
-
-
                                 @if (brand.ImageUrl != null)
                                 {
 
@@ -67,8 +61,6 @@
                                         <img src="@(!string.IsNullOrEmpty(imageUrl) ? imageUrl : brand.ImageUrl)" alt="Image Preview" style="height:150px;width:150px" />
                                         <button type="button" @onclick="DeleteImage" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
                                     </div>
-
-
                                 }
                             </div>
                         </div>

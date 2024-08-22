@@ -1,0 +1,639 @@
+﻿@page "/Inbox"
+@using Ecommerce.Mailer.DTOs
+@using MailKit
+@using Ecommerce.Mailer
+@inject IMailerServices MailerServices
+@using Radzen
+@using Radzen.Blazor
+@using Ecommerce.Admin.Components.Tags;
+@inject IJSRuntime JSRuntime
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject ISnackbar Snackbar
+<div class="mailbox">
+    <!-- BEGIN mailbox-sidebar -->
+    <div class="mailbox-sidebar">
+        <div class="mailbox-sidebar-header d-flex justify-content-center">
+            <a href="#emailNav" data-bs-toggle="collapse" class="btn btn-dark btn-sm me-auto d-block d-lg-none">
+                <i class="fa fa-cog"></i>
+            </a>
+            <a href="javascript:void(0)" @onclick="ComposeEmail" class="btn btn-dark ps-40px pe-40px btn-sm">
+                Compose
+            </a>
+        </div>
+        <div class="mailbox-sidebar-content collapse d-lg-block" id="emailNav">
+            <!-- BEGIN scrollbar -->
+            <div data-scrollbar="true" data-height="100%" data-skip-mobile="true">
+                <div class="nav-title"><b>FOLDERS</b></div>
+                <ul class="nav nav-inbox">
+                    <li class="@GetActiveClass(SpecialFolder.All)"><a href="javascript:void(0)" @onclick="() => LoadEmails(SpecialFolder.All)"><i class="fa fa-hdd fa-lg fa-fw me-2"></i> Inbox <span class="badge bg-gray-600 fs-10px rounded-pill ms-auto fw-bolder pt-4px pb-5px px-8px">@EmailCount</span></a></li>
+                    <li class="@GetActiveClass(SpecialFolder.Sent)"><a href="javascript:void(0)" @onclick="() => LoadEmails(SpecialFolder.Sent)"><i class="fa fa-envelope fa-lg fa-fw me-2"></i> Sent <span class="badge bg-gray-600 fs-10px rounded-pill ms-auto fw-bolder pt-4px pb-5px px-8px">@SentCount</span></a></li>
+                    <li class="@GetActiveClass(SpecialFolder.Drafts)"><a href="javascript:void(0)" @onclick="() => LoadEmails(SpecialFolder.Drafts)"><i class="fa fa-save fa-lg fa-fw me-2"></i> Drafts <span class="badge bg-gray-600 fs-10px rounded-pill ms-auto fw-bolder pt-4px pb-5px px-8px">@DraftCount</span></a></li>
+                    <li class="@GetActiveClass(SpecialFolder.Trash)"><a href="javascript:void(0)" @onclick="() => LoadEmails(SpecialFolder.Trash)"><i class="fa fa-trash-alt fa-lg fa-fw me-2"></i> Trash</a></li>
+                </ul>
+            </div>
+            <!-- END scrollbar -->
+        </div>
+    </div>
+    <!-- END mailbox-sidebar -->
+    <!-- BEGIN mailbox-content -->
+    <div class="mailbox-content">
+        <div class="mailbox-content-header">
+            <!-- BEGIN btn-toolbar -->
+            <div class="btn-toolbar align-items-center">
+                <div class="form-check me-2">
+                    <input type="checkbox" class="form-check-input" data-checked="email-checkbox" id="emailSelectAll" data-change="email-select-all" />
+                    <label class="form-check-label" for="emailSelectAll"></label>
+                </div>
+                <div class="dropdown me-2">
+                    <button class="btn btn-white btn-sm" data-bs-toggle="dropdown">
+                        View All <span class="caret ms-3px"></span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2"></i> All</a>
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2 text-muted"></i> Unread</a>
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2 text-blue"></i> Contacts</a>
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2 text-success"></i> Groups</a>
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2 text-warning"></i> Newsletters</a>
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2 text-danger"></i> Social updates</a>
+                        <a href="javascript:;" class="dropdown-item"><i class="fa fa-circle fs-9px fa-fw me-2 text-indigo"></i> Everything else</a>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-white me-2"><i class="fa fa-redo"></i></button>
+                <div class="w-100 d-sm-none d-block mb-2 hide" data-email-action="divider"></div>
+                <!-- BEGIN btn-group -->
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-white hide" data-email-action="delete"><i class="fa fa-times me-1"></i> <span class="hidden-xs">Delete</span></button>
+                    <button class="btn btn-sm btn-white hide" data-email-action="archive"><i class="fa fa-folder me-1"></i> <span class="hidden-xs">Archive</span></button>
+                    <button class="btn btn-sm btn-white hide" data-email-action="archive"><i class="fa fa-trash me-1"></i> <span class="hidden-xs">Junk</span></button>
+                </div>
+                <!-- END btn-group -->
+                <!-- BEGIN btn-group -->
+                <div class="btn-group ms-auto">
+                    <button class="btn btn-white btn-sm">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-white btn-sm">
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                </div>
+                <!-- END btn-group -->
+            </div>
+            <!-- END btn-toolbar -->
+        </div>
+        <div class="mailbox-content-body">
+            @if (IsComposing)
+            {
+                <!-- BEGIN scrollbar -->
+            <div data-scrollbar="true" data-height="100%" data-skip-mobile="true">
+                <!-- BEGIN form -->
+                <!-- BEGIN mailbox-to -->
+                <div class="mailbox-to">
+                    <label class="control-label">To:</label>
+
+                    <InputTags Value="ToEmails" />
+
+                    @*<div class="mailbox-float-link">
+                <a href="#" data-click="add-cc" data-name="Cc" class="me-5px">Cc</a>
+                <a href="#" data-click="add-cc" data-name="Bcc">Bcc</a>
+            </div>*@
+                </div>
+                <!-- END mailbox-to -->
+                @*<div data-id="extra-cc"></div>*@
+
+                <div data-id="extra-cc">
+                    <div class="mailbox-to">
+                        <label class="control-label">Cc:</label>
+
+                        <InputTags Value="CcEmails" />
+                    </div>
+
+                    <div class="mailbox-to">
+                        <label class="control-label">Bcc:</label>
+                        <InputTags Value="BccEmails" />
+                    </div>
+                </div>
+
+
+                <div class="mailbox-subject">
+                    <input type="text" class="form-control" placeholder="Subject" @bind="@newEmail.Subject" />
+
+                </div>
+                <div class="mailbox-input">
+                    <RadzenHtmlEditor @bind-Value=@htmlValue style="height: 300px;" Input=@OnInput Change=@OnChange Paste=@OnPaste Execute=@OnExecute UploadUrl="upload/image" />
+
+                </div>
+
+                <div class="mailbox-input mt-3">
+                    <InputFile OnChange="OnFileChange" multiple  />
+
+                </div>
+                @if (uploadedFiles!=null && uploadedFiles.Count > 0)
+                 {
+
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+
+                            <tbody>
+                                @foreach (var file in uploadedFiles)
+                                {
+                                    <tr>
+                                        <td>@file.Name (@file.Size / 1024) K</td>
+                                        <td>            <button class="btn btn-link text-danger" @onclick="() => RemoveFile(file)"><i class="fa fa-times"></i></button></td>
+                                       
+                                    </tr>
+                                }
+                                </tbody>
+                        </table>
+                    </div>
+                }      
+
+            </div>
+                <div class="mailbox-content-footer d-flex align-items-center justify-content-end">
+                    <button type="button" @onclick="@Discard" class="btn btn-white ps-40px pe-40px me-5px">Discard</button>
+                    <button type="button" @onclick="SendEmail" class="btn btn-primary ps-40px pe-40px">Send</button>
+                </div>
+                <!-- END scrollbar -->
+            }
+
+            else if (selectedEmail != null)
+            {
+                <!-- BEGIN scrollbar -->
+                <div data-scrollbar="true" data-height="100%" data-skip-mobile="true" class="ps ps--active-y" style="height: 100%;">
+                    <div class="p-3">
+                        <h3 class="mb-3">@selectedEmail.Subject</h3>
+                        <div class="d-flex mb-3">
+
+
+                            <a href="#" class="email-user bg-grey">
+                                <span class="text-white">@GetFirstLetter(selectedEmail.From[0].Name)</span>
+                            </a>
+
+                            <div class="ps-3">
+                                <div class="email-from text-dark fs-14px mb-3px fw-bold">
+                                    @selectedEmail.From[0].Name &lt;@selectedEmail.From[0].Email&gt;
+                                </div>
+
+                                <div class="mb-3px"><i class="fa fa-clock fa-fw"></i> @selectedEmail.Date</div>
+
+
+                                @if (selectedEmail != null && selectedEmail.To.Count > 0)
+                                {
+                                    <div class="email-to">
+                                        To: @GetRecipientsString(selectedEmail.To)
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <hr class="bg-gray-500">
+                        <ul class="attached-document clearfix">
+
+                            @if (selectedEmail.HasAttachments)
+                            {
+                                @foreach (var v in selectedEmail.Attachments.Select((attachment, index) => new { attachment, index }))
+                                {
+                                    <li class="fa-file" @onclick="() => DownloadFile(v.index)" >
+                                        <div class="document-file">
+                                            <a href="javascript:;">
+                                                <i class="fa fa-file"></i>
+                                            </a>
+                                        </div>
+                                        <div class="document-name">
+                                            <a class="text-decoration-none">@v.attachment.Name</a>
+                                        </div>
+                                    </li>
+                                }
+
+                            }
+
+
+                        </ul>
+
+                        <p class="text-dark">
+
+                            <RadzenHtmlEditor @bind-Value=@selectedEmail.Body style="height:300px" UploadUrl="upload/image" Disabled="true" />
+
+
+                        </p>
+
+                        <br>
+
+                    </div>
+                    <div class="ps__rail-x" style="left: 0px; bottom: 0px;"><div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps__rail-y" style="top: 0px; height: 568px; right: 0px;"><div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 531px;"></div></div>
+                </div>
+                <!-- END scrollbar -->
+
+
+            }
+
+
+            else
+            {
+                <div data-scrollbar="true" data-height="100%" data-skip-mobile="true">
+                    <!-- BEGIN list-email -->
+                    @if (IsLoading)
+                    {
+                        <div class="text-center">
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-lg no-radius list-email">
+                            @if (emails != null && emails.Count > 0)
+                            {
+                                @foreach (var email in emails)
+                                {
+                                    <li class="list-group-item">
+                                        <div class="email-checkbox">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" data-checked="email-checkbox" id="emailCheckbox13">
+                                                <label class="form-check-label" for="emailCheckbox13"></label>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="email-user bg-grey">
+                                            <span class="text-white">@GetFirstLetter(email.From)</span>
+                                        </a>
+                                        <div class="email-info">
+                                            <a href="#" @onclick="() => LoadEmailDetails(email.UniqueId)">
+                                                <span class="email-sender">@email.From</span>
+                                                <span class="email-title">@email.Subject</span>
+                                                <span class="email-desc">@email.Body...</span>
+                                                <span class="email-time">@email.Date</span>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                </div>
+
+                <div class="mailbox-content-footer d-flex align-items-center">
+                    <div class="text-dark fw-bold">
+                        @if (currentFolder == SpecialFolder.All)
+                        {
+
+                            <span>Total:</span>
+                            @EmailCount
+
+                            <div class="text-center mt-3">
+                                <button class="btn btn-white btn-sm" @onclick="() => LoadEmails(SpecialFolder.All)">Load More</button>
+                            </div>
+                        }
+                        @if (currentFolder == SpecialFolder.Drafts)
+                        {
+                            <span>Total:</span>
+                            @DraftCount
+                            <div class="text-center mt-3">
+                                <button class="btn btn-white btn-sm" @onclick="() => LoadEmails(SpecialFolder.Drafts)">Load More</button>
+                            </div>
+                        }
+                        @if (currentFolder == SpecialFolder.Sent)
+                        {
+                            <span>Total:</span>
+                            @SentCount
+                            <div class="text-center mt-3">
+                                <button class="btn btn-white btn-sm" @onclick="() => LoadEmails(SpecialFolder.Sent)">Load More</button>
+                            </div>
+
+
+                        }
+
+                    </div>
+
+
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+
+<!-- END mailbox -->
+
+@code {
+    private int currentPage = 1;
+    private int pageSize = 10;
+    public int EmailCount = 0;
+    public int SentCount = 0;
+    public int DraftCount = 0;
+    private List<ListedItem> emails;
+    private DetailsEmail selectedEmail = null;
+    private SpecialFolder currentFolder = SpecialFolder.All;
+    private bool IsLoading { get; set; } = false;
+    private bool IsComposing { get; set; } = false;
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private SendEmail newEmail = new SendEmail
+    {
+        To = new List<EmailAddress>(),
+        Cc = new List<EmailAddress>(),
+        Bcc = new List<EmailAddress>()
+    };
+    public List<string> ToEmails { get; set; } = new()
+    {
+
+    };
+    public List<string> CcEmails { get; set; } = new()
+    {
+
+    };
+    public List<string> BccEmails { get; set; } = new()
+    {
+
+    };
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEmails(currentFolder);
+    }
+
+    private async Task LoadEmails(SpecialFolder folder)
+    {
+        try
+        {
+            selectedEmail = null;
+
+            if (folder != currentFolder)
+            {
+                currentPage = 1;
+            }
+
+            IsLoading = true;
+            currentFolder = folder;
+            await MailerServices.Init();
+            currentFolder = folder;
+            if (currentPage == 1)
+            {
+                emails = (await MailerServices.FetchEmailsFromFolderAsync(folder, currentPage, pageSize)).Items.ToList();
+            }
+            else if (currentPage > 1)
+            {
+                var newEmails = (await MailerServices.FetchEmailsFromFolderAsync(folder, currentPage, pageSize)).Items.ToList();
+                emails.AddRange(newEmails.ToList());
+            }
+            currentPage++;
+            if (folder == SpecialFolder.All)
+            {
+                EmailCount = emails.Count;
+            }
+            else if (folder == SpecialFolder.Sent)
+            {
+                SentCount = emails.Count;
+            }
+            else if (folder == SpecialFolder.Drafts)
+            {
+                DraftCount = emails.Count;
+            }
+
+            IsLoading = false;
+        }
+        catch (Exception ex)
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadEmailDetails(uint? uniqueId)
+    {
+        selectedEmail = await MailerServices.FetchFullEmailFromInboxAsync(uniqueId.Value, currentFolder);
+    }
+
+    private string GetFirstLetter(string emailFrom)
+    {
+        if (string.IsNullOrEmpty(emailFrom))
+            return "?";
+
+        return emailFrom[0].ToString().ToUpper();
+    }
+
+    private string GetActiveClass(SpecialFolder folder)
+    {
+        return currentFolder == folder ? "active" : "";
+    }
+
+    private void ComposeEmail()
+    {
+        IsComposing = true;
+    }
+
+    private void CloseComposeEmail()
+    {
+        IsComposing = false;
+        newEmail = new SendEmail
+        {
+            To = new List<EmailAddress>(),
+            Cc = new List<EmailAddress>(),
+            Bcc = new List<EmailAddress>()
+        };
+    }
+
+    private async Task SendEmail()
+    {
+        try
+        {
+            newEmail.Body = htmlValue;
+            if (String.IsNullOrEmpty(newEmail.Subject))
+            {
+                var result = await DialogService.ShowMessageBox("Confirmation", "Send this message without a subject? ?", yesText: "Yes", cancelText: "No");
+                if (result == true)
+                {
+                    newEmail.Subject = "";
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (String.IsNullOrEmpty(newEmail.Body))
+            {
+                var result = await DialogService.ShowMessageBox("Confirmation", "Send this message without a Body? ?", yesText: "Yes", cancelText: "No");
+                if (result == true)
+                {
+                    newEmail.Body = "";
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+
+            newEmail.To = ToEmails.Select(email => new EmailAddress { Email = email }).ToList();
+            newEmail.Cc = CcEmails.Select(email => new EmailAddress { Email = email }).ToList();
+            newEmail.Bcc = BccEmails.Select(email => new EmailAddress { Email = email }).ToList();
+
+            if (newEmail.To.Count < 1)
+            {
+                Snackbar.Add("Please specify at least one recipient", Severity.Error);
+                return;
+            }
+
+            newEmail.Attachments = await ConvertFilesToStreams(uploadedFiles); // Convert files
+            bool emailresult= await MailerServices.SendEmailAsync(newEmail, "administrator@registerbyasset.com");
+            if(emailresult)
+            {
+
+                Snackbar.Add("Message sent", Severity.Success);
+                IsComposing = false;
+
+                newEmail = new SendEmail
+                {
+                    To = new List<EmailAddress>(),
+                    Cc = new List<EmailAddress>(),
+                    Bcc = new List<EmailAddress>()
+                };
+                await LoadEmails(currentFolder);
+            }
+            else
+            {
+                Snackbar.Add("Some thing wen wrong", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SaveDraft()
+    {
+        try
+        {
+            await MailerServices.SaveEmailAsync(newEmail);
+            IsComposing = false;
+            newEmail = new SendEmail
+            {
+                To = new List<EmailAddress>(),
+                Cc = new List<EmailAddress>(),
+                Bcc = new List<EmailAddress>()
+            };
+            await LoadEmails(SpecialFolder.Drafts);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+    }
+
+    private void ShowCcSection()
+    {
+        IsCcVisible = true;
+    }
+
+    private void ShowBccSection()
+    {
+        IsBccVisible = true;
+    }
+
+    private bool IsCcVisible { get; set; } = false;
+    private bool IsBccVisible { get; set; } = false;
+
+    string htmlValue = "<h6>Hi, </h1>";
+
+    void OnPaste(HtmlEditorPasteEventArgs args)
+    {
+
+    }
+
+    void OnChange(string html)
+    {
+
+    }
+
+    void OnInput(string html)
+    {
+
+    }
+
+    void OnExecute(HtmlEditorExecuteEventArgs args)
+    {
+
+    }
+
+    private async Task Discard()
+    {
+        IsComposing = false;
+        newEmail = new SendEmail
+        {
+            To = new List<EmailAddress>(),
+            Cc = new List<EmailAddress>(),
+            Bcc = new List<EmailAddress>()
+        };
+        ToEmails = new List<string>();
+        CcEmails = new List<string>();
+        BccEmails = new List<string>();
+
+    }
+
+    private string GetRecipientsString(List<EmailAddressDTO> recipients)
+    {
+        return string.Join(", ", recipients.Select(r => $"{r.Name} <{r.Email}>"));
+    }
+
+    private async Task DownloadFile(int index)
+    {
+
+        try
+        {
+            var fileToDownload = selectedEmail.Attachments[index];
+            // await  MailerServices.GetAttachmentAsync(SpecialFolder.All.ToString(), selectedEmail.UniqueId, index);
+            var result = await MailerServices.GetAttachmentAsync(SpecialFolder.All.ToString(), selectedEmail.UniqueId, index);
+
+            var bytes = new byte[result.FileStream.Length];
+            result.FileStream.Read(bytes, 0, bytes.Length);
+
+            var base64 = Convert.ToBase64String(bytes);
+            var dataUrl = $"data:{result.ContentType};base64,{base64}";
+            var fileName = result.FileName;
+
+            await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", dataUrl, fileName);
+        }
+        catch(Exception ex)
+        {
+
+        }
+
+    }
+
+    #region EmailAttachmentSection
+
+    private List<IBrowserFile> uploadedFiles = new(); // Store uploaded files
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        uploadedFiles = e.GetMultipleFiles().ToList();
+    }
+    private async Task<List<IFormFile>> ConvertFilesToStreams(List<IBrowserFile> browserFiles)
+    {
+        var formFiles = new List<IFormFile>();
+
+        foreach (var browserFile in browserFiles)
+        {
+            var memoryStream = new MemoryStream();
+            await browserFile.OpenReadStream(maxAllowedSize: 10485760).CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            var formFile = new FormFile(memoryStream, 0, memoryStream.Length, browserFile.Name, browserFile.Name)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = browserFile.ContentType
+            };
+
+            formFiles.Add(formFile);
+        }
+
+        return formFiles;
+    }
+
+    private void RemoveFile(IBrowserFile file)
+    {
+        uploadedFiles.Remove(file);
+    }
+    #endregion
+
+
+}
+

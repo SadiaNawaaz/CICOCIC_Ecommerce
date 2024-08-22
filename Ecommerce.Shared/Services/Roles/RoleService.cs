@@ -18,6 +18,7 @@ public interface IRoleService
     Task<ServiceResponse<Role>> AddRoleAsync(Role role);
     Task<ServiceResponse<Role>> UpdateRoleAsync(Role role);
     Task<ServiceResponse<bool>> DeleteRoleAsync(long id);
+    Task<ServiceResponse<Role>> GetRolesAsyncByTag(string Role);
 }
 
 public class RoleService : IRoleService
@@ -174,4 +175,29 @@ public class RoleService : IRoleService
             };
         }
     }
+
+    public async Task<ServiceResponse<Role>> GetRolesAsyncByTag(string Role)
+    {
+        try
+        {
+            var role = await _context.Roles.FirstOrDefaultAsync(a=>a.Name=="Agent");
+            return new ServiceResponse<Role>
+            {
+                Data = role,
+                Success = true,
+                Message = "Roles fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching roles.");
+            return new ServiceResponse<Role>
+            {
+                Success = false,
+                Message = "Error occurred while fetching roles"
+            };
+        }
+    }
+
+
 }

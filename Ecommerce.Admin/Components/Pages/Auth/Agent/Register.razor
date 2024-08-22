@@ -1,0 +1,210 @@
+﻿@page "/Register"
+@using Layout
+@layout LoginLayout
+@using Ecommerce.Shared.Services.Users;
+@inject IUserService UserService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IRoleService roleService
+@using Ecommerce.Shared.Services.Roles
+<!-- BEGIN #app -->
+
+
+
+<div id="app" class="app">
+    <!-- BEGIN register -->
+    <div class="register register-with-news-feed">
+        <!-- BEGIN news-feed -->
+
+
+        <div class="news-feed">
+            <div class="news-image" style="background-image: url(../assets/img/login-bg/login-bg-15.jpg)"></div>
+            <div class="news-caption">
+                <h4 class="caption-title"><b>Agent</b> App</h4>
+                <p>
+                    As a Cicocic  app Agent, you manage your organization’s account, such as add new Account, manage security settings, and turn on the services you want your team to access.
+                </p>
+            </div>
+        </div>
+        <!-- END news-feed -->
+        <!-- BEGIN register-container -->
+        <div class="register-container">
+            <!-- BEGIN register-header -->
+            <div class="register-header mb-25px h1">
+                <div class="mb-1">Sign Up</div>
+                <small class="d-block fs-15px lh-16">Create your  Cicocic Account. It’s Secure and always will be.</small>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+
+                <div class="alert alert-danger alert-dismissible fade show h-100 mb-0">
+                    @errorMessage
+
+                </div>
+
+            }
+
+
+            @if (!string.IsNullOrEmpty(sucessMessage))
+            {
+
+                <div class="alert alert-success fade show h-100 mb-0">
+                    @sucessMessage
+
+                </div>
+
+            }
+            <!-- END register-header -->
+            <!-- BEGIN register-content -->
+            <div class="register-content">
+                <EditForm Model="@user" OnValidSubmit="@HandleValidSubmit" FormName="userForm">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="mb-2">Name <span class="text-danger">*</span></label>
+
+                        <div class="row gx-3">
+                            <div class="col-md-6 mb-2 mb-md-0">
+                                <InputText id="FirstName" placeholder="First Name" class="form-control fs-13px" @bind-Value="user.FirstName" />
+                                <span class="text-danger"><ValidationMessage For="@(() => user.FirstName)" /></span>
+                            </div>
+                            <div class="col-md-6">
+                                <InputText id="LastName" placeholder="Last Name" class="form-control fs-13px" @bind-Value="user.LastName" />
+                                <span class="text-danger"><ValidationMessage For="@(() => user.LastName)" /></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-2">Username <span class="text-danger">*</span></label>
+                        <InputText id="Email" class="form-control fs-13px" @bind-Value="user.UserName" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.UserName)" /></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-2">Email <span class="text-danger">*</span></label>
+                        <InputText id="Email" class="form-control fs-13px" @bind-Value="user.Email" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.Email)" /></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-2">Extra Email <span class="text-danger">*</span></label>
+                        <InputText id="Email" class="form-control fs-13px" @bind-Value="user.ExtraEmail" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.ExtraEmail)" /></span>
+
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2">Password <span class="text-danger">*</span></label>
+                        <InputText id="Password" class="form-control fs-13px" @bind-Value="user.Password" type="password" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.Password)" /></span>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" value="" id="agreementCheckbox" />
+                        <label class="form-check-label" for="agreementCheckbox">
+                            By clicking Sign Up, you agree to our <a href="javascript:;">Terms</a> and that you have read our <a href="javascript:;">Data Policy</a>, including our <a href="javascript:;">Cookie Use</a>.
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <button type="submit" class="btn btn-theme d-block w-100 btn-lg h-45px fs-13px">Sign Up</button>
+                    </div>
+                    <div class="mb-4 pb-5">
+                        Already a member? Click <a href="/Login">here</a> to login.
+                    </div>
+                    <hr class="bg-gray-600 opacity-2" />
+                    <p class="text-center text-gray-600">
+                        &copy; Cicocic All Right Reserved 2024
+                    </p>
+
+
+                </EditForm>
+            </div>
+            <!-- END register-content -->
+        </div>
+        <!-- END register-container -->
+    </div>
+
+    <a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
+    <!-- END scroll-top-btn -->
+</div>
+<!-- END #app -->
+@code {
+    [Parameter] public long? UserId { get; set; }
+    private User user = new User();
+    private Role role = new Role();
+    private string errorMessage = "";
+    private string sucessMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await LoadRoles();
+        if (UserId.HasValue)
+        {
+            var response = await UserService.GetUserByIdAsync(UserId.Value);
+            if (response.Success)
+            {
+                user = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        try
+        {
+            errorMessage = "";
+            sucessMessage = "";
+            if (role == null || role.Id < 1)
+            {
+                errorMessage = "Please Contact to Admin For now Agent Configuration";
+                return;
+            }
+            ServiceResponse<User> response;
+            //user.RoleId = role.Id;
+            user.IsAgent = true;
+            response = await UserService.AddUserAsync(user);
+            if (response.Success)
+            {
+                sucessMessage = "Agent added successfully! An administrator will review your request shortly";
+                await Task.Delay(1000);
+
+            }
+            else
+            {
+
+                errorMessage = response.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Something went wrong please try again";
+        }
+    }
+
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            var response = await roleService.GetRolesAsyncByTag("Agent");
+            if (response.Success)
+            {
+                role = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while loading roles: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+        }
+    }
+
+}

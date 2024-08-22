@@ -13,12 +13,14 @@ namespace Ecommerce.Shared.Services.Users;
 
 public interface IUserService
 {
-    Task<ServiceResponse<List<User>>> GetUsersAsync();
+    Task<ServiceResponse<List<User>>> GetUsersAsync(bool IsAgent = false);
     Task<ServiceResponse<User>> GetUserByIdAsync(long id);
     Task<ServiceResponse<User>> AddUserAsync(User user);
     Task<ServiceResponse<User>> UpdateUserAsync(User user);
     Task<ServiceResponse<bool>> DeleteUserAsync(long id);
     Task<ServiceResponse<User>> LoginAsync(string email, string password);
+
+    Task<ServiceResponse<User>> UpdateAgentStatus(User user);
 }
 public class UserService : IUserService
 {
@@ -31,17 +33,32 @@ public class UserService : IUserService
         _logger = logger;
     }
 
-    public async Task<ServiceResponse<List<User>>> GetUsersAsync()
+    public async Task<ServiceResponse<List<User>>> GetUsersAsync(bool IsAgent=false)
     {
         try
         {
-            var users = await _context.Users.Include(a=>a.Role).ToListAsync();
-            return new ServiceResponse<List<User>>
+           
+            if(IsAgent)
             {
-                Data = users,
-                Success = true,
-                Message = "Users fetched successfully"
-            };
+                var users = await _context.Users.Include(a=>a.UserRoles).Where(a=>a.IsAgent==true).ToListAsync();
+                return new ServiceResponse<List<User>>
+                {
+                    Data = users,
+                    Success = true,
+                    Message = "Agents fetched successfully"
+                };
+            }
+            else
+            {
+                var users = await _context.Users.Include(a => a.UserRoles).ToListAsync();
+                return new ServiceResponse<List<User>>
+                {
+                    Data = users,
+                    Success = true,
+                    Message = "Users fetched successfully"
+                };
+            }
+          
         }
         catch (Exception ex)
         {
@@ -81,6 +98,18 @@ public class UserService : IUserService
     {
         try
         {
+
+            var existingUser = await _context.Users
+        .AnyAsync(u => u.UserName == user.UserName || u.Email == user.Email);
+
+            if (existingUser)
+            {
+                return new ServiceResponse<User>
+                {
+                    Success = false,
+                    Message = "Username or email already exists."
+                };
+            }
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return new ServiceResponse<User>
@@ -178,18 +207,18 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<ServiceResponse<User>> LoginAsync(string email, string password)
+    public async Task<ServiceResponse<User>> LoginAsync(string Username, string password)
     {
         try
         {
-            var user = await _context.Users.Include(a=>a.Role).FirstOrDefaultAsync(u => u.Email == email && u.Password == password); // Consider hashing the password for comparison
+            var user = await _context.Users.Include(a=>a.UserRoles).FirstOrDefaultAsync(u => u.UserName == Username && u.Password == password); // Consider hashing the password for comparison
 
             if (user == null)
             {
                 return new ServiceResponse<User>
                 {
                     Success = false,
-                    Message = "Invalid email or password"
+                    Message = "Invalid Username or password"
                 };
             }
 
@@ -207,6 +236,42 @@ public class UserService : IUserService
             {
                 Success = false,
                 Message = "Error occurred while logging in"
+            };
+        }
+    }
+
+    public async Task<ServiceResponse<User>> UpdateAgentStatus(User updatedUser)
+    {
+        try
+        {
+            var existingUser = await _context.Users.FindAsync(updatedUser.Id);
+
+            if (existingUser == null)
+            {
+                return new ServiceResponse<User>
+                {
+                    Success = false,
+                    Message = "Agent not found"
+                };
+            }
+            existingUser.Approved = updatedUser.Approved;
+            _context.Users.Update(existingUser);
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<User>
+            {
+                Data = existingUser,
+                Success = true,
+                Message = "Agent Status Updated successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while updating user.");
+            return new ServiceResponse<User>
+            {
+                Success = false,
+                Message = "Error occurred while updating user"
             };
         }
     }

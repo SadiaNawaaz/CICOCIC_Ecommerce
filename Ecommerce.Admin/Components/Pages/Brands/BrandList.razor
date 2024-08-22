@@ -28,6 +28,9 @@
             </div>
             <div class="panel-body">
                 <button class="btn btn-primary mb-3" @onclick="NavigateToAddBrand">Add Brand</button>
+
+
+
                 <MudDataGrid T="Brand" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
                     <ColGroup>
                         <col style="width: 70%;" />

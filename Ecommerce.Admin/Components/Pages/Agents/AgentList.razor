@@ -1,0 +1,286 @@
+﻿@page "/AgentList"
+@inject IUserService UserService
+@using Ecommerce.Shared.Services.Users;
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IRoleService roleService
+@using Ecommerce.Shared.Services.Roles
+
+<style>
+    input[type="checkbox"] {
+        --s: 50px; /* adjust this to control the size*/
+
+        height: calc(var(--s) + var(--s)/5);
+        width: auto; /* some browsers need this */
+        aspect-ratio: 2.25;
+        border-radius: var(--s);
+        margin: calc(var(--s)/2);
+        display: grid;
+        cursor: pointer;
+        background-color: #ff7a7a;
+        box-sizing: content-box;
+        overflow: hidden;
+        transition: .3s .1s;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+        input[type="checkbox"]:before {
+            content: "";
+            padding: calc(var(--s)/10);
+            --_g: radial-gradient(circle closest-side at calc(100% - var(--s)/2) 50%,#000 96%,#0000);
+            background: var(--_g) 0 /var(--_p,var(--s)) 100% no-repeat content-box, var(--_g) var(--_p,0)/var(--s) 100% no-repeat content-box, #fff;
+            mix-blend-mode: darken;
+            filter: blur(calc(var(--s)/12)) contrast(11);
+            transition: .4s, background-position .4s .1s, padding cubic-bezier(0,calc(var(--_i,-1)*200),1,calc(var(--_i,-1)*200)) .25s .1s;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #85ff7a;
+        }
+
+            input[type="checkbox"]:checked:before {
+                padding: calc(var(--s)/10 + .05px) calc(var(--s)/10);
+                --_p: 100%;
+                --_i: 1;
+            }
+
+
+ 
+</style>
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Agents</li>
+        </ol>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Agents</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <MudDataGrid T="User" Items="@users" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true" Style="margin-bottom:10px">
+                    <ColGroup>
+                        <col style="width: 20%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 30%;" />
+                        <col style="width: 30%;" />
+                    </ColGroup>
+                    <Columns>
+                        <PropertyColumn Property="x => x.FirstName" Title="First Name" />
+                        <PropertyColumn Property="x => x.LastName" Title="List Name" />
+                        <PropertyColumn Property="x => x.Email" Title="Email" />
+                        <PropertyColumn Property="x => x.UserName" Title="Username" />
+
+
+
+
+                        <TemplateColumn Title="Approved">
+                            <CellTemplate>
+                                @{
+                                    var isApproved = context.Item.Approved;
+                                    var iconClass = isApproved.HasValue
+                                        ? (isApproved.Value ? "far fa-lg fa-fw me-10px fa-circle-check text-success" : "far fa-lg fa-fw me-10px fa-circle-xmark text-danger")
+                                        : "bi bi-question-circle-fill text-warning";
+                                }
+                                <i class="@iconClass"></i>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+
+
+
+                        <TemplateColumn CellClass="justify-end">
+                            <HeaderTemplate>
+                                <div>Actions</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-white btn-sm w-90px">Settings</a>
+                                        <a href="#" class="btn btn-white btn-sm dropdown-toggle w-30px no-caret" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="caret"></span>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end" style="">
+                                            <a href="#" class="dropdown-item" @onclick="() => ChangeStatus(context.Item)">Change Status</a>
+
+                                            <div class="dropdown-divider"></div>
+                                            <a href="#" class="dropdown-item">Assign Roles</a>
+                                        </div>
+                                    </div>
+
+
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="User" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+                <br />  <br />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<a href="#modal-alert" class="btn btn-sm btn-danger w-100px" data-bs-toggle="modal">Rights</a>
+
+
+<!-- #modal-alert -->
+<div class="modal fade" id="modal-alert">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Assign Roles</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    @if (roles != null && roles.Count > 0)
+                    {
+
+
+                        foreach (var rol in roles)
+                        {
+                       <div class="form-check">
+                           <input type="checkbox">
+                           <input type="checkbox" class="form-check-input" id="mincheck1" name="mincheck[]" data-parsley-mincheck="2" value="foo" required="" data-parsley-multiple="mincheck">
+                           <label class="form-check-label" for="mincheck1">@rol.Name</label>
+                       </div>
+                        }
+
+
+
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                <a href="javascript:;" class="btn btn-danger" data-bs-dismiss="modal">Action</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    private bool _resizeColumn = true;
+    private List<User> users;
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private List<Role> roles = new List<Role>();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+        await LoadRoles();
+    }
+
+    private async Task LoadUsers()
+    {
+        var response = await UserService.GetUsersAsync(true);
+        if (response.Success)
+        {
+            users = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private void NavigateToAddUser()
+    {
+        NavigationManager.NavigateTo("/AddEditUser");
+    }
+
+    private async Task ChangeStatus(User user)
+    {
+
+        try
+        {
+            if (user.Approved == true)
+            {
+                user.Approved = false;
+            }
+            else
+            {
+                user.Approved = true;
+            }
+
+            ServiceResponse<User> response;
+            response = await UserService.UpdateAgentStatus(user);
+
+            if (response.Success)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+                await Task.Delay(1000);
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+
+    }
+
+    private void ToggleApprovalStatus(User item, object isApproved)
+    {
+
+        // Additional logic to handle approval status change, e.g., update database, call API, etc.
+    }
+
+
+    private async Task View(bool newValue)
+    {
+
+        //invoke some function.
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            var response = await roleService.GetRolesAsync();
+            if (response.Success)
+            {
+                roles = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while loading roles: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+        }
+    }
+}

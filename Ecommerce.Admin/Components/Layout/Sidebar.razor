@@ -1,12 +1,12 @@
-﻿
+﻿@inject SidebarStateService SidebarStateService
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div id="sidebar" class="app-sidebar" data-bs-theme="dark">
-    <!-- BEGIN scrollbar -->
     <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
-        <!-- BEGIN menu -->
         <div class="menu">
+
             <div class="menu-profile">
                 <a href="javascript:;" class="menu-profile-link" data-toggle="app-sidebar-profile" data-target="#appSidebarProfileMenu">
                     <div class="menu-profile-cover with-shadow"></div>
@@ -24,193 +24,194 @@
                     </div>
                 </a>
             </div>
-            <div id="appSidebarProfileMenu" class="collapse">
-                <div class="menu-item pt-5px">
-                    <a href="javascript:;" class="menu-link">
-                        <div class="menu-icon"><i class="fa fa-cog"></i></div>
-                        <div class="menu-text">Settings</div>
-                    </a>
-                </div>
-                <div class="menu-item">
-                    <a href="javascript:;" class="menu-link">
-                        <div class="menu-icon"><i class="fa fa-pencil-alt"></i></div>
-                        <div class="menu-text"> Send Feedback</div>
-                    </a>
-                </div>
-                <div class="menu-item pb-5px">
-                    <a href="javascript:;" class="menu-link">
-                        <div class="menu-icon"><i class="fa fa-question-circle"></i></div>
-                        <div class="menu-text"> Helps</div>
-                    </a>
-                </div>
-                <div class="menu-divider m-0"></div>
-            </div>
             <div class="menu-header">Navigation</div>
-            <div class="menu-item has-sub">
-                <a href="javascript:;" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fa fa-sitemap"></i>
-                    </div>
-                    <div class="menu-text">Dashboard</div>
-                    <div class="menu-caret"></div>
-                </a>
-                <div class="menu-submenu">
-                    <div class="menu-item active">
-                        <a href="/" class="menu-link"><div class="menu-text">Dashboard 1</div></a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="/" class="menu-link"><div class="menu-text">Dashboard 2</div></a>
-                    </div>
 
-                </div>
-            </div>
-
-            <div class="menu-item has-sub">
-                <a href="javascript:;" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fa fa-table"></i>
-                    </div>
-                    <div class="menu-text">Setup Data</div>
-                    <div class="menu-caret"></div>
-                </a>
-                <div class="menu-submenu">
-
-                    <div class="menu-item">
-                        <a href="/BrandList" class="menu-link"><div class="menu-text">Brands</div></a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="/ModelYearList" class="menu-link"><div class="menu-text">Model Years</div></a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="/SizeList" class="menu-link"><div class="menu-text">Sizes</div></a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a href="/ColorList" class="menu-link"><div class="menu-text">Color</div></a>
-                    </div>
-
-
-
-                </div>
-            </div>
-
-
-
-            <div class="menu-item has-sub">
-                <a href="javascript:;" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fa fa-tree"></i>
-                    </div>
-                    <div class="menu-text">Template</div>
-                    <div class="menu-caret"></div>
-                </a>
-                <div class="menu-submenu">
-                    <div class="menu-item active">
-                        <a href="/ClusterList" class="menu-link"><div class="menu-text">Clusters</div></a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="/FeatureList" class="menu-link"><div class="menu-text">Features</div></a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a href="/TemplateList" class="menu-link"><div class="menu-text">Template</div></a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="/TemplateCategoryLinkList" class="menu-link"><div class="menu-text">Template Linking</div></a>
-                    </div>
-
-
-
-                </div>
-            </div>
-
-            <div class="menu-item">
-                <a href="/MainProductList" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fab fa-simplybuilt"></i>
-                    </div>
-                    <div class="menu-text">Product</div>
-                </a>
-            </div>
-
-            <div class="menu-item">
-                <a href="/AddCategory" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fab fa-dashcube"></i>
-                    </div>
-                    <div class="menu-text">Category</div>
-                </a>
-            </div>
-
-
-            <div class="menu-item">
-                <a href="/CategoriesOrder" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fab fa-dashcube"></i>
-                    </div>
-                    <div class="menu-text">Category Order</div>
-                </a>
-            </div>
-
-
-            <div class="menu-item has-sub">
-                <a href="javascript:;" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fa fa-key"></i>
-                    </div>
-                    <div class="menu-text">Users &amp; Management</div>
-                    <div class="menu-caret"></div>
-                </a>
-                <div class="menu-submenu" style="box-sizing: border-box; display: none;">
-
-                    <div class="menu-item">
-                        <a href="/UserList" class="menu-link">
-                            <div class="menu-text">Register</div>
-                        </a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a href="/RoleList" class="menu-link">
-                            <div class="menu-text">Role</div>
-                        </a>
+            <!-- Dynamic Menu Items -->
+            @foreach (var menu in Menus)
+            {
+                var isOpen = SidebarStateService.IsMenuOpen(menu.Title);
+                <div class="menu-item has-sub @(isOpen ? "active" : "")">
+                    <a href="javascript:;" class="menu-link" @onclick="() => ToggleMenuAsync(menu.Title)">
+                        <div class="menu-icon">
+                            <i class="@(menu.IconClass)"></i>
+                        </div>
+                        <div class="menu-text">@menu.Title</div>
+                        <div class="menu-caret"></div>
+                    </a>
+                    <div class="menu-submenu @(isOpen ? "show" : "")">
+                        @foreach (var subItem in menu.SubItems)
+                        {
+                            <div class="menu-item">
+                                <NavLink href="@subItem.Route" class="menu-link">
+                                    <div class="menu-text">@subItem.Title</div>
+                                </NavLink>
+                            </div>
+                        }
                     </div>
                 </div>
-            </div>
-
-            <div class="menu-item has-sub">
-                <a href="javascript:;" class="menu-link">
-                    <div class="menu-icon">
-                        <i class="fa fa-key"></i>
-                    </div>
-                    <div class="menu-text">Configuration</div>
-                    <div class="menu-caret"></div>
-                </a>
-                <div class="menu-submenu" style="box-sizing: border-box; display: none;">
-
-                    <div class="menu-item">
-                        <a href="/SliderList" class="menu-link">
-                            <div class="menu-text">Sliders</div>
-                        </a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a href="/AddEditTrendingItems" class="menu-link">
-                            <div class="menu-text">Trending Items</div>
-                        </a>
-                    </div>
-
-
-                </div>
-            </div>
+            }
         </div>
-        <!-- END menu -->
     </div>
-    <!-- END scrollbar -->
 </div>
-<div class="app-sidebar-bg" data-bs-theme="dark"></div>
-<div class="app-sidebar-mobile-backdrop"><a href="#" data-dismiss="app-sidebar-mobile" class="stretched-link"></a></div>
 
 @code {
+    private List<MenuItem> Menus = new List<MenuItem>
+{
+    new MenuItem
+    {
+        Title = "Dashboard",
+        IconClass = "fa fa-sitemap",
+        Routes = new List<string> { "/" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Dashboard 1", Route = "/" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Setup Data",
+        IconClass = "fa fa-table",
+        Routes = new List<string> { "/BrandList", "/ModelYearList", "/SizeList", "/ColorList" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Brands", Route = "/BrandList" },
+            new SubMenuItem { Title = "Model Years", Route = "/ModelYearList" },
+            new SubMenuItem { Title = "Sizes", Route = "/SizeList" },
+            new SubMenuItem { Title = "Color", Route = "/ColorList" },
+        }
+    },
+    new MenuItem
+    {
+        Title = "Specifications",
+        IconClass = "fa fa-tree",
+        Routes = new List<string> { "/ClusterList", "/FeatureList" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Clusters", Route = "/ClusterList" },
+            new SubMenuItem { Title = "Features", Route = "/FeatureList" },
+
+        }
+    },
+        new MenuItem
+    {
+        Title = "Catalogs",
+        IconClass = "fa fa-tree",
+        Routes = new List<string> { "/CatalogList"},
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Catalogs", Route = "/CatalogList" },
+          
+
+        }
+    },
+
+    new MenuItem
+    {
+        Title = "Product",
+        IconClass = "fab fa-simplybuilt",
+        Routes = new List<string> { "/MainProductList" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Product", Route = "/MainProductList" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Category",
+        IconClass = "fab fa-dashcube",
+        Routes = new List<string> { "/AddCategory" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Category", Route = "/AddCategory" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Category Order",
+        IconClass = "fab fa-dashcube",
+        Routes = new List<string> { "/CategoriesOrder" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Category Order", Route = "/CategoriesOrder" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Users & Management",
+        IconClass = "fa fa-key",
+        Routes = new List<string> { "/UserList", "/RoleList" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Register", Route = "/UserList" },
+            new SubMenuItem { Title = "Role", Route = "/RoleList" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Configuration",
+        IconClass = "fa fa-key",
+        Routes = new List<string> { "/SliderList", "/AddEditTrendingItems" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Sliders", Route = "/SliderList" },
+            new SubMenuItem { Title = "Trending Items", Route = "/AddEditTrendingItems" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Customer & Agent",
+        IconClass = "fa fa-key",
+        Routes = new List<string> { "/AgentList" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Agents", Route = "/AgentList" }
+        }
+    },
+    new MenuItem
+    {
+        Title = "Email",
+        IconClass = "fa fa-envelope",
+        Routes = new List<string> { "/Inbox" },
+        SubItems = new List<SubMenuItem>
+    {
+            new SubMenuItem { Title = "Email", Route = "/Inbox" }
+        }
+    }
+};
+
+
+    private bool isInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !isInitialized)
+        {
+            isInitialized = true;
+            await SidebarStateService.LoadStateAsync();
+            StateHasChanged(); // Force the component to re-render after loading the state
+        }
+    }
+
+    private async Task ToggleMenuAsync(string menuId)
+    {
+        await SidebarStateService.ToggleMenuAsync(menuId);
+    }
+
+    private class MenuItem
+    {
+        public string Title { get; set; }
+        public string IconClass { get; set; }
+        public List<string> Routes { get; set; }
+        public List<SubMenuItem> SubItems { get; set; }
+    }
+
+    private class SubMenuItem
+    {
+        public string Title { get; set; }
+        public string Route { get; set; }
+    }
+
+
     public string UserName = "";
     protected override async Task OnInitializedAsync()
     {
@@ -227,10 +228,10 @@
 
             }
         }
-        catch(Exception ex)
-            {
+        catch (Exception ex)
+        {
 
-            }
+        }
 
     }
 }

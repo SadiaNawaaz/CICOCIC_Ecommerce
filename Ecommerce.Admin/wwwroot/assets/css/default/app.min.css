@@ -438,7 +438,8 @@ img, svg {
 
 table {
     caption-side: bottom;
-    border-collapse: collapse
+    border-collapse: collapse;
+    margin-bottom:3px!important;
 }
 
 caption {

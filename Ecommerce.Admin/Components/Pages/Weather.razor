@@ -1,202 +1,39 @@
-﻿@page "/weather/{ProductId:long?}"
-@attribute [StreamRendering]
-@using Ecommerce.Shared.Entities.ProductVariants
-@using Ecommerce.Shared.Services.ProductVariants
-@inject IProductVariantService productVariantService
-@inject ISnackbar snackbar
-@inject NavigationManager navigationManager
-@inject IJSRuntime jsRuntime
-@rendermode InteractiveServer
-<div class="d-flex align-items-center mb-3">
-    <div>
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Product Variants</a></li>
-            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product Variants</li>
-        </ol>
-    </div>
-</div>
+﻿@typeparam TItem where TItem : EmailAddress
+@using System.Collections.ObjectModel
+@using Ecommerce.Mailer.DTOs
+@using System.ComponentModel.DataAnnotations
 
-<div class="panel panel-inverse">
-    <div class="panel-heading">
-        <h4 class="panel-title">Product Variants - List</h4>
-        <div class="panel-heading-btn">
-            <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
-            <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
-            <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
-            <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
-        </div>
-    </div>
-    <div class="panel-body">
-        <div class="row fileupload-buttonbar">
-            <div class="col-xl-7">
-
-                <span class="fileupload-process"></span>
-            </div>
-            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
-                <div class="progress progress-striped active">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                </div>
-                <div class="progress-extended">&nbsp;</div>
-            </div>
-        </div>
-        <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
-            <ColGroup>
-                <col style="width: 80%;" />
-                <col style="width: 20%;" />
-            </ColGroup>
-            <Columns>
-                <PropertyColumn Property="x => x.Name" Title="Name" Style="width:30%" />
-                <PropertyColumn Property="x => x.Price" Title="Price" Style="width:20%" />
-                <PropertyColumn Property="x => x.Sku" Title="SKU" Style="width:20%" />
-                <PropertyColumn Property="x => x.Publish" Title="Publish" Style="width:10%" />
-
-                <TemplateColumn Title="Size" Style="width:10%">
-                    <CellTemplate>
-                        @{
-                            var sizeName = context.Item.GeneralSize?.Name ?? "N/A"; // Provide a default value if null
-                        }
-                        <div>
-                            @sizeName
-                        </div>
-                    </CellTemplate>
-                </TemplateColumn>
-                <TemplateColumn Title="Color" Style="width:10%">
-                    <CellTemplate>
-                        @{
-                            var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
-                        }
-                        <div style="background-color:@hexCode; color:@(hexCode == "#000000" ? "#FFFFFF" : "#000000"); padding: 15px; border-radius: 3px;">
-
-                        </div>
-                    </CellTemplate>
-                </TemplateColumn>
-
-                <TemplateColumn Title="Year" Style="width:10%">
-                    <CellTemplate>
-                        @{
-                            var year = context.Item.ModelYear?.Year.ToString() ?? "N/A";
-                        }
-                        <div>
-                            @year
-                        </div>
-                    </CellTemplate>
-                </TemplateColumn>
-
-                <TemplateColumn Title="Publish" Style="width:10%">
-                    <CellTemplate>
-                        @{
-                            var isPublished = context.Item.Publish;
-                        }
-                        <MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />
-                    </CellTemplate>
-                </TemplateColumn>
-                <TemplateColumn CellClass="d-flex justify-end" Style="width:20%">
-                    <HeaderTemplate>
-                        <div>Actions</div>
-                    </HeaderTemplate>
-                    <CellTemplate>
-                        <MudStack Row>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditProductVariant(context.Item)" />
-
-                        </MudStack>
-                    </CellTemplate>
-                </TemplateColumn>
-            </Columns>
-            <PagerContent>
-                <MudDataGridPager T="ProductVariant" PageSizeOptions=@(new int[] { 5, 10, 20 }) />
-            </PagerContent>
-        </MudDataGrid>
-    </div>
+<div>
+    @foreach (var item in EmailList)
+    {
+        <span class="email-tag">@item.Email <a href="javascript:void(0)" @onclick="@(() => RemoveEmail(item))">&times;</a></span>
+    }
+    <input type="text" @bind-value="newEmailAddress" @bind-value:event="oninput" @onkeydown="@OnKeyDown" placeholder="Add email" class="email-input" />
 </div>
 
 @code {
-    [Inject]
-    public IDialogService DialogService { get; set; }
+    [Parameter] public IList<TItem> EmailList { get; set; }
+    private string newEmailAddress = string.Empty;
 
-    [Parameter]  public long ProductId { get; set; } 
-    private bool _resizeColumn;
-    private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
-
-    protected override async Task OnInitializedAsync()
+    private void AddEmail()
     {
-        await LoadProductVariants();
-    }
-
-    private async Task LoadProductVariants()
-    {
-        try
+        if (!string.IsNullOrWhiteSpace(newEmailAddress) && new EmailAddressAttribute().IsValid(newEmailAddress))
         {
-            var response = await productVariantService.GetAllProductVariantsAsync(ProductId);
-            if (response.Success)
-            {
-                productVariants = response.Data;
-            }
-            else
-            {
-                snackbar.Add(response.Message, Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            snackbar.Add("An error occurred while loading product variants: " + ex.Message, Severity.Error);
-            Console.Error.WriteLine($"Error in LoadProductVariants: {ex}");
+            EmailList.Add((TItem)(object)new EmailAddress { Email = newEmailAddress });
+            newEmailAddress = string.Empty;
         }
     }
 
-    private void EditProductVariant(ProductVariant productVariant)
+    private void RemoveEmail(TItem email)
     {
-        try
-        {
-            navigationManager.NavigateTo($"/AddEditProductVariants?Id={productVariant.Id}&ProductId={ProductId}");
-        }
-        catch (Exception ex)
-        {
-            snackbar.Add("An error occurred while navigating to edit the product variant: " + ex.Message, Severity.Error);
-            Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
-        }
+        EmailList.Remove(email);
     }
 
-    private async Task DeleteProductVariant(ProductVariant productVariant)
+    private void OnKeyDown(KeyboardEventArgs e)
     {
-        try
+        if (e.Key == "Enter" || e.Key == "Tab")
         {
-            var parameters = new DialogParameters();
-            parameters.Add("ContentText", "Do you want to confirm?");
-            parameters.Add("ButtonText", "Yes");
-            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
-            var result = await dialogresult.Result;
-            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
-                await Delete(productVariant);
-        }
-        catch (Exception ex)
-        {
-            snackbar.Add("An error occurred while attempting to delete the product variant: " + ex.Message, Severity.Error);
-            Console.Error.WriteLine($"Error in DeleteProductVariant: {ex}");
+            AddEmail();
         }
     }
-
-    private async Task Delete(ProductVariant productVariant)
-    {
-        try
-        {
-            var response = await productVariantService.DeleteProductVariantAsync(productVariant.Id);
-            if (response.Success)
-            {
-                await LoadProductVariants();
-                snackbar.Add(response.Message, Severity.Success);
-            }
-            else
-            {
-                snackbar.Add(response.Message, Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            snackbar.Add("An error occurred while deleting the product variant: " + ex.Message, Severity.Error);
-            Console.Error.WriteLine($"Error in Delete: {ex}");
-        }
-    }
-
-
 }

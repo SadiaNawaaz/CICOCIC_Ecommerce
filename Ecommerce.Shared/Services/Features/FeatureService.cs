@@ -15,6 +15,7 @@ public interface IFeatureService
     Task<ServiceResponse<Feature>> AddFeatureAsync(Feature feature);
     Task<ServiceResponse<Feature>> UpdateFeatureAsync(Feature feature);
     Task<ServiceResponse<bool>> DeleteFeatureAsync(long id);
+    Task<ServiceResponse<List<Feature>>> GetFeaturesByClusterId(long clusterId);
 }
 public class FeatureService : IFeatureService
 {
@@ -169,4 +170,31 @@ public class FeatureService : IFeatureService
             };
         }
     }
+
+
+    public async Task<ServiceResponse<List<Feature>>> GetFeaturesByClusterId(long clusterId)
+    {
+        try
+        {
+            var features = await _context.Features.Where(a=>a.ClusterId== clusterId).ToListAsync();
+            return new ServiceResponse<List<Feature>>
+            {
+                Data = features,
+                Success = true,
+                Message = "Features fetched successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching features.");
+            return new ServiceResponse<List<Feature>>
+            {
+                Success = false,
+                Message = "Error occurred while fetching features"
+            };
+        }
+    }
+
+
+
 }

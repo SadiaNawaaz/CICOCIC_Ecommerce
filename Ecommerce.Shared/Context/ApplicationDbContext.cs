@@ -3,6 +3,7 @@
 using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.Brands;
+using Ecommerce.Shared.Entities.Catalogs;
 using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.Configurations;
@@ -15,6 +16,7 @@ using Ecommerce.Shared.Entities.Shared;
 using Ecommerce.Shared.Entities.Sizes;
 using Ecommerce.Shared.Entities.Templates;
 using Ecommerce.Shared.Entities.TrendingProducts;
+using Ecommerce.Shared.Services.Roles;
 using Microsoft.EntityFrameworkCore;
 using static Ecommerce.Shared.Services.ProductVariants.ProductVariantService;
 
@@ -52,16 +54,28 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
     public DbSet<TrendingProduct> TrendingProducts { get; set; }
 
+    public DbSet<Catalog> Catalogs { get; set; }
+    
 
     public DbSet<Slider> Sliders { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
 
     //public DbSet<ClusterFeatureDto> ClusterFeatureDtos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Feature>()
+      .HasOne(f => f.Cluster)
+      .WithMany(c => c.Features)
+      .HasForeignKey(f => f.ClusterId)
+      .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<TemplateCategory>()
+
+
+
+
+     modelBuilder.Entity<TemplateCategory>()
     .HasIndex(tc => new { tc.TemplateMasterId, tc.CategoryId })
     .IsUnique();
         modelBuilder.Entity<ProductFeatureValue>()
@@ -84,6 +98,20 @@ public class ApplicationDbContext : DbContext
         //    .HasMany(c => c.SubCategories)
         //    .WithOne(c => c.ParentCategory)
         //    .HasForeignKey(c => c.ParentCategoryId);
+
+        modelBuilder.Entity<UserRole>()
+        .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+        modelBuilder.Entity<UserRole>()
+            .HasOne(ur => ur.User)
+            .WithMany(u => u.UserRoles)
+            .HasForeignKey(ur => ur.UserId);
+
+        modelBuilder.Entity<UserRole>()
+            .HasOne(ur => ur.Role)
+            .WithMany()
+            .HasForeignKey(ur => ur.RoleId);
+
     }
 }
 

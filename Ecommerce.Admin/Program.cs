@@ -1,8 +1,11 @@
+using Blazored.SessionStorage;
 using Ecommerce.Admin.Authentication;
 using Ecommerce.Admin.Components;
 using Ecommerce.Admin.Services;
+using Ecommerce.Mailer;
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Services.Brands;
+using Ecommerce.Shared.Services.Catalogs;
 using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Colors;
@@ -41,16 +44,15 @@ builder.Services.AddScoped<IColorService, ColorService>();
 builder.Services.AddScoped<IProductVariantService,ProductVariantService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+builder.Services.AddSingleton<IMailerServices, MailerServices>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ImageResizeService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IUserService, UserService>();
-
-
+builder.Services.AddScoped<Radzen.DialogService>();
 builder.Services.AddScoped<ISliderService, SliderService>();
-
-
+builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddDbContext<ApplicationDbContext>(
  o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 //builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; });
@@ -71,7 +73,8 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddBlazoredSessionStorage();
+builder.Services.AddScoped<SidebarStateService>();
 //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 //    .AddCookie(options =>
 //    {

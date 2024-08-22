@@ -157,6 +157,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Pages\NewFolder\" />
     <Folder Include="wwwroot\assets\plugins\jquery-mockjax\test\ember\mockjax-app\app\components\" />
     <Folder Include="wwwroot\assets\plugins\jquery-mockjax\test\ember\mockjax-app\app\controllers\" />
     <Folder Include="wwwroot\assets\plugins\jquery-mockjax\test\ember\mockjax-app\app\helpers\" />
@@ -178,6 +179,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.Mailer\Ecommerce.Mailer.csproj" />
     <ProjectReference Include="..\Ecommerce.Shared\Ecommerce.Shared.csproj" />
   </ItemGroup>
 

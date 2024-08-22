@@ -43,7 +43,7 @@ namespace Ecommerce.Admin.Authentication
                 var claim = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.FirstName),
-                new Claim(ClaimTypes.Role, user.Role.Name) ,
+                //new Claim(ClaimTypes.Role, user.Role.Name) ,
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
