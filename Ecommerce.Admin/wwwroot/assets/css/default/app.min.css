@@ -40424,3 +40424,7 @@ body .sp-container {
     .mud-table th {
         font-weight: 600;
     }
+.mud-table-head {
+    font-weight: bold !important;
+    font-family: 'Roboto', sans-serif;
+}

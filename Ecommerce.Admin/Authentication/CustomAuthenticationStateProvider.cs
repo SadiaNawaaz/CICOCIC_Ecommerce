@@ -39,7 +39,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
         {
                 new Claim(ClaimTypes.Name, user.Email),
                 //new Claim(ClaimTypes.Role, user.Role.Name)
-            };
+      };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -68,41 +68,3 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 
 
 
-public class CustomAuthenticationStateProviderss : AuthenticationStateProvider
-{
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private ClaimsPrincipal _user = new ClaimsPrincipal(new ClaimsIdentity());
-
-    public CustomAuthenticationStateProviderss(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        var user = _httpContextAccessor.HttpContext?.User;
-        return new AuthenticationState(user ?? new ClaimsPrincipal(new ClaimsIdentity()));
-    }
-
-    public async Task MarkUserAsAuthenticated(User user)
-    {
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.Name, user.Email),
-            //new Claim(ClaimTypes.Role, user.Role.Name)
-        };
-
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
-
-        await _httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(principal)));
-    }
-
-    public async Task MarkUserAsLoggedOut()
-    {
-        await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(new ClaimsIdentity());
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(principal)));
-    }
-}

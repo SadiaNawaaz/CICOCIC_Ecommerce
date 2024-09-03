@@ -25,4 +25,5 @@ public class ProductVariantDetailDto
     public string? DefaultImageUrl { get; set; }
     public List<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; } = new List<ProductVariantFeatureValue>();
     public List<ProductVariantImages> productVariantImages { get; set; } = new List<ProductVariantImages>();
+    public List<ProductVariantMedia> ProductVariantMedia { get; set; } = new List<ProductVariantMedia>();
 }

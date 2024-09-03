@@ -22,7 +22,7 @@ public class Catalog : BaseEntity
     [Required]
     public  string Name { get; set; }
     public  string? Slug { get; set; }
-    public long Code { get; set; }
+    public string? Code { get; set; }
     public string? Thumbnail { get; set; }
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
@@ -40,9 +40,9 @@ public class Catalog : BaseEntity
     public GeneralColor? GeneralColor { get; set; }
     public long? ModelYearId { get; set; }
     public ModelYear? ModelYear { get; set; }
-    public string Media { get; set; } = "[]";
 
     public List<CatalogCluster> CatalogClusters { get; set; } = new List<CatalogCluster>();
+    public List<CatalogMedia> CatalogMedias { get; set; } = new List<CatalogMedia>();
 }
 public class CatalogCluster : BaseEntity
 {
@@ -69,4 +69,14 @@ public class CatalogClusterFeature : BaseEntity
 
 
 
+}
+
+public class CatalogMedia
+{
+    public long Id { get; set; }
+
+    [Required]
+    public string ImageUrl { get; set; }
+    public long CatalogId { get; set; }
+    public Catalog Catalog { get; set; }
 }

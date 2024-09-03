@@ -1,0 +1,12 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Ecommerce.Admin/bin
+/Ecommerce.Admin/obj
+/Ecommerce.Agent/obj
+/Ecommerce.Agent/bin/Debug/net8.0
+/Ecommerce.Mailer/obj
+/Ecommerce.Mailer/bin/Release/net8.0
+/Ecommerce.Shared/bin
+*.v2

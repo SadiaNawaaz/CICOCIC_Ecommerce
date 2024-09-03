@@ -1,6 +1,9 @@
 ﻿using Ecommerce.Shared.Abstraction;
 using Ecommerce.Shared.Entities.Brands;
+using Ecommerce.Shared.Entities.Catalogs;
+using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Features;
+using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Entities.Templates;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,20 +22,61 @@ public class Product : BaseEntity
     public string Name { get; set; }
     public string? Slug { get; set; }
     public string? Code { get; set; }
-
-    public string? Thumbnail { get; set; }   
+    public string? Thumbnail { get; set; }
+    public long? CatalogId { get; set; }
+    public Catalog? Catalog { get; set; }
     public long CategoryId { get; set; }
     public Category Category { get; set; }
-    public long TemplateMasterId { get; set; }
-    public TemplateMaster TemplateMaster { get; set; }
     [Required]
     public long BrandId { get; set; }
     public Brand Brand { get; set; }
     public double Price { get; set; }
-    public List<ProductFeatureValue> FeatureValues { get; set; } = new List<ProductFeatureValue>();
 
+    public List<ProductCluster> ProductClusters { get; set; } = new List<ProductCluster>();
+
+    public List<ProductImages> ProductImages { get; set; } = new List<ProductImages>();
+    public List<ProductMedia> ProductMedias { get; set; } = new List<ProductMedia>();
 
 }
+
+public class ProductCluster : BaseEntity
+{
+    public long ProductId { get; set; }
+    public Product Product { get; set; }
+    public long ClusterId { get; set; }
+    public Cluster Cluster { get; set; }
+    public int Order { get; set; }
+    public List<ProductClusterFeature> ProductClusterFeatures { get; set; } = new List<ProductClusterFeature>();
+    [NotMapped]
+    public bool IsDragOver { get; set; }
+
+}
+
+public class ProductClusterFeature : BaseEntity
+{
+    public long ProductClusterId { get; set; }
+    public ProductCluster ProductCluster { get; set; }
+    public long FeatureId { get; set; }
+    public Feature Feature { get; set; }
+    public string? Value { get; set; }
+}
+
+public class ProductImages : BaseEntity
+{
+
+    public long ProductId { get; set; }
+    public Product Product { get; set; }
+    [NotMapped]
+    public byte[] ImageByte { get; set; }
+    [NotMapped]
+    public string ImageUrl { get; set; }
+    public string ImageName { get; set; }
+
+    [NotMapped]
+    public bool IsDeleted { get; set; } = false;
+
+}
+
 public class ProductFeatureValue : BaseEntity
 {
     public long ProductId { get; set; }
@@ -41,4 +85,16 @@ public class ProductFeatureValue : BaseEntity
     public long TemplateClusterFeatureId { get; set; }
     public TemplateClusterFeature TemplateClusterFeature { get; set; }
     public string? Value { get; set; }
+}
+
+
+public class ProductMedia
+{
+    public long Id { get; set; }
+
+    [Required]
+    public string ImageUrl { get; set; }
+
+    public long ProductId { get; set; }
+    public Product Product { get; set; }
 }

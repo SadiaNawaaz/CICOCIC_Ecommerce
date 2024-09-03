@@ -4,6 +4,7 @@ using Ecommerce.Shared.Entities.ModelYears;
 using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Entities.Sizes;
 using Ecommerce.Shared.Entities.Templates;
+using Ecommerce.Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
@@ -25,12 +26,20 @@ public class ProductVariant : BaseEntity
     public string? Value { get; set; }
     public string? SSN { get; set; }
     public string ?Description { get;set; }
-
+    public string? Thumbnail { get; set; }
     public long? ModelYearId { get; set; }
     public ModelYear? ModelYear { get; set; }
     public bool Publish { get; set; }
-    public List<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; } = new List<ProductVariantFeatureValue>();
+   public VariantType? variantType { get; set; }
+    public string? TypeValue { get; set; }
+    public string? Note { get; set; }
     public List<ProductVariantImages> productVariantImages { get; set; } = new List<ProductVariantImages>();
+    public List<ProductVariantMedia> ProductVariantMedias { get; set; } = new List<ProductVariantMedia>();
+
+
+
+
+
 }
 public class ProductVariantFeatureValue : BaseEntity
 {
@@ -55,8 +64,26 @@ public class ProductVariantImages :BaseEntity
     [NotMapped]
     public string ImageUrl { get; set; }
     public string ImageName { get; set; }
+    public int Order { get; set; } 
 
     [NotMapped]
     public bool IsDeleted { get; set; } = false;
 
+    [NotMapped]
+    public bool IsCloned { get; set; } = false;
+
+
+
+}
+
+
+public class ProductVariantMedia
+{
+    public long Id { get; set; }
+
+    [Required]
+    public string ImageUrl { get; set; }
+
+    public long ProductVariantId { get; set; }
+    public ProductVariant ProductVariant { get; set; }
 }

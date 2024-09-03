@@ -60,13 +60,13 @@
 
                         <div class="col-md-2">
                             <label class="form-label"> Code</label>
-                            <InputNumber @bind-Value="catalog.Code" class="form-control" id="exampleInputEmail2" placeholder="Product Price" />
+                            <InputText @bind-Value="catalog.Code" class="form-control" id="exampleInputEmail2" placeholder="Code" />
                             <span class="text-danger"><ValidationMessage For="@(() => catalog.Code)" /> </span>
                         </div>
 
                         <div class="col-md-2">
                             <label class="form-label"> Price</label>
-                            <InputNumber @bind-Value="catalog.Price" class="form-control" id="exampleInputEmail2" placeholder="Product Price" />
+                            <InputNumber @bind-Value="catalog.Price" class="form-control" id="exampleInputEmail2" placeholder=" Price" />
                             <span class="text-danger"><ValidationMessage For="@(() => catalog.Price)" /> </span>
                         </div>
                         <div class="col-md-1">
@@ -244,6 +244,47 @@
             </div>
 
 
+
+
+            <!-- Media URLs Section -->
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-images fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media URLs
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <InputText @bind-Value="newMediaUrl" class="form-control" placeholder="Enter image URL" />
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary w-100px" @onclick="AddMediaUrl">Add</button>
+                        </div>
+                    </div>
+                    @if (catalog.CatalogMedias.Count > 0)
+                    {
+                        @foreach (var media in catalog.CatalogMedias)
+                        {
+                            <div class="row align-items-center mb-3">
+                               
+                                <div class="col-md-4">
+                                    <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                </div>
+                                <div class="col-md-4">
+
+
+                                    <button type="button"  @onclick="() => RemoveMediaUrl(media)" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i></button>
+
+
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!--End Media Section-->
+
         </div>
         <div class="col-xl-4">
             <div class="card border-0 mb-3">
@@ -389,6 +430,9 @@
     private List<GeneralColor> colors;
     private IEnumerable<Cluster> clusters = new List<Cluster>();
     public string clusterName = "";
+    private string newMediaUrl = string.Empty; // New URL input
+
+
 
     #region
 
@@ -775,7 +819,22 @@
     #endregion
 
 
+    #region MediaURl
 
+    private void AddMediaUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(newMediaUrl))
+        {
+            catalog.CatalogMedias.Add(new CatalogMedia { ImageUrl = newMediaUrl });
+            newMediaUrl = string.Empty;
+        }
+    }
+
+    private void RemoveMediaUrl(CatalogMedia media)
+    {
+        catalog.CatalogMedias.Remove(media);
+    }
+    #endregion
 
 
 

@@ -59,6 +59,7 @@
                         <MudStack Row>
                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditRole(context.Item)" />
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteRole(context.Item)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Security" Size="Size.Small" Class="text-primary" OnClick="() => ManagePermissions(context.Item)" /> 
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>
@@ -148,4 +149,18 @@
             Console.Error.WriteLine($"Error in NavigateToAddEditRole: {ex}");
         }
     }
+
+    private void ManagePermissions(Role role)
+    {
+        try
+        {
+            NavigationManager.NavigateTo($"/ManagePermissions/{role.Id}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while navigating to manage permissions: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in ManagePermissions: {ex}");
+        }
+    }
+
 }

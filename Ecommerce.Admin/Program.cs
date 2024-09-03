@@ -14,6 +14,7 @@ using Ecommerce.Shared.Services.Features;
 using Ecommerce.Shared.Services.ModelYears;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.ProductVariants;
+using Ecommerce.Shared.Services.RolePermissions;
 using Ecommerce.Shared.Services.Roles;
 using Ecommerce.Shared.Services.Sizes;
 using Ecommerce.Shared.Services.TemplateCategories;
@@ -53,6 +54,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<Radzen.DialogService>();
 builder.Services.AddScoped<ISliderService, SliderService>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 builder.Services.AddDbContext<ApplicationDbContext>(
  o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 //builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; });

@@ -211,14 +211,26 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _context.Users.Include(a=>a.UserRoles).FirstOrDefaultAsync(u => u.UserName == Username && u.Password == password); // Consider hashing the password for comparison
-
+            var user = await _context.Users
+          .Include(u => u.UserRoles)
+              .ThenInclude(ur => ur.Role) 
+              .ThenInclude(r => r.RolePermissions) 
+          .FirstOrDefaultAsync(u => u.UserName == Username && u.Password == password); 
+ 
             if (user == null)
             {
                 return new ServiceResponse<User>
                 {
                     Success = false,
                     Message = "Invalid Username or password"
+                };
+            }
+            if (user.IsAgent==true && user.Approved==false)
+            {
+                return new ServiceResponse<User>
+                {
+                    Success = false,
+                    Message = "You're not approved. Please wait for your request to be approved by an admin."
                 };
             }
 

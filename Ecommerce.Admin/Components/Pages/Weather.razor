@@ -1,39 +1,44 @@
-﻿@typeparam TItem where TItem : EmailAddress
-@using System.Collections.ObjectModel
-@using Ecommerce.Mailer.DTOs
-@using System.ComponentModel.DataAnnotations
+﻿@page "/Testing"
 
-<div>
-    @foreach (var item in EmailList)
-    {
-        <span class="email-tag">@item.Email <a href="javascript:void(0)" @onclick="@(() => RemoveEmail(item))">&times;</a></span>
-    }
-    <input type="text" @bind-value="newEmailAddress" @bind-value:event="oninput" @onkeydown="@OnKeyDown" placeholder="Add email" class="email-input" />
-</div>
+@using System.Threading
 
-@code {
-    [Parameter] public IList<TItem> EmailList { get; set; }
-    private string newEmailAddress = string.Empty;
 
-    private void AddEmail()
-    {
-        if (!string.IsNullOrWhiteSpace(newEmailAddress) && new EmailAddressAttribute().IsValid(newEmailAddress))
+
+    <PageTitle>Index</PageTitle>
+
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudAutocomplete T=Country
+                             Label="Select Country"
+                             @bind-Value=selectedCountry
+                             SearchFunc=this.FilterCountriesAsync
+                             ToStringFunc=DisplayValue />
+        </MudItem>
+    </MudGrid>
+
+    @code {
+        private Country? selectedCountry;
+
+        private Func<Country, string?> DisplayValue = item => item is null ? null : item.Name;
+
+        private async Task<IEnumerable<Country>> FilterCountriesAsync(string value)
         {
-            EmailList.Add((TItem)(object)new EmailAddress { Email = newEmailAddress });
-            newEmailAddress = string.Empty;
-        }
-    }
+            // pretend to be a async api or Db call
+            await Task.Yield();
 
-    private void RemoveEmail(TItem email)
-    {
-        EmailList.Remove(email);
-    }
+            if (!string.IsNullOrWhiteSpace(value))
+                return _countries.Where(item => item.Name.ToLower().Contains(value.ToLower())) ?? _countries;
 
-    private void OnKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" || e.Key == "Tab")
-        {
-            AddEmail();
+            return _countries;
         }
+
+        private List<Country> _countries = new()
+{
+       new Country("France"),
+       new Country("Finland"),
+       new Country("United Kingdom"),
+       new Country("United States of America"),
+    };
+
+        public record Country(string Name);
     }
-}

@@ -8,11 +8,11 @@ public class AuthenticatedComponent : ComponentBase
 {
     [Inject] protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 
-    protected string UserId { get; private set; }
+    protected long UserId { get; private set; }
 
+    protected bool IsAgent { get; private set; }
 
-    
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
         {
             await InitializeUserAsync();
         }
@@ -24,11 +24,25 @@ public class AuthenticatedComponent : ComponentBase
 
         if (user.Identity.IsAuthenticated)
         {
-            UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (long.TryParse(userIdClaim, out var parsedUserId))
+            {
+                UserId = parsedUserId;
+            }
+            else
+            {
+                UserId = 0; 
+            }
+
+
+
+            var isAgentClaim = user.FindFirst(ClaimTypes.Actor)?.Value;
+            IsAgent = isAgentClaim == "Agent";
         }
         else
         {
-            UserId = null;
+            UserId = 0 ;
+            IsAgent = false;
         }
     }
 

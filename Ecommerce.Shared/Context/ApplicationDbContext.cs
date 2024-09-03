@@ -9,6 +9,7 @@ using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.Configurations;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ModelYears;
+using Ecommerce.Shared.Entities.Permissions;
 using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Entities.Roles;
@@ -53,15 +54,17 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductVariantImages> productVariantImages { get; set; }
     public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
     public DbSet<TrendingProduct> TrendingProducts { get; set; }
-
     public DbSet<Catalog> Catalogs { get; set; }
-    
-
     public DbSet<Slider> Sliders { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
-
-    //public DbSet<ClusterFeatureDto> ClusterFeatureDtos { get; set; }
+    public DbSet<ProductImages> ProductImages { get; set; }
+    public DbSet<CatalogMedia> CatalogMedias { get; set; }
+    public DbSet<ProductMedia> ProductMedias { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<ProductVariantMedia> ProductVariantMedias { get; set; }
+   
+    public DbSet<RolePermission> RolePermissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

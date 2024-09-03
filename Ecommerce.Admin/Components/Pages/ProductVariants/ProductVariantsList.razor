@@ -6,6 +6,10 @@
 @inject NavigationManager navigationManager
 @inject IJSRuntime jsRuntime
 @rendermode InteractiveServer
+@inherits AuthenticatedComponent
+
+
+
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -40,17 +44,51 @@
             </div>
         </div>
         <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
-            <ColGroup>
-                <col style="width: 80%;" />
-                <col style="width: 20%;" />
-            </ColGroup>
+      
             <Columns>
-                <PropertyColumn Property="x => x.Name" Title="Name" Style="width:30%" />
-                <PropertyColumn Property="x => x.Price" Title="Price" Style="width:20%" />
-                <PropertyColumn Property="x => x.Sku" Title="SKU" Style="width:20%" />
-                <PropertyColumn Property="x => x.Publish" Title="Publish" Style="width:10%" />
 
-                <TemplateColumn Title="Size" Style="width:10%">
+
+                <TemplateColumn Title="Thumbnail">
+                    <CellTemplate>
+
+                        @{
+                            var thumbnail = context.Item.Thumbnail;
+                        }
+                        <img src="@thumbnail" class="rounded h-30px" />
+                      
+
+                    </CellTemplate>
+                </TemplateColumn>
+
+
+
+
+                <PropertyColumn Property="x => x.Name" Title="Name" />
+                <!-- New Column for VariantType -->
+                <TemplateColumn Title="Obj">
+                    <CellTemplate>
+                        @{
+                            var variantType = context.Item.variantType?.ToString() ?? "N/A";
+                        }
+                        <div>
+                            @variantType
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+
+                <!-- New Column for TypeValue -->
+                <TemplateColumn Title="Obj ID">
+                    <CellTemplate>
+                        @{
+                            var typeValue = context.Item.TypeValue ?? "N/A";
+                        }
+                        <div>
+                            @typeValue
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.Price" Title="Price" />        
+                <TemplateColumn Title="Size">
                     <CellTemplate>
                         @{
                             var sizeName = context.Item.GeneralSize?.Name ?? "N/A"; // Provide a default value if null
@@ -60,7 +98,7 @@
                         </div>
                     </CellTemplate>
                 </TemplateColumn>
-                <TemplateColumn Title="Color" Style="width:10%">
+                <TemplateColumn Title="Color">
                     <CellTemplate>
                         @{
                             var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
@@ -71,7 +109,7 @@
                     </CellTemplate>
                 </TemplateColumn>
 
-                <TemplateColumn Title="Year" Style="width:10%">
+                <TemplateColumn Title="Year">
                     <CellTemplate>
                         @{
                             var year = context.Item.ModelYear?.Year.ToString() ?? "N/A";
@@ -82,7 +120,7 @@
                     </CellTemplate>
                 </TemplateColumn>
 
-                <TemplateColumn Title="Publish" Style="width:10%">
+                <TemplateColumn Title="Publish">
                     <CellTemplate>
                         @{
                             var isPublished = context.Item.Publish;
@@ -90,7 +128,7 @@
                         <MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />
                     </CellTemplate>
                 </TemplateColumn>
-                <TemplateColumn CellClass="d-flex justify-end" Style="width:20%">
+                <TemplateColumn CellClass="d-flex justify-end">
                     <HeaderTemplate>
                         <div>Actions</div>
                     </HeaderTemplate>
@@ -112,8 +150,6 @@
 @code {
     [Inject]
     public IDialogService DialogService { get; set; }
-
-
     [Parameter]
     [SupplyParameterFromQuery(Name = "ProductId")]
     public long ProductId { get; set; }
@@ -123,7 +159,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        await base.OnInitializedAsync();
         await LoadProductVariants();
     }
 
@@ -131,7 +167,7 @@
     {
         try
         {
-            var response = await productVariantService.GetAllProductVariantsAsync(ProductId);
+            var response = await productVariantService.GetAllProductVariantsAsync(ProductId,UserId,IsAgent);
             if (response.Success)
             {
                 productVariants = response.Data;

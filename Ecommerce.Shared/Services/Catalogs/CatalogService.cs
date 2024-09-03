@@ -15,6 +15,7 @@ public interface ICatalogService
     Task<ServiceResponse<Catalog>> AddCatalogAsync(Catalog catalog);
     Task<ServiceResponse<Catalog>> UpdateCatalogAsync(Catalog catalog);
     Task<ServiceResponse<bool>> DeleteCatalogAsync(long id);
+    Task<ServiceResponse<List<Catalog>>> SearchCatalogsAsync(string searchTerm);
 }
 public class CatalogService: ICatalogService
 {
@@ -56,16 +57,17 @@ public class CatalogService: ICatalogService
         {
             // Use Include to load related entities
             var catalog = await _context.Catalogs
-                .Include(c => c.Brand)                   // Include related Brand
-                .Include(c => c.Category)                // Include related Category
-                .Include(c => c.GeneralSize)             // Include related GeneralSize
-                .Include(c => c.GeneralColor)            // Include related GeneralColor
-                .Include(c => c.ModelYear)               // Include related ModelYear
-                .Include(c => c.CatalogClusters)         // Include related CatalogClusters
-                    .ThenInclude(cc => cc.Cluster)       // Include the Cluster within CatalogClusters
-                .Include(c => c.CatalogClusters)         // Include related CatalogClusters again to include features
-                    .ThenInclude(cc => cc.CatalogClusterFeatures)  // Include CatalogClusterFeatures within each Cluster
-                        .ThenInclude(cf => cf.Feature)   // Include the Feature within each CatalogClusterFeature
+                .Include(c => c.Brand)                  
+                .Include(c => c.Category)               
+                .Include(c => c.GeneralSize)            
+                .Include(c => c.GeneralColor)           
+                .Include(c => c.ModelYear)
+                .Include(c => c.CatalogMedias)
+                .Include(c => c.CatalogClusters)        
+                    .ThenInclude(cc => cc.Cluster)      
+                .Include(c => c.CatalogClusters)       
+                    .ThenInclude(cc => cc.CatalogClusterFeatures)  
+                        .ThenInclude(cf => cf.Feature)  
                 .FirstOrDefaultAsync(c => c.Id == id);
             return new ServiceResponse<Catalog>
             {
@@ -190,5 +192,33 @@ public class CatalogService: ICatalogService
             };
         }
     }
+
+    public async Task<ServiceResponse<List<Catalog>>> SearchCatalogsAsync(string searchTerm)
+{
+    try
+    {
+        var catalogs = await _context.Catalogs
+            .Where(c => c.Name.Contains(searchTerm) || 
+                        c.Description.Contains(searchTerm) || 
+                        c.ShortDescription.Contains(searchTerm)|| c.Code.Contains(searchTerm))
+            .ToListAsync();
+
+        return new ServiceResponse<List<Catalog>>
+        {
+            Data = catalogs,
+            Success = true,
+            Message = "Catalogs fetched successfully"
+        };
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error occurred while searching catalogs.");
+        return new ServiceResponse<List<Catalog>>
+        {
+            Success = false,
+            Message = "Error occurred while searching catalogs"
+        };
+    }
+}
 
 }

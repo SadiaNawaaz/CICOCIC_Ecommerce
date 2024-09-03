@@ -1,0 +1,171 @@
+﻿@page "/ManagePermissions/{RoleId:long}"
+@using Ecommerce.Shared.Entities.Roles
+@using Ecommerce.Shared.Services.Roles
+@using Ecommerce.Shared.Services.RolePermissions
+@inject IRolePermissionService RolePermissionService
+@inject IRoleService RoleService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@using Ecommerce.Shared.Entities.Permissions;
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+    <style>
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px; /* Space between items */
+        }
+
+        .form-check-label {
+            margin-left: 10px; /* Space between checkbox and label */
+            font-size: 16px; /* Adjust font size as needed */
+        }
+
+        input[type="checkbox"] {
+            --s: 20px; /* Adjust this to control the size */
+
+            height: calc(var(--s) + var(--s) / 5);
+            width: auto; /* Some browsers need this */
+            aspect-ratio: 2.25;
+            border-radius: var(--s);
+            margin: 0; /* Remove margin for better alignment */
+            display: grid;
+            cursor: pointer;
+            background-color: #ff7a7a;
+            box-sizing: content-box;
+            overflow: hidden;
+            transition: .3s .1s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+            input[type="checkbox"]:before {
+                content: "";
+                padding: calc(var(--s) / 10);
+                --_g: radial-gradient(circle closest-side at calc(100% - var(--s) / 2) 50%, #000 96%, #0000);
+                background: var(--_g) 0 / var(--_p, var(--s)) 100% no-repeat content-box, var(--_g) var(--_p, 0) / var(--s) 100% no-repeat content-box, #fff;
+                mix-blend-mode: darken;
+                filter: blur(calc(var(--s) / 12)) contrast(11);
+                transition: .4s, background-position .4s .1s, padding cubic-bezier(0, calc(var(--_i, -1) * 200), 1, calc(var(--_i, -1) * 200)) .25s .1s;
+            }
+
+            input[type="checkbox"]:checked {
+                background-color: #85ff7a;
+            }
+
+                input[type="checkbox"]:checked:before {
+                    padding: calc(var(--s) / 10 + .05px) calc(var(--s) / 10);
+                    --_p: 100%;
+                    --_i: 1;
+                }
+    </style>
+
+    <div class="panel panel-inverse">
+        <div class="panel-heading">
+            <h4 class="panel-title">Manage Permissions for Role: @role?.Name</h4>
+        </div>
+        <div class="panel-body">
+            @if (permissions != null && permissions.Count > 0)
+            {
+                <EditForm Model="@ObjModel" OnValidSubmit="SavePermissions" FormName="PermissionForm">
+                    @foreach (var permission in permissions.Where(a => a.PageUrl != null).ToList())
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" id="@permission.Id" @bind="@permission.Checked" />
+                            <label class="form-check-label" for="@permission.Id">@permission.ActionName</label>
+                        </div>
+                    }
+                <div class="row">
+
+                    <div class="col-10">
+                    </div>
+                    <div class="col-1">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>                   
+                </div>
+                    
+                </EditForm>
+            }
+            else
+            {
+                <p>Loading permissions...</p>
+            }
+        </div>
+    </div>
+
+    @code {
+        [Parameter] public long RoleId { get; set; }
+        private Role role;
+        private List<PermissionDto> permissions = new List<PermissionDto>();
+        RolePermission ObjModel = new RolePermission();
+
+        protected override async Task OnInitializedAsync()
+        {
+            ObjModel.RoleId = RoleId;
+            permissions = new List<PermissionDto>();
+            await LoadPermissions();
+        }
+
+        private async Task LoadPermissions()
+        {
+            try
+            {
+                var roleResponse = await RoleService.GetRoleByIdAsync(RoleId);
+                if (roleResponse.Success)
+                {
+                    role = roleResponse.Data;
+                }
+                var allResponse = await RolePermissionService.GetAllPermissionsAsync();
+                if (allResponse.Success)
+                {
+                    permissions = allResponse.Data;
+                }
+                var permissionsResponse = await RolePermissionService.GetPermissionsForRoleAsync(RoleId);
+
+                if (permissionsResponse.Success)
+                {
+                    List<Permission> Assignedpermissions = permissionsResponse.Data;
+
+                    foreach (var permission in permissions)
+                    {
+                        if (Assignedpermissions.Any(ap => ap.Id == permission.Id))
+                        {
+                            permission.Checked = true;
+
+                        }
+                    }
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add("An error occurred while loading permissions: " + ex.Message, Severity.Error);
+                Console.Error.WriteLine($"Error in LoadPermissions: {ex}");
+            }
+        }
+
+
+        private async Task SavePermissions()
+        {
+            try
+            {
+                var response = await RolePermissionService.AssignPermissionsToRoleAsync(RoleId, permissions.Where(a => a.Checked == true).ToList());
+                if (response.Success)
+                {
+                    Snackbar.Add("Permissions updated successfully.", Severity.Success);
+                    NavigationManager.NavigateTo("/RoleList");
+                }
+                else
+                {
+                    Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add("An error occurred while saving permissions: " + ex.Message, Severity.Error);
+                Console.Error.WriteLine($"Error in SavePermissions: {ex}");
+            }
+        }
+
+
+    }

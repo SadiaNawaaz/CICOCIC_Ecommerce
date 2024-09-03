@@ -9,14 +9,8 @@ namespace Ecommerce.Shared.Entities.Features;
 
 public class Feature : BaseEntity
 {
-
-
-
-
     [Required]
-    public string Name { get; set; }
-
-    
+    public string Name { get; set; }  
     public long ClusterId { get; set; }
     public Cluster Cluster { get; set; }
     [NotMapped]

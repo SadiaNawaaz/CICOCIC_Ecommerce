@@ -43,9 +43,25 @@ namespace Ecommerce.Admin.Authentication
                 var claim = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.FirstName),
-                //new Claim(ClaimTypes.Role, user.Role.Name) ,
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
+
+                foreach (var role in user.UserRoles)
+                {                    
+                    foreach (var permission in role.Role.RolePermissions)
+                    {
+                        claim.Add(new Claim(ClaimTypes.Role, permission.PermissionId.ToString()));
+                    }
+                }
+
+                if (user.IsAgent)
+                {
+                    claim.Add(new Claim(ClaimTypes.Actor, "Agent"));
+                }
+                else
+                {
+                    claim.Add(new Claim(ClaimTypes.Actor, "Admin"));
+                }
 
                 var principal = new ClaimsPrincipal(new ClaimsIdentity(claim, "Auth"));
                 await HttpContext.SignInAsync("Auth", principal);

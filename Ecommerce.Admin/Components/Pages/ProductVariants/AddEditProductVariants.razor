@@ -19,7 +19,12 @@
 @using Ecommerce.Shared.Entities.ProductVariants
 @inject NavigationManager NavigationManager
 @inject ImageResizeService ImageResizeService
-
+@inherits AuthenticatedComponent
+@using Ecommerce.Shared.Enums;
+@using Ecommerce.Shared.Services.Catalogs;
+@inject ICatalogService CatalogService
+@using Ecommerce.Shared.Entities.Catalogs;
+@inject IConfiguration Configuration
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -60,94 +65,198 @@
                 </div>
             </div>
             <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media
+                <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" @onchange="OnCheckboxChanged" />
+                            Clone Product images
+                        </label>
+                    </div>
                 </div>
+
+
                 <div class="card-body">
                     <div id="dropzone">
                         <div>
                             <div class="dz-message needsclick">
-                                <b>click</b> to upload.<br />
+                                <b>Click</b> to upload.<br />
 
                                 <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
 
                                 @if (selectedFiles != null && selectedFiles.Count() > 0)
                                 {
-                                    <div>
-
-                                        @foreach (var file in selectedFiles.Where(a=>a.IsDeleted==false))
+                                    <div style="display: flex; flex-wrap: wrap; margin-top: 10px;">
+                                        @foreach (var file in selectedFiles.OrderBy(f => f.Order).Where(a => !a.IsDeleted))
                                         {
-                                            <div style="display:inline-block; margin: 10px; position: relative;">
-                                                <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
+                                            <div style="position: relative; margin: 10px; cursor: grab;" draggable="true"
+                                                 @ondragstart="(e) => HandleDragStart(e, file)"
+                                                 ondragover="event.preventDefault();"
+                                                 @ondrop="() => HandleDrop(file)">
+                                                <img src="@file.ImageUrl" alt="Image Preview" style="height: 150px; width: 150px;" />
                                                 <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
                                             </div>
                                         }
-
                                     </div>
                                 }
-
                             </div>
                         </div>
                     </div>
                 </div>
+
+
+                @*<div class="card-body">
+                        <div id="dropzone">
+                            <div>
+                                <div class="dz-message needsclick">
+                                    <b>click</b> to upload.<br />
+
+                                    <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
+
+                                    @if (selectedFiles != null && selectedFiles.Count() > 0)
+                                    {
+                                        <div>
+
+                                            @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
+                                            {
+                                                <div style="display:inline-block; margin: 10px; position: relative;">
+                                                    <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
+                                                    <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
+                                                </div>
+                                            }
+
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
             </div>
+
+
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media URLS
+                    </div>
+
+                </div>
+                <div class="card-body">
+                    @if (productVariant.ProductVariantMedias != null && productVariant.ProductVariantMedias.Count > 0)
+                    {
+                        @foreach (var media in productVariant.ProductVariantMedias)
+                        {
+                            <div class="row align-items-center mb-3">
+
+                                <div class="col-md-4">
+                                    <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                </div>
+                                <div class="col-md-4">
+
+
+                                    <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i></button>
+
+
+                                </div>
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3">
                     <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
                 </div>
                 <div class="card-body">
 
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead>
-                                <tr>
-                                    <th width="80%">Feature</th>
-                                    <th width="20%">Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (clusterTabs != null && clusterTabs.Count > 0)
+                    <div>
+                        @if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
+                        {
+
+                            foreach (var clus in Product.ProductClusters)
+                            {
+
+
+                                <div class="row mb-3 gx-3 alert alert-info align-items-center">
+                                    <div class="col-10">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <ul class="list-unstyled mb-0">
+                                                    <li><strong>@clus.Cluster.Name</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-2 text-end">
+
+                                    </div>
+                                </div>
+                                foreach (var f in clus.ProductClusterFeatures)
                                 {
-                                    @foreach (var clusterTab in clusterTabs)
-                                    {
-                                        var collapseId = $"collapse{clusterTab.cluster.Name.Replace(" ", "")}";
-                                        var headingId = $"heading{clusterTab.cluster.Name.Replace(" ", "")}";
+                                    <div class="row mb-3 gx-3">
+                                        <div class="col-2">
+                                            <ul id="tag-size" class="primary">
+                                                <li>@f.Feature.Name</li>
 
-                                        <tr>
-                                            <td colspan="2">
-                                                <div class="accordion" id="accordionPanelsStayOpenExample">
-                                                    <div class="accordion-item">
-                                                        <h2 class="accordion-header" id="@headingId">
-                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
-                                                                @clusterTab.cluster.Name
+                                            </ul>
+                                        </div>
+                                        <div class="col-4"><input type="text" class="form-control" @bind-value="@f.Value" readonly /></div>
 
-                                                            </button>
-                                                        </h2>
-                                                        <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId">
-                                                            <div class="accordion-body">
-                                                                <div class="card mb-4 border-0">
-                                                                    <ul class="list-group list-group-flush">
-                                                                        @foreach (var feature in clusterTab.Features)
-                                                                        {
-                                                                            <li class="list-group-item d-flex align-items-center justify-content-between">
-                                                                                <span class="mr-2">@feature.Feature.Name</span>
-                                                                                <input type="text" @bind-value=@feature.Feature.Value class="form-control" style="width: auto; margin-left: 10px;">
-
-
-                                                                            </li>
-                                                                        }
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
+                                    </div>
                                 }
-                            </tbody>
-                        </table>
+
+                            }
+
+                        }
+
+
+                    </div>
+
+
+                </div>
+
+
+
+            </div>
+
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-6">
+                            <label class="form-label">Type</label>
+
+                            <select id="variantType" @bind="productVariant.variantType" class="form-control">
+                                @foreach (var variant in Enum.GetValues(typeof(VariantType)).Cast<VariantType>())
+                                {
+                                    <option value="@variant">@variant</option>
+                                }
+                            </select>
+                        </div>
+
+
+                        <div class="col-6">
+                            <label class="form-label">Value</label>
+                            <InputText id="name" class="form-control" @bind-Value="productVariant.TypeValue" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Note</label>
+                            <div class="form-control p-0 overflow-hidden">
+                                <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind-Value="@productVariant.Note"></InputTextArea>
+                            </div>
+                        </div>
+
                     </div>
 
 
@@ -176,11 +285,26 @@
                                 </div>
                             </div>
                             <div>Publish to Site</div>
-
                         </div>
-                        <div class="w-50px text-center"><a href="#" class="text-decoration-none"><i class="fa fa-lg fa-fw fa-calendar"></i></a></div>
                     </div>
-                    <hr />
+                    <br />
+                    <div class="d-flex">
+                        @if (productVariant != null && productVariant.Id > 0)
+                        {
+                            <div class="flex-1 d-flex">
+
+                                <a href="@(webAppUrl + "Product?Id=" + productVariant.Id)" class="text-decoration-none" target="_blank">
+                                    <i class="fa fa-lg fa-fw fa-eye"></i>
+                                </a>
+
+                                <p> &nbsp;&nbsp;&nbsp; Save before Preview!</p>
+                            </div>
+                            <hr />
+                        }
+
+                    </div>
+
+
 
                 </div>
             </div>
@@ -253,7 +377,7 @@
                                         {
 
 
-                                            <option value="@col.Id" style="color:@col.HexCode;background-color:@col.HexCode;">@col.HexCode</option>
+                                            <option value="@col.Id" style="color:@col.HexCode;background-color:@col.HexCode;">@col.Name</option>
                                         }
                                     }
 
@@ -297,12 +421,44 @@
                     </form>
                 </div>
             </div>
+
+
+
+            <div class="card border-0 mb-3">
+                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                    <div class="flex-1">
+                        <div>Image</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        Add Image Thumbnail
+                    </div>
+                    <div class="form-horizontal form-bordered">
+                        <div class="form-group row">
+                            <label class="form-label col-form-label col-lg-4">Thumbnail</label>
+                            <div class="col-lg-8">
+
+                                <InputText @bind-Value="productVariant.Thumbnail" class="form-control" />
+
+                                @if (!String.IsNullOrEmpty(productVariant.Thumbnail))
+                                {
+                                    <img src="@productVariant.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
+                                }
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="card">
 
             <div class="card-footer bg-none d-flex p-3">
-                <button type="submit" class="btn btn-primary ms-auto">Save</button>
+                <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-primary ms-auto">Save</button>
             </div>
         </div>
     </div>
@@ -329,15 +485,18 @@
     private List<Brand> Brands = new List<Brand>();
     private IEnumerable<ModelYear> ModelYears = new List<ModelYear>();
     private List<GeneralSize> Sizes = new List<GeneralSize>();
-    private TemplateMaster TemplateMaster = new TemplateMaster();
-    private List<TemplateCluster> clusterTabs = new List<TemplateCluster>();
-    private List<GeneralColor> colors;
 
-    private List<ProductVariantFeatureValue> productVariantFeatureValues = new List<ProductVariantFeatureValue>();
+    private Catalog catalog = new Catalog();
+    private List<GeneralColor> colors;
+    string webAppUrl = "";
+
+
     #endregion
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
 
+        webAppUrl = Configuration["WebAppUrl"];
         await GetProduct();
         await LoadCategoryTreeAsync();
         await LoadModelYears();
@@ -345,13 +504,15 @@
         await LoadSizes();
         await LoadColors();
 
+
+
         if (Id > 0)
         {
             await LoadVariantForEdit();
 
         }
 
-        await LoadTemplate(Product.TemplateMasterId);
+        //await LoadTemplate(Product.TemplateMasterId);
 
 
     }
@@ -454,8 +615,28 @@
                 Product = response.Data;
                 if (Id == 0)
                 {
-                    productVariant.Name = Product.Name + "-";
+                    productVariant.Name = Product.Name;
                     productVariant.ProductId = Product.Id;
+                    productVariant.Price = Product.Price;
+                    if (Product.CatalogId != null && Product.CatalogId > 0)
+                    {
+                        var Catresponse = await CatalogService.GetCatalogByIdAsync(Product.CatalogId.Value);
+                        if (Catresponse.Success)
+                        {
+                            catalog = Catresponse.Data;
+
+                            productVariant.GeneralColorId = catalog.GeneralColorId;
+                            productVariant.GeneralSizeId = catalog.GeneralSizeId;
+                            productVariant.ModelYearId = catalog.ModelYearId;
+                            productVariant.Thumbnail = catalog.Thumbnail;
+
+                        }
+                        else
+                        {
+                            Snackbar.Add(response.Message, Severity.Error);
+                        }
+
+                    }
                 }
 
             }
@@ -479,100 +660,9 @@
     }
 
 
-
     #endregion
 
-    #region Template
-    private async Task LoadTemplate(long TemplateId)
-    {
 
-        try
-        {
-            var response = await TemplateService.GetTemplateMasterByIdAsync(TemplateId);
-            TemplateMaster = response.Data;
-            clusterTabs = new List<TemplateCluster>();
-            clusterTabs = TemplateMaster.Clusters.ToList();
-
-            if (response.Success)
-            {
-                var featureValues = Product.FeatureValues;
-
-                var VariantfeatureValues = productVariant.ProductVariantFeatureValues;
-
-                if (Id > 0 && productVariant.Id > 0 && productVariant.ProductVariantFeatureValues.Count > 0) //Edit Records
-                {
-
-
-                    if (VariantfeatureValues != null && VariantfeatureValues.Count > 0)
-                    {
-                        if (clusterTabs != null && clusterTabs.Count > 0)
-                        {
-                            if (VariantfeatureValues != null && VariantfeatureValues.Count > 0 && clusterTabs != null && clusterTabs.Count > 0)
-                            {
-                                foreach (var clusterTab in clusterTabs)
-                                {
-                                    foreach (var feature in clusterTab.Features)
-                                    {
-                                        var correspondingFeatureValue = VariantfeatureValues.FirstOrDefault(fv => fv.TemplateClusterFeatureId == feature.Id);
-                                        if (correspondingFeatureValue != null)
-                                        {
-                                            feature.Feature.Value = correspondingFeatureValue.Value;
-                                        }
-                                    }
-                                }
-                            }
-
-
-                        }
-
-
-                    }
-
-                }
-
-                else   //New Records
-                {
-                    if (featureValues != null && featureValues.Count > 0)
-                    {
-                        if (clusterTabs != null && clusterTabs.Count > 0)
-                        {
-                            if (featureValues != null && featureValues.Count > 0 && clusterTabs != null && clusterTabs.Count > 0)
-                            {
-                                foreach (var clusterTab in clusterTabs)
-                                {
-                                    foreach (var feature in clusterTab.Features)
-                                    {
-                                        var correspondingFeatureValue = featureValues.FirstOrDefault(fv => fv.TemplateClusterFeatureId == feature.Id);
-                                        if (correspondingFeatureValue != null)
-                                        {
-                                            feature.Feature.Value = correspondingFeatureValue.Value;
-                                        }
-                                    }
-                                }
-                            }
-
-
-                        }
-
-
-                    }
-                }
-
-
-            }
-            else
-            {
-                Snackbar.Add(response.Message, Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-
-    }
-
-    #endregion
 
     #region Brand
 
@@ -658,24 +748,13 @@
         try
         {
             ServiceResponse<ProductVariant> response;
-            if (clusterTabs != null && clusterTabs.Count > 0)
-            {
-                foreach (var v in clusterTabs)
-                {
-                    productVariantFeatureValues.AddRange(v.Features.Select(f => new ProductVariantFeatureValue
-                    {
-                        TemplateClusterFeatureId = f.Id,
-                        Value = f.Feature.Value,
-                    }));
-                }
-            }
-
-            productVariant.ProductVariantFeatureValues = productVariantFeatureValues;
-
             productVariant.productVariantImages = productVariant.productVariantImages.Where(a => a.IsDeleted == false).ToList();
 
             if (Id != 0)
             {
+                productVariant.LastModifiedBy = UserId;
+                productVariant.LastModifiedDate = DateTime.Now;
+
                 response = await IProductVariantService.UpdateProductVariantAsync(productVariant);
                 if (response.Success)
                 {
@@ -691,6 +770,8 @@
             {
 
                 productVariant.ProductId = ProductId;
+                productVariant.CreatedBy = UserId;
+                productVariant.CreatedDate = DateTime.Now;
                 response = await IProductVariantService.AddProductVariantAsync(productVariant);
                 if (response.Success)
                 {
@@ -703,7 +784,7 @@
                 }
             }
 
-            if(response.Success)
+            if (response.Success)
 
 
             {
@@ -729,7 +810,7 @@
         {
 
             var filePath = Path.Combine(productVariantImagesPath, image.ImageName);
-            if (image.IsDeleted==true)
+            if (image.IsDeleted == true)
             {
                 if (image.IsDeleted)
                 {
@@ -739,15 +820,29 @@
                     }
                 }
             }
-               else if(image.IsDeleted == false && image.ImageByte==null)
-                {
 
-                }
-                else
+            else if (image.IsCloned == true && !File.Exists(filePath))
+            {
+                // Copy the file from the original location if it's cloned
+                var sourceFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Products", Product.Id.ToString(), image.ImageName);
+                if (File.Exists(sourceFilePath))
                 {
-                    await File.WriteAllBytesAsync(filePath, image.ImageByte);
-                    image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
+                    File.Copy(sourceFilePath, filePath);
                 }
+                image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
+            }
+
+
+
+            else if (image.IsDeleted == false && image.ImageByte == null)
+            {
+
+            }
+            else
+            {
+                await File.WriteAllBytesAsync(filePath, image.ImageByte);
+                image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
+            }
 
 
 
@@ -768,7 +863,7 @@
             {
                 productVariant = response.Data;
                 selectedFiles = productVariant.productVariantImages;
-                if(selectedFiles!=null && selectedFiles.Count()>0)
+                if (selectedFiles != null && selectedFiles.Count() > 0)
                 {
                     selectedFiles.ToList().ForEach(image =>
                     {
@@ -791,12 +886,11 @@
     #endregion
 
 
-
     #region Images
 
     private List<ProductVariantImages> selectedFiles = new List<ProductVariantImages>();
     private List<string> selectedImagePreviews = new List<string>();
-
+    private ProductVariantImages? draggingImage;
 
     private async Task HandleSelected(InputFileChangeEventArgs e)
     {
@@ -816,13 +910,13 @@
                 {
                     ImageUrl = resizedImageUrl,
                     ImageByte = buffer,
-                    ImageName= uniqueFileName
+                    ImageName = uniqueFileName
                 };
 
                 selectedFiles.Add(productVariantImages);
             }
 
-            productVariant.productVariantImages=selectedFiles;
+            productVariant.productVariantImages = selectedFiles;
             StateHasChanged();
         }
         catch (Exception ex)
@@ -834,14 +928,111 @@
     private void RemoveImage(ProductVariantImages image)
     {
 
-        var node= selectedFiles.FirstOrDefault(a => a.ImageName == image.ImageName);
+        var node = selectedFiles.FirstOrDefault(a => a.ImageName == image.ImageName && a.IsDeleted==false);
         node.IsDeleted = true;
-
-        // selectedFiles.Remove(image);
         StateHasChanged();
     }
+
+
+    private void OnCheckboxChanged(ChangeEventArgs e)
+    {
+        try
+        {
+            bool isChecked = (bool)e.Value;
+
+            if (isChecked)
+            {
+                if (Product != null)
+                {
+
+
+                    if (Product.ProductMedias != null && Product.ProductMedias.Count > 0)
+                    {
+
+                        productVariant.ProductVariantMedias = Product.ProductMedias.Select(cm => new ProductVariantMedia
+                        {
+                            ImageUrl = cm.ImageUrl,
+
+                        }).ToList();
+
+                    }
+
+                    if (Product.ProductImages != null && Product.ProductImages.Count > 0)
+                    {
+
+                        foreach (var cm in Product.ProductImages)
+                        {
+                            // Check if the image with the same name already exists in the selectedFiles list
+                            if (!selectedFiles.Any(img => img.ImageName == cm.ImageName && img.IsDeleted==false))
+                            {
+                                selectedFiles.Add(new ProductVariantImages
+                                {
+                                    ImageUrl = $"/Products/{Product.Id}/{cm.ImageName}",
+                                    ImageName = cm.ImageName,
+                                    IsCloned = true
+                                });
+                            }
+                        }
+
+                        //selectedFiles.AddRange(Product.ProductImages.Select(cm => new ProductVariantImages
+                        //{
+                        //    ImageUrl = $"/Products/{Product.Id}/{cm.ImageName}",
+                        //    ImageName = cm.ImageName,
+                        //    IsCloned = true
+
+                        //}).ToList());
+
+                        productVariant.productVariantImages = selectedFiles;
+                    }
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+
+    }
+
+    private void RemoveMediaUrl(ProductVariantMedia media)
+    {
+        productVariant.ProductVariantMedias.Remove(media);
+    }
+
+
+    private void HandleDragStart(DragEventArgs e, ProductVariantImages file)
+    {
+        draggingImage = file;
+    }
+
+    private void HandleDrop(ProductVariantImages targetImage)
+    {
+        if (draggingImage == null) return;
+
+        int originalOrder = targetImage.Order;
+        selectedFiles.Where(x => x.Order >= originalOrder).ToList().ForEach(x => x.Order++);
+        draggingImage.Order = originalOrder;
+        int index = 0;
+        foreach (var image in selectedFiles.OrderBy(x => x.Order))
+        {
+            image.Order = index++;
+        }
+        draggingImage = null;
+    }
+
+
     #endregion
 
+
+    void KeyHandler(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            return;
+        }
+    }
 
 }
 

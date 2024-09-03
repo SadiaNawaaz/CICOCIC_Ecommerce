@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
+using Ecommerce.Shared.Entities.Catalogs;
 using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,6 @@ public class ProductService : IProductService
         {
             var products = await _context.Products
                                .Include(p => p.Category)
-                               .Include(p => p.TemplateMaster)
                                .ToListAsync();
             return new ServiceResponse<List<Product>>
             {
@@ -61,13 +61,22 @@ public class ProductService : IProductService
     {
         try
         {
-            var product = await _context.Products.Include(p => p.FeatureValues).Include(b=>b.Brand).FirstOrDefaultAsync(p => p.Id == id);
-
+            var product = await _context.Products
+           .Include(c => c.Brand)                   
+           .Include(c => c.Category)
+           .Include(c => c.ProductImages)
+           .Include(c => c.ProductMedias)
+           .Include(c => c.ProductClusters)         
+               .ThenInclude(cc => cc.Cluster)       
+           .Include(c => c.ProductClusters)         
+               .ThenInclude(cc => cc.ProductClusterFeatures)  
+                   .ThenInclude(cf => cf.Feature)   
+           .FirstOrDefaultAsync(c => c.Id == id);
             return new ServiceResponse<Product>
             {
                 Data = product,
                 Success = true,
-                Message = "Product fetched successfully"
+                Message = "Catalog fetched successfully"
             };
         }
         catch (Exception ex)
@@ -122,7 +131,7 @@ public class ProductService : IProductService
 
             existingProduct.Name = updatedProduct.Name;
             existingProduct.CategoryId = updatedProduct.CategoryId;
-            existingProduct.TemplateMasterId = updatedProduct.TemplateMasterId;
+            //existingProduct.TemplateMasterId = updatedProduct.TemplateMasterId;
             _context.Products.Update(existingProduct);
             await _context.SaveChangesAsync();
 
@@ -180,8 +189,6 @@ public class ProductService : IProductService
         }
     }
 
-
-
     public async Task<ServiceResponse<List<Product>>> GetProductsByCategoryIdAsync(long CategoryId)
     {
         try
@@ -217,7 +224,6 @@ public class ProductService : IProductService
                 p.Price,
                b.Name AS Brand,
                 c.Name AS Category,
-                t.Name as Template,
                 COUNT(pv.Id) AS Stock
                     FROM 
                      Products p
@@ -227,10 +233,8 @@ public class ProductService : IProductService
                     Brands b ON p.BrandId = b.Id
                      LEFT JOIN 
                       Categories c ON p.CategoryId = c.Id
-                      Left join TemplateMasters t 
-                     ON p.TemplateMasterId = t.Id
                       GROUP BY 
-                       p.Id, p.Name, b.Name, c.Name,t.Name,p.Price
+                       p.Id, p.Name, b.Name, c.Name,p.Price
                          ";
 
 

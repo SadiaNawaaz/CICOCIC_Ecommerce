@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
+@using System.Security.Claims;
 <div id="sidebar" class="app-sidebar" data-bs-theme="dark">
     <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
         <div class="menu">
@@ -26,29 +26,36 @@
             </div>
             <div class="menu-header">Navigation</div>
 
-            <!-- Dynamic Menu Items -->
+           
             @foreach (var menu in Menus)
             {
-                var isOpen = SidebarStateService.IsMenuOpen(menu.Title);
-                <div class="menu-item has-sub @(isOpen ? "active" : "")">
-                    <a href="javascript:;" class="menu-link" @onclick="() => ToggleMenuAsync(menu.Title)">
-                        <div class="menu-icon">
-                            <i class="@(menu.IconClass)"></i>
-                        </div>
-                        <div class="menu-text">@menu.Title</div>
-                        <div class="menu-caret"></div>
-                    </a>
-                    <div class="menu-submenu @(isOpen ? "show" : "")">
-                        @foreach (var subItem in menu.SubItems)
-                        {
-                            <div class="menu-item">
-                                <NavLink href="@subItem.Route" class="menu-link">
-                                    <div class="menu-text">@subItem.Title</div>
-                                </NavLink>
+                if (HasPermission(menu.PermissionId) || menu.SubItems.Any(subItem => HasPermission(subItem.PermissionId)))
+                {
+
+                    var isOpen = SidebarStateService.IsMenuOpen(menu.Title);
+                    <div class="menu-item has-sub @(isOpen ? "active" : "")">
+                        <a href="javascript:;" class="menu-link" @onclick="() => ToggleMenuAsync(menu.Title)">
+                            <div class="menu-icon">
+                                <i class="@(menu.IconClass)"></i>
                             </div>
-                        }
+                            <div class="menu-text">@menu.Title</div>
+                            <div class="menu-caret"></div>
+                        </a>
+                        <div class="menu-submenu @(isOpen ? "show" : "")">
+                            @foreach (var subItem in menu.SubItems)
+                            {
+                                if (HasPermission(subItem.PermissionId))
+                                {
+                                <div class="menu-item">
+                                    <NavLink href="@subItem.Route" class="menu-link">
+                                        <div class="menu-text">@subItem.Title</div>
+                                    </NavLink>
+                                </div>
+                                }
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             }
         </div>
     </div>
@@ -62,9 +69,10 @@
         Title = "Dashboard",
         IconClass = "fa fa-sitemap",
         Routes = new List<string> { "/" },
+        PermissionId = 1,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Dashboard 1", Route = "/" }
+{
+            new SubMenuItem { Title = "Dashboard 1", Route = "/", PermissionId = 1 }  
         }
     },
     new MenuItem
@@ -72,12 +80,13 @@
         Title = "Setup Data",
         IconClass = "fa fa-table",
         Routes = new List<string> { "/BrandList", "/ModelYearList", "/SizeList", "/ColorList" },
+        PermissionId = 2,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Brands", Route = "/BrandList" },
-            new SubMenuItem { Title = "Model Years", Route = "/ModelYearList" },
-            new SubMenuItem { Title = "Sizes", Route = "/SizeList" },
-            new SubMenuItem { Title = "Color", Route = "/ColorList" },
+{
+            new SubMenuItem { Title = "Brands", Route = "/BrandList", PermissionId = 12 },  
+            new SubMenuItem { Title = "Model Years", Route = "/ModelYearList", PermissionId = 13 },  
+            new SubMenuItem { Title = "Sizes", Route = "/SizeList", PermissionId = 14 },  
+            new SubMenuItem { Title = "Color", Route = "/ColorList", PermissionId = 15 }  
         }
     },
     new MenuItem
@@ -85,34 +94,33 @@
         Title = "Specifications",
         IconClass = "fa fa-tree",
         Routes = new List<string> { "/ClusterList", "/FeatureList" },
+        PermissionId = 3,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Clusters", Route = "/ClusterList" },
-            new SubMenuItem { Title = "Features", Route = "/FeatureList" },
-
+{
+            new SubMenuItem { Title = "Clusters", Route = "/ClusterList", PermissionId = 16 },  
+            new SubMenuItem { Title = "Features", Route = "/FeatureList", PermissionId = 17 }  
         }
     },
-        new MenuItem
+    new MenuItem
     {
         Title = "Catalogs",
         IconClass = "fa fa-tree",
-        Routes = new List<string> { "/CatalogList"},
+        Routes = new List<string> { "/CatalogList" },
+        PermissionId = 4,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Catalogs", Route = "/CatalogList" },
-          
-
+{
+            new SubMenuItem { Title = "Catalogs", Route = "/CatalogList", PermissionId = 4 }  
         }
     },
-
     new MenuItem
     {
         Title = "Product",
         IconClass = "fab fa-simplybuilt",
         Routes = new List<string> { "/MainProductList" },
+        PermissionId = 5,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Product", Route = "/MainProductList" }
+{
+            new SubMenuItem { Title = "Product", Route = "/MainProductList", PermissionId = 5 }  
         }
     },
     new MenuItem
@@ -120,9 +128,10 @@
         Title = "Category",
         IconClass = "fab fa-dashcube",
         Routes = new List<string> { "/AddCategory" },
+        PermissionId = 6,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Category", Route = "/AddCategory" }
+{
+            new SubMenuItem { Title = "Category", Route = "/AddCategory", PermissionId = 6 }  
         }
     },
     new MenuItem
@@ -130,9 +139,10 @@
         Title = "Category Order",
         IconClass = "fab fa-dashcube",
         Routes = new List<string> { "/CategoriesOrder" },
+        PermissionId = 7,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Category Order", Route = "/CategoriesOrder" }
+{
+            new SubMenuItem { Title = "Category Order", Route = "/CategoriesOrder", PermissionId = 7 }  
         }
     },
     new MenuItem
@@ -140,10 +150,11 @@
         Title = "Users & Management",
         IconClass = "fa fa-key",
         Routes = new List<string> { "/UserList", "/RoleList" },
+        PermissionId = 8,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Register", Route = "/UserList" },
-            new SubMenuItem { Title = "Role", Route = "/RoleList" }
+{
+            new SubMenuItem { Title = "Register", Route = "/UserList", PermissionId = 18 },  
+            new SubMenuItem { Title = "Role", Route = "/RoleList", PermissionId = 19 }  
         }
     },
     new MenuItem
@@ -151,10 +162,11 @@
         Title = "Configuration",
         IconClass = "fa fa-key",
         Routes = new List<string> { "/SliderList", "/AddEditTrendingItems" },
+        PermissionId = 9,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Sliders", Route = "/SliderList" },
-            new SubMenuItem { Title = "Trending Items", Route = "/AddEditTrendingItems" }
+{
+            new SubMenuItem { Title = "Sliders", Route = "/SliderList", PermissionId = 20 },  
+            new SubMenuItem { Title = "Trending Items", Route = "/AddEditTrendingItems", PermissionId = 21 }  
         }
     },
     new MenuItem
@@ -162,9 +174,10 @@
         Title = "Customer & Agent",
         IconClass = "fa fa-key",
         Routes = new List<string> { "/AgentList" },
+        PermissionId = 10,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Agents", Route = "/AgentList" }
+{
+            new SubMenuItem { Title = "Agents", Route = "/AgentList", PermissionId = 22 }  
         }
     },
     new MenuItem
@@ -172,23 +185,24 @@
         Title = "Email",
         IconClass = "fa fa-envelope",
         Routes = new List<string> { "/Inbox" },
+        PermissionId = 11,  
         SubItems = new List<SubMenuItem>
-    {
-            new SubMenuItem { Title = "Email", Route = "/Inbox" }
+{
+            new SubMenuItem { Title = "Email", Route = "/Inbox", PermissionId = 11 }  
         }
     }
 };
 
-
     private bool isInitialized = false;
-
+    private bool IsAgent = false;
+    public List<int> UserPermissions { get; set; } = new List<int>();
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !isInitialized)
         {
             isInitialized = true;
             await SidebarStateService.LoadStateAsync();
-            StateHasChanged(); // Force the component to re-render after loading the state
+            StateHasChanged(); 
         }
     }
 
@@ -203,12 +217,14 @@
         public string IconClass { get; set; }
         public List<string> Routes { get; set; }
         public List<SubMenuItem> SubItems { get; set; }
+        public int PermissionId { get; set; }
     }
 
     private class SubMenuItem
     {
         public string Title { get; set; }
         public string Route { get; set; }
+        public int PermissionId { get; set; }
     }
 
 
@@ -225,7 +241,12 @@
             {
 
                 UserName = user.Identity.Name;
-
+                var isAgentClaim = user.FindFirst(ClaimTypes.Actor)?.Value;
+                IsAgent = isAgentClaim == "Agent";
+                UserPermissions = user.Claims
+                              .Where(c => c.Type == ClaimTypes.Role)
+                              .Select(c => int.Parse(c.Value))
+                              .ToList();
             }
         }
         catch (Exception ex)
@@ -233,5 +254,10 @@
 
         }
 
+    }
+
+    private bool HasPermission(int permissionId)
+    {
+        return UserPermissions.Contains(permissionId);
     }
 }

@@ -10,6 +10,7 @@ public class ClusterFeatureDto
 {
     public string? Cluster { get; set; }
     public long ClusterId { get; set; }
+    public int Order { get; set; }
     public List<FeatureValuePair>? Features { get; set; }
 }
 
@@ -26,6 +27,7 @@ public class RawClusterFeatureDto
     public string Feature { get; set; }
     public long ClusterId { get; set; }
     public long FeatureId { get; set; }
-    public string Value { get; set; } // Assuming 'value' is of type int
+    public string? Value { get; set; }
+    public int Order { get; set; } = 0;
 }
 

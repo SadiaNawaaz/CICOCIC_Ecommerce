@@ -32,5 +32,10 @@ public static class UrlHelper
     {
         return $"{_baseUrl}/Category/{productId}/{imageUrl}";
     }
+
+    public static string GetVariantImageUrl(long VariantId, string imageUrl)
+    {
+        return $"{_baseUrl}/ProductVariants/{VariantId}/{imageUrl}";
+    }
 }
 

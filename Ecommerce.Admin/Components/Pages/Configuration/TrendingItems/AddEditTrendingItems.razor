@@ -162,7 +162,7 @@
             var ProductId = Convert.ToInt64(e);
             if (ProductId > 0)
             {
-                var response = await productVariantService.GetAllProductVariantsAsync(ProductId);
+                var response = await productVariantService.GetAllProductVariantsAsync(ProductId,0,false);
                 if (response.Success)
                 {
                     productVariants = response.Data;

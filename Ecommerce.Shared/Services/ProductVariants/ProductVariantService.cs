@@ -17,10 +17,10 @@ public interface IProductVariantService
     Task<ServiceResponse<ProductVariant>> UpdateProductVariantAsync(ProductVariant productVariant);
     Task<ServiceResponse<bool>> DeleteProductVariantAsync(long id);
     Task<ServiceResponse<ProductVariant>> GetProductVariantByIdAsync(long id);
-    Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId);
+    Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId,long UserId,bool IsAgent);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId);
     Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long categoryId);
-    Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long templateMasterId,long productVariantId);
+    Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId);
     Task<ServiceResponse<TrendingProduct>> AddTrendingProdutc(TrendingProduct productVariant);
     Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync();
@@ -103,7 +103,6 @@ public class ProductVariantService: IProductVariantService
         {
             // Retrieve the existing product variant with related entities
             var existingProductVariant = await _context.ProductVariants
-                .Include(pv => pv.ProductVariantFeatureValues)
                 .FirstOrDefaultAsync(pv => pv.Id == updatedProductVariant.Id);
 
             if (existingProductVariant == null)
@@ -192,7 +191,7 @@ public class ProductVariantService: IProductVariantService
                 .Include(pv => pv.GeneralSize)
                 .Include(pv => pv.GeneralColor)
                 .Include(pv => pv.ModelYear)
-                .Include(fv => fv.ProductVariantFeatureValues)
+                 .Include(pv => pv.ProductVariantMedias)
                 .Include(img => img.productVariantImages)
                 .FirstOrDefaultAsync(pv => pv.Id == id);
 
@@ -222,15 +221,23 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
-    public async Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId)
+    public async Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId,long UserId, bool IsAgent)
     {
         try
         {
-            var productVariants = await _context.ProductVariants
-                .Include(pv => pv.GeneralSize)
-                .Include(pv => pv.GeneralColor)
-                .Include(pv => pv.ModelYear).Where(a=>a.ProductId== ProductId)
-                .ToListAsync();
+            var productVariantsQuery = _context.ProductVariants
+          .Include(pv => pv.GeneralSize)
+          .Include(pv => pv.GeneralColor)
+          .Include(pv => pv.ModelYear)
+          .Where(pv => pv.ProductId == ProductId);
+
+            // Apply additional filtering if the user is an agent
+            if (IsAgent)
+            {
+                productVariantsQuery = productVariantsQuery.Where(pv => pv.CreatedBy == UserId);
+            }
+
+            var productVariants = await productVariantsQuery.ToListAsync();
 
             return new ServiceResponse<List<ProductVariant>>
             {
@@ -256,7 +263,7 @@ public class ProductVariantService: IProductVariantService
         try
         {
             var productVariants = await _context.ProductVariants
-                .Where(pv => pv.Product.CategoryId == categoryId)
+                .Where(pv => pv.Product.CategoryId == categoryId && pv.Publish==true)
                 .Select(pv => new ProductVariantDto
                 {
                     ProductId = pv.ProductId,
@@ -296,7 +303,6 @@ public class ProductVariantService: IProductVariantService
                 .Include(p => p.Product.Category)
                 .Include(p => p.GeneralColor)
                 .Include(p => p.GeneralSize)
-                .Include(p => p.ProductVariantFeatureValues)
                 .Include(p => p.productVariantImages) 
                 .Where(pv => pv.Id == Id)
                 .Select(pv => new ProductVariantDetailDto
@@ -311,14 +317,22 @@ public class ProductVariantService: IProductVariantService
                     ProductPrice = pv.Product.Price,
                     Sku = pv.Sku,
                     Description=pv.Description,
-                    ProductVariantFeatureValues = pv.ProductVariantFeatureValues,
                     year = pv.ModelYear != null ? pv.ModelYear.Year : 0,
-                    TemplateMasterId=pv.Product.TemplateMasterId,
+                    //TemplateMasterId=pv.Product.TemplateMasterId,
                     DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null,
                     productVariantImages = pv.productVariantImages.Select(vi => new ProductVariantImages
                     {
-                        ImageName = vi.ImageName 
+                        ImageName = vi.ImageName ,
+                        Order= vi.Order,
+                    }).ToList(),
+                    ProductVariantMedia = pv.ProductVariantMedias.Select(vi => new ProductVariantMedia
+                    {
+                        ImageUrl = vi.ImageUrl,
+                        
                     }).ToList()
+
+
+
                 })
                 .FirstOrDefaultAsync();
 
@@ -386,27 +400,28 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-    public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long templateMasterId, long productVariantId)
+    public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId)
     {
         var response = new ServiceResponse<List<ClusterFeatureDto>>();
 
         try
         {
             var clusterFeatures = await _context.Set<RawClusterFeatureDto>()
-                .FromSqlRaw("SELECT c.Name AS Cluster, f.Name AS Feature, c.Id AS ClusterId, f.Id AS FeatureId, fv.Value FROM TemplateClusters tc " +
-                            "INNER JOIN Clusters c ON tc.ClusterId = c.Id " +
-                            "INNER JOIN TemplateClusterFeatures tf ON tc.Id = tf.TemplateClusterId " +
-                            "INNER JOIN Features f ON tf.FeatureId = f.Id " +
-                            "INNER JOIN ProductVariantFeatureValues fv ON tf.Id = fv.TemplateClusterFeatureId " +
-                            "WHERE tc.TemplateMasterId = {0} AND fv.ProductVariantId = {1}", templateMasterId, productVariantId)
+                .FromSqlRaw("SELECT c.Name AS Cluster, f.Name AS Feature, c.Id AS ClusterId, f.Id AS FeatureId, ISNULL(pcf.Value, '-') AS Value,pc.[Order]" +
+                            "FROM ProductCluster pc " +
+                            "INNER JOIN Clusters c ON pc.ClusterId = c.Id " +
+                            "INNER JOIN ProductClusterFeature pcf ON pc.Id = pcf.ProductClusterId " +
+                            "INNER JOIN Features f ON pcf.FeatureId = f.Id " +
+                            "WHERE pc.ProductId = {0}", productVariantId)
                 .ToListAsync();
 
             var groupedData = clusterFeatures
-                .GroupBy(cf => new { cf.Cluster, cf.ClusterId })
+                .GroupBy(cf => new { cf.Cluster, cf.ClusterId,cf.Order })
                 .Select(g => new ClusterFeatureDto
                 {
                     Cluster = g.Key.Cluster,
                     ClusterId = g.Key.ClusterId,
+                    Order=g.Key.Order,
                     Features = g.Select(cf => new FeatureValuePair
                     {
                         Feature = cf.Feature,
@@ -428,6 +443,7 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
+
     public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId)
     {
         var response = new ServiceResponse<List<ProductVariantDto>>();
@@ -537,8 +553,6 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-
-  
     public async Task<ServiceResponse<bool>> RemoveTrendingProduct(long id)
     {
         try
