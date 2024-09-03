@@ -615,16 +615,7 @@ else
     {
         try
         {
-            var response = await productVariantService.GetClusterFeaturesAsync(TemplateId, Id);
-            if (response.Success)
-            {
-                clusters = response.Data;
-                StateHasChanged();
-            }
-            else
-            {
-
-            }
+         
         }
         catch (Exception ex)
         {
