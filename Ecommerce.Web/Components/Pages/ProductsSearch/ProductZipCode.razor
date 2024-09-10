@@ -1,0 +1,240 @@
+﻿@page "/ProductZipCode"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IProductVariantService productVariantService
+@inject NavigationManager Navigation
+
+
+<div id="search-results" class="section-container">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN search-container -->
+        <div class="search-container">
+            <!-- BEGIN search-sidebar -->
+            <div class="search-sidebar">
+                <h4 class="title">Filter By</h4>
+                <div>
+                    <div class="mb-3">
+                        <label class="form-label">Keywords</label>
+                        <input type="text" class="form-control input-sm" name="keyword" placeholder="Enter Keywords" value="@Keyword" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <div class="row row-space-0">
+                            <div class="col-md-5">
+                                <input type="number" class="form-control input-sm" name="price_from" value="10" placeholder="Price From" />
+                            </div>
+                            <div class="col-md-2 text-center pt-5px fs-12px text-muted">to</div>
+                            <div class="col-md-5">
+                                <input type="number" class="form-control input-sm" name="price_to" value="10000" placeholder="Price To" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-30px">
+                        <button type="submit" class="btn btn-sm btn-theme btn-dark w-100"><i class="fa fa-search fa-fw me-1 ms-n3"></i> FILTER</button>
+                    </div>
+                </div>
+                <h4 class="title mb-0">Categories</h4>
+                <ul class="search-category-list">
+                    <li><a href="#">iPhone <span class="pull-right">(10)</span></a></li>
+                    <li><a href="#">Mac <span class="pull-right">(15)</span></a></li>
+                    <li><a href="#">iPad <span class="pull-right">(32)</span></a></li>
+                    <li><a href="#">Watch <span class="pull-right">(4)</span></a></li>
+                    <li><a href="#">TV <span class="pull-right">(6)</span></a></li>
+                    <li><a href="#">Accessories <span class="pull-right">(38)</span></a></li>
+                </ul>
+            </div>
+            <!-- END search-sidebar -->
+            <!-- BEGIN search-content -->
+            <div class="search-content">
+                @if (IsLoading)
+                {
+                    <!-- Show Loading Spinner -->
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                <!-- BEGIN search-toolbar -->
+                <div class="search-toolbar">
+                    <!-- BEGIN row -->
+                    <div class="row">
+                        <div class="col-lg-6">
+
+
+
+                        </div>
+                        <!-- END col-6 -->
+                        <!-- BEGIN col-6 -->
+                        <div class="col-lg-6 text-end">
+                            <ul class="sort-list">
+                                <li class="text"><i class="fa fa-filter"></i> Sort by:</li>
+                                <li class="active"><a href="#">Popular</a></li>
+                                <li><a href="#">New Arrival</a></li>
+                                <li><a href="#">Discount</a></li>
+                                <li><a href="#">Price</a></li>
+                            </ul>
+                        </div>
+                        <!-- END col-6 -->
+                    </div>
+                    <!-- END row -->
+                </div>
+
+               
+                <div class="search-item-container">
+                    @if (ProductVariants != null && ProductVariants.Any())
+                    {
+                        int itemsPerRow = 3; // Number of items per row
+                        int totalItems = ProductVariants.Count; // Total number of items
+                        int currentItemIndex = 0;
+
+                        while (currentItemIndex < totalItems)
+                        {
+                            // Open a new row
+                            <div class="item-row">
+                                @for (int i = 0; i < itemsPerRow && currentItemIndex < totalItems; i++)
+                                {
+                                    var variant = ProductVariants[currentItemIndex];
+
+                                    <div class="item item-thumbnail">
+                                        <a href="#" class="item-image">
+                                            <img src="@UrlHelper.GetVariantImageUrl(variant.Id, variant.DefaultImageUrl)" alt="" onerror="this.onerror=null;this.src='/200x200.png';" />
+
+                                            @{
+                                                double discount = variant.ProductPrice - variant.VariantPrice;
+                                                if (discount > 0)
+                                                {
+                                                    int discountPercentage = (int)Math.Round((discount / variant.ProductPrice) * 100);
+                                                    <div class="discount">@discountPercentage% OFF</div>
+                                                }
+                                            }
+                                        </a>
+                                        <div class="item-info">
+                                            <NavLink href="@GetProductUrl(variant.Id)">@variant.Name<br /></NavLink>
+                                            <p class="item-desc">@variant.Description</p>
+                                            <div class="item-price">@variant.VariantPrice</div>
+                                            <div class="item-discount-price">@variant.ProductPrice</div>
+                                        </div>
+                                    </div>
+
+
+                                    currentItemIndex++; // Move to the next item
+                                }
+                            </div> <!-- Close the row -->
+                        }
+                    }
+                </div>
+                }
+
+
+
+
+            </div>
+            <!-- END search-content -->
+        </div>
+        <!-- END search-container -->
+    </div>
+    <!-- END container -->
+</div>
+
+
+
+
+
+@code {
+    private string Keyword { get; set; }
+    private long? CategoryId { get; set; }
+    private string PostalCode { get; set; }
+    private int? Distance { get; set; }
+    private bool IsLoading { get; set; } = false;
+    private List<ProductVariantDto> ProductVariants = new List<ProductVariantDto>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        Navigation.LocationChanged += OnLocationChanged;
+        await ProcessQueryParamsAsync();
+
+    }
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+
+        InvokeAsync(async () =>
+        {
+            await ProcessQueryParamsAsync();
+        });
+
+
+    }
+
+    private async Task ProcessQueryParamsAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.ContainsKey("keyword"))
+        {
+            Keyword = query["keyword"];
+        }
+
+        if (query.ContainsKey("categoryId") && long.TryParse(query["categoryId"], out var categoryId))
+        {
+            CategoryId = categoryId;
+        }
+
+        if (query.ContainsKey("postalCode"))
+        {
+            PostalCode = query["postalCode"];
+        }
+
+        if (query.ContainsKey("distance") && int.TryParse(query["distance"], out var distance))
+        {
+            Distance = distance;
+        }
+
+        await SearchProductsAsync();
+    }
+
+    private async Task SearchProductsAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            StateHasChanged();
+            var response = await productVariantService.GetProductVariantsWithinDistanceAsync(Keyword, CategoryId, PostalCode, Distance);
+            if (response.Success)
+            {
+                ProductVariants = response.Data;
+                StateHasChanged();  // Ensure the UI updates
+            }
+            else
+            {
+                Console.WriteLine($"Error: {response.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+    private string GetProductUrl(long productId)
+    {
+        return $"/Product?Id={productId}";
+    }
+
+
+
+}

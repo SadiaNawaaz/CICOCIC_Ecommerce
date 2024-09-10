@@ -1,0 +1,254 @@
+﻿@page "/PopularBrand"
+@using Ecommerce.Shared.Services.Brands;
+@using Ecommerce.Shared.Services.PopularBrands; 
+@inject IBrandService BrandService
+@inject IPopularBrandService PopularBrandService
+@inject ISnackbar Snackbar
+@inject ImageResizeService ImageResizeService
+@inject NavigationManager NavigationManager
+@using Radzen
+@using Radzen.Blazor
+@using Ecommerce.Shared.Entities.PopularBrands;
+
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-body">
+                <div class="row mt-3">
+                    <div class="col-lg-4">
+                        <div class="mb-lg-0 mb-3">
+                            <label class="form-label">Brands</label>
+                            <RadzenDropDownDataGrid TValue="long" Data=@brands TextProperty="Name" ValueProperty="Id" Change="@(args => BrandChanged(args))" Class="form-control">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="Name" Title="Brand Name" Width="100px" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="mb-lg-0">
+                            <label class="form-label">Order</label>
+                            <RadzenDropDown TValue="int" Data="@(Enumerable.Range(1, 5))" Change="@(args => OrderChanged(args))" Class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="mb-lg-0 mt-15px">
+                            <label class="form-label">Upload Banner</label>
+                            <InputFile OnChange="@(e => HandleFileChange(e))" style="display: none;" name="image" />
+                            <label class="btn btn-primary" style="cursor: pointer;">
+                                <i class="fa fa-fw fa-upload"></i> Select Banner
+                                <InputFile OnChange="@(e => HandleFileChange(e))" style="display:none" />
+                            </label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(BannerUrl))
+                        {
+                            <img class="card-img-top mt-7px" src="@BannerUrl" alt="" style="width:150px; height: 150px; object-fit: cover;">
+                        }
+
+                    </div>
+                    <div class="col-2 mt-15px">
+                        <button class="btn btn-primary" @onclick="@MarkBrand">Add To List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var popularBrand in popularBrands.OrderBy(pb => pb.Order))
+            {
+                <div class="col-xl-3">
+                    <div class="card border-0" style="height: 350px;">
+                        <img class="card-img-top" src="@($"/PopularBrand/{popularBrand.Id}/{popularBrand.BannerUrl}")" alt="" style="width: 100%; height: 250px; object-fit: cover;">
+                        <div class="card-body p-2" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h5 class="card-title mb-0">@popularBrand.Name : @popularBrand.Order</h5>
+                            <a href="javascript:;" class="btn btn-danger btn-icon btn-circle btn-sm" @onclick="() => RemovePopularBrand(popularBrand.Id)">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+    </div>
+</div>
+
+@code {
+    private List<Brand> brands = new List<Brand>();
+    private List<PopularBrandDto> popularBrands = new List<PopularBrandDto>();
+    private Ecommerce.Shared.Entities.PopularBrands.PopularBrand popularBrand = new Ecommerce.Shared.Entities.PopularBrands.PopularBrand();
+    private IBrowserFile uploadedFile;
+    private string BannerUrl = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBrands();
+        await LoadPopularBrands();
+    }
+
+    private async Task LoadBrands()
+    {
+        try
+        {
+            var response = await BrandService.GetBrandsAsync();
+            if (response.Success)
+            {
+                brands = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error loading brands.", Severity.Error);
+        }
+    }
+
+    private async Task LoadPopularBrands()
+    {
+        try
+        {
+            var response = await PopularBrandService.GetPopularBrandsAsync();
+            if (response.Success)
+            {
+                popularBrands = response.Data;
+
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error loading popular brands.", Severity.Error);
+        }
+    }
+
+    private  async void HandleFileChange(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        var memoryStream = new MemoryStream();
+        await uploadedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+        popularBrand.ImageByte = memoryStream.ToArray();
+        var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(uploadedFile.Name)}";
+        BannerUrl = await ImageResizeService.ResizeImage(memoryStream, uploadedFile.ContentType, 300, 300);
+        popularBrand.BannerUrl = $"{uniqueFileName}";
+        StateHasChanged();
+
+    }
+
+    private async Task MarkBrand()
+    {
+        try
+        {
+            if (popularBrand.BrandId == 0)
+            {
+                Snackbar.Add("Please select a brand.", Severity.Warning);
+                return;
+            }
+
+            if (popularBrands.Any(pb => pb.BrandId == popularBrand.BrandId))
+            {
+                Snackbar.Add("This brand is already added to the popular list.", Severity.Warning);
+                return;
+            }
+
+            if (popularBrands.Any(pb => pb.Order == popularBrand.order))
+            {
+                Snackbar.Add("This Order is already added Please Choose another.", Severity.Warning);
+                return;
+            }
+
+            if (uploadedFile == null)
+            {
+                Snackbar.Add("Please upload a banner.", Severity.Warning);
+                return;
+            }
+
+
+            var response = await PopularBrandService.AddPopularBrandAsync(popularBrand, popularBrand.ImageByte, popularBrand.BannerUrl);
+
+            if (response.Success)
+            {
+                Snackbar.Add("Brand added to popular list.", Severity.Success);
+
+                #region PathSave
+
+
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PopularBrand", popularBrand.Id.ToString());
+                if (!Directory.Exists(bannerPath))
+                {
+                    Directory.CreateDirectory(bannerPath);
+                }
+                if (popularBrand.BannerUrl != null)
+                {
+                    var filePath = bannerPath + "/" + popularBrand.BannerUrl;
+                    await File.WriteAllBytesAsync(filePath, popularBrand.ImageByte);
+
+
+
+                }
+
+
+                #endregion
+
+                popularBrand = new Ecommerce.Shared.Entities.PopularBrands.PopularBrand();
+                BannerUrl = null;
+                await LoadPopularBrands();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while adding the brand.", Severity.Error);
+        }
+    }
+
+    private async Task RemovePopularBrand(long brandId)
+    {
+        try
+        {
+            var response = await PopularBrandService.RemovePopularBrandAsync(brandId);
+            if (response.Success)
+            {
+
+
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PopularBrand", brandId.ToString());
+                if (Directory.Exists(bannerPath))
+                {
+                    Directory.Delete(bannerPath, true);                
+                }
+                Snackbar.Add("Brand removed from popular list.", Severity.Success);
+                await LoadPopularBrands();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while removing the brand.", Severity.Error);
+        }
+    }
+
+    private async Task BrandChanged(object e)
+    {
+        var brandId = Convert.ToInt64(e);
+        if (brandId > 0)
+        {
+            popularBrand.BrandId = brandId;
+        }
+    }
+    private void OrderChanged(object e)
+    {
+        popularBrand.order = Convert.ToInt32(e);
+    }
+}

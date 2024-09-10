@@ -1,0 +1,240 @@
+﻿@page "/PopularCategories"
+@using Ecommerce.Shared.Services.Categories;
+@using Ecommerce.Shared.Services.PopularCategories;
+@inject ICategoryService CategoryService
+@inject IPopularCategoryService PopularCategoryService
+@inject ISnackbar Snackbar
+@inject ImageResizeService ImageResizeService
+@inject NavigationManager NavigationManager
+@using Radzen
+@using Radzen.Blazor
+@using Ecommerce.Shared.Entities.PopularCategories; 
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-body">
+                <div class="row mt-3">
+                    <div class="col-lg-4">
+                        <div class="mb-lg-0 mb-3">
+                            <label class="form-label">Categories</label>
+                            <RadzenDropDownDataGrid TValue="long" Data=@categories TextProperty="Name" ValueProperty="Id" Change="@(args => CategoryChanged(args))" Class="form-control">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="Name" Title="Category Name" Width="100px" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="mb-lg-0">
+                            <label class="form-label">Order</label>
+                            <RadzenDropDown TValue="int" Data="@(Enumerable.Range(1, 5))" Change="@(args => OrderChanged(args))" Class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="mb-lg-0 mt-15px">
+                            <label class="form-label">Upload Banner</label>
+                            <InputFile OnChange="@(e => HandleFileChange(e))" style="display: none;" name="image" />
+                            <label class="btn btn-primary" style="cursor: pointer;">
+                                <i class="fa fa-fw fa-upload"></i> Select Banner
+                                <InputFile OnChange="@(e => HandleFileChange(e))" style="display:none" />
+                            </label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(BannerUrl))
+                        {
+                            <img class="card-img-top mt-7px" src="@BannerUrl" alt="" style="width:150px; height: 150px; object-fit: cover;">
+                        }
+
+                    </div>
+                    <div class="col-2 mt-15px">
+                        <button class="btn btn-primary" @onclick="@MarkCategory">Add To List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var popularCategory in popularCategories)
+            {
+                <div class="col-xl-3">
+                    <div class="card border-0" style="height: 350px;">
+                        <img class="card-img-top" src="@($"/PopularCategory/{popularCategory.Id}/{popularCategory.BannerUrl}")" alt="" style="width: 100%; height: 250px; object-fit: cover;">
+                        <div class="card-body p-2" style="display: flex; justify-content: space-between;align-items: center;">
+                            <h5 class="card-title mb-0">@popularCategory.Name : @popularCategory.Order </h5>
+                            <a href="javascript:;" class="btn btn-danger btn-icon btn-circle btn-sm" @onclick="() => RemovePopularCategory(popularCategory.Id)">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<CategoryDto> categories = new List<CategoryDto>();
+    private List<PopularCategoryDto> popularCategories = new List<PopularCategoryDto>();
+    private PopularCategory popularCategory = new PopularCategory();
+    private IBrowserFile uploadedFile;
+    private string BannerUrl = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        await LoadPopularCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            var response = await CategoryService.GetCategoriesTopLevelDtoAsync();
+            if (response.Success)
+            {
+                categories = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error loading categories.", Severity.Error);
+        }
+    }
+
+    private async Task LoadPopularCategories()
+    {
+        try
+        {
+            var response = await PopularCategoryService.GetPopularCategoriesAsync();
+            if (response.Success)
+            {
+                popularCategories = response.Data;
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error loading popular categories.", Severity.Error);
+        }
+    }
+
+    private async void HandleFileChange(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        var memoryStream = new MemoryStream();
+        await uploadedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+        popularCategory.ImageByte = memoryStream.ToArray();
+        var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(uploadedFile.Name)}";
+        BannerUrl = await ImageResizeService.ResizeImage(memoryStream, uploadedFile.ContentType, 300, 300);
+        popularCategory.BannerUrl = $"{uniqueFileName}";
+        StateHasChanged();
+    }
+
+    private async Task MarkCategory()
+    {
+        try
+        {
+            if (popularCategory.CategoryId == 0)
+            {
+                Snackbar.Add("Please select a category.", Severity.Warning);
+                return;
+            }
+
+            if (popularCategories.Any(pc => pc.CategoryId == popularCategory.CategoryId))
+            {
+                Snackbar.Add("This category is already added to the popular list.", Severity.Warning);
+                return;
+            }
+
+            if (popularCategories.Any(pc => pc.Order == popularCategory.Order))
+            {
+                Snackbar.Add("This order is already taken. Please choose another.", Severity.Warning);
+                return;
+            }
+
+            if (uploadedFile == null)
+            {
+                Snackbar.Add("Please upload a banner.", Severity.Warning);
+                return;
+            }
+
+            var response = await PopularCategoryService.AddPopularCategoryAsync(popularCategory, popularCategory.ImageByte, popularCategory.BannerUrl);
+
+            if (response.Success)
+            {
+                Snackbar.Add("Category added to popular list.", Severity.Success);
+
+                #region SaveBannerPath
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PopularCategory", popularCategory.Id.ToString());
+                if (!Directory.Exists(bannerPath))
+                {
+                    Directory.CreateDirectory(bannerPath);
+                }
+                if (popularCategory.BannerUrl != null)
+                {
+                    var filePath = bannerPath + "/" + popularCategory.BannerUrl;
+                    await File.WriteAllBytesAsync(filePath, popularCategory.ImageByte);
+                }
+                #endregion
+
+                popularCategory = new PopularCategory();
+                BannerUrl = null;
+                await LoadPopularCategories();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while adding the category.", Severity.Error);
+        }
+    }
+
+    private async Task RemovePopularCategory(long categoryId)
+    {
+        try
+        {
+            var response = await PopularCategoryService.RemovePopularCategoryAsync(categoryId);
+            if (response.Success)
+            {
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PopularCategory", categoryId.ToString());
+                if (Directory.Exists(bannerPath))
+                {
+                    Directory.Delete(bannerPath, true);
+                }
+                Snackbar.Add("Category removed from popular list.", Severity.Success);
+                await LoadPopularCategories();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while removing the category.", Severity.Error);
+        }
+    }
+
+    private async Task CategoryChanged(object e)
+    {
+        var categoryId = Convert.ToInt64(e);
+        if (categoryId > 0)
+        {
+            popularCategory.CategoryId = categoryId;
+        }
+    }
+
+    private void OrderChanged(object e)
+    {
+        popularCategory.Order = Convert.ToInt32(e);
+    }
+}

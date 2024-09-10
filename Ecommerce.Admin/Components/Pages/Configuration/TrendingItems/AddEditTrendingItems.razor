@@ -8,33 +8,12 @@
 @using Radzen
 @using Radzen.Blazor
 @using Ecommerce.Shared.Entities.TrendingProducts;
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
-
-<div class="d-flex align-items-center mb-3">
-    <div>
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/ProductList">Configuration</a></li>
-            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Trending Items</li>
-        </ol>
-        <h1 class="page-header mb-0"> Product </h1>
-    </div>
-</div>
-
 
 
 <div class="row">
     <div class="col-12">
         <div class="panel panel-inverse">
-            <div class="panel-heading">
-                <h4 class="panel-title">Trending Form</h4>
-                <div class="panel-heading-btn">
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
-                </div>
-            </div>
+        
             <div class="panel-body">
                 <div class="row mt-3">
                     <div class="col-lg-5">
@@ -93,9 +72,6 @@
        
     </div>
 </div>
-
-
-
 
 
 @code {

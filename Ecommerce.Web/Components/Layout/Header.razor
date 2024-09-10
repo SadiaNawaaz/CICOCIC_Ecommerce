@@ -91,31 +91,38 @@
                                         <div class="container" style="margin-bottom:10px">
                                             <div class="row no-gutters">
                                                 <div class="col-md-3 border">
-                                                    <input type="text" class="form-control border-0" id="query" name="query" placeholder="Search" aria-label="Search" autocomplete="off">
+                                                    <input type="text" class="form-control border-0" placeholder="Search" aria-label="Search" autocomplete="off" @bind="filter.KeyWord">
                                                 </div>
                                                 <div class="col-md-3 border">
-                                                    <select class="form-control border-0" id="categoryId" name="categoryId">
-                                                        <option value="" disabled selected>Choose category:</option>
-                                                        <option value="0">Electronica</option>
-                                                        <option value="0">Huis</option>
-                                                        <option value="0">Auto & Fiets</option>
-                                                        <option value="0">Verzorging</option>
-
+                                                    <select class="form-control border-0" @bind="filter.CategoryId">
+                                                        <option value="" selected>Choose category:</option>
+                                                        @if (Categories != null && Categories.Count > 0)
+                                                        {
+                                                            @foreach (var cat in Categories)
+                                                            {
+                                                                <option value="@cat.Id">@cat.Name</option>
+                                                            }
+                                                        }
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2 border">
-                                                    <input type="text" class="form-control border-0" id="postcode" name="postcode" placeholder="Postal Code" autocomplete="off">
+                                                    <input type="text" class="form-control border-0" placeholder="Postal Code" autocomplete="off" @bind="filter.PostelCode">
                                                 </div>
                                                 <div class="col-md-2 border">
-                                                    <select class="form-control border-0" id="distance" name="distance">
-                                                        <option value="" disabled selected>Choose distance:</option>
-                                                        <option value="0">&lt; 3 km</option>
-                                                        <option value="0">&lt; 4 km</option>
-
+                                                    <select class="form-control border-0" @bind="filter.Distance">
+                                                         <option value="" selected>Distance</option>
+                                                        <option value="3">&lt; 3 km</option>
+                                                        <option value="5">&lt; 5 km</option>
+                                                        <option value="10">&lt; 10 km</option>
+                                                        <option value="15">&lt; 15 km</option>
+                                                        <option value="25">&lt; 25 km</option>
+                                                        <option value="50">&lt; 50 km</option>
+                                                        <option value="70">&lt; 70 km</option>
+                                                        <option value="75">&lt; 75 km</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2 border">
-                                                    <a @onclick="@(async () => await fnDetails(0))" class="btn btn-primary" style="width:100%">Search</a>
+                                                    <a @onclick="@(async () => await SearchProductsAsync())" class="btn btn-primary" style="width:100%">Search</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -280,8 +287,8 @@
     public List<CategoryDto> SubCategories = new List<CategoryDto>();
     public List<Brand> Brands = new List<Brand>();
     private List<Ecommerce.Shared.Entities.Configurations.Slider> sliders = new List<Ecommerce.Shared.Entities.Configurations.Slider>();
-
-
+    private SearchFilter filter = new SearchFilter();
+    
 
     #endregion
 
@@ -388,7 +395,17 @@
 
         NavigationManager.NavigateTo($"/ProductByCategory/{id}");
     }
+    private async Task SearchProductsAsync()
+    {
+        var keyword = filter.KeyWord ?? "";
+        var categoryId = filter.CategoryId;
+        var postalCode = filter.PostelCode ?? "";
+        var distance = filter.Distance;
+        var queryString = $"keyword={Uri.EscapeDataString(keyword)}&categoryId={categoryId}&postalCode={Uri.EscapeDataString(postalCode)}&distance={distance}";
+        NavigationManager.NavigateTo($"/ProductZipCode?{queryString}");
 
+
+    }
     public async Task fnBrandDetails(long id)
     {
 

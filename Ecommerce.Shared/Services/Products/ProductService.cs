@@ -223,7 +223,7 @@ public class ProductService : IProductService
                 p.Name AS Name,
                 p.Price,
                b.Name AS Brand,
-                c.Name AS Category,
+                c.Name AS Category,p.Thumbnail,
                 COUNT(pv.Id) AS Stock
                     FROM 
                      Products p
@@ -234,7 +234,7 @@ public class ProductService : IProductService
                      LEFT JOIN 
                       Categories c ON p.CategoryId = c.Id
                       GROUP BY 
-                       p.Id, p.Name, b.Name, c.Name,p.Price
+                       p.Id, p.Name, b.Name, c.Name,p.Price,p.Thumbnail
                          ";
 
 

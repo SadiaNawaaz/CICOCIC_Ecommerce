@@ -1,26 +1,224 @@
-﻿@page "/counter"
-@using Ecommerce.Shared.Entities.Sizes
-@using Ecommerce.Shared.Services.Sizes;
-@inject ISizeService SizeService
-@inject ISnackbar Snackbar
-@inject NavigationManager NavigationManager
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
-
-
-
-<MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px">
-    <CustomGraphics>
-
-    </CustomGraphics>
-</MudChart>
-
-
-@code {
-    public List<ChartSeries> Series = new List<ChartSeries>()
-{
-        new ChartSeries() { Name = "United States", Data = new double[] { 40, 20, 25, 27, 46, 60, 48, 80, 15 } },
-        new ChartSeries() { Name = "Germany", Data = new double[] { 19, 24, 35, 13, 28, 15, 13, 16, 31 } },
-        new ChartSeries() { Name = "Sweden", Data = new double[] { 8, 6, 11, 13, 4, 16, 10, 16, 18 } },
-    };
-    public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+﻿{
+   "results" :
+   [
+      {
+         "address_components" :
+         [
+            {
+               "long_name" : "54770",
+               "short_name" : "54770",
+               "types" :
+               [
+                  "postal_code"
+               ]
+            },
+            {
+               "long_name" : "Strum",
+               "short_name" : "Strum",
+               "types" :
+               [
+                  "locality",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Wisconsin",
+               "short_name" : "WI",
+               "types" :
+               [
+                  "administrative_area_level_1",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" :
+               [
+                  "country",
+                  "political"
+               ]
+            }
+         ],
+         "formatted_address" : "Strum, WI 54770, USA",
+         "geometry" :
+         {
+            "bounds" :
+            {
+               "northeast" :
+               {
+                  "lat" : 44.683386,
+                  "lng" : -91.2749259
+               },
+               "southwest" :
+               {
+                  "lat" : 44.4288429,
+                  "lng" : -91.46952979999999
+               }
+            },
+            "location" :
+            {
+               "lat" : 44.5606466,
+               "lng" : -91.38551609999999
+            },
+            "location_type" : "APPROXIMATE",
+            "viewport" :
+            {
+               "northeast" :
+               {
+                  "lat" : 44.683386,
+                  "lng" : -91.2749259
+               },
+               "southwest" :
+               {
+                  "lat" : 44.4288429,
+                  "lng" : -91.46952979999999
+               }
+            }
+         },
+         "place_id" : "ChIJ89AZIVDF-IcRqADMR-0mo6c",
+         "postcode_localities" :
+         [
+            "Allen",
+            "Eleva",
+            "Strum"
+         ],
+         "types" :
+         [
+            "postal_code"
+         ]
+      },
+      {
+         "address_components" :
+         [
+            {
+               "long_name" : "54770",
+               "short_name" : "54770",
+               "types" :
+               [
+                  "postal_code"
+               ]
+            },
+            {
+               "long_name" : "Block A 1",
+               "short_name" : "Block A 1",
+               "types" :
+               [
+                  "political",
+                  "sublocality",
+                  "sublocality_level_2"
+               ]
+            },
+            {
+               "long_name" : "PGECHS",
+               "short_name" : "PGECHS",
+               "types" :
+               [
+                  "political",
+                  "sublocality",
+                  "sublocality_level_1"
+               ]
+            },
+            {
+               "long_name" : "Lahore",
+               "short_name" : "Lahore",
+               "types" :
+               [
+                  "locality",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Lahore",
+               "short_name" : "Lahore",
+               "types" :
+               [
+                  "administrative_area_level_2",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Punjab",
+               "short_name" : "Punjab",
+               "types" :
+               [
+                  "administrative_area_level_1",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Pakistan",
+               "short_name" : "PK",
+               "types" :
+               [
+                  "country",
+                  "political"
+               ]
+            }
+         ],
+         "formatted_address" : "Block A 1 PGECHS, Lahore, Punjab 54770, Pakistan",
+         "geometry" :
+         {
+            "bounds" :
+            {
+               "northeast" :
+               {
+                  "lat" : 31.4881488,
+                  "lng" : 74.41299049999999
+               },
+               "southwest" :
+               {
+                  "lat" : 31.4162047,
+                  "lng" : 74.2604819
+               }
+            },
+            "location" :
+            {
+               "lat" : 31.4434036,
+               "lng" : 74.2899324
+            },
+            "location_type" : "APPROXIMATE",
+            "viewport" :
+            {
+               "northeast" :
+               {
+                  "lat" : 31.4881488,
+                  "lng" : 74.41299049999999
+               },
+               "southwest" :
+               {
+                  "lat" : 31.4162047,
+                  "lng" : 74.2604819
+               }
+            }
+         },
+         "place_id" : "ChIJx9sPvz8BGTkR_Vw0pXIyVTk",
+         "postcode_localities" :
+         [
+            "Ahmed Avenue",
+            "Aitchison Society",
+            "Awaisia Housing Scheme",
+            "Faisal Town",
+            "Green Town",
+            "Gul E Daman",
+            "Iqbal Avenue Housing Society",
+            "Johar Town",
+            "Mateen Avenue",
+            "Muhammadpura",
+            "Nespak Housing Scheme",
+            "PCSIR Staff Colony",
+            "PGECHS",
+            "Pia Housing Scheme",
+            "Rehman Villas",
+            "Revenue Employees Cooperative Housing Society",
+            "Shadiwal Johar Town",
+            "Wapda Colony"
+         ],
+         "types" :
+         [
+            "postal_code"
+         ]
+      }
+   ],
+   "status" : "OK"
 }

@@ -1,0 +1,91 @@
+﻿@using Ecommerce.Shared.Services.PopularCategories;
+@inject IPopularCategoryService PopularCategoryService
+@using Ecommerce.Shared.Entities.PopularCategories;
+<style>
+
+
+    .category-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .category-title {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+
+    .img-fluid {
+        width: 220px;
+        height: 220px;
+        object-fit: cover;
+        border: 2px solid #ddd;
+    }
+
+    .section-title {
+        font-weight: bold;
+        
+    }
+</style>
+<div id="mobile-list" class="section-container pt-0">
+    <!-- BEGIN container -->
+    <div class="container">
+        <div class="container py-5 text-center">
+            <h4 class="section-title mb-5">Explore Popular Categories</h4>
+            <div class="row justify-content-center">
+
+                @if (Categories != null && Categories.Count > 0)
+                {
+                    foreach (var cat in Categories.OrderBy(a => a.Order))
+                    {
+                        <div class="col">
+                            <div class="category-item">
+                                <img src="@UrlHelper.GetPopularCategoriesImageUrl(cat.Id, cat.BannerUrl)" class="img-fluid rounded-circle mb-3" alt="Luxury" />
+                                <h6 class="category-title">@cat.Name.</h6>
+                            </div>
+                        </div>
+                    }
+
+                }
+
+            </div>
+
+
+                  
+        </div>
+
+    </div>
+    <!-- END container -->
+</div>
+
+@code
+{
+    private List<PopularCategoryDto> Categories { get; set; } = new List<PopularCategoryDto>();
+
+    #region FetchData
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            var response = await PopularCategoryService.GetPopularCategoriesAsync();
+            if (response.Success)
+            {
+                Categories = response.Data;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+    #endregion
+}

@@ -1,0 +1,145 @@
+﻿@using Ecommerce.Shared.Entities.PopularBrands;
+@using Ecommerce.Shared.Services.PopularBrands;
+@inject IPopularBrandService popularBrandService
+
+<div id="promotions" class="section-container bg-component">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN section-title -->
+        <h4 class="section-title clearfix">
+            <span class="flex-1">Most popular brands, <small>up to 90% off est. retail</small></span>
+            <a href="#" class="btn">SHOW ALL</a>
+        </h4>
+        <!-- END section-title -->
+        <!-- BEGIN row for popular brands -->
+        @if (featuredBrand != null)
+        {
+            <div class="row gx-2">
+                <!-- Featured Brand -->
+                <div class="col-lg-6">
+                    <div class="promotion promotion-lg bg-dark">
+                        <div class="promotion-image text-end promotion-image-overflow-bottom">
+                            <img src="@UrlHelper.GetPopularBrandImageUrl(featuredBrand.Id, featuredBrand.BannerUrl)" alt="@featuredBrand.Name" />
+                        </div>
+                        <div class="promotion-caption promotion-caption-inverse">
+                            <h4 class="promotion-title">@featuredBrand.Name</h4>
+                            <div class="promotion-price"><small></small></div>
+                            <p class="promotion-desc"></p>
+                            <a href="/Brand/@featuredBrand.BrandId" class="promotion-btn">View More</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Brands -->
+                <div class="col-lg-3 col-md-6">
+
+                    @if (brand1 != null)
+                    {
+
+                        <div class="promotion bg-blue">
+                            <div class="promotion-image promotion-image-overflow-bottom promotion-image-overflow-top">
+                                <img src="@UrlHelper.GetPopularBrandImageUrl(brand1.Id, brand1.BannerUrl)" alt="@brand1.Name" />
+                            </div>
+                            <div class="promotion-caption promotion-caption-inverse text-end">
+                                <h4 class="promotion-title">@brand1.Name</h4>
+                                
+                                <p class="promotion-desc"></p>
+                                <a href="/Brand/@brand1.BrandId" class="promotion-btn">View More</a>
+                            </div>
+                        </div>
+
+                    }
+
+                    @if (brand2 != null)
+                    {
+
+                        <div class="promotion bg-gray-200">
+                            <div class="promotion-image text-center promotion-image-overflow-bottom">
+                                <img src="@UrlHelper.GetPopularBrandImageUrl(brand2.Id, brand2.BannerUrl)" alt="@brand2.Name" />
+                            </div>
+                            <div class="promotion-caption text-center">
+                                <h4 class="promotion-title">@brand2.Name</h4>
+                             
+                                <p class="promotion-desc"></p>
+                                <a href="/Brand/@brand2.BrandId" class="promotion-btn">View More</a>
+                            </div>
+                        </div>
+
+                    }
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    @if (brand3 != null)
+                    {
+                         <div class="promotion bg-gray-200">
+                             <div class="promotion-image promotion-image-overflow-right promotion-image-overflow-bottom text-end">
+                                 <img src="@UrlHelper.GetPopularBrandImageUrl(brand3.Id, brand3.BannerUrl)" alt="@brand3.Name" />
+                             </div>
+                             <div class="promotion-caption text-center">
+                                 <h4 class="promotion-title">Apple Accessories</h4>
+                         
+                                 <a href="/Brand/@brand3.BrandId" class="promotion-btn">View More</a>
+                             </div>
+                         </div>
+
+                    }
+
+                    @if (brand4 != null)
+                    {
+
+                        <div class="promotion bg-dark">
+                            <div class="promotion-image text-end">
+                                <img src="@UrlHelper.GetPopularBrandImageUrl(brand4.Id, brand4.BannerUrl)" alt="@brand4.Name" />
+                            </div>
+                            <div class="promotion-caption promotion-caption-inverse">
+                                <h4 class="promotion-title">@brand4.Name</h4>
+                              
+                                <p class="promotion-desc"></p>
+                                <a href="/Brand/@brand4.BrandId" class="promotion-btn">View More</a>
+                            </div>
+                        </div>
+
+                    }
+                </div>
+                </div>
+        }
+        <!-- END row -->
+    </div>
+    <!-- END container -->
+</div>
+
+@code{
+    private List<PopularBrandDto> popularBrands = new List<PopularBrandDto>();
+    private PopularBrandDto featuredBrand;
+    private PopularBrandDto brand1;
+    private PopularBrandDto brand2;
+    private PopularBrandDto brand3;
+    private PopularBrandDto brand4;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPopularBrands();
+    }
+
+    private async Task LoadPopularBrands()
+    {
+        try
+        {
+            var response = await popularBrandService.GetPopularBrandsAsync();
+            if (response.Success)
+            {
+                // Featured brand (Order == 1)
+                featuredBrand = response.Data.FirstOrDefault(b => b.Order == 1);
+
+                // Assign specific brands by their order
+                brand1 = response.Data.FirstOrDefault(b => b.Order == 2);
+                brand2 = response.Data.FirstOrDefault(b => b.Order == 3);
+                brand3 = response.Data.FirstOrDefault(b => b.Order == 4);
+                brand4 = response.Data.FirstOrDefault(b => b.Order == 5);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+    }
+}

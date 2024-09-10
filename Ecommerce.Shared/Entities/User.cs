@@ -22,10 +22,11 @@ public class User: BaseEntity
     [StringLength(100)]
     [DataType(DataType.Password)]
     public string Password { get; set; }
-    //public long RoleId { get; set; }
-    //public Role Role { get; set; }
+ 
     public bool IsAgent { get; set; } = false;
     public bool? Approved { get; set; } = false;
+
+    public string? PostalCode { get; set; }
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 

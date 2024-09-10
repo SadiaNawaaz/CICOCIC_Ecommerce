@@ -1,11 +1,14 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
+using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Entities.TrendingProducts;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace Ecommerce.Shared.Services.ProductVariants;
 
@@ -25,6 +28,7 @@ public interface IProductVariantService
     Task<ServiceResponse<TrendingProduct>> AddTrendingProdutc(TrendingProduct productVariant);
     Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync();
     Task<ServiceResponse<bool>> RemoveTrendingProduct(long id);
+    Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsWithinDistanceAsync(string Keyword, long ? CategoryId, string PostalCode, int? Distance);
 
 }
 
@@ -32,11 +36,13 @@ public class ProductVariantService: IProductVariantService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<ProductService> _logger;
+    private readonly HttpClient _httpClient; 
 
-    public ProductVariantService(ApplicationDbContext context, ILogger<ProductService> logger)
+    public ProductVariantService(ApplicationDbContext context, ILogger<ProductService> logger, HttpClient httpClient)
     {
         _context = context;
         _logger = logger;
+        _httpClient = httpClient;
     }
 
     public async Task<ServiceResponse<ProductVariant>> AddProductVariantAsync(ProductVariant productVariant)
@@ -268,7 +274,7 @@ public class ProductVariantService: IProductVariantService
                 {
                     ProductId = pv.ProductId,
                     Id = pv.Id,
-                    Name = pv.Product.Name,
+                    Name = pv.Name,
                     Category = pv.Product.Category.Name,
                     Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
                     Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
@@ -584,6 +590,124 @@ public class ProductVariantService: IProductVariantService
                 Success = false,
                 Message = $"An error occurred while deleting the product variant: {ex.Message}"
             };
+        }
+    }
+    public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsWithinDistanceAsync(string Keyword, long? CategoryId, string PostalCode, int? Distance)
+    {
+        var response = new ServiceResponse<List<ProductVariantDto>>();
+
+        try
+        {
+            var agents = await _context.Users
+                .Where(u => u.IsAgent == true && u.PostalCode != null)
+                .ToListAsync();
+
+            var agentIdsWithinDistance = new List<long>();
+
+            foreach (var agent in agents)
+            {
+                var distance = await CalculateDistanceBetweenPostalCodes(PostalCode, agent.PostalCode);
+                if (distance <= Distance)
+                {
+                    agentIdsWithinDistance.Add(agent.Id);
+                }
+            }
+            List<long> categoryIds = new List<long>();
+            if (CategoryId.HasValue && CategoryId.Value > 0)
+            {
+                categoryIds = await GetCategoryAndDescendantsAsync(CategoryId.Value);
+            }
+
+            var productVariantsQuery = _context.ProductVariants
+                .Include(pv => pv.Product)
+                .Include(pv => pv.GeneralSize)
+                .Include(pv => pv.GeneralColor)
+                .Include(pv => pv.productVariantImages)
+                .Where(pv => agentIdsWithinDistance.Contains(pv.CreatedBy.Value));
+
+            if (categoryIds.Any())
+            {
+                productVariantsQuery = productVariantsQuery.Where(pv => categoryIds.Contains(pv.Product.CategoryId));
+            }
+            if (!string.IsNullOrEmpty(Keyword))
+            {
+                productVariantsQuery = productVariantsQuery.Where(pv =>
+                    pv.Name.Contains(Keyword) || pv.Product.Name.Contains(Keyword));
+            }
+            var productVariants = await productVariantsQuery
+                .Select(pv => new ProductVariantDto
+                {
+                    ProductId = pv.ProductId,
+                    Id = pv.Id,
+                    Name = pv.Name,
+                    Category = pv.Product.Category.Name,
+                    Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
+                    Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
+                    VariantPrice = pv.Price,
+                    ProductPrice = pv.Product.Price,
+                    Sku = pv.Sku,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null
+                })
+                .ToListAsync();
+
+            response.Data = productVariants;
+            response.Success = true;
+            response.Message = "Product variants fetched successfully.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching product variants within distance.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching product variants: {ex.Message}";
+        }
+
+        return response;
+    }
+    private async Task<double> CalculateDistanceBetweenPostalCodes(string originPostalCode, string destinationPostalCode)
+    {
+        string apiKey = "AIzaSyBtJuGDulzkXuGDtQ5rhZYXzOqQe3OXv_s"; 
+        string requestUri = $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={originPostalCode}&destinations={destinationPostalCode}&key={apiKey}";
+
+        HttpResponseMessage response = await _httpClient.GetAsync(requestUri);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonResult = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true 
+            };
+            var distanceMatrixResponse = JsonSerializer.Deserialize<DistanceMatrixResponse>(jsonResult, options);
+            if (distanceMatrixResponse.Rows.Count > 0 && distanceMatrixResponse.Rows[0].Elements.Count > 0)
+            {
+                var distanceInMeters = distanceMatrixResponse.Rows[0].Elements[0].Distance.Value;
+                return distanceInMeters / 1000.0; 
+            }
+        }
+
+        return double.MaxValue; 
+    }
+ 
+    private async Task<List<long>> GetCategoryAndDescendantsAsync(long categoryId)
+    {
+        var allCategories = await _context.Categories.ToListAsync();
+        var categoryIds = new List<long> { categoryId };
+        AddDescendantCategories(categoryId, allCategories, categoryIds);
+
+        return categoryIds;
+    }
+
+    private void AddDescendantCategories(long categoryId, List<Category> allCategories, List<long> categoryIds)
+    {
+        var childCategories = allCategories.Where(c => c.ParentCategoryId == categoryId).ToList();
+
+        foreach (var child in childCategories)
+        {
+            if (!categoryIds.Contains(child.Id))
+            {
+                categoryIds.Add(child.Id);
+                AddDescendantCategories(child.Id, allCategories, categoryIds);
+            }
         }
     }
 

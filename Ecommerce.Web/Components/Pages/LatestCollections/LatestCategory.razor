@@ -1,0 +1,115 @@
+﻿@using Ecommerce.Shared.Entities.CategoryConfigurations;
+@using Ecommerce.Shared.Services.Categories;
+@using Ecommerce.Shared.Services.CategoryConfigurations;
+@inject ICategoryConfigurationService CategoryConfigurationService
+@inject IProductVariantService productVariantService
+@inject ICategoryService CategoryService
+@using Ecommerce.Shared.Entities;
+<div id="tablet-list" class="section-container pt-0">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN section-title -->
+
+        @if (Latest != null && Latest.Id > 0)
+        {
+
+            <h4 class="section-title clearfix">
+                <span class="flex-1">
+                    @Latest.CategoryName
+                    <small>Shop and get your favourite @Latest.CategoryName at amazing prices!</small>
+                </span>
+                <a href="#" class="btn">SHOW ALL</a>
+            </h4>
+            <!-- END section-title -->
+            <!-- BEGIN category-container -->
+            <div class="category-container">
+
+                <div class="category-detail">
+                    <!-- BEGIN category-item -->
+                    <a href="#" class="category-item full">
+                        <div class="item">
+                            <div class="item-cover">
+                                <img src="@UrlHelper.GetLatestCategoryImageUrl(Latest.Id, Latest.BannerUrl)" alt="" />
+                            </div>
+                            <div class="item-info bottom">
+                                <h4 class="item-title">@Latest.Title</h4>
+                                <p class="item-desc">@Latest.Description</p>
+                                <div class="item-price">@Latest.StartingFromPrice</div>
+                            </div>
+                        </div>
+                    </a>
+                    <!-- END category-item -->
+                    <!-- BEGIN category-item -->
+                    <div class="category-item list">
+                        <!-- BEGIN item-row -->
+                        <div class="item-row">
+                            <!-- BEGIN item -->
+                            @foreach (var produc in ProductVariants.Take(6))
+                            {
+                                <div class="item item-thumbnail">
+                                    <a href="product_detail.html" class="item-image">
+                                        <img src="@UrlHelper.GetVariantImageUrl(produc.Id, produc.DefaultImageUrl)" alt="" />
+                                        <div class="discount">@produc.discountPercentage % OFF</div>
+                                    </a>
+                                    <div class="item-info">
+                                        <h4 class="item-title">
+                                            <a href="product_detail.html">@produc.Name<br /></a>
+                                        </h4>
+                                        <p class="item-desc">@produc.Description</p>
+                                        <div class="item-price">$@produc.VariantPrice</div>
+                                        <div class="item-discount-price">€@produc.ProductPrice</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                    <!-- END category-item -->
+                </div>
+                <!-- END category-detail -->
+            </div>
+            <!-- END category-container -->
+
+        }
+    </div>
+    <!-- END container -->
+</div>
+
+@code{
+    CategoryConfigurationDto Latest = new CategoryConfigurationDto();
+    private IEnumerable<ProductVariantDto> ProductVariants = new List<ProductVariantDto>();
+    protected override async Task OnInitializedAsync()
+    {
+        var lastConfigurationResponse = await CategoryConfigurationService.GetLastInsertedConfigurationAsync();
+        if (lastConfigurationResponse.Success)
+        {
+            Latest = lastConfigurationResponse.Data;
+            await LoadProductVariants();
+
+        }
+        else
+        {
+
+        }
+    }
+    private async Task LoadProductVariants()
+    {
+        try
+        {
+            var response = await productVariantService.GetProductVariantsByCategoryAsync(Latest.CategoryId);
+            if (response.Success)
+            {
+                ProductVariants = response.Data;
+            }
+            else
+            {
+                ProductVariants = new List<ProductVariantDto>();
+            }
+        }
+        catch (Exception ex)
+        {
+            ProductVariants = new List<ProductVariantDto>();
+        }
+    }
+
+}

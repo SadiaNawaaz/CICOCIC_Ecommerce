@@ -1,0 +1,89 @@
+﻿@page "/ConfigurationList"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Ecommerce.Admin.Components.Pages.Configuration.TrendingItems;
+@using Ecommerce.Admin.Components.Pages.Brands;
+@using Ecommerce.Admin.Components.Pages.Configuration.PopularBrands;
+@using Ecommerce.Admin.Components.Pages.Configuration.PopularCategories; 
+@using Ecommerce.Admin.Components.Pages.Configuration.CategoryConfigurations; 
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductList">Configuration</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Configurations</li>
+        </ol>
+        <h1 class="page-header mb-0"> Product </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-body">
+                <div class="panel panel-inverse panel-with-tabs" data-sortable-id="ui-unlimited-tabs-1">
+                    <div class="panel-heading p-0">
+                        <div class="tab-overflow">
+                            <ul class="nav nav-tabs nav-tabs-inverse">
+                                <li class="nav-item prev-button"><a href="javascript:;" data-click="prev-tab" class="nav-link text-primary"><i class="fa fa-arrow-left"></i></a></li>
+                                <li class="nav-item">
+                                    <a href="javascript:;" data-bs-toggle="tab" class="nav-link @(activeTab == 1 ? "active" : "")" @onclick="() => SetActiveTab(1)">Trending products</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="javascript:;" data-bs-toggle="tab" class="nav-link @(activeTab == 2 ? "active" : "")" @onclick="() => SetActiveTab(2)">Popular brands</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="javascript:;" data-bs-toggle="tab" class="nav-link @(activeTab == 3 ? "active" : "")" @onclick="() => SetActiveTab(3)">Popular Categories</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="javascript:;" data-bs-toggle="tab" class="nav-link @(activeTab == 4 ? "active" : "")" @onclick="() => SetActiveTab(4)">Banner</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="panel-body tab-content">
+                        <div class="tab-pane fade @(activeTab == 1 ? "active show" : "")">
+                            @if (activeTab == 1)
+                            {
+                                <AddEditTrendingItems></AddEditTrendingItems>
+                            }
+                        </div>
+                        <div class="tab-pane fade @(activeTab == 2 ? "active show" : "")">
+                            @if (activeTab == 2)
+                            {
+                                <PopularBrand></PopularBrand>
+                            }
+                        </div>
+                        <div class="tab-pane fade @(activeTab == 3 ? "active show" : "")">
+                            @if (activeTab == 3)
+                            {
+                                <PopularCategoriesList></PopularCategoriesList>
+                            }
+                        </div>
+
+                        <div class="tab-pane fade @(activeTab == 4 ? "active show" : "")">
+                            @if (activeTab == 4)
+                            {
+                                <CategoryConfigurationList></CategoryConfigurationList>
+                            }
+                        </div>
+                        <!-- Add other tabs similarly -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int activeTab = 1;
+
+    private void SetActiveTab(int tabIndex)
+    {
+        activeTab = tabIndex;
+        StateHasChanged(); // Trigger UI update
+    }
+}
+
+
+

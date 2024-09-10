@@ -28,17 +28,29 @@
             <div class="panel-body">
                 <button class="btn btn-primary mb-3" @onclick="NavigateToAddProduct">Add Product</button>
                 <MudDataGrid T="ProductDto" Items="@products" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
-                    <ColGroup>
-                        <col style="width: 70%;" />
-                        <col style="width: 20%;" />
-                        <col style="width: 10%;" />
-                    </ColGroup>
+                 
                     <Columns>
+
+
+
+                        <TemplateColumn Title="Thumbnail">
+                            <CellTemplate>
+
+                                @{
+                                    var thumbnail = context.Item.Thumbnail;
+                                }
+                                <img src="@thumbnail" class="rounded h-30px" />
+
+
+                            </CellTemplate>
+                        </TemplateColumn>
+
+
                         <PropertyColumn Property="x => x.Name" Title="Name" />
                         <PropertyColumn Property="x => x.Stock" Title="Stock" />
                         <PropertyColumn Property="x => x.Price" Title="Price" />
                         <PropertyColumn Property="x => x.Category" Title="Category" />
-              
+
 
 
                         <TemplateColumn CellClass="d-flex justify-end">

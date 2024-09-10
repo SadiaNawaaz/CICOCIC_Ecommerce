@@ -49,21 +49,29 @@
                     <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Title</label>
-                        <InputText id="name" class="form-control" @bind-Value="productVariant.Name" />
+                    <div class="row">
+                        <div class="col-lg-9">
+                            <label class="form-label">Title</label>
+                            <InputText id="name" class="form-control" @bind-Value="productVariant.Name" />
 
-                        <span class="text-danger"> <ValidationMessage For="@(() => productVariant.Name)" /></span>
+                            <span class="text-danger"> <ValidationMessage For="@(() => productVariant.Name)" /></span>
+
+                        </div>
+
+
+                        <div class="col-lg-1">
+                            <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-primary w-100px me-5px mt-20px">Save</button>
+                        </div>
 
                     </div>
-                    <div class="">
-                        <label class="form-label">Description</label>
-                        <div class="form-control p-0 overflow-hidden">
-                            <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind-Value="@productVariant.Description"></InputTextArea>
+                    <div class="col-lg-12">
+                            <label class="form-label">Description</label>
+                            <div class="form-control p-0 overflow-hidden">
+                                <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind-Value="@productVariant.Description"></InputTextArea>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
                     <div>
@@ -455,12 +463,7 @@
             </div>
         </div>
 
-        <div class="card">
-
-            <div class="card-footer bg-none d-flex p-3">
-                <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-primary ms-auto">Save</button>
-            </div>
-        </div>
+      
     </div>
 </EditForm>
 @code {
@@ -628,7 +631,16 @@
                             productVariant.GeneralColorId = catalog.GeneralColorId;
                             productVariant.GeneralSizeId = catalog.GeneralSizeId;
                             productVariant.ModelYearId = catalog.ModelYearId;
-                            productVariant.Thumbnail = catalog.Thumbnail;
+
+                            if(Product.Thumbnail !=null && Product.Thumbnail!="")
+                            {
+                                productVariant.Thumbnail = Product.Thumbnail;
+                            }
+                            else
+                            {
+                                productVariant.Thumbnail = catalog.Thumbnail;
+                            }
+
 
                         }
                         else

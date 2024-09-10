@@ -91,7 +91,7 @@
                                         <a href="#" class="item-image">
 
 
-                                            <img src="http://localhost:5201/ProductVariants/@variant.Id/@variant.DefaultImageUrl" alt="" onerror="this.onerror=null;this.src='/200x200.png';" />
+                                            <img src="@UrlHelper.GetVariantImageUrl(variant.Id, variant.DefaultImageUrl)" alt="" onerror="this.onerror=null;this.src='/200x200.png';" />
 
                                             @{
                                                 double discount = variant.ProductPrice - variant.VariantPrice;

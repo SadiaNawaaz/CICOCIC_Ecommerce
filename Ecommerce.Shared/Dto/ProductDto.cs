@@ -18,7 +18,7 @@ public class ProductDto
     public string? Category { get; set; }
     public string? Brand { get; set; }
     public double Price { get; set; }
-
+    public string? Thumbnail { get; set; }
     public int Stock { get; set; }
   
 }

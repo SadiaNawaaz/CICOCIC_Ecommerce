@@ -37,5 +37,20 @@ public static class UrlHelper
     {
         return $"{_baseUrl}/ProductVariants/{VariantId}/{imageUrl}";
     }
+
+    public static string GetPopularBrandImageUrl(long Id, string imageUrl)
+    {
+        return $"{_baseUrl}/PopularBrand/{Id}/{imageUrl}";
+    }
+
+    public static string GetPopularCategoriesImageUrl(long Id, string imageUrl)
+    {
+        return $"{_baseUrl}/PopularCategory/{Id}/{imageUrl}";
+    }
+
+    public static string GetLatestCategoryImageUrl(long Id, string imageUrl)
+    {
+        return $"{_baseUrl}/CategoryConfig/{Id}/{imageUrl}";
+    }
 }
 

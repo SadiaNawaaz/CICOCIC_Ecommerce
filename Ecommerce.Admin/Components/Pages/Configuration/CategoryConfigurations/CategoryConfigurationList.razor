@@ -1,0 +1,211 @@
+﻿@page "/CategoryConfiguration"
+@using Ecommerce.Shared.Services.Categories;
+@using Ecommerce.Shared.Services.CategoryConfigurations;
+@inject ICategoryService CategoryService
+@using Ecommerce.Shared.Entities.CategoryConfigurations;
+@inject ICategoryConfigurationService CategoryConfigurationService
+@inject ISnackbar Snackbar
+@inject ImageResizeService ImageResizeService
+@inject NavigationManager NavigationManager
+@using Radzen
+@using Radzen.Blazor
+
+<div class="container mt-5">
+    <h3>Category Configuration</h3>
+    <div class="row">
+        <div class="col-md-3">
+            <label class="form-label">Category</label>
+            <RadzenDropDownDataGrid TValue="long" Data=@categories TextProperty="Name" ValueProperty="Id" Change="@(args => CategoryChanged(args))" Class="form-control">
+                <Columns>
+                    <RadzenDropDownDataGridColumn Property="Name" Title="Category Name" Width="100px" />
+                </Columns>
+            </RadzenDropDownDataGrid>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Title</label>
+            <input class="form-control" @bind="configuration.Title" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-control" @bind="configuration.Description"></input>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Starting From Price</label>
+            <input type="number" class="form-control" @bind="configuration.StartingFromPrice" />
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-primary mt-15px" @onclick="SaveConfiguration">Save</button>
+        </div>
+        <div class="col-md-12 mt-3">
+            <label class="form-label">Banner Image</label>
+            <InputFile OnChange="@(e => HandleFileChange(e))" />
+        </div>
+        <div class="col-md-12 mt-3">
+            @if (!string.IsNullOrEmpty(BannerUrl))
+            {
+                <img src="@BannerUrl" style="width:200px; height:200px;" />
+            }
+        </div>
+
+    </div>
+
+    <div class="row mt-5">
+        <h4>Existing Configurations</h4>
+        @if (existingConfigurations != null && existingConfigurations.Count > 0)
+        {
+            @foreach (var configuration in existingConfigurations)
+            {
+                <div class="col-xl-3">
+                    <div class="card border-0" style="height: 350px;">
+                        <img class="card-img-top" src="@($"/CategoryConfig/{configuration.Id}/{configuration.BannerUrl}")" alt="" style="width: 100%; height: 250px; object-fit: cover;">
+                        <div class="card-body p-2" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h5 class="card-title mb-0">@configuration.CategoryName</h5>
+                          
+                            <a href="javascript:;" class="btn btn-danger btn-icon btn-circle btn-sm" @onclick="() => RemoveConfiguration(configuration.Id)">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No configurations available.</p>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Category> categories = new List<Category>();
+    private List<CategoryConfigurationDto> existingConfigurations = new List<CategoryConfigurationDto>();
+    private CategoryConfiguration configuration = new CategoryConfiguration();
+    private IBrowserFile uploadedFile;
+    private string BannerUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        await LoadConfigurations();
+    }
+
+    private async Task LoadCategories()
+    {
+        var response = await CategoryService.GetCategoriesAsync();
+        if (response.Success)
+        {
+            categories = response.Data.Where(a=>a.Level==4).ToList();
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private async Task LoadConfigurations()
+    {
+        var response = await CategoryConfigurationService.GetCategoryConfigurationsAsync();
+        if (response.Success)
+        {
+            existingConfigurations = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+    }
+
+    private async void HandleFileChange(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        var memoryStream = new MemoryStream();
+        await uploadedFile.OpenReadStream().CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+        configuration.ImageByte = memoryStream.ToArray();
+        BannerUrl = await ImageResizeService.ResizeImage(memoryStream, uploadedFile.ContentType, 300, 300);
+        configuration.BannerUrl = $"{Guid.NewGuid()}{Path.GetExtension(uploadedFile.Name)}";
+    }
+
+    private async Task SaveConfiguration()
+    {
+        try
+        {
+            var response = await CategoryConfigurationService.SaveCategoryConfigurationAsync(configuration, configuration.ImageByte, configuration.BannerUrl);
+            if (response.Success)
+            {
+                Snackbar.Add("Configuration saved successfully", Severity.Success);
+
+                // Save banner to folder
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CategoryConfig", configuration.Id.ToString());
+                if (!Directory.Exists(bannerPath))
+                {
+                    Directory.CreateDirectory(bannerPath);
+                }
+                if (configuration.BannerUrl != null)
+                {
+                    var filePath = bannerPath + "/" + configuration.BannerUrl;
+                    await File.WriteAllBytesAsync(filePath, configuration.ImageByte);
+                }
+                ClearForm();
+                await LoadConfigurations();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while saving the configuration.", Severity.Error);
+        }
+    }
+
+    private async Task RemoveConfiguration(long configurationId)
+    {
+        try
+        {
+            var response = await CategoryConfigurationService.DeleteCategoryConfigurationAsync(configurationId);
+            if (response.Success)
+            {
+                // Remove banner from folder
+                var bannerPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CategoryConfig", configurationId.ToString());
+                if (Directory.Exists(bannerPath))
+                {
+                    Directory.Delete(bannerPath, true);
+                }
+
+                Snackbar.Add("Configuration removed successfully", Severity.Success);
+                await LoadConfigurations();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("An error occurred while removing the configuration.", Severity.Error);
+        }
+    }
+
+    private void CategoryChanged(object e)
+    {
+        configuration.CategoryId = Convert.ToInt64(e);
+    }
+
+    private void OnEdit(CategoryConfigurationDto selectedConfiguration)
+    {
+        configuration.CategoryId = selectedConfiguration.CategoryId;
+        configuration.Title = selectedConfiguration.Title;
+        configuration.Description = selectedConfiguration.Description;
+        configuration.StartingFromPrice = selectedConfiguration.StartingFromPrice;
+        BannerUrl = selectedConfiguration.BannerUrl;
+    }
+    private void ClearForm()
+    {
+        configuration = new CategoryConfiguration();
+        uploadedFile = null;
+        BannerUrl = null;
+        StateHasChanged();
+    }
+}

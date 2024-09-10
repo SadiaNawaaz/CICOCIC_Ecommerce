@@ -8,6 +8,7 @@ using Ecommerce.Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
+using System.Text.Json.Serialization;
 
 namespace Ecommerce.Shared.Entities.ProductVariants;
 public class ProductVariant : BaseEntity
@@ -86,4 +87,66 @@ public class ProductVariantMedia
 
     public long ProductVariantId { get; set; }
     public ProductVariant ProductVariant { get; set; }
+}
+
+
+public class DistanceElement
+{
+    [JsonPropertyName("distance")]
+    public Distance Distance { get; set; }
+
+    [JsonPropertyName("duration")]
+    public Duration Duration { get; set; }
+
+    [JsonPropertyName("status")]
+    public string Status { get; set; }
+}
+
+public class DistanceRow
+{
+    [JsonPropertyName("elements")]
+    public List<DistanceElement> Elements { get; set; }
+}
+
+public class DistanceMatrixResponse
+{
+    [JsonPropertyName("destination_addresses")]
+    public List<string> Destination_Addresses { get; set; }
+
+    [JsonPropertyName("origin_addresses")]
+    public List<string> Origin_Addresses { get; set; }
+
+    [JsonPropertyName("rows")]
+    public List<DistanceRow> Rows { get; set; }
+
+    [JsonPropertyName("status")]
+    public string Status { get; set; }
+}
+
+public class Distance
+{
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+
+    [JsonPropertyName("value")]
+    public int Value { get; set; }
+}
+
+public class Duration
+{
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+
+    [JsonPropertyName("value")]
+    public int Value { get; set; }
+}
+
+
+
+public class SearchFilter
+{
+    public long CategoryId { get; set; }
+    public int Distance { get; set; }
+    public string? PostelCode { get; set; }
+    public string KeyWord { get; set; }
 }

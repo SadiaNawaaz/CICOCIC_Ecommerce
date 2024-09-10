@@ -7,11 +7,14 @@ using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Catalogs;
 using Ecommerce.Shared.Services.Categories;
+using Ecommerce.Shared.Services.CategoryConfigurations;
 using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Colors;
 using Ecommerce.Shared.Services.Configurations;
 using Ecommerce.Shared.Services.Features;
 using Ecommerce.Shared.Services.ModelYears;
+using Ecommerce.Shared.Services.PopularBrands;
+using Ecommerce.Shared.Services.PopularCategories;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.ProductVariants;
 using Ecommerce.Shared.Services.RolePermissions;
@@ -35,6 +38,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IClusterService, ClusterService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IPopularBrandService, PopularBrandService>();
 builder.Services.AddScoped<IModelYearService, ModelYearService>();
 builder.Services.AddScoped<IFeatureService, FeatureService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
@@ -55,6 +59,10 @@ builder.Services.AddScoped<Radzen.DialogService>();
 builder.Services.AddScoped<ISliderService, SliderService>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+builder.Services.AddScoped<IPopularCategoryService, PopularCategoryService>();
+
+builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(
  o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 //builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; });

@@ -238,7 +238,19 @@
 
                                 </div>
                             </div>
+                            <div class="col-lg-6">
+                                <div class="mb-lg-0 mb-3">
+                                    <label class="form-label">Thumbnail </label>
 
+                                    <InputText @bind-Value="product.Thumbnail" class="form-control" placeholder="Product Thumbnail" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.Thumbnail)" /> </span>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <img src="@product.Thumbnail" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                            </div>
                         </div>
 
 
