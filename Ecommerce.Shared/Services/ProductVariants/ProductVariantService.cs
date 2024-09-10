@@ -665,7 +665,7 @@ public class ProductVariantService: IProductVariantService
     }
     private async Task<double> CalculateDistanceBetweenPostalCodes(string originPostalCode, string destinationPostalCode)
     {
-        string apiKey = "AIzaSyBtJuGDulzkXuGDtQ5rhZYXzOqQe3OXv_s"; 
+        string apiKey = ""; 
         string requestUri = $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={originPostalCode}&destinations={destinationPostalCode}&key={apiKey}";
 
         HttpResponseMessage response = await _httpClient.GetAsync(requestUri);
