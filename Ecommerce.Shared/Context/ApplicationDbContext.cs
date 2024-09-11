@@ -38,7 +38,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<PopularCategory> PopularCategories { get; set; }
 
-    
+
     public DbSet<User> Users { get; set; }
     public DbSet<Customer> Customers { get; set; }
 
@@ -69,36 +69,54 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductMedia> ProductMedias { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<ProductVariantMedia> ProductVariantMedias { get; set; }
-   
+
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<CategoryConfiguration> CategoryConfigurations { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Feature>()
+
+        modelBuilder.Entity<Catalog>()
+       .HasOne(c => c.Category)
+       .WithMany()
+       .HasForeignKey(c => c.CategoryId)
+       .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Catalog>()
+       .HasOne(c => c.Category)
+       .WithMany()
+       .HasForeignKey(c => c.CategoryId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Product>()
+       .HasOne(c => c.Brand)
+       .WithMany()
+       .HasForeignKey(c => c.BrandId)
+       .OnDelete(DeleteBehavior.Restrict);
+
+
+
+
+       modelBuilder.Entity<Feature>()
       .HasOne(f => f.Cluster)
       .WithMany(c => c.Features)
       .HasForeignKey(f => f.ClusterId)
       .OnDelete(DeleteBehavior.NoAction);
 
-
-
-
-
-     modelBuilder.Entity<TemplateCategory>()
-    .HasIndex(tc => new { tc.TemplateMasterId, tc.CategoryId })
-    .IsUnique();
+        modelBuilder.Entity<TemplateCategory>()
+       .HasIndex(tc => new { tc.TemplateMasterId, tc.CategoryId })
+       .IsUnique();
         modelBuilder.Entity<ProductFeatureValue>()
-  .HasOne(pfv => pfv.TemplateClusterFeature)
-  .WithMany()
-  .HasForeignKey(pfv => pfv.TemplateClusterFeatureId)
-  .OnDelete(DeleteBehavior.NoAction);
+       .HasOne(pfv => pfv.TemplateClusterFeature)
+       .WithMany()
+       .HasForeignKey(pfv => pfv.TemplateClusterFeatureId)
+       .OnDelete(DeleteBehavior.NoAction);
 
 
         modelBuilder.Entity<ProductVariantFeatureValue>()
-      .HasOne(pvfv => pvfv.TemplateClusterFeature)
-      .WithMany()
-      .HasForeignKey(pvfv => pvfv.TemplateClusterFeatureId)
-      .OnDelete(DeleteBehavior.NoAction);
+       .HasOne(pvfv => pvfv.TemplateClusterFeature)
+       .WithMany()
+       .HasForeignKey(pvfv => pvfv.TemplateClusterFeatureId)
+       .OnDelete(DeleteBehavior.NoAction);
         modelBuilder.Entity<RawClusterFeatureDto>().HasNoKey();
         //base.OnModelCreating(modelBuilder);
 
