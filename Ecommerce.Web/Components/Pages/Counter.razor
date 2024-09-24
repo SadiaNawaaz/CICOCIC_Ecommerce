@@ -1,68 +1,28 @@
 ﻿@page "/counter"
-@using System.Net.Http
-@using System.Net.Http.Json
-@inject HttpClient HttpClient
-@inject IProductVariantService productVariantService
-
-<h3>Distance Between Zip Codes</h3>
-<div>
-    <input @bind="origin" placeholder="Enter origin zip code" />
-    <input @bind="destination" placeholder="Enter destination zip code" />
-    <button @onclick="CalculateDistance">Get Distance</button>
-</div>
-
-@if (!string.IsNullOrEmpty(result))
-{
-    <p>@result</p>
-}
-
-@code {
-    private string origin = "91935";
-    private string destination = "00765";
-    private string result = "";
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadProductVariants();
-    }
 
 
-    private async Task CalculateDistance()
-    {
-        string apiKey = "";
-        // string requestUri = $"https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins={origin}&destinations={destination}&key={apiKey}";
-        string requestUri = $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={origin},NL&destinations={destination},NL&key={apiKey}";
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+        Launch demo modal
+    </button>
 
-        HttpResponseMessage response = await HttpClient.GetAsync(requestUri);
-        if (response.IsSuccessStatusCode)
-        {
-            string jsonResult = await response.Content.ReadAsStringAsync();
-
-            result = "";
-        }
-        else
-        {
-            result = "Failed to retrieve data";
-        }
-    }
-
-    private async Task LoadProductVariants()
-    {
-        try
-        {
-            //var response = await productVariantService.GetProductVariantsWithinDistanceAsync("2514 HP", 9);
-            //if (response.Success)
-            //{
-            //    var ProductVariants = response.Data;
-            //}
-            //else
-            //{
-
-            //}
-        }
-        catch (Exception ex)
-        {
-
-        }
-    }
-}
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>

@@ -25,28 +25,36 @@
 @inject ICatalogService CatalogService
 @using Ecommerce.Shared.Entities.Catalogs;
 @inject IConfiguration Configuration
-<div class="d-flex align-items-center mb-3">
-    <div>
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
-            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Variants</li>
-        </ol>
-        <h1 class="page-header mb-0"> Variants</h1>
-    </div>
-</div>
+@inject IJSRuntime JS
+
 
 
 
 <EditForm Model="@productVariant" OnValidSubmit="HandleValidSubmitVariant" FormName="Variants">
     <DataAnnotationsValidator />
 
+    <div class="d-flex align-items-center mb-3">
+        <div>
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
+                <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Variants</li>
+            </ol>
+            <h1 class="page-header mb-0"> Variants</h1>
+        </div>
+
+        <div class="ms-auto">
+            <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-success w-100px me-5px mt-20px">Save</button>
+        </div>
+    </div>
+
+
     <!-- The Modal -->
     <div class="row">
         <div class="col-xl-8">
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Product Information
+                    <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information</b>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -59,23 +67,21 @@
                         </div>
 
 
-                        <div class="col-lg-1">
-                            <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-primary w-100px me-5px mt-20px">Save</button>
-                        </div>
+
 
                     </div>
                     <div class="col-lg-12">
-                            <label class="form-label">Description</label>
-                            <div class="form-control p-0 overflow-hidden">
-                                <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind-Value="@productVariant.Description"></InputTextArea>
-                            </div>
+                        <label class="form-label">Description</label>
+                        <div class="form-control p-0 overflow-hidden">
+                            <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind-Value="@productVariant.Description"></InputTextArea>
                         </div>
                     </div>
                 </div>
+            </div>
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
                     <div>
-                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media
+                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Media</b>
                     </div>
                     <div>
                         <label>
@@ -95,10 +101,10 @@
                                 <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
 
                                 @if (selectedFiles != null && selectedFiles.Count() > 0)
-                                {
+                                    {
                                     <div style="display: flex; flex-wrap: wrap; margin-top: 10px;">
                                         @foreach (var file in selectedFiles.OrderBy(f => f.Order).Where(a => !a.IsDeleted))
-                                        {
+                                            {
                                             <div style="position: relative; margin: 10px; cursor: grab;" draggable="true"
                                                  @ondragstart="(e) => HandleDragStart(e, file)"
                                                  ondragover="event.preventDefault();"
@@ -106,9 +112,9 @@
                                                 <img src="@file.ImageUrl" alt="Image Preview" style="height: 150px; width: 150px;" />
                                                 <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
                                             </div>
-                                        }
+                                            }
                                     </div>
-                                }
+                                    }
                             </div>
                         </div>
                     </div>
@@ -149,15 +155,15 @@
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
                     <div>
-                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Media URLS
+                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLS</b>
                     </div>
 
                 </div>
                 <div class="card-body">
                     @if (productVariant.ProductVariantMedias != null && productVariant.ProductVariantMedias.Count > 0)
-                    {
-                        @foreach (var media in productVariant.ProductVariantMedias)
                         {
+                        @foreach (var media in productVariant.ProductVariantMedias)
+                            {
                             <div class="row align-items-center mb-3">
 
                                 <div class="col-md-4">
@@ -171,8 +177,8 @@
 
                                 </div>
                             </div>
+                            }
                         }
-                    }
 
                 </div>
             </div>
@@ -185,10 +191,10 @@
 
                     <div>
                         @if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
-                        {
+                            {
 
                             foreach (var clus in Product.ProductClusters)
-                            {
+                                {
 
 
                                 <div class="row mb-3 gx-3 alert alert-info align-items-center">
@@ -206,7 +212,7 @@
                                     </div>
                                 </div>
                                 foreach (var f in clus.ProductClusterFeatures)
-                                {
+                                    {
                                     <div class="row mb-3 gx-3">
                                         <div class="col-2">
                                             <ul id="tag-size" class="primary">
@@ -217,12 +223,12 @@
                                         <div class="col-4"><input type="text" class="form-control" @bind-value="@f.Value" readonly /></div>
 
                                     </div>
+                                    }
+
                                 }
 
                             }
 
-                        }
-
 
                     </div>
 
@@ -234,45 +240,45 @@
             </div>
 
 
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
-                </div>
-                <div class="card-body">
+            @*<div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
+                    </div>
+                    <div class="card-body">
 
-                    <div class="row">
+                        <div class="row">
 
-                        <div class="col-6">
-                            <label class="form-label">Type</label>
+                            <div class="col-6">
+                                <label class="form-label">Type</label>
 
-                            <select id="variantType" @bind="productVariant.variantType" class="form-control">
-                                @foreach (var variant in Enum.GetValues(typeof(VariantType)).Cast<VariantType>())
-                                {
-                                    <option value="@variant">@variant</option>
-                                }
-                            </select>
-                        </div>
-
-
-                        <div class="col-6">
-                            <label class="form-label">Value</label>
-                            <InputText id="name" class="form-control" @bind-Value="productVariant.TypeValue" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Note</label>
-                            <div class="form-control p-0 overflow-hidden">
-                                <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind-Value="@productVariant.Note"></InputTextArea>
+                                <select id="variantType" @bind="productVariant.variantType" class="form-control">
+                                    @foreach (var variant in Enum.GetValues(typeof(VariantType)).Cast<VariantType>())
+                                    {
+                                        <option value="@variant">@variant</option>
+                                    }
+                                </select>
                             </div>
+
+
+                            <div class="col-6">
+                                <label class="form-label">Value</label>
+                                <InputText id="name" class="form-control" @bind-Value="productVariant.TypeValue" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Note</label>
+                                <div class="form-control p-0 overflow-hidden">
+                                    <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind-Value="@productVariant.Note"></InputTextArea>
+                                </div>
+                            </div>
+
                         </div>
+
 
                     </div>
 
 
-                </div>
 
-
-
-            </div>
+                </div>*@
 
 
         </div>
@@ -280,7 +286,7 @@
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex">
                     <div class="flex-1">
-                        <div>Publish</div>
+                        <div>  <i class="fa fa-arrow-right-from-file fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Publish</b></div>
                     </div>
                     <div><a href="#" class="text-decoration-none text-gray-500">Manage</a></div>
                 </div>
@@ -298,7 +304,7 @@
                     <br />
                     <div class="d-flex">
                         @if (productVariant != null && productVariant.Id > 0)
-                        {
+                            {
                             <div class="flex-1 d-flex">
 
                                 <a href="@(webAppUrl + "Product?Id=" + productVariant.Id)" class="text-decoration-none" target="_blank">
@@ -308,7 +314,7 @@
                                 <p> &nbsp;&nbsp;&nbsp; Save before Preview!</p>
                             </div>
                             <hr />
-                        }
+                            }
 
                     </div>
 
@@ -319,7 +325,7 @@
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex">
                     <div class="flex-1">
-                        <div>Product Level</div>
+                        <div>  <i class="fa fa-seedling fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Product Level</b></div>
                     </div>
                 </div>
                 <div class="card-body fw-bold">
@@ -338,7 +344,7 @@
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex">
                     <div class="flex-1">
-                        <div>Brand</div>
+                        <div>  <i class="fa fa-navicon fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Brand</b></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -352,7 +358,7 @@
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex">
                     <div class="flex-1">
-                        <div>Variants</div>
+                        <div>  <i class="fa fa-list-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Variants</b></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -367,9 +373,9 @@
                                 <select class="form-select" @bind="@productVariant.GeneralSizeId">
                                     <option value="">-- Select Size --</option>
                                     @foreach (var size in Sizes)
-                                    {
+                                        {
                                         <option value="@size.Id">@size.Name</option>
-                                    }
+                                        }
                                 </select>
 
                             </div>
@@ -380,14 +386,14 @@
                                 <select class="form-select" @bind="@productVariant.GeneralColorId">
                                     <option value="">-- Select Color --</option>
                                     @if (colors != null && colors.Count > 0)
-                                    {
-                                        @foreach (var col in colors)
                                         {
+                                        @foreach (var col in colors)
+                                            {
 
 
                                             <option value="@col.Id" style="color:@col.HexCode;background-color:@col.HexCode;">@col.Name</option>
+                                            }
                                         }
-                                    }
 
                                 </select>
 
@@ -414,9 +420,9 @@
                                 <select class="form-select" @bind="@productVariant.ModelYearId">
                                     <option value="">-- Select Model Year --</option>
                                     @foreach (var modelYear in ModelYears)
-                                    {
+                                        {
                                         <option value="@modelYear.Id">@modelYear.Year</option>
-                                    }
+                                        }
                                 </select>
                             </div>
                         </div>
@@ -435,7 +441,7 @@
             <div class="card border-0 mb-3">
                 <div class="card-header h6 mb-0 bg-none p-3 d-flex">
                     <div class="flex-1">
-                        <div>Image</div>
+                        <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -450,9 +456,9 @@
                                 <InputText @bind-Value="productVariant.Thumbnail" class="form-control" />
 
                                 @if (!String.IsNullOrEmpty(productVariant.Thumbnail))
-                                {
+                                    {
                                     <img src="@productVariant.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
-                                }
+                                    }
 
                             </div>
                         </div>
@@ -463,7 +469,7 @@
             </div>
         </div>
 
-      
+
     </div>
 </EditForm>
 @code {
@@ -496,7 +502,7 @@
 
     #endregion
     protected override async Task OnInitializedAsync()
-    {
+        {
         await base.OnInitializedAsync();
 
         webAppUrl = Configuration["WebAppUrl"];
@@ -510,166 +516,166 @@
 
 
         if (Id > 0)
-        {
+            {
             await LoadVariantForEdit();
 
-        }
+            }
 
         //await LoadTemplate(Product.TemplateMasterId);
 
 
-    }
+        }
 
     private async Task LoadCategoryTreeAsync()
-    {
-        try
         {
+        try
+            {
             var response = await CategoryService.GetCategoriesDtoAsync();
             if (response.Success)
-            {
+                {
                 Categories = response.Data;
                 Level1Categories = Categories.Where(c => c.Level == 1).ToList();
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
-        }
-    }
     #region level
     private void OnLevel1Changed(object e)
-    {
+        {
 
         try
-        {
+            {
             var selectedLevel1Id = Convert.ToInt64(e);
             if (selectedLevel1Id > 0)
-            {
+                {
                 Level2Categories = Categories.Where(c => c.Level == 2 && c.ParentCategoryId == selectedLevel1Id).ToList() ?? new List<CategoryDto>();
                 Level3Categories.Clear();
                 Level4Categories.Clear();
+                }
+
+            }
+        catch (Exception ex)
+            {
+
             }
 
         }
-        catch (Exception ex)
-        {
-
-        }
-
-    }
 
     private void OnLevel2Changed(object e)
-    {
-        try
         {
+        try
+            {
             var selectedLevel2Id = Convert.ToInt64(e);
             if (selectedLevel2Id > 0)
-            {
+                {
                 Level3Categories = Categories.Where(c => c.Level == 3 && c.ParentCategoryId == selectedLevel2Id).ToList() ?? new List<CategoryDto>();
                 Level4Categories.Clear();
+                }
+
+            }
+        catch (Exception ex)
+            {
+
+
             }
 
-        }
-        catch (Exception ex)
-        {
 
 
         }
-
-
-
-    }
 
     private void OnLevel3Changed(object e)
-    {
-        try
         {
+        try
+            {
             var selectedLevel3Id = Convert.ToInt64(e);
             if (selectedLevel3Id > 0)
-            {
+                {
                 Level4Categories = Categories.Where(c => c.Level == 4 && c.ParentCategoryId == selectedLevel3Id).ToList() ?? new List<CategoryDto>();
+
+                }
 
             }
 
-        }
-
         catch (Exception ex)
 
-        {
+            {
 
+            }
         }
-    }
 
     private async Task GetProduct()
-    {
-        try
         {
+        try
+            {
 
 
             var response = await IProductService.GetProductByIdAsync(ProductId);
 
             if (response.Success)
-            {
+                {
 
                 Product = response.Data;
                 if (Id == 0)
-                {
+                    {
                     productVariant.Name = Product.Name;
                     productVariant.ProductId = Product.Id;
                     productVariant.Price = Product.Price;
                     if (Product.CatalogId != null && Product.CatalogId > 0)
-                    {
+                        {
                         var Catresponse = await CatalogService.GetCatalogByIdAsync(Product.CatalogId.Value);
                         if (Catresponse.Success)
-                        {
+                            {
                             catalog = Catresponse.Data;
 
                             productVariant.GeneralColorId = catalog.GeneralColorId;
                             productVariant.GeneralSizeId = catalog.GeneralSizeId;
                             productVariant.ModelYearId = catalog.ModelYearId;
 
-                            if(Product.Thumbnail !=null && Product.Thumbnail!="")
-                            {
+                            if (Product.Thumbnail != null && Product.Thumbnail != "")
+                                {
                                 productVariant.Thumbnail = Product.Thumbnail;
-                            }
+                                }
                             else
-                            {
+                                {
                                 productVariant.Thumbnail = catalog.Thumbnail;
+                                }
+
+
+                            }
+                        else
+                            {
+                            Snackbar.Add(response.Message, Severity.Error);
                             }
 
-
                         }
-                        else
-                        {
-                            Snackbar.Add(response.Message, Severity.Error);
-                        }
-
                     }
+
                 }
 
-            }
-
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+
+
+
             }
-
-
-
-        }
 
         catch (Exception ex)
-        {
+            {
             Snackbar.Add(ex.Message, Severity.Error);
 
+            }
+
+
         }
-
-
-    }
 
 
     #endregion
@@ -679,221 +685,225 @@
     #region Brand
 
     private async Task LoadBrands()
-    {
+        {
         var response = await BrandService.GetBrandsAsync();
         if (response.Success)
-        {
+            {
             Brands = response.Data;
-        }
+            }
         else
-        {
+            {
             Snackbar.Add(response.Message, Severity.Error);
+            }
         }
-    }
     #endregion
 
     #region ModelYear
     private async Task LoadModelYears()
-    {
-        try
         {
+        try
+            {
             var response = await modelYearService.GetModelYearsAsync();
             if (response.Success)
-            {
+                {
                 ModelYears = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while loading model years: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in LoadModelYears: {ex}");
+            }
         }
-    }
     #endregion
 
     #region Sizes
     private async Task LoadSizes()
-    {
+        {
 
         try
-        {
+            {
             var response = await SizeService.GetSizesAsync();
             if (response.Success)
-            {
+                {
                 Sizes = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-    }
     #endregion
 
 
     #region Colors
     private async Task LoadColors()
-    {
+        {
         var response = await ColorService.GetColorsAsync();
         if (response.Success)
-        {
+            {
             colors = response.Data;
-        }
+            }
         else
-        {
+            {
             Snackbar.Add(response.Message, Severity.Error);
+            }
         }
-    }
     #endregion
 
     #region Save
     private async Task HandleValidSubmitVariant()
-    {
-        try
         {
+        try
+            {
             ServiceResponse<ProductVariant> response;
             productVariant.productVariantImages = productVariant.productVariantImages.Where(a => a.IsDeleted == false).ToList();
 
             if (Id != 0)
-            {
+                {
                 productVariant.LastModifiedBy = UserId;
                 productVariant.LastModifiedDate = DateTime.Now;
 
                 response = await IProductVariantService.UpdateProductVariantAsync(productVariant);
                 if (response.Success)
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Success);
 
-                }
+                    }
                 else
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Error);
+                    Console.Error.WriteLine($"Error : {response.InnerException}");
+
+                    await JS.InvokeVoidAsync("console.log", response.InnerException);
+                    }
                 }
-            }
             else
-            {
+                {
 
                 productVariant.ProductId = ProductId;
                 productVariant.CreatedBy = UserId;
                 productVariant.CreatedDate = DateTime.Now;
                 response = await IProductVariantService.AddProductVariantAsync(productVariant);
                 if (response.Success)
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Success);
 
-                }
+                    }
                 else
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Error);
+                    await JS.InvokeVoidAsync("console.log", response.InnerException);
+                    }
                 }
-            }
 
             if (response.Success)
 
 
-            {
+                {
                 await SaveImagesToFileSystem(productVariant.Id);
-            }
+                }
 
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
         }
-    }
     private async Task SaveImagesToFileSystem(long productVariantId)
-    {
+        {
         var productVariantImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductVariants", productVariantId.ToString());
 
         if (!Directory.Exists(productVariantImagesPath))
-        {
+            {
             Directory.CreateDirectory(productVariantImagesPath);
-        }
+            }
 
         foreach (var image in selectedFiles)
-        {
+            {
 
             var filePath = Path.Combine(productVariantImagesPath, image.ImageName);
             if (image.IsDeleted == true)
-            {
-                if (image.IsDeleted)
                 {
-                    if (File.Exists(filePath))
+                if (image.IsDeleted)
                     {
+                    if (File.Exists(filePath))
+                        {
                         File.Delete(filePath);
+                        }
                     }
                 }
-            }
 
             else if (image.IsCloned == true && !File.Exists(filePath))
-            {
+                {
                 // Copy the file from the original location if it's cloned
                 var sourceFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Products", Product.Id.ToString(), image.ImageName);
                 if (File.Exists(sourceFilePath))
-                {
+                    {
                     File.Copy(sourceFilePath, filePath);
-                }
+                    }
                 image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
-            }
+                }
 
 
 
             else if (image.IsDeleted == false && image.ImageByte == null)
-            {
+                {
 
-            }
+                }
             else
-            {
+                {
                 await File.WriteAllBytesAsync(filePath, image.ImageByte);
                 image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
-            }
+                }
 
+
+
+            }
 
 
         }
-
-
-    }
     #endregion
 
 
     #region Edit
     private async Task LoadVariantForEdit()
-    {
-        try
         {
+        try
+            {
             var response = await IProductVariantService.GetProductVariantByIdAsync(Id);
             if (response.Success)
-            {
+                {
                 productVariant = response.Data;
                 selectedFiles = productVariant.productVariantImages;
                 if (selectedFiles != null && selectedFiles.Count() > 0)
-                {
+                    {
                     selectedFiles.ToList().ForEach(image =>
                     {
                         image.ImageUrl = $"/ProductVariants/{productVariant.Id}/{image.ImageName}";
                     });
-                }
+                    }
 
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-    }
 
     #endregion
 
@@ -905,11 +915,11 @@
     private ProductVariantImages? draggingImage;
 
     private async Task HandleSelected(InputFileChangeEventArgs e)
-    {
-        try
         {
-            foreach (var file in e.GetMultipleFiles())
+        try
             {
+            foreach (var file in e.GetMultipleFiles())
+                {
                 using var memoryStream = new MemoryStream();
                 await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
 
@@ -919,72 +929,72 @@
                 memoryStream.Position = 0;
                 var buffer = memoryStream.ToArray();
                 ProductVariantImages productVariantImages = new ProductVariantImages
-                {
+                    {
                     ImageUrl = resizedImageUrl,
                     ImageByte = buffer,
                     ImageName = uniqueFileName
-                };
+                    };
 
                 selectedFiles.Add(productVariantImages);
-            }
+                }
 
             productVariant.productVariantImages = selectedFiles;
             StateHasChanged();
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
         }
-    }
 
     private void RemoveImage(ProductVariantImages image)
-    {
+        {
 
-        var node = selectedFiles.FirstOrDefault(a => a.ImageName == image.ImageName && a.IsDeleted==false);
+        var node = selectedFiles.FirstOrDefault(a => a.ImageName == image.ImageName && a.IsDeleted == false);
         node.IsDeleted = true;
         StateHasChanged();
-    }
+        }
 
 
     private void OnCheckboxChanged(ChangeEventArgs e)
-    {
-        try
         {
+        try
+            {
             bool isChecked = (bool)e.Value;
 
             if (isChecked)
-            {
-                if (Product != null)
                 {
+                if (Product != null)
+                    {
 
 
                     if (Product.ProductMedias != null && Product.ProductMedias.Count > 0)
-                    {
+                        {
 
                         productVariant.ProductVariantMedias = Product.ProductMedias.Select(cm => new ProductVariantMedia
-                        {
+                            {
                             ImageUrl = cm.ImageUrl,
 
-                        }).ToList();
+                            }).ToList();
 
-                    }
+                        }
 
                     if (Product.ProductImages != null && Product.ProductImages.Count > 0)
-                    {
+                        {
 
                         foreach (var cm in Product.ProductImages)
-                        {
-                            // Check if the image with the same name already exists in the selectedFiles list
-                            if (!selectedFiles.Any(img => img.ImageName == cm.ImageName && img.IsDeleted==false))
                             {
-                                selectedFiles.Add(new ProductVariantImages
+                            // Check if the image with the same name already exists in the selectedFiles list
+                            if (!selectedFiles.Any(img => img.ImageName == cm.ImageName && img.IsDeleted == false))
                                 {
+                                selectedFiles.Add(new ProductVariantImages
+                                    {
                                     ImageUrl = $"/Products/{Product.Id}/{cm.ImageName}",
                                     ImageName = cm.ImageName,
                                     IsCloned = true
-                                });
+                                    });
+                                }
                             }
-                        }
 
                         //selectedFiles.AddRange(Product.ProductImages.Select(cm => new ProductVariantImages
                         //{
@@ -995,32 +1005,32 @@
                         //}).ToList());
 
                         productVariant.productVariantImages = selectedFiles;
-                    }
+                        }
 
+                    }
                 }
             }
-        }
         catch (Exception ex)
-        {
+            {
+
+            }
+
 
         }
-
-
-    }
 
     private void RemoveMediaUrl(ProductVariantMedia media)
-    {
+        {
         productVariant.ProductVariantMedias.Remove(media);
-    }
+        }
 
 
     private void HandleDragStart(DragEventArgs e, ProductVariantImages file)
-    {
+        {
         draggingImage = file;
-    }
+        }
 
     private void HandleDrop(ProductVariantImages targetImage)
-    {
+        {
         if (draggingImage == null) return;
 
         int originalOrder = targetImage.Order;
@@ -1028,23 +1038,23 @@
         draggingImage.Order = originalOrder;
         int index = 0;
         foreach (var image in selectedFiles.OrderBy(x => x.Order))
-        {
+            {
             image.Order = index++;
-        }
+            }
         draggingImage = null;
-    }
+        }
 
 
     #endregion
 
 
     void KeyHandler(KeyboardEventArgs args)
-    {
-        if (args.Key == "Enter")
         {
+        if (args.Key == "Enter")
+            {
             return;
+            }
         }
-    }
 
 }
 

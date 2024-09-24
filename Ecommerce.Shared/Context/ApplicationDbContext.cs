@@ -22,6 +22,7 @@ using Ecommerce.Shared.Entities.Templates;
 using Ecommerce.Shared.Entities.TrendingProducts;
 using Ecommerce.Shared.Services.Roles;
 using Microsoft.EntityFrameworkCore;
+using System;
 using static Ecommerce.Shared.Services.ProductVariants.ProductVariantService;
 
 namespace Ecommerce.Shared.Context;
@@ -58,6 +59,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<ProductFeatureValue> ProductFeatureValues { get; set; }
     public DbSet<ProductVariantImages> productVariantImages { get; set; }
+    public DbSet<VariantObjectMedia> VariantObjectMedias { get; set; }
+    
     public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
     public DbSet<TrendingProduct> TrendingProducts { get; set; }
     public DbSet<Catalog> Catalogs { get; set; }
@@ -80,6 +83,13 @@ public class ApplicationDbContext : DbContext
        .WithMany()
        .HasForeignKey(c => c.CategoryId)
        .OnDelete(DeleteBehavior.Restrict);
+
+
+        modelBuilder.Entity<Catalog>()
+    .HasIndex(p => new { p.Name, p.Id,p.Code })
+    .IsUnique();
+
+
 
         modelBuilder.Entity<Catalog>()
        .HasOne(c => c.Category)

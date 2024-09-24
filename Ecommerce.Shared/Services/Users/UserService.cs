@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Services.Shared;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -211,6 +212,90 @@ public class UserService : IUserService
     {
         try
         {
+            //string sourceConnectionString = "Server=mssql008.db.hosting;Database=ID432610_cico;User Id=ID432610_cico;Password=Gazelle11;Integrated Security=false;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;";
+
+            //// Destination server connection details
+            //string destinationConnectionString = "Server=mssql005.db.hosting;Database=ID432610_cicocic;User Id=ID432610_cicocic;Password=Gazelle11;Integrated Security=false;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;";
+
+            //// Source table and destination table names
+            //string sourceTable = "tmpCatalogszero";
+            //string destinationTable = "tmpCatalogs"; // Replace with the actual destination table name
+
+            //// SQL query to select data from the source table
+            //string selectQuery = $"SELECT [Id], [Name], [Slug], [BrandId], [Code], [Thumbnail], [Description], [ShortDescription], [Price], [CategoryId], [Media], [ColorId], [SizeId], [Year] FROM {sourceTable}";
+
+            //// SQL query to insert data into the destination table
+            //string insertQuery = $@"
+            //INSERT INTO {destinationTable} (
+            //    Id, Name, Slug, BrandId, Code, Thumbnail, Description, ShortDescription, Price, CategoryId, Media, ColorId, SizeId, Year
+            //) VALUES (
+            //    @Id, @Name, @Slug, @BrandId, @Code, @Thumbnail, @Description, @ShortDescription, @Price, @CategoryId, @Media, @ColorId, @SizeId, @Year
+            //)";
+            //try
+            //    {
+            //    // Connect to the source server and fetch data
+            //    using (SqlConnection sourceConnection = new SqlConnection(sourceConnectionString))
+            //        {
+            //        sourceConnection.Open();
+            //        using (SqlCommand selectCommand = new SqlCommand(selectQuery, sourceConnection))
+            //            {
+            //            using (SqlDataReader reader = selectCommand.ExecuteReader())
+            //                {
+            //                // Connect to the destination server and insert data
+            //                using (SqlConnection destinationConnection = new SqlConnection(destinationConnectionString))
+            //                    {
+            //                    destinationConnection.Open();
+            //                    using (SqlCommand insertCommand = new SqlCommand(insertQuery, destinationConnection))
+            //                        {
+            //                        insertCommand.Parameters.Add("@Id", System.Data.SqlDbType.Int);
+            //                        insertCommand.Parameters.Add("@Name", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@Slug", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@BrandId", System.Data.SqlDbType.Int);
+            //                        insertCommand.Parameters.Add("@Code", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@Thumbnail", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@Description", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@ShortDescription", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@Price", System.Data.SqlDbType.Decimal);
+            //                        insertCommand.Parameters.Add("@CategoryId", System.Data.SqlDbType.Int);
+            //                        insertCommand.Parameters.Add("@Media", System.Data.SqlDbType.NVarChar);
+            //                        insertCommand.Parameters.Add("@ColorId", System.Data.SqlDbType.Int);
+            //                        insertCommand.Parameters.Add("@SizeId", System.Data.SqlDbType.Int);
+            //                        insertCommand.Parameters.Add("@Year", System.Data.SqlDbType.Int);
+
+            //                        // Iterate through each row in the source data
+            //                        while (reader.Read())
+            //                            {
+            //                            // Set parameter values
+            //                            insertCommand.Parameters["@Id"].Value = reader["Id"];
+            //                            insertCommand.Parameters["@Name"].Value = reader["Name"];
+            //                            insertCommand.Parameters["@Slug"].Value = reader["Slug"];
+            //                            insertCommand.Parameters["@BrandId"].Value = reader["BrandId"];
+            //                            insertCommand.Parameters["@Code"].Value = reader["Code"];
+            //                            insertCommand.Parameters["@Thumbnail"].Value = reader["Thumbnail"];
+            //                            insertCommand.Parameters["@Description"].Value = reader["Description"];
+            //                            insertCommand.Parameters["@ShortDescription"].Value = reader["ShortDescription"];
+            //                            insertCommand.Parameters["@Price"].Value = reader["Price"];
+            //                            insertCommand.Parameters["@CategoryId"].Value = reader["CategoryId"];
+            //                            insertCommand.Parameters["@Media"].Value = reader["Media"];
+            //                            insertCommand.Parameters["@ColorId"].Value = reader["ColorId"];
+            //                            insertCommand.Parameters["@SizeId"].Value = reader["SizeId"];
+            //                            insertCommand.Parameters["@Year"].Value = reader["Year"];
+
+            //                            // Execute the insert command
+            //                            insertCommand.ExecuteNonQuery();
+            //                            }
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+
+            //    Console.WriteLine("Data transfer completed successfully.");
+            //    }
+            //catch (Exception ex)
+            //    {
+            //    Console.WriteLine($"An error occurred: {ex.Message}");
+            //    }
             var user = await _context.Users
           .Include(u => u.UserRoles)
               .ThenInclude(ur => ur.Role) 

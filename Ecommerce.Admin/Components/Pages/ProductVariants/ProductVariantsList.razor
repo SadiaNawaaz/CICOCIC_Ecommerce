@@ -31,6 +31,7 @@
         </div>
     </div>
     <div class="panel-body">
+
         <div class="row fileupload-buttonbar">
             <div class="col-xl-7">
 
@@ -44,27 +45,34 @@
             </div>
         </div>
         <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
-      
+            <!-- Define ColGroup for column widths -->
+            <ColGroup>
+                <col style="width:40px;" />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                
+                <col style="width:40px;" />
+            </ColGroup>
+
             <Columns>
-
-
-                <TemplateColumn Title="Thumbnail">
+                <!-- Thumbnail Column -->
+                <TemplateColumn Title="Thumbnail" Style="width: 60px;">
                     <CellTemplate>
-
                         @{
                             var thumbnail = context.Item.Thumbnail;
                         }
-                        <img src="@thumbnail" class="rounded h-30px" />
-                      
-
+                        <img src="@thumbnail" alt="NoImage.png" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';" />
                     </CellTemplate>
                 </TemplateColumn>
 
-
-
-
+                <!-- Name Column -->
                 <PropertyColumn Property="x => x.Name" Title="Name" />
-                <!-- New Column for VariantType -->
+
+                <!-- Obj Column -->
                 <TemplateColumn Title="Obj">
                     <CellTemplate>
                         @{
@@ -76,7 +84,7 @@
                     </CellTemplate>
                 </TemplateColumn>
 
-                <!-- New Column for TypeValue -->
+                <!-- Obj ID Column -->
                 <TemplateColumn Title="Obj ID">
                     <CellTemplate>
                         @{
@@ -87,7 +95,11 @@
                         </div>
                     </CellTemplate>
                 </TemplateColumn>
-                <PropertyColumn Property="x => x.Price" Title="Price" />        
+
+                <!-- Price Column -->
+                <PropertyColumn Property="x => x.Price" Title="Price" />
+
+                <!-- Size Column -->
                 <TemplateColumn Title="Size">
                     <CellTemplate>
                         @{
@@ -98,17 +110,21 @@
                         </div>
                     </CellTemplate>
                 </TemplateColumn>
+
+                <!-- Color Column -->
                 <TemplateColumn Title="Color">
                     <CellTemplate>
                         @{
                             var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
                         }
-                        <div style="background-color:@hexCode; color:@(hexCode == "#000000" ? "#FFFFFF" : "#000000"); padding: 15px; border-radius: 3px;">
+                        @*<div style="background-color:@hexCode; color:@(hexCode == "#000000" ? "#FFFFFF" : "#000000"); padding: 5px; border-radius: 3px;">
+                        </div>*@
 
-                        </div>
+                        <span class="badge" style="background-color:@hexCode"> @hexCode </span>
                     </CellTemplate>
                 </TemplateColumn>
 
+                <!-- Year Column -->
                 <TemplateColumn Title="Year">
                     <CellTemplate>
                         @{
@@ -120,6 +136,7 @@
                     </CellTemplate>
                 </TemplateColumn>
 
+                <!-- Publish Column -->
                 <TemplateColumn Title="Publish">
                     <CellTemplate>
                         @{
@@ -128,22 +145,32 @@
                         <MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />
                     </CellTemplate>
                 </TemplateColumn>
-                <TemplateColumn CellClass="d-flex justify-end">
+
+                <!-- Manage Records Column -->
+                <TemplateColumn Title="Actions" Style="width: 60px;">
                     <HeaderTemplate>
-                        <div>Actions</div>
+                        <div>Manage Records</div>
                     </HeaderTemplate>
                     <CellTemplate>
                         <MudStack Row>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditProductVariant(context.Item)" />
-
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="@(e => EditProductVariant(context.Item))">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Object" @onclick="@(e => CreateObject(context.Item))">
+                                <i class="fas fa-object-group"></i>
+                            </button>
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>
+
+            <!-- Pagination Control -->
             <PagerContent>
-                <MudDataGridPager T="ProductVariant" PageSizeOptions=@(new int[] { 5, 10, 20 }) />
+                <MudDataGridPager T="ProductVariant" />
             </PagerContent>
         </MudDataGrid>
+
+       
     </div>
 </div>
 
@@ -158,49 +185,49 @@
     private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
 
     protected override async Task OnInitializedAsync()
-    {
+        {
         await base.OnInitializedAsync();
         await LoadProductVariants();
-    }
+        }
 
     private async Task LoadProductVariants()
-    {
-        try
         {
+        try
+            {
             var response = await productVariantService.GetAllProductVariantsAsync(ProductId,UserId,IsAgent);
             if (response.Success)
-            {
+                {
                 productVariants = response.Data;
-            }
+                }
             else
-            {
+                {
                 snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             snackbar.Add("An error occurred while loading product variants: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in LoadProductVariants: {ex}");
+            }
         }
-    }
 
     private void EditProductVariant(ProductVariant productVariant)
-    {
+        {
         try
-        {
+            {
             navigationManager.NavigateTo($"/AddEditProductVariants?Id={productVariant.Id}&ProductId={ProductId}");
-        }
+            }
         catch (Exception ex)
-        {
+            {
             snackbar.Add("An error occurred while navigating to edit the product variant: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
+            }
         }
-    }
 
     private async Task DeleteProductVariant(ProductVariant productVariant)
-    {
-        try
         {
+        try
+            {
             var parameters = new DialogParameters();
             parameters.Add("ContentText", "Do you want to confirm?");
             parameters.Add("ButtonText", "Yes");
@@ -208,35 +235,47 @@
             var result = await dialogresult.Result;
             if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
                 await Delete(productVariant);
-        }
+            }
         catch (Exception ex)
-        {
+            {
             snackbar.Add("An error occurred while attempting to delete the product variant: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in DeleteProductVariant: {ex}");
+            }
         }
-    }
 
     private async Task Delete(ProductVariant productVariant)
-    {
-        try
         {
+        try
+            {
             var response = await productVariantService.DeleteProductVariantAsync(productVariant.Id);
             if (response.Success)
-            {
+                {
                 await LoadProductVariants();
                 snackbar.Add(response.Message, Severity.Success);
-            }
+                }
             else
-            {
+                {
                 snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             snackbar.Add("An error occurred while deleting the product variant: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in Delete: {ex}");
+            }
         }
-    }
 
 
+    private void CreateObject(ProductVariant productVariant)
+        {
+        try
+            {
+            navigationManager.NavigateTo($"/AddEditVariantObject?Id={productVariant.Id}&ProductId={ProductId}");
+            }
+        catch (Exception ex)
+            {
+            snackbar.Add("An error occurred while navigating to edit the product variant: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
+            }
+        }
 }

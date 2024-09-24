@@ -29,7 +29,7 @@ public interface IProductVariantService
     Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync();
     Task<ServiceResponse<bool>> RemoveTrendingProduct(long id);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsWithinDistanceAsync(string Keyword, long ? CategoryId, string PostalCode, int? Distance);
-
+    Task<ServiceResponse<bool>> SaveVariantObjectMediaAsync(List<VariantObjectMedia> mediaList);
 }
 
 public class ProductVariantService: IProductVariantService
@@ -60,10 +60,11 @@ public class ProductVariantService: IProductVariantService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding product variant.");
+            _logger.LogError(ex, "Error adding product variant."+ex.Message);
             return new ServiceResponse<ProductVariant>
             {
                 Success = false,
+                InnerException = ex.InnerException.ToString(),
                 Message = $"An error occurred while adding the product variant: {ex.Message}"
             };
         }
@@ -199,6 +200,7 @@ public class ProductVariantService: IProductVariantService
                 .Include(pv => pv.ModelYear)
                  .Include(pv => pv.ProductVariantMedias)
                 .Include(img => img.productVariantImages)
+                .Include(img => img.VariantObjectMedias)
                 .FirstOrDefaultAsync(pv => pv.Id == id);
 
             if (productVariant == null)
@@ -711,4 +713,78 @@ public class ProductVariantService: IProductVariantService
         }
     }
 
-}
+    public async Task<ServiceResponse<bool>> SaveVariantObjectMediaAsync(List<VariantObjectMedia> mediaList)
+        {
+        try
+            {
+            if (mediaList == null || !mediaList.Any())
+                {
+                return new ServiceResponse<bool>
+                    {
+                    Success = false,
+                    Message = "No media to save."
+                    };
+                }
+
+            foreach (var media in mediaList)
+                {
+                if (media.Id == 0)
+                    {
+                    _context.VariantObjectMedias.Add(media);
+                    }
+                else
+                    {
+                    var existingMedia = await _context.VariantObjectMedias.FindAsync(media.Id);
+
+                    if (existingMedia == null)
+                        {
+                        return new ServiceResponse<bool>
+                            {
+                            Success = false,
+                            Message = $"Media object with Id {media.Id} not found."
+                            };
+                        }
+
+                    if (media.IsDeleted)
+                        {
+                        _context.VariantObjectMedias.Remove(existingMedia);
+                        }
+                    else
+                        {
+                        existingMedia.Name = media.Name;
+                        existingMedia.FileUrl = media.FileUrl;
+                        existingMedia.FilExtension = media.FilExtension;
+
+                        if (media.FileByte != null && media.FileByte.Length > 0)
+                            {
+                            existingMedia.FileByte = media.FileByte;
+                            }
+                        }
+                    }
+                }
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<bool>
+                {
+                Data = true,
+                Success = true,
+                Message = "Variant object media saved/updated successfully."
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error saving/updating variant object media.");
+            return new ServiceResponse<bool>
+                {
+                Success = false,
+                InnerException=ex.InnerException.ToString(),
+                Message = $"An error occurred while saving/updating variant object media"
+                };
+            }
+        }
+
+
+
+
+    }

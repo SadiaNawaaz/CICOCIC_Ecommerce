@@ -89,100 +89,100 @@
     private bool ImageDel = false;
     private string ImageDelPath = null;
     protected override async Task OnInitializedAsync()
-    {
+        {
         await base.OnInitializedAsync();
         if (BrandId.HasValue)
-        {
+            {
             var response = await BrandService.GetBrandByIdAsync(BrandId.Value);
             if (response.Success)
-            {
+                {
                 brand = response.Data;
                 brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;
                 StateHasChanged();
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
         }
-    }
 
     private async Task HandleValidSubmit()
-    {
-        try
         {
+        try
+            {
             ServiceResponse<Brand> response;
             if (BrandId.HasValue)
-            {
+                {
                 brand.LastModifiedBy = UserId;
                 response = await BrandService.UpdateBrandAsync(brand);
-            }
+                }
             else
-            {
+                {
                 brand.CreatedBy = UserId;
 
                 response = await BrandService.AddBrandAsync(brand);
-            }
+                }
 
             if (response.Success)
-            {
+                {
                 var brandImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Brands", brand.Id.ToString());
 
                 if (!Directory.Exists(brandImagesPath))
-                {
+                    {
                     Directory.CreateDirectory(brandImagesPath);
-                }
+                    }
 
                 if (ImageDel)
-                {
+                    {
                     var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                     var DelImagePath = wwwRootPath + ImageDelPath;
                     if (File.Exists(DelImagePath))
-                    {
+                        {
                         File.Delete(DelImagePath);
+                        }
                     }
-                }
 
                 if (brand.ImageByte != null)
-                {
+                    {
                     var filePath = Path.Combine(brandImagesPath, brand.ImageUrl);
                     await File.WriteAllBytesAsync(filePath, brand.ImageByte);
-                    brand.ImageUrl = $"/brands/{brand.Id}/{brand.ImageUrl}";
+                    //brand.ImageUrl = $"/brands/{brand.Id}/{brand.ImageUrl}";
 
-                }
+                    }
                 Snackbar.Add(response.Message, Severity.Success);
                 await Task.Delay(1000);
                 NavigationManager.NavigateTo("/BrandList");
 
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
-        }
-    }
 
     private void GoBack()
-    {
+        {
         NavigationManager.NavigateTo("/BrandList");
-    }
+        }
 
     async Task HandleFileChange(InputFileChangeEventArgs e)
-    {
+        {
         var maxSizeBytes = 512000; // Maximum allowed size in bytes (500 KB)
 
 
 
         try
-        {
+            {
             file = e.File;
 
             if (file.Size <= maxSizeBytes)
-            {
+                {
                 using var memoryStream = new MemoryStream();
                 await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
                 var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
@@ -192,20 +192,20 @@
                 var buffer = memoryStream.ToArray();
                 brand.ImageByte = buffer;
                 brand.ImageUrl = uniqueFileName;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add("Please Choose file under limit  (500 KB)", Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-    }
 
     void DeleteImage()
-    {
+        {
         ImageDelPath = brand.ImageUrl;
         file = null;
         imageUrl = null;
@@ -213,5 +213,5 @@
         ImageDel = true;
 
 
-    }
+        }
 }

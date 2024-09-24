@@ -37,11 +37,11 @@ public class ProductVariant : BaseEntity
     public List<ProductVariantImages> productVariantImages { get; set; } = new List<ProductVariantImages>();
     public List<ProductVariantMedia> ProductVariantMedias { get; set; } = new List<ProductVariantMedia>();
 
+    public List<VariantObjectMedia> VariantObjectMedias { get; set; } = new List<VariantObjectMedia>();
+    
 
 
-
-
-}
+    }
 public class ProductVariantFeatureValue : BaseEntity
 {
 
@@ -150,3 +150,21 @@ public class SearchFilter
     public string? PostelCode { get; set; }
     public string KeyWord { get; set; }
 }
+
+
+
+public class VariantObjectMedia : BaseEntity
+    {
+
+    public long ProductVariantId { get; set; }
+    public virtual ProductVariant ProductVariant { get; set; }
+    [Required]
+    public string Name { get; set; }
+    public string FileUrl { get; set; }
+    public string FilExtension { get; set; }
+
+    [NotMapped]
+    public byte[] FileByte { get; set; }
+    [NotMapped]
+    public bool IsDeleted { get; set; } = false;
+    }

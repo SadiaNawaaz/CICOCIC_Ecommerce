@@ -7,7 +7,9 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+  
 
 <div class="d-flex align-items-center mb-3">
     <div>
@@ -16,6 +18,9 @@
             <li class="breadcrumb-item"><a href="/CatalogList">Catalog</a></li>
             <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Catalogs</li>
         </ol>
+    </div>
+    <div class="ms-auto">
+        <button @onclick="NavigateToAddEditCatalog" class="btn btn-success btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-success-900"></i> Add Catalog</button>
     </div>
 </div>
 
@@ -31,22 +36,37 @@
     </div>
     <div class="panel-body">
         <div class="row fileupload-buttonbar">
-            <div class="col-xl-7">
-                <button type="button" class="btn btn-primary start me-1 mb-3" @onclick="NavigateToAddEditCatalog">
-                    <i class="fa fa-fw fa-add"></i>
-                    <span>Add Catalog</span>
-                </button>
-                <span class="fileupload-process"></span>
-            </div>
-            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
-                <div class="progress progress-striped active">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                </div>
-                <div class="progress-extended">&nbsp;</div>
+            <div class="col-xl-9">
+
             </div>
         </div>
 
-        <MudDataGrid T="Catalog" Items="@catalogs" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+
+        <div class="input-group mb-3">
+            <button class="btn btn-white" type="button"  aria-haspopup="true" aria-expanded="false">Filter Catalog <b class="caret"></b></button>
+            <div class="flex-fill position-relative">
+                <div class="input-group">
+                    <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                        <i class="fa fa-search opacity-5"></i>
+                    </div>
+                    <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..."  @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged"/>
+                </div>
+            </div>
+        </div>
+
+        @*<div class="flex-fill position-relative">
+            <div class="input-group">
+                <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                    <i class="fa fa-search opacity-5"></i>
+                </div>
+                <input type="text" class="form-control ps-35px bg-light" placeholder="Search..." @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged" />
+            </div>
+        </div>*@
+
+
+
+
+        <MudDataGrid T="Catalog" Items="@filteredCatalogs" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
             <ColGroup>
                 <col style="width: 10%;" />
                 <col style="width: 40%;" />
@@ -56,9 +76,10 @@
             </ColGroup>
             <Columns>
                 <!-- Thumbnail Column -->
+
                 <TemplateColumn Title="Thumbnail" Style="width:10%">
                     <CellTemplate>
-                        <img src="@context.Item.Thumbnail" alt="Thumbnail" style="max-height: 50px; max-width: 50px;" />
+                        <img src="@context.Item.Thumbnail" alt="NoImage.png" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';" />
                     </CellTemplate>
                 </TemplateColumn>
 
@@ -72,14 +93,21 @@
                 <PropertyColumn Property="x => x.Code" Title="Code" Style="width:15%" />
 
                 <!-- Action Column -->
-                <TemplateColumn  Style="width:20%">
+                <TemplateColumn Style="width:20%">
                     <HeaderTemplate>
-                        <div>Actions</div>
+                        <div>Manage Records</div>
                     </HeaderTemplate>
                     <CellTemplate>
                         <MudStack Row>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditCatalog(context.Item)" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteCatalog(context.Item)" />
+                            <!-- Edit Button with Tooltip -->
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="@(e => EditCatalog(context.Item))">
+                                <i class="fas fa-edit"></i>
+                            </button>
+
+                            <!-- Delete Button with Tooltip -->
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete"   @onclick="@(e => DeleteCatalog(context.Item))">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>
@@ -89,72 +117,75 @@
                 <MudDataGridPager T="Catalog" PageSizeOptions=@(new int[] {5, 10, 20}) />
             </PagerContent>
         </MudDataGrid>
+
+
+
+
+
+
+
+
+
+
     </div>
 </div>
 
 @code {
     private bool _resizeColumn;
     private IEnumerable<Catalog> catalogs = new List<Catalog>();
-    private string _searchString;
+    private IEnumerable<Catalog> filteredCatalogs = new List<Catalog>();
+    private string _searchString = string.Empty;
+
     private List<string> _events = new();
 
     [Inject]
     public IDialogService DialogService { get; set; }
 
-    private Func<Catalog, bool> _quickFilter => x =>
-    {
-        if (string.IsNullOrWhiteSpace(_searchString))
-            return true;
-
-        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    };
 
     protected override async Task OnInitializedAsync()
-    {
+        {
         await LoadCatalogs();
-    }
+        }
 
     private async Task LoadCatalogs()
-    {
-        try
         {
+        try
+            {
             var response = await CatalogService.GetCatalogsAsync();
             if (response.Success)
-            {
+                {
                 catalogs = response.Data;
-            }
+                FilterCatalogs();
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while loading catalogs: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in LoadCatalogs: {ex}");
+            }
         }
-    }
 
     private void EditCatalog(Catalog catalog)
-    {
+        {
         try
-        {
+            {
             NavigationManager.NavigateTo($"/AddEditCatalog/{catalog.Id}");
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while navigating to edit the catalog: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in EditCatalog: {ex}");
+            }
         }
-    }
 
     private async Task DeleteCatalog(Catalog catalog)
-    {
-        try
         {
+        try
+            {
             var parameters = new DialogParameters();
             parameters.Add("ContentText", "Do you want to confirm?");
             parameters.Add("ButtonText", "Yes");
@@ -162,46 +193,68 @@
             var result = await dialogresult.Result;
             if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
                 await Delete(catalog);
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while attempting to delete the catalog: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in DeleteCatalog: {ex}");
+            }
         }
-    }
 
     private async Task Delete(Catalog catalog)
-    {
-        try
         {
+        try
+            {
             var response = await CatalogService.DeleteCatalogAsync(catalog.Id);
             if (response.Success)
-            {
+                {
                 await LoadCatalogs();
                 Snackbar.Add(response.Message, Severity.Success);
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while deleting the catalog: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in Delete: {ex}");
+            }
         }
-    }
 
     private void NavigateToAddEditCatalog()
-    {
+        {
         try
-        {
+            {
             NavigationManager.NavigateTo("/AddEditCatalog");
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while navigating to add or edit a catalog: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in NavigateToAddEditCatalog: {ex}");
+            }
         }
-    }
+
+
+    private void OnSearchChanged()
+        {
+        FilterCatalogs();
+        }
+
+    private void FilterCatalogs()
+        {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            {
+            filteredCatalogs = catalogs;
+            }
+        else
+            {
+            filteredCatalogs = catalogs.Where(c =>
+                c.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                c.Code?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true ||
+                c.Price.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase)
+            );
+            }
+        }
 }

@@ -97,11 +97,10 @@
                         <InputText id="Password" class="form-control fs-13px" @bind-Value="user.Password" type="password" />
                         <span class="text-danger"><ValidationMessage For="@(() => user.Password)" /></span>
                     </div>
-                    <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" value="" id="agreementCheckbox" />
-                        <label class="form-check-label" for="agreementCheckbox">
-                            By clicking Sign Up, you agree to our <a href="javascript:;">Terms</a> and that you have read our <a href="javascript:;">Data Policy</a>, including our <a href="javascript:;">Cookie Use</a>.
-                        </label>
+                    <div class="mb-4">
+                        <label class="mb-2">Postal/Zip Code <span class="text-danger"></span></label>
+                        <InputText id="text" class="form-control fs-13px" @bind-Value="user.PostalCode" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.PostalCode)" /></span>
                     </div>
                     <div class="mb-4">
                         <button type="submit" class="btn btn-theme d-block w-100 btn-lg h-45px fs-13px">Sign Up</button>
@@ -134,77 +133,78 @@
     private string sucessMessage = "";
 
     protected override async Task OnInitializedAsync()
-    {
+        {
 
         await LoadRoles();
         if (UserId.HasValue)
-        {
+            {
             var response = await UserService.GetUserByIdAsync(UserId.Value);
             if (response.Success)
-            {
+                {
                 user = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
         }
-    }
 
     private async Task HandleValidSubmit()
-    {
+        {
 
         try
-        {
+            {
             errorMessage = "";
             sucessMessage = "";
             if (role == null || role.Id < 1)
-            {
+                {
                 errorMessage = "Please Contact to Admin For now Agent Configuration";
                 return;
-            }
+                }
             ServiceResponse<User> response;
-            //user.RoleId = role.Id;
+            user.UserRoles.Add(new UserRole { RoleId = role.Id });
+
             user.IsAgent = true;
             response = await UserService.AddUserAsync(user);
             if (response.Success)
-            {
+                {
                 sucessMessage = "Agent added successfully! An administrator will review your request shortly";
                 await Task.Delay(1000);
 
-            }
+                }
             else
-            {
+                {
 
                 errorMessage = response.Message;
+                }
+            }
+        catch (Exception ex)
+            {
+            errorMessage = "Something went wrong please try again";
             }
         }
-        catch (Exception ex)
-        {
-            errorMessage = "Something went wrong please try again";
-        }
-    }
 
 
     private async Task LoadRoles()
-    {
-        try
         {
+        try
+            {
             var response = await roleService.GetRolesAsyncByTag("Agent");
             if (response.Success)
-            {
+                {
                 role = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while loading roles: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+            }
         }
-    }
 
 }

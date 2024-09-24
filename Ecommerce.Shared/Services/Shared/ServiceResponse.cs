@@ -8,4 +8,6 @@ public class ServiceResponse<T>
     public bool Success { get; set; }
     public string Message { get; set; }
 
-}
+    public string InnerException { get; set; }
+
+    }

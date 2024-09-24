@@ -105,10 +105,11 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while adding product.");
+            _logger.LogError(ex, "Error occurred while adding product." + ex.InnerException);
             return new ServiceResponse<Product>
             {
                 Success = false,
+                InnerException=ex.InnerException.ToString(),
                 Message = "Error occurred while adding product"
             };
         }
@@ -144,7 +145,7 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while updating product.");
+            _logger.LogError(ex, "Error occurred while updating product." + ex.Message);
             return new ServiceResponse<Product>
             {
                 Success = false,

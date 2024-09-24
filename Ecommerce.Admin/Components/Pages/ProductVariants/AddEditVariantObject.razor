@@ -1,0 +1,292 @@
+﻿@page "/AddEditVariantObject"
+
+@inject IProductVariantService IProductVariantService
+@using Ecommerce.Shared.Services.ProductVariants;
+@inject ISnackbar Snackbar
+@using Ecommerce.Shared.Enums;
+@inject IJSRuntime jsRuntime
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/ProductVariantList?ProductId=@Id"></a>Variants</li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Object</li>
+        </ol>
+        <h1 class="page-header mb-0"> Object</h1>
+    </div>
+</div>
+<ErrorBoundary @ref="errorBoundary">
+    <EditForm Model="@productVariant" OnValidSubmit="HandleValidSubmitVariant" FormName="Variants">
+        <DataAnnotationsValidator />
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Variant Information
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-9">
+                                <label class="form-label">Title</label>
+                                <label id="name" class="form-control">@productVariant.Name</label>
+                            </div>
+                            <div class="col-lg-1">
+                                <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-warning w-100px me-5px mt-20px">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">Type</label>
+                                <select id="variantType" @bind="productVariant.variantType" class="form-control">
+                                    @foreach (var variant in Enum.GetValues(typeof(VariantType)).Cast<VariantType>())
+                                        {
+                                        <option value="@variant">@variant</option>
+                                        }
+                                </select>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label">Value</label>
+                                <InputText id="name" class="form-control" @bind-Value="productVariant.TypeValue" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Note</label>
+                                <div class="form-control p-0 overflow-hidden">
+                                    <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind-Value="@productVariant.Note"></InputTextArea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Variant Object Media Section -->
+                        <div class="mt-4">
+                            <h5>Object Media </h5>
+                            @foreach (var media in productVariant.VariantObjectMedias.Where(a => a.IsDeleted == false))
+                                {
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Name</label>
+                                        <InputText class="form-control" @bind-Value="media.Name" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Upload File</label>
+                                        <InputFile OnChange="@(e => OnInputFileChange(e, media))" class="form-control" />
+                                    </div>
+                                    <div class="col-md-1">
+                                        @if (!string.IsNullOrEmpty(media.FileUrl) && media.Id > 0)
+                                            {
+                                            <a href="@($"/ProductVariants/{media.ProductVariantId}/ObjectMedia/{media.FileUrl}")" class="btn btn-secondary w-40px mt-15px" download>
+                                                <i class="fa fa-download"></i>
+                                            </a>
+                                            }
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">File Extension</label>
+                                        <InputText class="form-control" @bind-Value="media.FilExtension" readonly />
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label>&nbsp;</label>
+                                        <button type="button" class="btn btn-danger w-40px mt-15px" @onclick="() => RemoveMedia(media)"> <i class="fa fa-trash"></i></button>
+                                    </div>
+                                </div>
+                                }
+
+
+                            <button type="button" class="btn btn-warning" @onclick="AddNewMedia">+ Add New</button>
+
+
+                        </div>
+                        <span class="text-warning-500"><b>Note</b> :The name of the attachment is mandatory; otherwise, data will be lost</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</ErrorBoundary>
+@code {
+    #region Variables
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "Id")]
+    public long Id { get; set; }
+    private ErrorBoundary errorBoundary;
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "ProductId")]
+    public long ProductId { get; set; }
+
+    private ProductVariant productVariant = new ProductVariant();
+    #endregion
+
+    protected override async Task OnInitializedAsync()
+        {
+        try
+            {
+            await base.OnInitializedAsync();
+            await LoadVariantForEdit();
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
+            }
+
+        }
+
+    #region Edit
+    private async Task LoadVariantForEdit()
+        {
+        try
+            {
+            var response = await IProductVariantService.GetProductVariantByIdAsync(Id);
+            if (response.Success)
+                {
+                productVariant = response.Data;
+                }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+    #endregion
+
+    private async Task HandleValidSubmitVariant()
+        {
+        try
+            {
+
+
+
+            ServiceResponse<bool> response;
+
+
+            productVariant.VariantObjectMedias = productVariant.VariantObjectMedias
+           .Where(media => !string.IsNullOrEmpty(media.Name) && !media.IsDeleted)
+           .ToList();
+
+
+
+            #region Image
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductVariants", Id.ToString(), "ObjectMedia");
+
+            if (!Directory.Exists(uploadsFolder))
+                {
+                Directory.CreateDirectory(uploadsFolder);
+                }
+            foreach (var media in productVariant.VariantObjectMedias)
+                {
+                if (media.IsDeleted)
+                    {
+
+                    var filePath = Path.Combine(uploadsFolder, media.FileUrl);
+                    if (File.Exists(filePath))
+                        {
+                        File.Delete(filePath);
+                        }
+                    }
+                else
+                    {
+                    if (media.FileByte != null && media.FileByte.Length > 0)
+                        {
+                        var uniqueFileName = $"{media.FileUrl}";
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                        await File.WriteAllBytesAsync(filePath, media.FileByte);
+                        }
+
+                    }
+
+
+                }
+
+            #endregion
+            response = await IProductVariantService.SaveVariantObjectMediaAsync(productVariant.VariantObjectMedias.ToList());
+            if (response.Success)
+                {
+                Snackbar.Add(response.Message, Severity.Success);
+
+                }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                Console.WriteLine(response.InnerException);
+
+                await jsRuntime.InvokeVoidAsync("console.log", response.InnerException);
+                }
+            }
+
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
+
+            }
+
+
+
+        }
+
+    void KeyHandler(KeyboardEventArgs args)
+        {
+        if (args.Key == "Enter")
+            {
+            return;
+            }
+        }
+
+    private void AddNewMedia()
+        {
+        productVariant.VariantObjectMedias.Add(new VariantObjectMedia());
+        }
+
+    private void RemoveMedia(VariantObjectMedia media)
+        {
+
+        media.IsDeleted = true;
+
+
+        if (media.Id == 0)
+            {
+            productVariant.VariantObjectMedias.Remove(media);
+            }
+        }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e, VariantObjectMedia media)
+        {
+
+        try
+            {
+            var file = e.File;
+            var extension = Path.GetExtension(file.Name);
+            media.FilExtension = extension;
+
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            media.FileByte = stream.ToArray(); // Store the file bytes in media object
+
+            media.FileUrl = file.Name;
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
+
+        }
+
+    private void HandleError(Exception exception)
+        {
+        // Handle the error, e.g., log it or display a message
+        Snackbar.Add($"An error occurred: {exception.Message}", Severity.Error);
+        }
+}

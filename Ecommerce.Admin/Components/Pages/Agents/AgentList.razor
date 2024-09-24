@@ -45,7 +45,7 @@
                         <PropertyColumn Property="x => x.Email" Title="Email" />
                         <PropertyColumn Property="x => x.UserName" Title="Username" />
 
-
+                        <PropertyColumn Property="x => x.PostalCode" Title="Postal/Zip" />
 
 
                         <TemplateColumn Title="Approved">
@@ -75,7 +75,7 @@
                                             <span class="caret"></span>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-end" style="">
-                                            <button  class="dropdown-item" @onclick="() => ChangeStatus(context.Item)">Change Status</button>
+                                            <button class="dropdown-item" @onclick="() => ChangeStatus(context.Item)">Change Status</button>
 
                                             <div class="dropdown-divider"></div>
                                             <button class="dropdown-item">Assign Roles</button>
@@ -101,7 +101,7 @@
 
 
 
-<a href="#modal-alert" class="btn btn-sm btn-danger w-100px" data-bs-toggle="modal">Rights</a>
+@*<a href="#modal-alert" class="btn btn-sm btn-danger w-100px" data-bs-toggle="modal">Rights</a>*@
 
 
 <!-- #modal-alert -->

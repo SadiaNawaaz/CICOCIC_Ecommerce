@@ -4,6 +4,7 @@ using Ecommerce.Shared.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240918061329_objects12")]
+    partial class objects12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -849,48 +852,6 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("ProductVariantMedias");
                 });
 
-            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.VariantObjectMedia", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FilExtension")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("LastModifiedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ProductVariantId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("VariantObjectMedias");
-                });
-
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>
                 {
                     b.Property<long>("Id")
@@ -1693,17 +1654,6 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("ProductVariant");
                 });
 
-            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.VariantObjectMedia", b =>
-                {
-                    b.HasOne("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", "ProductVariant")
-                        .WithMany("VariantObjectMedias")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-                });
-
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.Product", b =>
                 {
                     b.HasOne("Ecommerce.Shared.Entities.Brands.Brand", "Brand")
@@ -1939,8 +1889,6 @@ namespace Ecommerce.Shared.Migrations
             modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", b =>
                 {
                     b.Navigation("ProductVariantMedias");
-
-                    b.Navigation("VariantObjectMedias");
 
                     b.Navigation("productVariantImages");
                 });

@@ -1,0 +1,337 @@
+﻿
+@page "/VariantObjects";
+@using Ecommerce.Shared.Entities.ProductVariants
+@using Ecommerce.Shared.Services.ProductVariants
+@inject IProductVariantService productVariantService
+@inject ISnackbar snackbar
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@rendermode InteractiveServer
+@inherits AuthenticatedComponent
+
+
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Product Variants</a></li>
+            <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Objects</li>
+        </ol>
+    </div>
+</div>
+
+<div class="panel panel-inverse">
+    <div class="panel-heading">
+        <h4 class="panel-title">Object - List</h4>
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row fileupload-buttonbar">
+            <div class="col-xl-7">
+
+                <span class="fileupload-process"></span>
+            </div>
+            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
+                <div class="progress progress-striped active">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <div class="progress-extended">&nbsp;</div>
+            </div>
+        </div>
+
+
+
+
+
+        <div class="mb-3 d-sm-flex fw-bold">
+            <div class="mt-sm-0 mt-2"><a href="#" class="text-dark text-decoration-none"><i class="fa fa-download fa-fw me-1 text-dark text-opacity-50"></i> Export</a></div>
+            <div class="ms-sm-4 ps-sm-1 mt-sm-0 mt-2"><a href="#" class="text-dark text-decoration-none"><i class="fa fa-upload fa-fw me-1 text-dark text-opacity-50"></i> Import</a></div>
+            <div class="ms-sm-4 ps-sm-1 mt-sm-0 mt-2 dropdown-toggle">
+                <a href="#" data-bs-toggle="dropdown" class="text-dark text-decoration-none"><i class="fa fa-cog fa-fw me-1 text-dark text-opacity-50"></i> More Actions <b class="caret"></b></a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                    <div role="separator" class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Separated link</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0">
+            <ul class="nav nav-tabs nav-tabs-v2 px-3">
+                <li class="nav-item me-2">
+                    <a href="#allTab" class="nav-link active px-2" data-bs-toggle="tab" @onclick="() => TabClick(0)">All</a>
+                </li>
+                <li class="nav-item me-2">
+                    <a href="#publishedTab" class="nav-link px-2" data-bs-toggle="tab" @onclick="() => TabClick(1)">Published</a>
+                </li>
+                <li class="nav-item me-2">
+                    <a href="#unpublishedTab" class="nav-link px-2" data-bs-toggle="tab" @onclick="() => TabClick(2)">Unpublished</a>
+                </li>
+            </ul>
+            <div class="tab-content p-3">
+
+                     <div class="input-group mb-3">
+         <button class="btn btn-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Filter products <b class="caret"></b></button>
+         <div class="dropdown-menu">
+             <a class="dropdown-item" href="#">Action</a>
+             <a class="dropdown-item" href="#">Another action</a>
+             <a class="dropdown-item" href="#">Something else here</a>
+             <div role="separator" class="dropdown-divider"></div>
+             <a class="dropdown-item" href="#">Separated link</a>
+         </div>
+         <div class="flex-fill position-relative">
+             <div class="input-group">
+                 <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                     <i class="fa fa-search opacity-5"></i>
+                 </div>
+                 <input type="text" class="form-control ps-35px bg-light" placeholder="Search products..."  @bind="searchTerm" @oninput="FilterProducts" />
+             </div>
+         </div>
+     </div>
+                <div class="tab-pane fade show active" id="allTab"> 
+                              </div>
+
+
+
+                <div class="tab-pane fade show active" id="publishedTab">
+
+
+
+
+                </div>
+
+                <div class="tab-pane fade show active" id="unpublishedTab">
+
+
+
+                </div>
+
+                <div class="table-responsive">
+                    <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+
+                        <Columns>
+
+
+                            <TemplateColumn Title="Thumbnail">
+                                <CellTemplate>
+
+                                    @{
+                                        var thumbnail = context.Item.Thumbnail;
+                                    }
+                                    <img src="@thumbnail" alt="NoImage.png" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';" />
+
+
+                                </CellTemplate>
+                            </TemplateColumn>
+
+                            <PropertyColumn Property="x => x.Name" Title="Name" />
+                            <!-- New Column for VariantType -->
+                            <TemplateColumn Title="Obj">
+                                <CellTemplate>
+                                    @{
+                                        var variantType = context.Item.variantType?.ToString() ?? "N/A";
+                                    }
+                                    <div>
+                                        @variantType
+                                    </div>
+                                </CellTemplate>
+                            </TemplateColumn>
+
+                            <!-- New Column for TypeValue -->
+                            <TemplateColumn Title="Obj ID">
+                                <CellTemplate>
+                                    @{
+                                        var typeValue = context.Item.TypeValue ?? "N/A";
+                                    }
+                                    <div>
+                                        @typeValue
+                                    </div>
+                                </CellTemplate>
+                            </TemplateColumn>
+                            <PropertyColumn Property="x => x.Price" Title="Price" />
+                            <TemplateColumn Title="Size">
+                                <CellTemplate>
+                                    @{
+                                        var sizeName = context.Item.GeneralSize?.Name ?? "N/A"; // Provide a default value if null
+                                    }
+                                    <div>
+                                        @sizeName
+                                    </div>
+                                </CellTemplate>
+                            </TemplateColumn>
+                            <TemplateColumn Title="Color">
+                                <CellTemplate>
+                                    @{
+                                        var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
+                                    }
+                                    <span class="badge" style="background-color:@hexCode"> @hexCode </span>
+                                </CellTemplate>
+                            </TemplateColumn>
+
+                            <TemplateColumn Title="Year">
+                                <CellTemplate>
+                                    @{
+                                        var year = context.Item.ModelYear?.Year.ToString() ?? "N/A";
+                                    }
+                                    <div>
+                                        @year
+                                    </div>
+                                </CellTemplate>
+                            </TemplateColumn>
+
+                            <TemplateColumn Title="Publish">
+                                <CellTemplate>
+                                    @{
+                                        var isPublished = context.Item.Publish;
+                                    }
+                                    <MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />
+                                </CellTemplate>
+                            </TemplateColumn>
+
+
+                            <TemplateColumn>
+                                <HeaderTemplate>
+                                    <div>Actions</div>
+                                </HeaderTemplate>
+                                <CellTemplate>
+                                    <MudStack Row>
+                                        <MudIconButton Icon="@Icons.Material.Filled.EmojiObjects" Size="Size.Small" Class="text-warning" OnClick="() => CreateObject(context.Item)" />
+
+                                    </MudStack>
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                        <PagerContent>
+                            <MudDataGridPager T="ProductVariant" PageSizeOptions=@(new int[] { 5, 10, 20 }) />
+                        </PagerContent>
+                    </MudDataGrid>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    
+    </div>
+</div>
+
+@code {
+    [Inject]
+    public IDialogService DialogService { get; set; }
+    private string searchTerm = string.Empty;
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "ProductId")]
+    public long ProductId { get; set; }
+
+    private bool _resizeColumn;
+    private IEnumerable<ProductVariant> AllproductVariants = new List<ProductVariant>();
+    private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
+
+    protected override async Task OnInitializedAsync()
+        {
+        await base.OnInitializedAsync();
+        await LoadProductVariants();
+        }
+
+    private async Task LoadProductVariants()
+        {
+        try
+            {
+            var response = await productVariantService.GetAllProductVariantsAsync(ProductId, UserId, IsAgent);
+            if (response.Success)
+                {
+                productVariants = response.Data;
+                AllproductVariants = productVariants;
+                }
+            else
+                {
+                snackbar.Add(response.Message, Severity.Error);
+                Console.Error.WriteLine($"Error : {response.InnerException}");
+                }
+            }
+        catch (Exception ex)
+            {
+            snackbar.Add("An error occurred while loading product variants: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadProductVariants: {ex}");
+            }
+        }
+
+    private void EditProductVariant(ProductVariant productVariant)
+        {
+        try
+            {
+            navigationManager.NavigateTo($"/AddEditProductVariants?Id={productVariant.Id}&ProductId={ProductId}");
+            }
+        catch (Exception ex)
+            {
+            snackbar.Add("An error occurred while navigating to edit the product variant: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
+            }
+        }
+
+
+    private int _activeTab = 0;
+
+    private void TabClick(int  tabName)
+        {
+        _activeTab = tabName;
+        switch (_activeTab)
+            {
+            case 0:
+                _activeTab = 0;
+                productVariants = AllproductVariants;
+                break;
+            case 1:
+                _activeTab = 1;
+                productVariants = AllproductVariants.Where(a=>a.Publish==true).ToList();
+                break;
+            case 2:
+                _activeTab = 2;
+                productVariants = AllproductVariants.Where(a => a.Publish == false).ToList(); ;
+                break;
+            default:
+                _activeTab = 0;
+                productVariants = AllproductVariants;
+                break;
+            }
+
+        }
+    private void FilterProducts(ChangeEventArgs e)
+        {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+            productVariants = AllproductVariants;
+            }
+        else
+            {
+            productVariants = AllproductVariants.Where(pv => pv.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                                             (pv.TypeValue?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                                              (pv.Price.ToString()?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                                              (pv.GeneralSize.ToString()?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                                             (pv.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+            }
+        }
+
+    private void CreateObject(ProductVariant productVariant)
+        {
+        try
+            {
+            navigationManager.NavigateTo($"/AddEditVariantObject?Id={productVariant.Id}&ProductId={ProductId}");
+            }
+        catch (Exception ex)
+            {
+            snackbar.Add("An error occurred while navigating to edit the product variant: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
+            }
+        }
+}
