@@ -80,3 +80,14 @@ public class CatalogMedia
     public long CatalogId { get; set; }
     public Catalog Catalog { get; set; }
 }
+
+
+public class CatalogDto
+    {
+    public long Id { get; set; }
+    public string Name { get; set; }
+    public string BrandName { get; set; }
+    public string Thumbnail { get; set; }
+    public decimal Price { get; set; }
+    public string Code { get; set; }
+    }

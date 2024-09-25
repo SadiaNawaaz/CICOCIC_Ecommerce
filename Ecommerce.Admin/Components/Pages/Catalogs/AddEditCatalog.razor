@@ -62,21 +62,20 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">  Name</label>
-                                <InputText @bind-Value="catalog.Name" class="form-control" id="exampleInputEmail2" placeholder="Name" />
+                                <label class="form-label">  Title</label>
+                                <InputText @bind-Value="catalog.Name" class="form-control" id="exampleInputEmail2" placeholder="Title" />
                                 <span class="text-danger"><ValidationMessage For="@(() => catalog.Name)" /> </span>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label"> Code</label>
                                 <InputText @bind-Value="catalog.Code" class="form-control" id="exampleInputEmail2" placeholder="Code" />
                                 <span class="text-danger"><ValidationMessage For="@(() => catalog.Code)" /> </span>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label"> Price</label>
-                                <InputNumber @bind-Value="catalog.Price" class="form-control" id="exampleInputEmail2" placeholder=" Price" />
-                                <span class="text-danger"><ValidationMessage For="@(() => catalog.Price)" /> </span>
+                            <div class="col-md-4">
+                                <label class="form-label"> Slug</label>
+                                <InputText @bind-Value="catalog.Slug" class="form-control" id="exampleInputEmail2" />
                             </div>
 
                         </div>
@@ -210,7 +209,7 @@
                                                 {
 
 
-                                                <div class="row mb-3 gx-3 alert alert-info align-items-center">
+                                                <div class="row mb-3 gx-3 alert alert-success align-items-center">
                                                     <div class="col-10">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div>
@@ -316,15 +315,14 @@
                                         <option value="">-- Select Color --</option>
                                         @if (colors != null && colors.Count > 0)
                                             {
-                                            @foreach (var col in colors)
+                                            foreach (var col in colors)
                                                 {
-
-
-                                                <option value="@col.Id" style="color:@col.HexCode">@col.HexCode</option>
+                                                <option value="@col.Id" style="background-color:@col.HexCode">@col.HexCode</option>
                                                 }
                                             }
-
                                     </select>
+
+
                                 </div>
                             </div>
 
@@ -344,10 +342,10 @@
 
 
                             <div class="form-group row">
-                                <label class="form-label col-form-label col-lg-4">Slug</label>
-                                <div class="col-lg-8">
-
-                                    <InputText @bind-Value="catalog.Slug" class="form-control" id="exampleInputEmail2" />
+                                <label class="form-label col-form-label col-lg-4">Price</label>
+                                <div class="col-lg-8">                            
+                                    <InputNumber @bind-Value="catalog.Price" class="form-control" id="exampleInputEmail2" placeholder=" Price" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => catalog.Price)" /> </span>
                                 </div>
                             </div>
 

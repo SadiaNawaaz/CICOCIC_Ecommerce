@@ -9,7 +9,13 @@
 @inject IJSRuntime JSRuntime
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-  
+  <style>
+
+      .mud-table-head {
+          background-color: #00acac;
+          color:white;
+      }
+  </style>
 
 <div class="d-flex align-items-center mb-3">
     <div>
@@ -54,19 +60,8 @@
             </div>
         </div>
 
-        @*<div class="flex-fill position-relative">
-            <div class="input-group">
-                <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
-                    <i class="fa fa-search opacity-5"></i>
-                </div>
-                <input type="text" class="form-control ps-35px bg-light" placeholder="Search..." @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged" />
-            </div>
-        </div>*@
 
-
-
-
-        <MudDataGrid T="Catalog" Items="@filteredCatalogs" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
+        <MudDataGrid T="CatalogDto" Items="@filteredCatalogs" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
             <ColGroup>
                 <col style="width: 10%;" />
                 <col style="width: 40%;" />
@@ -84,7 +79,7 @@
                 </TemplateColumn>
 
                 <!-- Name Column -->
-                <PropertyColumn Property="x => x.Name" Title="Name" Style="width:40%" />
+                <PropertyColumn Property="x => x.Name" Title="Title" Style="width:40%" />
 
                 <!-- Price Column -->
                 <PropertyColumn Property="x => x.Price" Title="Price" Style="width:15%" />
@@ -114,7 +109,7 @@
             </Columns>
 
             <PagerContent>
-                <MudDataGridPager T="Catalog" PageSizeOptions=@(new int[] {5, 10, 20}) />
+                <MudDataGridPager T="CatalogDto" PageSizeOptions=@(new int[] {5, 10, 20}) />
             </PagerContent>
         </MudDataGrid>
 
@@ -132,8 +127,8 @@
 
 @code {
     private bool _resizeColumn;
-    private IEnumerable<Catalog> catalogs = new List<Catalog>();
-    private IEnumerable<Catalog> filteredCatalogs = new List<Catalog>();
+    private IEnumerable<CatalogDto> catalogs = new List<CatalogDto>();
+    private IEnumerable<CatalogDto> filteredCatalogs = new List<CatalogDto>();
     private string _searchString = string.Empty;
 
     private List<string> _events = new();
@@ -151,7 +146,7 @@
         {
         try
             {
-            var response = await CatalogService.GetCatalogsAsync();
+            var response = await CatalogService.GetCatalogsWithBrandAsync();
             if (response.Success)
                 {
                 catalogs = response.Data;
@@ -169,7 +164,7 @@
             }
         }
 
-    private void EditCatalog(Catalog catalog)
+    private void EditCatalog(CatalogDto catalog)
         {
         try
             {
@@ -182,7 +177,7 @@
             }
         }
 
-    private async Task DeleteCatalog(Catalog catalog)
+    private async Task DeleteCatalog(CatalogDto catalog)
         {
         try
             {
@@ -201,7 +196,7 @@
             }
         }
 
-    private async Task Delete(Catalog catalog)
+    private async Task Delete(CatalogDto catalog)
         {
         try
             {

@@ -16,6 +16,7 @@ public interface ICatalogService
     Task<ServiceResponse<Catalog>> UpdateCatalogAsync(Catalog catalog);
     Task<ServiceResponse<bool>> DeleteCatalogAsync(long id);
     Task<ServiceResponse<List<Catalog>>> SearchCatalogsAsync(string searchTerm);
+    Task<ServiceResponse<List<CatalogDto>>> GetCatalogsWithBrandAsync();
 }
 public class CatalogService: ICatalogService
 {
@@ -27,6 +28,44 @@ public class CatalogService: ICatalogService
         _context = context;
         _logger = logger;
     }
+
+
+    public async Task<ServiceResponse<List<CatalogDto>>> GetCatalogsWithBrandAsync()
+        {
+        try
+            {
+            // Project only the needed columns into CatalogDto
+            var catalogs = await _context.Catalogs
+                .Include(c => c.Brand)
+                .Select(c => new CatalogDto
+                    {
+                    Id = c.Id,
+                    Name = (c.Brand != null ? c.Brand.Name : "No Brand") + " - " + c.Name,
+                    BrandName = c.Brand != null ? c.Brand.Name : "No Brand",
+                    Thumbnail = c.Thumbnail,
+                    Price = c.Price,
+                    Code = c.Code
+                    })
+                .ToListAsync();
+
+            return new ServiceResponse<List<CatalogDto>>
+                {
+                Data = catalogs,
+                Success = true,
+                Message = "Catalogs fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching catalogs.");
+            return new ServiceResponse<List<CatalogDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching catalogs"
+                };
+            }
+        }
+
 
     public async Task<ServiceResponse<List<Catalog>>> GetCatalogsAsync()
     {
