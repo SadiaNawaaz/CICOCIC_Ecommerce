@@ -5,231 +5,240 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-<div class="d-flex align-items-center mb-3">
-    <div>
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active">Products</li>
-        </ol>
-    </div>
-    <div class="ms-auto">
-        <button @onclick="NavigateToAddProduct" class="btn btn-primary btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i> Add Product</button>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="panel panel-inverse">
-            <div class="panel-heading">
-                <h4 class="panel-title">Product - List</h4>
-                <div class="panel-heading-btn">
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
-                    <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
-                </div>
-            </div>
-            <div class="panel-body">
 
-                <div class="input-group mb-3">
-                    <button class="btn btn-white" type="button" aria-haspopup="true" aria-expanded="false">Filter Product <b class="caret"></b></button>
-                    <div class="flex-fill position-relative">
-                        <div class="input-group">
-                            <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
-                                <i class="fa fa-search opacity-5"></i>
-                            </div>
-                            <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..."    @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterProducts"/>
-                        </div>
+
+    <style>
+
+        .mud-table-head {
+            background-color: #348FE2;
+            color: white;
+        }
+    </style>
+    <div class="d-flex align-items-center mb-3">
+        <div>
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">Products</li>
+            </ol>
+        </div>
+        <div class="ms-auto">
+            <button @onclick="NavigateToAddProduct" class="btn btn-primary btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i> Add Product</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="panel panel-inverse">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Product - List</h4>
+                    <div class="panel-heading-btn">
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
                     </div>
                 </div>
-                <MudDataGrid T="ProductDto" Items="@filteredProducts" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
-                    <ColGroup>
-                        <col style="width: 10%;" />
-                        <col style="width: 40%;" />
-                        <col style="width: 15%;" />
-                        <col style="width: 15%;" />
-                        <col style="width: 10%;" />
-                        <col style="width: 20%;" />
-                    </ColGroup>
-                    <Columns>
+                <div class="panel-body">
 
-                        <TemplateColumn Title="Thumbnail" Style="width:10%">
-                            <CellTemplate>
+                    <div class="input-group mb-3">
+                        <button class="btn btn-white" type="button" aria-haspopup="true" aria-expanded="false">Filter Product <b class="caret"></b></button>
+                        <div class="flex-fill position-relative">
+                            <div class="input-group">
+                                <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                                    <i class="fa fa-search opacity-5"></i>
+                                </div>
+                                <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..." @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterProducts" />
+                            </div>
+                        </div>
+                    </div>
+                    <MudDataGrid T="ProductDto" Items="@filteredProducts" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
+                        <ColGroup>
+                            <col style="width: 10%;" />
+                            <col style="width: 40%;" />
+                            <col style="width: 15%;" />
+                            <col style="width: 15%;" />
+                            <col style="width: 10%;" />
+                            <col style="width: 20%;" />
+                        </ColGroup>
+                        <Columns>
 
-                                @{
-                                    var thumbnail = context.Item.Thumbnail;
-                                }
-                                <img src="@thumbnail" alt="NoImage.png" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';" />
+                            <TemplateColumn Title="Thumbnail" Style="width:10%">
+                                <CellTemplate>
 
-                            </CellTemplate>
-                        </TemplateColumn>
+                                    @{
+                                        var thumbnail = context.Item.Thumbnail;
+                                    }
+                                    <img src="@thumbnail" alt="NoImage.png" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';" />
 
-
-                        <PropertyColumn Property="x => x.Name" Title="Name" Style="width:40%" />
-                        <PropertyColumn Property="x => x.Stock" Title="Stock" Style="width:10%" />
-                        <PropertyColumn Property="x => x.Price" Title="Price" Style="width:10%" />
-                        <PropertyColumn Property="x => x.Category" Title="Category" Style="width:10%" />
+                                </CellTemplate>
+                            </TemplateColumn>
 
 
+                            <PropertyColumn Property="x => x.Name" Title="Name" Style="width:40%" />
+                            <PropertyColumn Property="x => x.Stock" Title="Stock" Style="width:10%" />
+                            <PropertyColumn Property="x => x.Price" Title="Price" Style="width:10%" />
+                            <PropertyColumn Property="x => x.Category" Title="Category" Style="width:10%" />
 
-                        <TemplateColumn CellClass="d-flex justify-end" Style="width:20%">
-                            <HeaderTemplate>
-                                <div>Manage Records</div>
-                            </HeaderTemplate>
-                            <CellTemplate>
-                                <MudStack Row>
-                                    <!-- Add Variants Button -->
-                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Add Variants" @onclick="() => AddVariants(context.Item.Id)">
-                                        <i class="fas fa-plus-square"></i>
-                                    </button>
 
-                                    <!-- Edit Button -->
-                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="() => EditProduct(context.Item.Id)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
 
-                                    <!-- Delete Button -->
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => DeleteProduct(context.Item)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                            <TemplateColumn CellClass="d-flex justify-end" Style="width:20%">
+                                <HeaderTemplate>
+                                    <div>Manage Records</div>
+                                </HeaderTemplate>
+                                <CellTemplate>
+                                    <MudStack Row>
+                                        <!-- Add Variants Button -->
+                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Add Variants" @onclick="() => AddVariants(context.Item.Id)">
+                                            <i class="fas fa-plus-square"></i>
+                                        </button>
 
-                                    <!-- List Product Variants Button -->
-                                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="List Product Variants" @onclick="() => ListProductVariants(context.Item.Id, false)">
-                                        <i class="fas fa-list"></i>
-                                    </button>
+                                        <!-- Edit Button -->
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="() => EditProduct(context.Item.Id)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
 
-                                    <!-- Open File Button -->
-                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Product Objects" @onclick="() => ListProductVariants(context.Item.Id, true)">
-                                        <i class="fas fa-file-circle-check"></i>
-                                    </button>
+                                        <!-- Delete Button -->
+                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => DeleteProduct(context.Item)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
 
-                                </MudStack>
-                            </CellTemplate>
-                        </TemplateColumn>
-                    </Columns>
-                    <PagerContent>
-                        <MudDataGridPager T="ProductDto" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
-                    </PagerContent>
-                </MudDataGrid>
+                                        <!-- List Product Variants Button -->
+                                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="List Product Variants" @onclick="() => ListProductVariants(context.Item.Id, false)">
+                                            <i class="fas fa-list"></i>
+                                        </button>
+
+                                        <!-- Open File Button -->
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Product Objects" @onclick="() => ListProductVariants(context.Item.Id, true)">
+                                            <i class="fas fa-file-circle-check"></i>
+                                        </button>
+
+                                    </MudStack>
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                        <PagerContent>
+                            <MudDataGridPager T="ProductDto" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                        </PagerContent>
+                    </MudDataGrid>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-@code {
+    @code {
 
-    private bool _resizeColumn = true;
-    private List<ProductDto> products = new List<ProductDto>();
-    private List<ProductDto> filteredProducts = new List<ProductDto>();
-    private string searchTerm = string.Empty; // Search term for filteri
+        private bool _resizeColumn = true;
+        private List<ProductDto> products = new List<ProductDto>();
+        private List<ProductDto> filteredProducts = new List<ProductDto>();
+        private string searchTerm = string.Empty; // Search term for filteri
 
-    [Inject]
-    public IDialogService DialogService { get; set; }
+        [Inject]
+        public IDialogService DialogService { get; set; }
 
-    protected override async Task OnInitializedAsync()
-        {
-        await LoadProducts();
-        }
-
-    private async Task LoadProducts()
-        {
-        try
+        protected override async Task OnInitializedAsync()
             {
-            var response = await ProductService.GetProductsWithVariantsAsync();
-            if (response.Success)
+            await LoadProducts();
+            }
+
+        private async Task LoadProducts()
+            {
+            try
                 {
-                products = response.Data;
+                var response = await ProductService.GetProductsWithVariantsAsync();
+                if (response.Success)
+                    {
+                    products = response.Data;
+                    filteredProducts = products;
+                    }
+                else
+                    {
+                    Snackbar.Add(response.Message, Severity.Error);
+                    }
+                }
+
+            catch (Exception ex)
+                {
+
+                }
+            }
+
+        private void NavigateToAddProduct()
+            {
+            NavigationManager.NavigateTo("/MainProduct");
+            }
+
+
+        private void FilterProducts()
+            {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                {
                 filteredProducts = products;
                 }
             else
                 {
-                Snackbar.Add(response.Message, Severity.Error);
+                // Filter products based on the search term
+                filteredProducts = products.Where(p =>
+                    (p.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (p.Category?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (p.Price.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.Stock.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
                 }
             }
 
-        catch (Exception ex)
+        private void AddVariants(long ProductId)
             {
 
+            NavigationManager.NavigateTo($"/AddEditProductVariants?Id=0&ProductId={ProductId}");
             }
-        }
 
-    private void NavigateToAddProduct()
-        {
-        NavigationManager.NavigateTo("/MainProduct");
-        }
-
-
-    private void FilterProducts()
-        {
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        private void ListProductVariants(long ProductId, bool type)
             {
-            filteredProducts = products;
+
+            if (type == false)
+                {
+                NavigationManager.NavigateTo($"/ProductVariantList?ProductId={ProductId}");
+                }
+            else
+                {
+                NavigationManager.NavigateTo($"/VariantObjects?ProductId={ProductId}");
+                }
+
             }
-        else
+
+
+        private void EditProduct(long productId)
             {
-            // Filter products based on the search term
-            filteredProducts = products.Where(p =>
-                (p.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (p.Category?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (p.Price.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-                (p.Stock.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-            ).ToList();
+            NavigationManager.NavigateTo($"/MainProduct/{productId}");
             }
-        }
 
-    private void AddVariants(long ProductId)
-        {
-
-        NavigationManager.NavigateTo($"/AddEditProductVariants?Id=0&ProductId={ProductId}");
-        }
-
-    private void ListProductVariants(long ProductId,bool type)
-        {
-
-        if(type==false)
+        private async Task DeleteProduct(ProductDto product)
             {
-            NavigationManager.NavigateTo($"/ProductVariantList?ProductId={ProductId}");
+            try
+                {
+                var parameters = new DialogParameters();
+                parameters.Add("ContentText", "Do you want to confirm?");
+                parameters.Add("ButtonText", "Yes");
+                var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
+                var result = await dialogresult.Result;
+                if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+                    await DeleteProduct(product.Id);
+                }
+            catch (Exception ex)
+                {
+                Snackbar.Add("An error occurred while attempting to delete the product: " + ex.Message, Severity.Error);
+                Console.Error.WriteLine($"Error in DeleteProduct: {ex}");
+                }
             }
-        else
+
+        private async Task DeleteProduct(long productId)
             {
-            NavigationManager.NavigateTo($"/VariantObjects?ProductId={ProductId}");
+            var response = await ProductService.DeleteProductAsync(productId);
+            if (response.Success)
+                {
+                Snackbar.Add(response.Message, Severity.Success);
+                await LoadProducts();
+                }
+            else
+                Snackbar.Add(response.Message, Severity.Error);
             }
-
-        }
-
-
-    private void EditProduct(long productId)
-        {
-        NavigationManager.NavigateTo($"/MainProduct/{productId}");
-        }
-
-    private async Task DeleteProduct(ProductDto product)
-        {
-        try
-            {
-            var parameters = new DialogParameters();
-            parameters.Add("ContentText", "Do you want to confirm?");
-            parameters.Add("ButtonText", "Yes");
-            var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
-            var result = await dialogresult.Result;
-            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
-                await DeleteProduct(product.Id);
-            }
-        catch (Exception ex)
-            {
-            Snackbar.Add("An error occurred while attempting to delete the product: " + ex.Message, Severity.Error);
-            Console.Error.WriteLine($"Error in DeleteProduct: {ex}");
-            }
-        }
-
-    private async Task DeleteProduct(long productId)
-        {
-        var response = await ProductService.DeleteProductAsync(productId);
-        if (response.Success)
-            {
-            Snackbar.Add(response.Message, Severity.Success);
-            await LoadProducts();
-            }
-        else
-            Snackbar.Add(response.Message, Severity.Error);
-        }
-}
+    }

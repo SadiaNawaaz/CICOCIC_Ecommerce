@@ -19,6 +19,9 @@
         </ol>
 
     </div>
+    <div class="ms-auto">
+        <button @onclick="NavigateToAddEditCluster" class="btn btn-primary btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i>Add Cluster</button>
+    </div>
 </div>
 
 
@@ -36,25 +39,7 @@
     <!-- END panel-heading -->
     <!-- BEGIN panel-body -->
     <div class="panel-body">
-        <div class="row fileupload-buttonbar">
-            <div class="col-xl-7">
 
-                <button type="button" class="btn btn-primary start me-1  mb-3" @onclick="NavigateToAddEditCluster">
-                    <i class="fa fa-fw fa-add"></i>
-                    <span>Add Cluster</span>
-                </button>
-
-                <!-- The global file processing state -->
-                <span class="fileupload-process"></span>
-            </div>
-
-            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
-                <div class="progress progress-striped active">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                </div>
-                <div class="progress-extended">&nbsp;</div>
-            </div>
-        </div>
         <MudDataGrid T="Cluster" Items="@clusters" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
             <ColGroup>
                 <col style="width: 90%;" />
@@ -65,7 +50,7 @@
             <Columns>
                 <!-- PropertyColumn for the name -->
                 <PropertyColumn Property="x => x.Name" Title="Name" Style="width:90%" />
-                <TemplateColumn CellClass="d-flex justify-end" Style="width:10%">
+                <TemplateColumn Style="width:10%">
                     <HeaderTemplate>
                         <div>Edit</div>
                     </HeaderTemplate>

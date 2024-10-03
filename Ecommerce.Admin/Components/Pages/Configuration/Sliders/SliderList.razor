@@ -13,6 +13,10 @@
             <li class="breadcrumb-item active">Sliders</li>
         </ol>
     </div>
+
+    <div class="ms-auto">
+        <button @onclick="NavigateToAddSlider" class="btn btn-primary btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i>Add Slider</button>
+    </div>
 </div>
 <div class="row">
     <div class="col-12">
@@ -27,7 +31,6 @@
                 </div>
             </div>
             <div class="panel-body">
-                <button class="btn btn-primary mb-3" @onclick="NavigateToAddSlider">Add Slider</button>
                 <MudDataGrid T="Slider" Items="@sliders" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
                     <ColGroup>
                         <col style="width: 30%;" />
@@ -95,7 +98,7 @@
                         </TemplateColumn>
 
 
-                        <TemplateColumn CellClass="d-flex justify-end">
+                        <TemplateColumn>
                             <HeaderTemplate>
                                 <div>Actions</div>
                             </HeaderTemplate>

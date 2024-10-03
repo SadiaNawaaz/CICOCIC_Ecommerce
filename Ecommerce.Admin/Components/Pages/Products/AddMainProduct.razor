@@ -61,1089 +61,1036 @@
         transition: all 0.3s ease;
         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    .accordion-button:not(.collapsed) {
-        color:white !important;
-    }
 
+    .accordion-button:not(.collapsed) {
+        color: white !important;
+    }
 </style>
 
-    <div class="modal fade" id="modal-dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Modal Dialog</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-                <div class="modal-body">
-
-                    <RadzenAutoComplete Data=@features Change="@(args => OnFeatureNameChanged(args))"
-                                        TextProperty="Name"
-                                        Style="width:100%"
-                                        FilterOperator="StringFilterOperator.StartsWith"
-                                        FilterDelay="100"
-                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Feature Name" } })" />
-
-                </div>
-                <div class="modal-footer">
-                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
-                    <button class="btn btn-success" @onclick="@AddNewFeature">Add</button>
-                </div>
+<div class="modal fade" id="modal-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Modal Dialog</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
             </div>
+            <div class="modal-body">
+
+                <RadzenAutoComplete Data=@features Change="@(args => OnFeatureNameChanged(args))"
+                                    TextProperty="Name"
+                                    Style="width:100%"
+                                    FilterOperator="StringFilterOperator.StartsWith"
+                                    FilterDelay="100"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Feature Name" } })" />
+
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                <button class="btn btn-success" @onclick="@AddNewFeature">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
+    <DataAnnotationsValidator />
+
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/ProductList">Products</a></li>
+                <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product</li>
+            </ol>
+            <h1 class="page-header mb-0"> Product </h1>
+        </div>
+        <div>
+            <button type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <button type="submit" class="btn btn-primary w-100px">Save</button>
         </div>
     </div>
 
 
-    <EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
-        <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information </b>
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-12 mb-10px">
+
+                            <div class="accordion" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            Product From Catalogs
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <span>Search Catalog by Name || Desc||Code||Price</span>
+                                            <RadzenDropDownDataGrid TValue="long" @bind-Value=catalog.Id Data=@catalogs LoadData=@LoadData Count="@count" AllowVirtualization="true" AllowClear="true" Style="width:100%" Change="@(args => CloneCatalog(args))"
+                                                                    AllowFiltering="true" TextProperty="@nameof(Catalog.Name)" ValueProperty="@nameof(Catalog.Id)" Name="DropDownDataGridVirtualizationLoadData">
+                                                <Columns>
+                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Name)" Title="Name" Width="100px" />
+                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Price)" Title="Price" Width="200px" />
+                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Code)" Title="Code" Width="200px" />
+                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.ShortDescription)" Title="Desc" Width="200px" />
+
+                                                </Columns>
+                                            </RadzenDropDownDataGrid>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
 
 
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <div>
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/ProductList">Products</a></li>
-                    <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product</li>
-                </ol>
-                <h1 class="page-header mb-0"> Product </h1>
+
+
+
+
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <label class="form-label"> Title</label>
+                                <InputText @bind-Value="product.Name" class="form-control" id="exampleInputEmail2" placeholder=" Title" />
+                                <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label"> Code</label>
+                                <InputText @bind-Value="product.Code" class="form-control" id="exampleInputEmail2" placeholder=" Code" />
+                                <span class="text-danger"><ValidationMessage For="@(() => product.Code)" /> </span>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"> Slug</label>
+                                <InputText @bind-Value="product.Slug" class="form-control" id="exampleInputEmail2" placeholder=" Slug" />
+                                <span class="text-danger"><ValidationMessage For="@(() => product.Slug)" /> </span>
+                            </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="form-label">Description</label>
+                                    <div class="form-control p-0 overflow-hidden">
+                                        <textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind="product.Description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="form-label">Short Description</label>
+                                    <div class="form-control p-0 overflow-hidden">
+                                        <textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind="product.ShortDescription"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
             </div>
-            <div>
-                <button type="submit" disabled style="display: none" aria-hidden="true"></button>
-                <button type="submit" class="btn btn-primary w-100px">Save</button>
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Levels</b>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-lg-0 mb-3">
+                                <label class="form-label"> Main Category</label>
+
+
+                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
+                                    <Columns>
+                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
+
+
+
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="mb-lg-0 mb-3">
+                                <label class="form-label">Sub Category</label>
+
+                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
+                                    <Columns>
+                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
+
+
+
+
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-lg-6">
+                                <div class="mb-lg-0 mb-3">
+                                    <label class="form-label">Sub Sub Category</label>
+
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-lg-0 mb-3">
+                                    <label class="form-label">Group Category </label>
+
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+
+
+                                </div>
+                            </div>
+                    
+
+                           
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+
+                    <button type="button" class="btn btn-primary" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
+                        <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
+                        <b>Add/Edit Product Specifications </b>
+                    </button>
+
+                </div>
+                <div class="card-body">
+
+
+                    <div class="modal" id="modal-without-animation">
+                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="alert alert-primary p-2 modal-header">
+                                    <h5>Product Specifications For <b>@product.Name</b></h5>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-9px">
+
+                                        <div class="col-md-8">
+
+                                            <RadzenAutoComplete TValue="Cluster"
+                                                                Data=@clusters
+                                                                TextProperty="Name"
+                                                                ValueProperty="Id" Style="width:100%"
+                                                                FilterOperator="StringFilterOperator.StartsWith"
+                                                                FilterDelay="100"
+                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Cluster Name" } })"
+                                                                Change="@(args => OnClusterChange(args))" />
+                                        </div>
+
+                                    </div>
+                                    <div>
+                                        @if (product != null && product.ProductClusters != null && product.ProductClusters.Count > 0)
+                                            {
+                                            <ul class="list-group" ondragover="event.preventDefault();" style="list-style-type: none; padding: 0;">
+                                                @foreach (var clus in product.ProductClusters.OrderBy(c => c.Order))
+                                                    {
+                                                    <li class="mb-3 p-0"
+                                                        style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);"
+                                                        @ondrop="() => HandleDrop(clus)"
+                                                        @key="clus"
+                                                        draggable="true"
+                                                        @ondragstart="() => draggingCluster = clus"
+                                                        @ondragend="() => draggingCluster = null">
+
+                                                        <!-- Cluster Heading -->
+                                                        <div class="d-flex justify-content-between align-items-center alert alert-primary p-2"
+                                                             style=" border-radius: 10px 10px 0 0;">
+                                                            <div>
+                                                                <strong>@clus.Cluster.Name</strong>
+                                                            </div>
+                                                            <div>
+                                                                <button type="button" @onclick="() => RemoveCluster(clus)" class="btn btn-outline-danger btn-sm">
+                                                                    <i class="fa fa-trash"></i>
+                                                                </button>
+                                                                <button type="button" @onclick="() => AddNewCluster(clus)" class="btn btn-outline-primary btn-sm">
+                                                                    <i class="fa fa-plus"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Cluster Features -->
+                                                        @if (clus.ProductClusterFeatures != null && clus.ProductClusterFeatures.Count > 0)
+                                                            {
+                                                            <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
+                                                                @foreach (var f in clus.ProductClusterFeatures)
+                                                                    {
+                                                                    <div class="row mb-2 align-items-center">
+                                                                        <div class="col-md-2">
+                                                                            <span>@f.Feature.Name</span>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <input type="text" class="form-control" @bind-value="@f.Value" />
+                                                                        </div>
+                                                                        <div class="col-md-1 text-end">
+                                                                            <button type="button" @onclick="() => RemoveFeature(clus, f)" class="btn btn-default d-block">
+                                                                                <i class="fa fa-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    }
+                                                            </div>
+                                                            }
+                                                    </li>
+                                                    }
+                                            </ul>
+                                            }
+
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
             </div>
         </div>
 
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card border-0 mb-4">
-                    <div class="card-header h6 mb-0 bg-none p-3">
-                        <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information </b>
+
+        <div class="col-lg-4">
+
+
+            <div class="card border-0 mb-3">
+                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                    <div class="flex-1">
+                        <div> <i class="fa fa-circle-info fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Information</b></div>
                     </div>
-                    <div class="card-body">
-
-                        <div class="row">
-                        
-                            <div class="col-12 mb-10px">
-
-                                <div class="accordion" id="accordionExample">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="headingTwo">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                                Product From Catalogs
-                                            </button>
-                                        </h2>
-                                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-                                            <div class="accordion-body">
-                                                <span>Search Catalog by Name || Desc||Code||Price</span>
-                                                <RadzenDropDownDataGrid TValue="long" @bind-Value=catalog.Id Data=@catalogs LoadData=@LoadData Count="@count" AllowVirtualization="true" AllowClear="true" Style="width:100%" Change="@(args => CloneCatalog(args))"
-                                                                        AllowFiltering="true" TextProperty="@nameof(Catalog.Name)" ValueProperty="@nameof(Catalog.Id)" Name="DropDownDataGridVirtualizationLoadData">
-                                                    <Columns>
-                                                        <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Name)" Title="Name" Width="100px" />
-                                                        <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Price)" Title="Price" Width="200px" />
-                                                        <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Code)" Title="Code" Width="200px" />
-                                                        <RadzenDropDownDataGridColumn Property="@nameof(Catalog.ShortDescription)" Title="Desc" Width="200px" />
-
-                                                    </Columns>
-                                                </RadzenDropDownDataGrid>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary">
+                        Add Related Data
+                    </div>
 
 
+                    <div class="form-horizontal form-bordered">
+                        <div class="form-group row">
+                            <label class="form-label col-form-label col-lg-4">Brand</label>
+                            <div class="col-lg-8">
+                                <RadzenDropDownDataGrid TValue="long" @bind-Value="product.BrandId" Data=@Brands TextProperty="Name" ValueProperty="Id" Class="form-control">
+                                    <Columns>
+                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
 
 
-
-
-
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
                             </div>
+                        </div>
 
 
-                            <div class="col-md-6">
-                                <label class="form-label"> Product Name</label>
-                                <InputText @bind-Value="product.Name" class="form-control" id="exampleInputEmail2" placeholder="Product Title" />
-                                <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label"> Product Code</label>
-                                <InputText @bind-Value="product.Code" class="form-control" id="exampleInputEmail2" placeholder="Product Code" />
-                                <span class="text-danger"><ValidationMessage For="@(() => product.Code)" /> </span>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label"> Product Price</label>
-                                <InputNumber @bind-Value="product.Price" class="form-control" id="exampleInputEmail2" placeholder="Product Price" />
+
+                    </div>
+
+                    <div class="form-horizontal form-bordered">
+                        <div class="form-group row">
+                            <label class="form-label col-form-label col-lg-4">Price</label>
+                            <div class="col-lg-8">
+                                <InputNumber @bind-Value="product.Price" class="form-control" id="exampleInputEmail2" placeholder=" Price" />
                                 <span class="text-danger"><ValidationMessage For="@(() => product.Price)" /> </span>
                             </div>
-
-
-
-
                         </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 mb-3">
+                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                    <div class="flex-1">
+                        <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary">
+                        Add Image Thumbnail
+                    </div>
+                    <div class="form-horizontal form-bordered">
+                        <div class="form-group row">
+                            <label class="form-label col-form-label col-lg-4">Thumbnail</label>
+                            <div class="col-lg-8">
+
+                                <InputText @bind-Value="product.Thumbnail" class="form-control" />
+
+                                @if (!String.IsNullOrEmpty(product.Thumbnail))
+                                    {
+                                    <img src="@product.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
+                                    }
+
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
 
-                <div class="card border-0 mb-4">
-                    <div class="card-header h6 mb-0 bg-none p-3">
-                        <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Levels</b>
-</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label"> Main Category</label>
-
-
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
-
-
-
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Sub Category</label>
-
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
-
-
-
-
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-lg-6">
-                                    <div class="mb-lg-0 mb-3">
-                                        <label class="form-label">Sub Sub Category</label>
-
-                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
-                                            <Columns>
-                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                            </Columns>
-                                        </RadzenDropDownDataGrid>
-
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="mb-lg-0 mb-3">
-                                        <label class="form-label">Group Category </label>
-
-                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
-                                            <Columns>
-                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                            </Columns>
-                                        </RadzenDropDownDataGrid>
-
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="mb-lg-0 mb-3">
-                                        <label class="form-label">Brand </label>
-
-                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="product.BrandId" Data=@Brands TextProperty="Name" ValueProperty="Id" Class="form-control">
-                                            <Columns>
-                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                            </Columns>
-                                        </RadzenDropDownDataGrid>
-                                        <span class="text-danger"><ValidationMessage For="@(() => product.Brand)" /> </span>
-
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <div class="mb-lg-0 mb-3">
-                                        <label class="form-label">Slug </label>
-
-                                        <InputText @bind-Value="product.Slug" class="form-control" id="exampleInputEmail2" placeholder="Product Slug" />
-                                        <span class="text-danger"><ValidationMessage For="@(() => product.Slug)" /> </span>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-                        </div>
-                    </div>
+            </div>
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-images fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLs</b>
                 </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-10">
+                            <InputText @bind-Value="newMediaUrl" class="form-control" placeholder="Enter image URL" />
+                        </div>
+                        <div class="col-md-2">
 
-                <div class="card border-0 mb-4">
-                    <div class="card-header h6 mb-0 bg-none p-3">
-                      
-                        <button type="button" class="btn btn-primary" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
-                            <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
-                            <b>Add/Edit Product Specifications</b>
-                        </button>
+                            <button type="button" class="btn btn-primary" @onclick="AddMediaUrl">
+                                <i class="fa fa-plus"></i>
+                            </button>
 
+                        </div>
                     </div>
-                    <div class="card-body">
+                    @if (product.ProductMedias != null && product.ProductMedias.Count > 0)
+                        {
+                        @foreach (var media in product.ProductMedias)
+                            {
+                            <div class="row align-items-center mb-3">
+
+                                <div class="col-md-8">
+                                    <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                </div>
+                                <div class="col-md-4">
 
 
-                        <div class="modal" id="modal-without-animation">
-                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Add/Edit Product Specifications</h4>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="row mb-9px">
+                                    <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
 
-                                            <div class="col-md-8">
 
-                                                <RadzenAutoComplete TValue="Cluster"
-                                                                    Data=@clusters
-                                                                    TextProperty="Name"
-                                                                    ValueProperty="Id" Style="width:100%"
-                                                                    FilterOperator="StringFilterOperator.StartsWith"
-                                                                    FilterDelay="100"
-                                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Cluster Name" } })"
-                                                                    Change="@(args => OnClusterChange(args))" />
-                                            </div>
-                                         
-                                        </div>
-                                        <div>
-                                            @if (product != null && product.ProductClusters != null && product.ProductClusters.Count > 0)
-                                                {
-                                                <ul class="list-group" ondragover="event.preventDefault();" style="list-style-type: none; padding: 0;">
-                                                    @foreach (var clus in product.ProductClusters.OrderBy(c => c.Order))
-                                                        {
-                                                        <li class="mb-3 p-0"
-                                                            style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);"
-                                                            @ondrop="() => HandleDrop(clus)"
-                                                            @key="clus"
-                                                            draggable="true"
-                                                            @ondragstart="() => draggingCluster = clus"
-                                                            @ondragend="() => draggingCluster = null">
-
-                                                            <!-- Cluster Heading -->
-                                                            <div class="d-flex justify-content-between align-items-center bg-blue text-white p-2"
-                                                                 style=" border-radius: 10px 10px 0 0;">
-                                                                <div>
-                                                                    <strong>@clus.Cluster.Name</strong>
-                                                                </div>
-                                                                <div>
-                                                                    <button type="button" @onclick="() => RemoveCluster(clus)" class="btn btn-outline-danger btn-sm">
-                                                                        <i class="fa fa-trash"></i>
-                                                                    </button>
-                                                                    <button type="button" @onclick="() => AddNewCluster(clus)" class="btn btn-outline-light btn-sm">
-                                                                        <i class="fa fa-plus"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Cluster Features -->
-                                                            @if (clus.ProductClusterFeatures != null && clus.ProductClusterFeatures.Count > 0)
-                                                                {
-                                                                <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
-                                                                    @foreach (var f in clus.ProductClusterFeatures)
-                                                                        {
-                                                                        <div class="row mb-2 align-items-center">
-                                                                            <div class="col-md-2">
-                                                                                <span>@f.Feature.Name</span>
-                                                                            </div>
-                                                                            <div class="col-md-3">
-                                                                                <input type="text" class="form-control" @bind-value="@f.Value" />
-                                                                            </div>
-                                                                            <div class="col-md-1 text-end">
-                                                                                <button type="button" @onclick="() => RemoveFeature(clus, f)"  class="btn btn-default d-block">
-                                                                                    <i class="fa fa-trash"></i>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                        }
-                                                                </div>
-                                                                }
-                                                        </li>
-                                                        }
-                                                </ul>
-                                                }
-
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
-                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            }
+                        }
+                </div>
+            </div>
 
+            <div class="card border-0 mb-4">
+                <div class="card-header h6 mb-0 bg-none p-3">
+                    <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b> Media</b>
+                </div>
+                <div class="card-body">
+                    <div id="dropzone">
+                        <div>
+                            <div class="dz-message needsclick">
+                                <b>click</b> to upload.<br />
 
-                   
-                    </div>
-                    </div>
-                    </div>
+                                <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
 
+                                @if (selectedFiles != null && selectedFiles.Count() > 0)
+                                    {
+                                    <div>
 
-
-                            <div class="col-lg-4">
-
-                                <div class="card border-0 mb-3">
-                                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                                        <div class="flex-1">
-                                            <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="alert alert-primary">
-                                            Add Image Thumbnail
-                                        </div>
-                                        <div class="form-horizontal form-bordered">
-                                            <div class="form-group row">
-                                                <label class="form-label col-form-label col-lg-4">Thumbnail</label>
-                                                <div class="col-lg-8">
-
-                                                    <InputText @bind-Value="product.Thumbnail" class="form-control" />
-
-                                                    @if (!String.IsNullOrEmpty(product.Thumbnail))
-                                                        {
-                                                        <img src="@product.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
-                                                        }
-
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="card border-0 mb-4">
-                                    <div class="card-header h6 mb-0 bg-none p-3">
-                                        <i class="fa fa-images fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLs</b>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row mb-3">
-                                            <div class="col-md-10">
-                                                <InputText @bind-Value="newMediaUrl" class="form-control" placeholder="Enter image URL" />
-                                            </div>
-                                            <div class="col-md-2">
-
-                                                <button type="button" class="btn btn-primary" @onclick="AddMediaUrl">
-                                                    <i class="fa fa-plus"></i>
-                                                </button>
-
-                                            </div>
-                                        </div>
-                                        @if (product.ProductMedias != null && product.ProductMedias.Count > 0)
+                                        @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
                                             {
-                                            @foreach (var media in product.ProductMedias)
-                                                {
-                                                <div class="row align-items-center mb-3">
-
-                                                    <div class="col-md-8">
-                                                        <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
-                                                    </div>
-                                                    <div class="col-md-4">
-
-
-                                                        <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
-
-
-                                                    </div>
-                                                </div>
-                                                }
-                                            }
-                                    </div>
-                                </div>
-
-                                <div class="card border-0 mb-4">
-                                    <div class="card-header h6 mb-0 bg-none p-3">
-                                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b> Media</b>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="dropzone">
-                                            <div>
-                                                <div class="dz-message needsclick">
-                                                    <b>click</b> to upload.<br />
-
-                                                    <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
-
-                                                    @if (selectedFiles != null && selectedFiles.Count() > 0)
-                                                        {
-                                                        <div>
-
-                                                            @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
-                                                                {
-                                                                <div style="display:inline-block; margin: 10px; position: relative;">
-                                                                    <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
-                                                                    <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
-                                                                </div>
-                                                                }
-
-                                                        </div>
-                                                        }
-
-                                                </div>
+                                            <div style="display:inline-block; margin: 10px; position: relative;">
+                                                <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
+                                                <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
                                             </div>
-                                        </div>
+                                            }
+
                                     </div>
-                                </div>
+                                    }
 
                             </div>
-
                         </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 
 </EditForm>
-    @code {
+@code {
 
-        #region Variables
-        [Parameter]
-        public long ProductId { get; set; }
-        private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
-        private List<CategoryDto> Level1Categories { get; set; } = new List<CategoryDto>();
-        private List<CategoryDto> Level2Categories { get; set; } = new List<CategoryDto>();
-        private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
-        private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
-        private List<ProductFeatureValue> productFeatureValues = new List<ProductFeatureValue>();
-        private List<Brand> Brands = new List<Brand>();
-        private long selectedLevel1CategoryId;
-        private long selectedLevel2CategoryId;
-        private long selectedLevel3CategoryId;
-        private Product product = new Product();
-        private IEnumerable<Cluster> clusters = new List<Cluster>();
-        public string clusterName = string.Empty;
-        string featureName = string.Empty;
+    #region Variables
+    [Parameter]
+    public long ProductId { get; set; }
+    private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level1Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level2Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
+    private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
+    private List<ProductFeatureValue> productFeatureValues = new List<ProductFeatureValue>();
+    private List<Brand> Brands = new List<Brand>();
+    private long selectedLevel1CategoryId;
+    private long selectedLevel2CategoryId;
+    private long selectedLevel3CategoryId;
+    private Product product = new Product();
+    private IEnumerable<Cluster> clusters = new List<Cluster>();
+    public string clusterName = string.Empty;
+    string featureName = string.Empty;
 
-        private List<Feature> features = new List<Feature>();
-        private Feature feature = new Feature();
-        private string newMediaUrl = string.Empty; // New URL input
-        #endregion
+    private List<Feature> features = new List<Feature>();
+    private Feature feature = new Feature();
+    private string newMediaUrl = string.Empty; // New URL input
+    #endregion
 
-        #region
+    #region
 
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+        {
+        await LoadCategoryTreeAsync();
+        await LoadBrands();
+        await LoadClusters();
+        await LoadFeatures();
+        if (ProductId > 0)
             {
-             await LoadCategoryTreeAsync();
-             await LoadBrands();
-             await LoadClusters();
-             await LoadFeatures();
-             if (ProductId > 0)
-                 {
-                 await LoadProductForEdit();
-
-                 }
+            await LoadProductForEdit();
 
             }
 
-        private async Task LoadCategoryTreeAsync()
+        }
+
+    private async Task LoadCategoryTreeAsync()
+        {
+        try
             {
-            try
-                {
-                var response = await CategoryService.GetCategoriesDtoAsync();
-                if (response.Success)
-                    {
-
-                    Categories = response.Data;
-                    Level1Categories = Categories.Where(c => c.Level == 1).ToList();
-                    Level2Categories = Categories.Where(c => c.Level == 2).ToList();
-                    Level3Categories = Categories.Where(c => c.Level == 3).ToList();
-                    Level4Categories = Categories.Where(c => c.Level == 4).ToList();
-                    }
-                else
-                    {
-                    Snackbar.Add(response.Message, Severity.Error);
-                    }
-                }
-            catch (Exception ex)
-                {
-                Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
-                }
-            }
-
-        #endregion
-
-        #region level
-        private void OnLevel1Changed(object e)
-            {
-
-            try
-                {
-                var selectedLevel1Id = Convert.ToInt64(e);
-                if (selectedLevel1Id > 0)
-                    {
-                    Level2Categories = Categories.Where(c => c.Level == 2 && c.ParentCategoryId == selectedLevel1Id).ToList() ?? new List<CategoryDto>();
-                    Level3Categories.Clear();
-                    Level4Categories.Clear();
-                    }
-
-                }
-            catch (Exception ex)
-                {
-
-                }
-
-            }
-
-        private void OnLevel2Changed(object e)
-            {
-            try
-                {
-                var selectedLevel2Id = Convert.ToInt64(e);
-                if (selectedLevel2Id > 0)
-                    {
-                    Level3Categories = Categories.Where(c => c.Level == 3 && c.ParentCategoryId == selectedLevel2Id).ToList() ?? new List<CategoryDto>();
-                    Level4Categories.Clear();
-                    }
-
-                }
-            catch (Exception ex)
-                {
-
-
-                }
-
-
-
-            }
-
-        private void OnLevel3Changed(object e)
-            {
-            try
-                {
-                var selectedLevel3Id = Convert.ToInt64(e);
-                if (selectedLevel3Id > 0)
-                    {
-                    Level4Categories = Categories.Where(c => c.Level == 4 && c.ParentCategoryId == selectedLevel3Id).ToList() ?? new List<CategoryDto>();
-
-                    }
-
-                }
-
-            catch (Exception ex)
-
-                {
-
-                }
-            }
-
-        private async Task OnLevel4Changed(object e)
-            {
-            try
-                {
-                long categoryId = Convert.ToInt64(e);
-                if (categoryId > 0)
-                    {
-                    // Start from the selected Group Category (Level 4)
-                    var currentCategory = Categories.FirstOrDefault(c => c.Id == categoryId);
-                    if (currentCategory == null)
-                        return;
-
-                    // Level 4 - Group Category
-                    selectedLevel3CategoryId = currentCategory.ParentCategoryId ?? 0;
-
-                    if (selectedLevel3CategoryId > 0)
-                        {
-                        // Level 3 - Sub Sub Category
-                        var level3Category = Categories.FirstOrDefault(c => c.Id == selectedLevel3CategoryId);
-                        selectedLevel2CategoryId = level3Category?.ParentCategoryId ?? 0;
-                        }
-
-                    if (selectedLevel2CategoryId > 0)
-                        {
-                        // Level 2 - Sub Category
-                        var level2Category = Categories.FirstOrDefault(c => c.Id == selectedLevel2CategoryId);
-                        selectedLevel1CategoryId = level2Category?.ParentCategoryId ?? 0;
-                        }
-
-                    // For Level 1 - Main Category, selectedLevel1CategoryId is already set above
-                    // You don't need any further action here if you're just setting the IDs
-                    }
-
-                StateHasChanged();
-                }
-            catch (Exception ex)
-                {
-
-                Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
-                }
-            }
-
-        #endregion
-
-        #region Brand
-
-        private async Task LoadBrands()
-            {
-            var response = await BrandService.GetBrandsAsync();
+            var response = await CategoryService.GetCategoriesDtoAsync();
             if (response.Success)
                 {
-                Brands = response.Data;
+
+                Categories = response.Data;
+                Level1Categories = Categories.Where(c => c.Level == 1).ToList();
+                Level2Categories = Categories.Where(c => c.Level == 2).ToList();
+                Level3Categories = Categories.Where(c => c.Level == 3).ToList();
+                Level4Categories = Categories.Where(c => c.Level == 4).ToList();
                 }
             else
                 {
                 Snackbar.Add(response.Message, Severity.Error);
                 }
             }
-        #endregion
-
-        #region Save
-
-        private async Task HandleValidSubmit()
+        catch (Exception ex)
             {
-            try
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+            }
+        }
+
+    #endregion
+
+    #region level
+    private void OnLevel1Changed(object e)
+        {
+
+        try
+            {
+            var selectedLevel1Id = Convert.ToInt64(e);
+            if (selectedLevel1Id > 0)
                 {
+                Level2Categories = Categories.Where(c => c.Level == 2 && c.ParentCategoryId == selectedLevel1Id).ToList() ?? new List<CategoryDto>();
+                Level3Categories.Clear();
+                Level4Categories.Clear();
+                }
+
+            }
+        catch (Exception ex)
+            {
+
+            }
+
+        }
+
+    private void OnLevel2Changed(object e)
+        {
+        try
+            {
+            var selectedLevel2Id = Convert.ToInt64(e);
+            if (selectedLevel2Id > 0)
+                {
+                Level3Categories = Categories.Where(c => c.Level == 3 && c.ParentCategoryId == selectedLevel2Id).ToList() ?? new List<CategoryDto>();
+                Level4Categories.Clear();
+                }
+
+            }
+        catch (Exception ex)
+            {
+
+
+            }
 
 
 
+        }
 
-                if (product.BrandId == 0)
-                    {
-                    Snackbar.Add($"Please select Brand", Severity.Info);
+    private void OnLevel3Changed(object e)
+        {
+        try
+            {
+            var selectedLevel3Id = Convert.ToInt64(e);
+            if (selectedLevel3Id > 0)
+                {
+                Level4Categories = Categories.Where(c => c.Level == 4 && c.ParentCategoryId == selectedLevel3Id).ToList() ?? new List<CategoryDto>();
+
+                }
+
+            }
+
+        catch (Exception ex)
+
+            {
+
+            }
+        }
+
+    private async Task OnLevel4Changed(object e)
+        {
+        try
+            {
+            long categoryId = Convert.ToInt64(e);
+            if (categoryId > 0)
+                {
+                // Start from the selected Group Category (Level 4)
+                var currentCategory = Categories.FirstOrDefault(c => c.Id == categoryId);
+                if (currentCategory == null)
                     return;
-                    }
-                ServiceResponse<Product> response;
 
+                // Level 4 - Group Category
+                selectedLevel3CategoryId = currentCategory.ParentCategoryId ?? 0;
 
-
-
-                if (ProductId > 0)
+                if (selectedLevel3CategoryId > 0)
                     {
-
-
-
-                    response = await IProductService.UpdateProductAsync(product);
+                    // Level 3 - Sub Sub Category
+                    var level3Category = Categories.FirstOrDefault(c => c.Id == selectedLevel3CategoryId);
+                    selectedLevel2CategoryId = level3Category?.ParentCategoryId ?? 0;
                     }
-                else
+
+                if (selectedLevel2CategoryId > 0)
                     {
-
-                    response = await IProductService.AddProductAsync(product);
+                    // Level 2 - Sub Category
+                    var level2Category = Categories.FirstOrDefault(c => c.Id == selectedLevel2CategoryId);
+                    selectedLevel1CategoryId = level2Category?.ParentCategoryId ?? 0;
                     }
 
-                if (response.Success)
-                    {
-                    Snackbar.Add(response.Message, Severity.Success);
-
-                    }
-                else
-                    {
-                    Snackbar.Add(response.Message, Severity.Error);
-                    Console.Error.WriteLine($"Error : {response.InnerException}");
-
-                    await JS.InvokeVoidAsync("console.log", response.InnerException);
-                    }
-
-                if (response.Success)
-
-
-                    {
-                    await SaveImagesToFileSystem(product.Id);
-                    }
+                // For Level 1 - Main Category, selectedLevel1CategoryId is already set above
+                // You don't need any further action here if you're just setting the IDs
                 }
 
-            catch (Exception ex)
+            StateHasChanged();
+            }
+        catch (Exception ex)
+            {
+
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
+        }
+
+    #endregion
+
+    #region Brand
+
+    private async Task LoadBrands()
+        {
+        var response = await BrandService.GetBrandsAsync();
+        if (response.Success)
+            {
+            Brands = response.Data;
+            }
+        else
+            {
+            Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+    #endregion
+
+    #region Save
+
+    private async Task HandleValidSubmit()
+        {
+        try
+            {
+
+
+
+
+            if (product.BrandId == 0)
                 {
-                Snackbar.Add(ex.Message, Severity.Error);
+                Snackbar.Add($"Please select Brand", Severity.Info);
+                return;
+                }
+            ServiceResponse<Product> response;
+
+
+
+
+            if (ProductId > 0)
+                {
+
+
+
+                response = await IProductService.UpdateProductAsync(product);
+                }
+            else
+                {
+
+                response = await IProductService.AddProductAsync(product);
                 }
 
+            if (response.Success)
+                {
+                Snackbar.Add(response.Message, Severity.Success);
 
+                }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                Console.Error.WriteLine($"Error : {response.InnerException}");
+
+                await JS.InvokeVoidAsync("console.log", response.InnerException);
+                }
+
+            if (response.Success)
+
+
+                {
+                await SaveImagesToFileSystem(product.Id);
+                }
             }
 
-        private async Task SaveImagesToFileSystem(long productId)
+        catch (Exception ex)
             {
-            var productImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Products", productId.ToString());
+            Snackbar.Add(ex.Message, Severity.Error);
+            }
 
-            if (!Directory.Exists(productImagesPath))
+
+        }
+
+    private async Task SaveImagesToFileSystem(long productId)
+        {
+        var productImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Products", productId.ToString());
+
+        if (!Directory.Exists(productImagesPath))
+            {
+            Directory.CreateDirectory(productImagesPath);
+            }
+
+        foreach (var image in selectedFiles)
+            {
+
+            var filePath = Path.Combine(productImagesPath, image.ImageName);
+            if (image.IsDeleted == true)
                 {
-                Directory.CreateDirectory(productImagesPath);
-                }
-
-            foreach (var image in selectedFiles)
-                {
-
-                var filePath = Path.Combine(productImagesPath, image.ImageName);
-                if (image.IsDeleted == true)
+                if (image.IsDeleted)
                     {
-                    if (image.IsDeleted)
+                    if (File.Exists(filePath))
                         {
-                        if (File.Exists(filePath))
-                            {
-                            File.Delete(filePath);
-                            }
+                        File.Delete(filePath);
                         }
                     }
-                else if (image.IsDeleted == false && image.ImageByte == null)
-                    {
+                }
+            else if (image.IsDeleted == false && image.ImageByte == null)
+                {
 
-                    }
-                else
+                }
+            else
+                {
+                await File.WriteAllBytesAsync(filePath, image.ImageByte);
+                image.ImageUrl = $"/Products/{productId}/{image.ImageName}";
+                }
+
+
+
+            }
+
+
+        }
+    #endregion
+
+    #region  Edit_Section
+
+    private async Task LoadProductForEdit()
+        {
+        try
+            {
+            var response = await IProductService.GetProductByIdAsync(ProductId);
+            if (response.Success)
+                {
+                product = response.Data;
+                await OnLevel4Changed(product.CategoryId);
+
+                selectedFiles = product.ProductImages;
+                if (selectedFiles != null && selectedFiles.Count() > 0)
                     {
-                    await File.WriteAllBytesAsync(filePath, image.ImageByte);
-                    image.ImageUrl = $"/Products/{productId}/{image.ImageName}";
+                    selectedFiles.ToList().ForEach(image =>
+                    {
+                        image.ImageUrl = $"/Products/{product.Id}/{image.ImageName}";
+                    });
                     }
 
 
 
                 }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
 
+
+
+    #endregion
+
+    #region CataLogsSection
+    string _searchString;
+
+    string value;
+    int count;
+    Catalog catalog = new Catalog();
+    private IEnumerable<Catalog> catalogs = new List<Catalog>();
+    async Task LoadData(LoadDataArgs args)
+        {
+        await Task.Yield();
+
+        try
+            {
+            string searchTerm = args.Filter;
+
+            var result = await CatalogService.SearchCatalogsAsync(searchTerm);
+
+            catalogs = result.Data ?? new List<Catalog>();
+            count = catalogs.Count();
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add("Error occurred while searching catalogs: " + ex.Message, Severity.Error);
 
             }
-        #endregion
 
-        #region  Edit_Section
 
-        private async Task LoadProductForEdit()
+        }
+    private async Task CloneCatalog(object e)
+        {
+        try
             {
-            try
+
+            long CatalogsId = Convert.ToInt64(e);
+
+            if (CatalogsId > 0)
                 {
-                var response = await IProductService.GetProductByIdAsync(ProductId);
+                product.CatalogId = CatalogsId;
+                var response = await CatalogService.GetCatalogByIdAsync(CatalogsId);
                 if (response.Success)
                     {
-                    product = response.Data;
-                    await OnLevel4Changed(product.CategoryId);
+                    Catalog catalogObj = response.Data;
 
-                    selectedFiles = product.ProductImages;
-                    if (selectedFiles != null && selectedFiles.Count() > 0)
+                    // Clone the catalog data to the product
+                    product.Name = catalogObj.Name;
+                    product.Price = (double)catalogObj.Price;
+                    product.BrandId = catalogObj.BrandId ?? 0;
+                    product.CategoryId = catalogObj.CategoryId;
+                    product.Thumbnail = catalogObj.Thumbnail;
+                    product.Code = catalogObj.Code;
+                    product.Slug = catalogObj.Slug;
+                    product.Description = catalogObj.Description;
+                    product.ShortDescription = catalogObj.ShortDescription;
+                    product.ProductClusters = catalogObj.CatalogClusters.Select(cc => new ProductCluster
                         {
-                        selectedFiles.ToList().ForEach(image =>
-                        {
-                            image.ImageUrl = $"/Products/{product.Id}/{image.ImageName}";
-                        });
-                        }
-
-
-
-                    }
-                else
-                    {
-                    Snackbar.Add(response.Message, Severity.Error);
-                    }
-                }
-            catch (Exception ex)
-                {
-                Snackbar.Add(ex.Message, Severity.Error);
-                }
-            }
-
-
-
-        #endregion
-
-        #region CataLogsSection
-        string _searchString;
-
-        string value;
-        int count;
-        Catalog catalog = new Catalog();
-        private IEnumerable<Catalog> catalogs = new List<Catalog>();
-        async Task LoadData(LoadDataArgs args)
-            {
-            await Task.Yield();
-
-            try
-                {
-                string searchTerm = args.Filter;
-
-                var result = await CatalogService.SearchCatalogsAsync(searchTerm);
-
-                catalogs = result.Data ?? new List<Catalog>();
-                count = catalogs.Count();
-                }
-            catch (Exception ex)
-                {
-                Snackbar.Add("Error occurred while searching catalogs: " + ex.Message, Severity.Error);
-
-                }
-
-
-            }
-        private async Task CloneCatalog(object e)
-            {
-            try
-                {
-
-                long CatalogsId = Convert.ToInt64(e);
-
-                if (CatalogsId > 0)
-                    {
-                    product.CatalogId = CatalogsId;
-                    var response = await CatalogService.GetCatalogByIdAsync(CatalogsId);
-                    if (response.Success)
-                        {
-                        Catalog catalogObj = response.Data;
-
-                        // Clone the catalog data to the product
-                        product.Name = catalogObj.Name;
-                        product.Price = (double)catalogObj.Price;
-                        product.BrandId = catalogObj.BrandId ?? 0;
-                        product.CategoryId = catalogObj.CategoryId;
-                        product.Thumbnail = catalogObj.Thumbnail;
-                        product.Code = catalogObj.Code;
-                        product.Slug = catalogObj.Slug;
-                        product.ProductClusters = catalogObj.CatalogClusters.Select(cc => new ProductCluster
+                        ClusterId = cc.ClusterId,
+                        Cluster = cc.Cluster,
+                        ProductClusterFeatures = cc.CatalogClusterFeatures.Select(cf => new ProductClusterFeature
                             {
-                            ClusterId = cc.ClusterId,
-                            Cluster = cc.Cluster,
-                            ProductClusterFeatures = cc.CatalogClusterFeatures.Select(cf => new ProductClusterFeature
-                                {
-                                FeatureId = cf.FeatureId,
-                                Value = cf.Value,
-                                Feature = cf.Feature
-                                }).ToList()
+                            FeatureId = cf.FeatureId,
+                            Value = cf.Value,
+                            Feature = cf.Feature
+                            }).ToList()
+                        }).ToList();
+                    if (catalogObj.CatalogMedias != null)
+                        {
+                        product.ProductMedias = catalogObj.CatalogMedias.Select(cm => new ProductMedia
+                            {
+                            ImageUrl = cm.ImageUrl,
+
                             }).ToList();
-                        if (catalogObj.CatalogMedias != null)
-                            {
-                            product.ProductMedias = catalogObj.CatalogMedias.Select(cm => new ProductMedia
-                                {
-                                ImageUrl = cm.ImageUrl,
-
-                                }).ToList();
-                            }
-                        else
-                            {
-                            product.ProductMedias = new List<ProductMedia>();
-                            }
-
-
-                        await OnLevel4Changed(catalogObj.CategoryId);
-
                         }
                     else
                         {
-                        Snackbar.Add(response.Message, Severity.Error);
+                        product.ProductMedias = new List<ProductMedia>();
                         }
+
+
+                    await OnLevel4Changed(catalogObj.CategoryId);
+
                     }
                 else
                     {
-
+                    Snackbar.Add(response.Message, Severity.Error);
                     }
-
-
                 }
-            catch (Exception ex)
+            else
                 {
 
                 }
+
+
             }
-        #endregion
-
-        #region Images
-
-        private List<ProductImages> selectedFiles = new List<ProductImages>();
-        private List<string> selectedImagePreviews = new List<string>();
-
-
-        private async Task HandleSelected(InputFileChangeEventArgs e)
+        catch (Exception ex)
             {
-            try
+
+            }
+        }
+    #endregion
+
+    #region Images
+
+    private List<ProductImages> selectedFiles = new List<ProductImages>();
+    private List<string> selectedImagePreviews = new List<string>();
+
+
+    private async Task HandleSelected(InputFileChangeEventArgs e)
+        {
+        try
+            {
+            foreach (var file in e.GetMultipleFiles())
                 {
-                foreach (var file in e.GetMultipleFiles())
+                using var memoryStream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
+
+                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
+                memoryStream.Position = 0;
+                var resizedImageUrl = await ImageResizeService.ResizeImage(memoryStream, file.ContentType, 150, 150);
+                memoryStream.Position = 0;
+                var buffer = memoryStream.ToArray();
+                ProductImages productImages = new ProductImages
                     {
-                    using var memoryStream = new MemoryStream();
-                    await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
+                    ImageUrl = resizedImageUrl,
+                    ImageByte = buffer,
+                    ImageName = uniqueFileName
+                    };
 
-                    var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
-                    memoryStream.Position = 0;
-                    var resizedImageUrl = await ImageResizeService.ResizeImage(memoryStream, file.ContentType, 150, 150);
-                    memoryStream.Position = 0;
-                    var buffer = memoryStream.ToArray();
-                    ProductImages productImages = new ProductImages
-                        {
-                        ImageUrl = resizedImageUrl,
-                        ImageByte = buffer,
-                        ImageName = uniqueFileName
-                        };
-
-                    selectedFiles.Add(productImages);
-                    }
-
-                product.ProductImages = selectedFiles;
-                StateHasChanged();
+                selectedFiles.Add(productImages);
                 }
-            catch (Exception ex)
-                {
-                Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
-                }
-            }
 
-        private void RemoveImage(ProductImages image)
-            {
-
-            var node = selectedFiles.FirstOrDefault(a => a.ImageName == image.ImageName);
-            node.IsDeleted = true;
-
-            selectedFiles.Remove(image);
+            product.ProductImages = selectedFiles;
             StateHasChanged();
             }
-        #endregion
-
-        #region Clsuter
-        private async Task LoadClusters()
+        catch (Exception ex)
             {
-            try
-                {
-                var response = await clusterService.GetClustersAsync();
-                if (response.Success)
-                    {
-                    clusters = response.Data;
-                    }
-                else
-                    {
-                    Snackbar.Add(response.Message, Severity.Error);
-                    }
-                }
-            catch (Exception ex)
-                {
-                Snackbar.Add("An error occurred while loading clusters: " + ex.Message, Severity.Error);
-                Console.Error.WriteLine($"Error in LoadClusters: {ex}");
-                }
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
             }
+        }
 
-        private async Task OnClusterChange(object value)
+    private void RemoveImage(ProductImages image)
+        {
+
+        var node = selectedFiles.FirstOrDefault(a => a.ImageName == image.ImageName);
+        node.IsDeleted = true;
+
+        selectedFiles.Remove(image);
+        StateHasChanged();
+        }
+    #endregion
+
+    #region Clsuter
+    private async Task LoadClusters()
+        {
+        try
             {
-
-            string selectedClusterName = value as string;
-
-            var selectedCluster = clusters.FirstOrDefault(c => c.Name == selectedClusterName);
-            if (selectedCluster != null)
-                {
-
-
-                var existingCluster = catalog.CatalogClusters.FirstOrDefault(c => c.ClusterId == selectedCluster.Id);
-                if (existingCluster != null)
-                    {
-
-                    return;
-                    }
-
-                var response = await FeatureService.GetFeaturesByClusterId(selectedCluster.Id);
-                if (response.Success)
-                    {
-                    List<Feature> features = response.Data;
-                    ProductCluster productClusters = new ProductCluster();
-                    productClusters.ClusterId = selectedCluster.Id;
-                    productClusters.Cluster = selectedCluster;
-
-                    foreach (var f in features)
-                        {
-                        ProductClusterFeature clusterFeature = new ProductClusterFeature();
-                        clusterFeature.Feature = f;
-                        clusterFeature.FeatureId = f.Id;
-                        productClusters.ProductClusterFeatures.Add(clusterFeature);
-                        }
-                    product.ProductClusters.Add(productClusters);
-                    }
-                else
-                    {
-                    Snackbar.Add(response.Message, Severity.Error);
-                    }
-                }
-
-
-            }
-
-
-
-        private ProductCluster? draggingCluster;
-
-        private void HandleDrop(ProductCluster landingCluster)
-            {
-            if (draggingCluster == null) return;
-
-            int originalOrder = landingCluster.Order;
-            // Increase the order of clusters that are after the landing cluster
-            foreach (var cluster in product.ProductClusters.Where(c => c.Order >= originalOrder))
-                {
-                cluster.Order++;
-                }
-
-            // Assign the dropped cluster to the position of the landing cluster
-            draggingCluster.Order = originalOrder;
-
-            // Reorder clusters
-            int index = 0;
-            foreach (var cluster in product.ProductClusters.OrderBy(c => c.Order))
-                {
-                cluster.Order = index++;
-                cluster.IsDragOver = false;
-                }
-            }
-
-
-
-        #endregion
-
-
-        #region Remove Methods
-
-        private void RemoveCluster(ProductCluster clusterToRemove)
-            {
-            product.ProductClusters.Remove(clusterToRemove);
-            }
-
-        private void RemoveFeature(ProductCluster cluster, ProductClusterFeature featureToRemove)
-            {
-            cluster.ProductClusterFeatures.Remove(featureToRemove);
-            }
-        #endregion
-
-
-        #region AddNewFeature
-        private async Task AddNewCluster(ProductCluster AddFeature)
-            {
-            await JS.InvokeVoidAsync("showModal");
-
-            feature.ClusterId = AddFeature.ClusterId;
-
-
-
-            }
-        private async Task AddNewFeature()
-            {
-
-            var selectedFeature = features.FirstOrDefault(f => f.Name == featureName);
-            if (selectedFeature != null)
-                {
-                feature.Id = selectedFeature.Id;
-                var selectedCluster = product.ProductClusters.FirstOrDefault(c => c.ClusterId == feature.ClusterId);
-                if (selectedCluster != null)
-                    {
-
-                    ProductClusterFeature p = new ProductClusterFeature();
-                    p.Feature = features.FirstOrDefault(a => a.Id == feature.Id);
-                    p.FeatureId = feature.Id;
-                    p.ProductCluster = selectedCluster;
-                    p.ProductClusterId = selectedCluster.ClusterId;
-                    selectedCluster.ProductClusterFeatures.Add(p);
-                    await JS.InvokeVoidAsync("hideModal");
-                    StateHasChanged();
-                    }
-                }
-
-
-
-
-            }
-        private async Task LoadFeatures()
-            {
-            var response = await FeatureService.GetFeaturesAsync();
+            var response = await clusterService.GetClustersAsync();
             if (response.Success)
                 {
-                features = response.Data;
+                clusters = response.Data;
+                }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add("An error occurred while loading clusters: " + ex.Message, Severity.Error);
+            Console.Error.WriteLine($"Error in LoadClusters: {ex}");
+            }
+        }
+
+    private async Task OnClusterChange(object value)
+        {
+
+        string selectedClusterName = value as string;
+
+        var selectedCluster = clusters.FirstOrDefault(c => c.Name == selectedClusterName);
+        if (selectedCluster != null)
+            {
+
+
+            var existingCluster = catalog.CatalogClusters.FirstOrDefault(c => c.ClusterId == selectedCluster.Id);
+            if (existingCluster != null)
+                {
+
+                return;
+                }
+
+            var response = await FeatureService.GetFeaturesByClusterId(selectedCluster.Id);
+            if (response.Success)
+                {
+                List<Feature> features = response.Data;
+                ProductCluster productClusters = new ProductCluster();
+                productClusters.ClusterId = selectedCluster.Id;
+                productClusters.Cluster = selectedCluster;
+
+                foreach (var f in features)
+                    {
+                    ProductClusterFeature clusterFeature = new ProductClusterFeature();
+                    clusterFeature.Feature = f;
+                    clusterFeature.FeatureId = f.Id;
+                    productClusters.ProductClusterFeatures.Add(clusterFeature);
+                    }
+                product.ProductClusters.Add(productClusters);
                 }
             else
                 {
@@ -1152,42 +1099,140 @@
             }
 
 
-        private void OnFeatureNameChanged(object value)
+        }
+
+
+
+    private ProductCluster? draggingCluster;
+
+    private void HandleDrop(ProductCluster landingCluster)
+        {
+        if (draggingCluster == null) return;
+
+        int originalOrder = landingCluster.Order;
+        // Increase the order of clusters that are after the landing cluster
+        foreach (var cluster in product.ProductClusters.Where(c => c.Order >= originalOrder))
             {
-            featureName = value as string ?? string.Empty;
+            cluster.Order++;
+            }
+
+        // Assign the dropped cluster to the position of the landing cluster
+        draggingCluster.Order = originalOrder;
+
+        // Reorder clusters
+        int index = 0;
+        foreach (var cluster in product.ProductClusters.OrderBy(c => c.Order))
+            {
+            cluster.Order = index++;
+            cluster.IsDragOver = false;
+            }
+        }
 
 
-            if (string.IsNullOrEmpty(featureName))
+
+    #endregion
+
+
+    #region Remove Methods
+
+    private void RemoveCluster(ProductCluster clusterToRemove)
+        {
+        product.ProductClusters.Remove(clusterToRemove);
+        }
+
+    private void RemoveFeature(ProductCluster cluster, ProductClusterFeature featureToRemove)
+        {
+        cluster.ProductClusterFeatures.Remove(featureToRemove);
+        }
+    #endregion
+
+
+    #region AddNewFeature
+    private async Task AddNewCluster(ProductCluster AddFeature)
+        {
+        await JS.InvokeVoidAsync("showModal");
+
+        feature.ClusterId = AddFeature.ClusterId;
+
+
+
+        }
+    private async Task AddNewFeature()
+        {
+
+        var selectedFeature = features.FirstOrDefault(f => f.Name == featureName);
+        if (selectedFeature != null)
+            {
+            feature.Id = selectedFeature.Id;
+            var selectedCluster = product.ProductClusters.FirstOrDefault(c => c.ClusterId == feature.ClusterId);
+            if (selectedCluster != null)
                 {
 
+                ProductClusterFeature p = new ProductClusterFeature();
+                p.Feature = features.FirstOrDefault(a => a.Id == feature.Id);
+                p.FeatureId = feature.Id;
+                p.ProductCluster = selectedCluster;
+                p.ProductClusterId = selectedCluster.ClusterId;
+                selectedCluster.ProductClusterFeatures.Add(p);
+                await JS.InvokeVoidAsync("hideModal");
+                StateHasChanged();
                 }
             }
 
 
-        #endregion
 
 
-
-
-        #region MediaURl
-
-        private void AddMediaUrl()
+        }
+    private async Task LoadFeatures()
+        {
+        var response = await FeatureService.GetFeaturesAsync();
+        if (response.Success)
             {
-            if (!string.IsNullOrWhiteSpace(newMediaUrl))
-                {
-                product.ProductMedias.Add(new ProductMedia { ImageUrl = newMediaUrl });
-                newMediaUrl = string.Empty;
-                }
+            features = response.Data;
             }
-
-        private void RemoveMediaUrl(ProductMedia media)
+        else
             {
-            product.ProductMedias.Remove(media);
+            Snackbar.Add(response.Message, Severity.Error);
             }
-        #endregion
+        }
 
-    }
-    <script>
+
+    private void OnFeatureNameChanged(object value)
+        {
+        featureName = value as string ?? string.Empty;
+
+
+        if (string.IsNullOrEmpty(featureName))
+            {
+
+            }
+        }
+
+
+    #endregion
+
+
+
+
+    #region MediaURl
+
+    private void AddMediaUrl()
+        {
+        if (!string.IsNullOrWhiteSpace(newMediaUrl))
+            {
+            product.ProductMedias.Add(new ProductMedia { ImageUrl = newMediaUrl });
+            newMediaUrl = string.Empty;
+            }
+        }
+
+    private void RemoveMediaUrl(ProductMedia media)
+        {
+        product.ProductMedias.Remove(media);
+        }
+    #endregion
+
+}
+<script>
     var myModal; // Declare a global variable to store the modal instance
 
     function showModal() {
@@ -1201,4 +1246,4 @@
         }
     }
 
-    </script>
+</script>

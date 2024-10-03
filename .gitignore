@@ -10,3 +10,6 @@
 /Ecommerce.Mailer/bin/Release/net8.0
 /Ecommerce.Shared/bin
 *.v2
+DataAccess/obj/Debug/DataAccess.csproj.AssemblyReference.cache
+DataAccess/obj/Debug/.NETFramework,Version=v4.8.AssemblyAttributes.cs
+DataAccess/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache

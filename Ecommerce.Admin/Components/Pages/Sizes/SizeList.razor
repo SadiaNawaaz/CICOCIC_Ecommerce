@@ -13,6 +13,9 @@
             <li class="breadcrumb-item active">Sizes</li>
         </ol>
     </div>
+    <div class="ms-auto">
+        <button @onclick="NavigateToAddSize" class="btn btn-primary btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i>Add Size</button>
+    </div>
 </div>
 <div class="row">
     <div class="col-12">
@@ -27,7 +30,6 @@
                 </div>
             </div>
             <div class="panel-body">
-                <button class="btn btn-primary mb-3" @onclick="NavigateToAddSize">Add Size</button>
                 <MudDataGrid T="GeneralSize" Items="@sizes" RowsPerPage="5" Striped="true" Bordered="true">
                     <ColGroup>
                         <col style="width: 80%;" />
@@ -37,7 +39,7 @@
                     <Columns>
                         <PropertyColumn Property="x => x.Name" Title="Name" />
 
-                        <TemplateColumn CellClass="d-flex justify-end">
+                        <TemplateColumn>
                             <HeaderTemplate>
                                 <div>Actions</div>
                             </HeaderTemplate>

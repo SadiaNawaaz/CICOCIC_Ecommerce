@@ -31,6 +31,8 @@ public class Product : BaseEntity
     public long BrandId { get; set; }
     public Brand Brand { get; set; }
     public double Price { get; set; }
+    public string? Description { get; set; }
+    public string? ShortDescription { get; set; }
 
     public List<ProductCluster> ProductClusters { get; set; } = new List<ProductCluster>();
 

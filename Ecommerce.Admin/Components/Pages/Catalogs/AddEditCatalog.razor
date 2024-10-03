@@ -75,7 +75,7 @@
 
                             <div class="col-md-4">
                                 <label class="form-label"> Slug</label>
-                                <InputText @bind-Value="catalog.Slug" class="form-control" id="exampleInputEmail2" />
+                                <InputText @bind-Value="catalog.Slug" class="form-control" id="exampleInputEmail2"  placeholder="Slug"/>
                             </div>
 
                         </div>
@@ -308,7 +308,27 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="form-label col-form-label col-lg-4">Color</label>
+                                <label class="form-label col-form-label col-lg-4">
+                                    Color &nbsp;&nbsp;
+
+
+                                    <div>
+
+                                        @if (catalog.GeneralColorId != null)
+                                            {
+                                            var selectedColor = colors.FirstOrDefault(c => c.Id == catalog.GeneralColorId);
+                                            if (selectedColor != null)
+                                                {
+
+
+                                                <span class="badge" style="background-color:@selectedColor.HexCode; color:@selectedColor.HexCode;border-color:black"> . .</span>
+                                                }
+                                            }
+
+
+                                    </div>
+
+                                </label>
 
                                 <div class="col-lg-8">
                                     <select class="form-select" @bind="@catalog.GeneralColorId">
@@ -317,7 +337,7 @@
                                             {
                                             foreach (var col in colors)
                                                 {
-                                                <option value="@col.Id" style="background-color:@col.HexCode">@col.HexCode</option>
+                                                <option value="@col.Id" >@col.Name</option>
                                                 }
                                             }
                                     </select>

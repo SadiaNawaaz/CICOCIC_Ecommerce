@@ -17,6 +17,9 @@
             <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Model Years</li>
         </ol>
     </div>
+    <div class="ms-auto">
+        <button @onclick="NavigateToAddEditModelYear" class="btn btn-primary btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i>Add Year</button>
+    </div>
 </div>
 
 <div class="panel panel-inverse">
@@ -33,22 +36,6 @@
     <!-- END panel-heading -->
     <!-- BEGIN panel-body -->
     <div class="panel-body">
-        <div class="row fileupload-buttonbar">
-            <div class="col-xl-7 mb-3">
-                <button type="button" class="btn btn-primary start " @onclick="NavigateToAddEditModelYear">
-                    <i class="fa fa-fw fa-add"></i>
-                    <span>Add new</span>
-                </button>
-                <!-- The global file processing state -->
-                <span class="fileupload-process"></span>
-            </div>
-            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
-                <div class="progress progress-striped active">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                </div>
-                <div class="progress-extended">&nbsp;</div>
-            </div>
-        </div>
         <MudDataGrid T="ModelYear" Items="@modelYears" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
             <ColGroup>
                 <col style="width: 90%;" />
@@ -58,7 +45,7 @@
             <Columns>
                 <!-- PropertyColumn for the year -->
                 <PropertyColumn Property="x => x.Year" Title="Year" Style="width:90%" />
-                <TemplateColumn CellClass="d-flex justify-end" Style="width:10%">
+                <TemplateColumn Style="width:10%">
                     <HeaderTemplate>
                         <div>Edit</div>
                     </HeaderTemplate>

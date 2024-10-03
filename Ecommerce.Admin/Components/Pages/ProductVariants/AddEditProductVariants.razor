@@ -185,7 +185,7 @@
 
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
+                    <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Specifications</b>
                 </div>
                 <div class="card-body">
 
@@ -197,7 +197,7 @@
                                 {
 
 
-                                <div class="row mb-3 gx-3 alert alert-info align-items-center">
+                                <div class="row mb-3 gx-3 alert alert-success align-items-center">
                                     <div class="col-10">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
@@ -381,7 +381,22 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Color</label>
+                            <label class="form-label col-form-label col-lg-4">
+                                Color  &nbsp;&nbsp;
+                                <div>
+
+                                    @if (productVariant.GeneralColorId != null)
+                                        {
+                                        var selectedColor = colors.FirstOrDefault(c => c.Id == productVariant.GeneralColorId);
+                                        if (selectedColor != null)
+                                            {
+                                            <span class="badge" style="background-color:@selectedColor.HexCode; color:@selectedColor.HexCode;border-color:black"> . .</span>
+                                            }
+                                        }
+
+
+                                </div>
+                            </label>
                             <div class="col-lg-8">
                                 <select class="form-select" @bind="@productVariant.GeneralColorId">
                                     <option value="">-- Select Color --</option>
@@ -391,7 +406,7 @@
                                             {
 
 
-                                            <option value="@col.Id" style="color:@col.HexCode;background-color:@col.HexCode;">@col.Name</option>
+                                            <option value="@col.Id">@col.Name</option>
                                             }
                                         }
 
