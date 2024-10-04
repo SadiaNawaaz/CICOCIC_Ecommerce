@@ -30,11 +30,11 @@
         </div>
     </div>
     <div class="panel-body">
-    
+
         <MudDataGrid T="Role" Items="@roles" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
             <ColGroup>
-                <col style="width: 90%;" />
-                <col style="width: 10%;" />
+                <col style="width: 60%;" />
+                <col style="width: 20%;" />
                 <col />
             </ColGroup>
             <Columns>
@@ -42,13 +42,26 @@
                 <PropertyColumn Property="x => x.Description" Title="Description" Style="width:90%" />
                 <TemplateColumn Style="width:10%">
                     <HeaderTemplate>
-                        <div>Edit</div>
+                        <div>Manage Records</div>
                     </HeaderTemplate>
                     <CellTemplate>
                         <MudStack Row>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditRole(context.Item)" />
+                            @*<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditRole(context.Item)" />
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteRole(context.Item)" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Security" Size="Size.Small" Class="text-primary" OnClick="() => ManagePermissions(context.Item)" /> 
+                            <MudIconButton Icon="@Icons.Material.Filled.Security" Size="Size.Small" Class="text-primary" OnClick="() => ManagePermissions(context.Item)" />*@
+
+                            <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="() => EditRole(context.Item)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => DeleteRole(context.Item)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="Manage Permissions" @onclick="() => ManagePermissions(context.Item)">
+                                <i class="fas fa-virus"></i>
+                            </button>
+
+
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>
@@ -66,90 +79,90 @@
     private string _searchString;
 
     protected override async Task OnInitializedAsync()
-    {
+        {
         await LoadRoles();
-    }
+        }
 
     private async Task LoadRoles()
-    {
-        try
         {
+        try
+            {
             var response = await roleService.GetRolesAsync();
             if (response.Success)
-            {
+                {
                 roles = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while loading roles: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+            }
         }
-    }
 
     private void EditRole(Role role)
-    {
+        {
         try
-        {
+            {
             NavigationManager.NavigateTo($"/AddEditRole/{role.Id}");
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while navigating to edit the role: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in EditRole: {ex}");
+            }
         }
-    }
 
     private async Task DeleteRole(Role role)
-    {
-        try
         {
+        try
+            {
             var response = await roleService.DeleteRoleAsync(role.Id);
             if (response.Success)
-            {
+                {
                 await LoadRoles();
                 Snackbar.Add(response.Message, Severity.Success);
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while deleting the role: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in DeleteRole: {ex}");
+            }
         }
-    }
 
     private void NavigateToAddEditRole()
-    {
+        {
         try
-        {
+            {
             NavigationManager.NavigateTo("/AddEditRole");
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while navigating to add or edit a role: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in NavigateToAddEditRole: {ex}");
+            }
         }
-    }
 
     private void ManagePermissions(Role role)
-    {
+        {
         try
-        {
+            {
             NavigationManager.NavigateTo($"/ManagePermissions/{role.Id}");
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while navigating to manage permissions: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in ManagePermissions: {ex}");
+            }
         }
-    }
 
 }

@@ -29,7 +29,7 @@
 @using Ecommerce.Shared.Services.Catalogs;
 @inject ICatalogService CatalogService
 
-  
+
 
     <EditForm Model="@catalog" OnValidSubmit="@HandleValidSubmit" FormName="brandForm" @onkeydown="HandleKeyDown">
         <DataAnnotationsValidator />
@@ -178,7 +178,7 @@
 
 
                         <div class="modal" id="modal-without-animation">
-                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-dialog modal-xl modal-dialog-scrollable">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title">Add/Edit Product Specifications</h4>
@@ -202,7 +202,54 @@
                                         </div>
 
 
-                                        @if (catalog != null && catalog.CatalogClusters != null && catalog.CatalogClusters.Count > 0)
+
+                                        <div class="accordion" id="catalogAccordion">
+                                            <!-- Loop through each cluster -->
+
+                                            @if (catalog != null && catalog.CatalogClusters != null && catalog.CatalogClusters.Count > 0)
+                                                {
+                                                @foreach (var clus in catalog.CatalogClusters)
+                                                    {
+                                                    <div class="accordion-item">
+                                                        <h2 class="accordion-header d-flex justify-content-between align-items-center alert-success" id="heading-@clus.Cluster.Id">
+                                                            <button class="accordion-button alert alert-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@clus.Cluster.Id" aria-expanded="false" aria-controls="collapse-@clus.Cluster.Id">
+                                                                @clus.Cluster.Name
+                                                            </button>
+                                                            <!-- Cross button aligned to the right -->
+                                                            <button type="button" @onclick="() => RemoveCluster(clus)" class="btn btn-outline-danger btn-sm mb-40px">
+                                                                <i class="fa fa-times"></i>
+                                                            </button>
+                                                        </h2>
+
+                                                        <div id="collapse-@clus.Cluster.Id" class="accordion-collapse collapse" aria-labelledby="heading-@clus.Cluster.Id" data-bs-parent="#catalogAccordion">
+                                                            <div class="accordion-body">
+                                                                <!-- Features for the cluster -->
+                                                                @foreach (var f in clus.CatalogClusterFeatures)
+                                                                    {
+                                                                    <div class="row mb-3 gx-3">
+                                                                        <div class="col-2">
+                                                                            <ul id="tag-size" class="primary">
+                                                                                <li>@f.Feature.Name</li>
+                                                                            </ul>
+                                                                        </div>
+                                                                        <div class="col-4">
+                                                                            <input type="text" class="form-control" value="@f.Value" />
+                                                                        </div>
+                                                                        <div class="col-1">
+                                                                            <button type="button" @onclick="() => RemoveFeature(clus, f)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                    }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    }
+                                                }
+                                        </div>
+
+
+
+                                        @*@if (catalog != null && catalog.CatalogClusters != null && catalog.CatalogClusters.Count > 0)
                                             {
 
                                             foreach (var clus in catalog.CatalogClusters)
@@ -243,7 +290,7 @@
 
                                                 }
 
-                                            }
+                                            }*@
 
 
                                     </div>

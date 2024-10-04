@@ -6060,7 +6060,7 @@ textarea.form-control-lg {
     }
 }
 
-.accordion-button:not(.collapsed) {
+/*.accordion-button:not(.collapsed) {
     color: var(--bs-accordion-active-color);
     background-color: var(--bs-accordion-active-bg);
     box-shadow: inset 0 calc(-1 * var(--bs-accordion-border-width)) 0 var(--bs-accordion-border-color)
@@ -6069,7 +6069,7 @@ textarea.form-control-lg {
     .accordion-button:not(.collapsed)::after {
         background-image: var(--bs-accordion-btn-active-icon);
         transform: var(--bs-accordion-btn-icon-transform)
-    }
+    }*/
 
 .accordion-button::after {
     flex-shrink: 0;
@@ -40427,4 +40427,11 @@ body .sp-container {
 .mud-table-head {
     font-weight: bold !important;
     font-family: 'Roboto', sans-serif;
+}
+
+
+
+.mud-table-head {
+    background-color: #348FE2;
+    color: white;
 }

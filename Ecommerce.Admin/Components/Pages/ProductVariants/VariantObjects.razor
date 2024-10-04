@@ -10,6 +10,13 @@
 @inherits AuthenticatedComponent
 
 
+<style>
+
+    .mud-table-head {
+        background-color: #f59c1a;
+        color: white;
+    }
+</style>
 
 <div class="d-flex align-items-center mb-3">
     <div>
@@ -78,26 +85,26 @@
             </ul>
             <div class="tab-content p-3">
 
-                     <div class="input-group mb-3">
-         <button class="btn btn-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Filter products <b class="caret"></b></button>
-         <div class="dropdown-menu">
-             <a class="dropdown-item" href="#">Action</a>
-             <a class="dropdown-item" href="#">Another action</a>
-             <a class="dropdown-item" href="#">Something else here</a>
-             <div role="separator" class="dropdown-divider"></div>
-             <a class="dropdown-item" href="#">Separated link</a>
-         </div>
-         <div class="flex-fill position-relative">
-             <div class="input-group">
-                 <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
-                     <i class="fa fa-search opacity-5"></i>
-                 </div>
-                 <input type="text" class="form-control ps-35px bg-light" placeholder="Search products..."  @bind="searchTerm" @oninput="FilterProducts" />
-             </div>
-         </div>
-     </div>
-                <div class="tab-pane fade show active" id="allTab"> 
-                              </div>
+                <div class="input-group mb-3">
+                    <button class="btn btn-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Filter products <b class="caret"></b></button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                        <div role="separator" class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Separated link</a>
+                    </div>
+                    <div class="flex-fill position-relative">
+                        <div class="input-group">
+                            <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                                <i class="fa fa-search opacity-5"></i>
+                            </div>
+                            <input type="text" class="form-control ps-35px bg-light" placeholder="Search products..." @bind="searchTerm" @oninput="FilterProducts" />
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade show active" id="allTab">
+                </div>
 
 
 
@@ -199,7 +206,7 @@
 
                             <TemplateColumn>
                                 <HeaderTemplate>
-                                    <div>Actions</div>
+                                    <div>Manage Records</div>
                                 </HeaderTemplate>
                                 <CellTemplate>
                                     <MudStack Row>
@@ -221,7 +228,7 @@
 
 
 
-    
+
     </div>
 </div>
 
@@ -282,7 +289,7 @@
 
     private int _activeTab = 0;
 
-    private void TabClick(int  tabName)
+    private void TabClick(int tabName)
         {
         _activeTab = tabName;
         switch (_activeTab)
@@ -293,7 +300,7 @@
                 break;
             case 1:
                 _activeTab = 1;
-                productVariants = AllproductVariants.Where(a=>a.Publish==true).ToList();
+                productVariants = AllproductVariants.Where(a => a.Publish == true).ToList();
                 break;
             case 2:
                 _activeTab = 2;

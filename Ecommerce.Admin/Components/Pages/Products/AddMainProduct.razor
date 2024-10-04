@@ -323,6 +323,7 @@
                                         </div>
 
                                     </div>
+                                    @*//New Code is here /*@
                                     <div>
                                         @if (product != null && product.ProductClusters != null && product.ProductClusters.Count > 0)
                                             {
@@ -332,55 +333,63 @@
                                                     <li class="mb-3 p-0"
                                                         style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);"
                                                         @ondrop="() => HandleDrop(clus)"
-                                                        @key="clus"
                                                         draggable="true"
                                                         @ondragstart="() => draggingCluster = clus"
                                                         @ondragend="() => draggingCluster = null">
 
                                                         <!-- Cluster Heading -->
                                                         <div class="d-flex justify-content-between align-items-center alert alert-primary p-2"
-                                                             style=" border-radius: 10px 10px 0 0;">
+                                                             style="border-radius: 10px 10px 0 0;">
                                                             <div>
                                                                 <strong>@clus.Cluster.Name</strong>
                                                             </div>
                                                             <div>
+                                                                <!-- Toggle Collapse Button -->
+                                                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCluster-@clus.Cluster.Id" aria-expanded="false">
+                                                                    <i class="fa fa-chevron-down"></i>
+                                                                </button>
+                                                                <!-- Remove Cluster Button -->
                                                                 <button type="button" @onclick="() => RemoveCluster(clus)" class="btn btn-outline-danger btn-sm">
                                                                     <i class="fa fa-trash"></i>
                                                                 </button>
+                                                                <!-- Add New Cluster Button -->
                                                                 <button type="button" @onclick="() => AddNewCluster(clus)" class="btn btn-outline-primary btn-sm">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
 
-                                                        <!-- Cluster Features -->
-                                                        @if (clus.ProductClusterFeatures != null && clus.ProductClusterFeatures.Count > 0)
-                                                            {
+                                                        <!-- Cluster Features (Collapsible Content) -->
+                                                        <div id="collapseCluster-@clus.Cluster.Id" class="collapse">
                                                             <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
-                                                                @foreach (var f in clus.ProductClusterFeatures)
+                                                                @if (clus.ProductClusterFeatures != null && clus.ProductClusterFeatures.Count > 0)
                                                                     {
-                                                                    <div class="row mb-2 align-items-center">
-                                                                        <div class="col-md-2">
-                                                                            <span>@f.Feature.Name</span>
+                                                                    @foreach (var f in clus.ProductClusterFeatures)
+                                                                        {
+                                                                        <div class="row mb-2 align-items-center">
+                                                                            <div class="col-md-2">
+                                                                                <span>@f.Feature.Name</span>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input type="text" class="form-control" @bind-value="@f.Value" />
+                                                                            </div>
+                                                                            <div class="col-md-1 text-end">
+                                                                                <button type="button" @onclick="() => RemoveFeature(clus, f)" class="btn btn-default d-block">
+                                                                                    <i class="fa fa-trash"></i>
+                                                                                </button>
+                                                                            </div>
                                                                         </div>
-                                                                        <div class="col-md-3">
-                                                                            <input type="text" class="form-control" @bind-value="@f.Value" />
-                                                                        </div>
-                                                                        <div class="col-md-1 text-end">
-                                                                            <button type="button" @onclick="() => RemoveFeature(clus, f)" class="btn btn-default d-block">
-                                                                                <i class="fa fa-trash"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
+                                                                        }
                                                                     }
                                                             </div>
-                                                            }
+                                                        </div>
                                                     </li>
                                                     }
                                             </ul>
                                             }
-
                                     </div>
+
+                              
                                 </div>
                                 <div class="modal-footer">
                                     <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>

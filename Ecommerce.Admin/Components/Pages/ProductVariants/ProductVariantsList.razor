@@ -8,7 +8,13 @@
 @rendermode InteractiveServer
 @inherits AuthenticatedComponent
 
+<style>
 
+    .mud-table-head {
+        background-color: #653ea7;
+        color: white;
+    }
+</style>
 
 <div class="d-flex align-items-center mb-3">
     <div>
@@ -31,19 +37,6 @@
         </div>
     </div>
     <div class="panel-body">
-
-        <div class="row fileupload-buttonbar">
-            <div class="col-xl-7">
-
-                <span class="fileupload-process"></span>
-            </div>
-            <div class="col-xl-5 fileupload-progress fade d-none d-xl-block">
-                <div class="progress progress-striped active">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                </div>
-                <div class="progress-extended">&nbsp;</div>
-            </div>
-        </div>
         <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
             <!-- Define ColGroup for column widths -->
             <ColGroup>
@@ -54,7 +47,7 @@
                 <col />
                 <col />
                 <col />
-                
+
                 <col style="width:40px;" />
             </ColGroup>
 
@@ -118,7 +111,7 @@
                             var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
                         }
                         @*<div style="background-color:@hexCode; color:@(hexCode == "#000000" ? "#FFFFFF" : "#000000"); padding: 5px; border-radius: 3px;">
-                        </div>*@
+                            </div>*@
 
                         <span class="badge" style="background-color:@hexCode"> @hexCode </span>
                     </CellTemplate>
@@ -153,7 +146,7 @@
                     </HeaderTemplate>
                     <CellTemplate>
                         <MudStack Row>
-                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="@(e => EditProductVariant(context.Item))">
+                            <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="@(e => EditProductVariant(context.Item))">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Object" @onclick="@(e => CreateObject(context.Item))">
@@ -170,7 +163,7 @@
             </PagerContent>
         </MudDataGrid>
 
-       
+
     </div>
 </div>
 
@@ -194,7 +187,7 @@
         {
         try
             {
-            var response = await productVariantService.GetAllProductVariantsAsync(ProductId,UserId,IsAgent);
+            var response = await productVariantService.GetAllProductVariantsAsync(ProductId, UserId, IsAgent);
             if (response.Success)
                 {
                 productVariants = response.Data;

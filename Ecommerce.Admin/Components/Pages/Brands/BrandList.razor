@@ -35,23 +35,34 @@
 
 
 
-                <MudDataGrid T="Brand" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+                <MudDataGrid T="Brand" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
                     <ColGroup>
-                        <col style="width: 70%;" />
+                        <col style="width: 60%;" />
                         <col style="width: 20%;" />
-                        <col style="width: 10%;" />
+                        <col style="width: 20%;" />
                     </ColGroup>
                     <Columns>
                         <PropertyColumn Property="x => x.Name" Title="Name" />
                         <PropertyColumn Property="x => x.ImageUrl" Title="Image URL" />
                         <TemplateColumn>
                             <HeaderTemplate>
-                                <div>Actions</div>
+                                <div>Manage Records</div>
                             </HeaderTemplate>
                             <CellTemplate>
                                 <MudStack Row>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditBrand(context.Item.Id)" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />
+                                    @*<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditBrand(context.Item.Id)" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />*@
+
+
+
+                                    <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="() => EditBrand(context.Item.Id)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => DeleteBrand(context.Item)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+
                                 </MudStack>
                             </CellTemplate>
                         </TemplateColumn>
