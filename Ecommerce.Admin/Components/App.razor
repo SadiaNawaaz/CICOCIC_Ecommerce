@@ -42,7 +42,7 @@
     </style>
 </head>
 <body>
-    <Routes />
+    <Routes @rendermode="InteractiveServer"/>
     <script src="_framework/blazor.web.js"></script>
     <!-- ================== BEGIN core-js ================== -->
     <script src="/assets/js/vendor.min.js"></script>
@@ -50,7 +50,6 @@
 
     <!-- ================== END core-js ================== -->
     <!-- ================== BEGIN page-js ================== -->
-  
     <!-- ================== END page-js ================== -->
 
     <script src="/assets/plugins/jquery-migrate/dist/jquery-migrate.min.js"></script>
@@ -69,6 +68,25 @@
         anchor.click();
     };
     </script>
+
+    <script>
+    window.saveAsFile = function (fileName, byteBase64) {
+        var link = document.createElement('a');
+        link.download = fileName;
+        link.href = 'data:application/octet-stream;base64,' + byteBase64;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+        window.reloadJsFile = function (scriptUrl) {
+    const scriptElement = document.createElement('script');
+    scriptElement.src = scriptUrl + '?cachebuster=' + new Date().getTime(); // Prevent caching
+    scriptElement.type = 'text/javascript';
+    document.head.appendChild(scriptElement);
+};
+
+    </script>
+
 </body>
 
 </html>

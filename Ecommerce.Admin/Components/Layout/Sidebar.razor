@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @using System.Security.Claims;
+@inject IJSRuntime JS
 <div id="sidebar" class="app-sidebar" data-bs-theme="dark">
     <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
         <div class="menu">
@@ -26,11 +27,11 @@
             </div>
             <div class="menu-header">Navigation</div>
 
-           
+
             @foreach (var menu in Menus)
-            {
-                if (HasPermission(menu.PermissionId) || menu.SubItems.Any(subItem => HasPermission(subItem.PermissionId)))
                 {
+                if (HasPermission(menu.PermissionId) || menu.SubItems.Any(subItem => HasPermission(subItem.PermissionId)))
+                    {
 
                     var isOpen = SidebarStateService.IsMenuOpen(menu.Title);
                     <div class="menu-item has-sub @(isOpen ? "active" : "")">
@@ -43,20 +44,20 @@
                         </a>
                         <div class="menu-submenu @(isOpen ? "show" : "")">
                             @foreach (var subItem in menu.SubItems)
-                            {
-                                if (HasPermission(subItem.PermissionId))
                                 {
-                                <div class="menu-item">
-                                    <NavLink href="@subItem.Route" class="menu-link">
-                                        <div class="menu-text">@subItem.Title</div>
-                                    </NavLink>
-                                </div>
+                                if (HasPermission(subItem.PermissionId))
+                                    {
+                                    <div class="menu-item">
+                                        <NavLink href="@subItem.Route" class="menu-link">
+                                            <div class="menu-text">@subItem.Title</div>
+                                        </NavLink>
+                                    </div>
+                                    }
                                 }
-                            }
                         </div>
                     </div>
+                    }
                 }
-            }
         </div>
     </div>
 </div>
@@ -86,7 +87,7 @@
             new SubMenuItem { Title = "Brands", Route = "/BrandList", PermissionId = 12 },
             new SubMenuItem { Title = "Model Years", Route = "/ModelYearList", PermissionId = 13 },
             new SubMenuItem { Title = "Sizes", Route = "/SizeList", PermissionId = 14 },
-            new SubMenuItem { Title = "Color", Route = "/ColorList", PermissionId = 15 }
+            new SubMenuItem { Title = "Colors", Route = "/ColorList", PermissionId = 15 }
         }
     },
     new MenuItem
@@ -120,7 +121,9 @@
         PermissionId = 5,
         SubItems = new List<SubMenuItem>
 {
-            new SubMenuItem { Title = "Product", Route = "/MainProductList", PermissionId = 5 }
+                new SubMenuItem { Title = "Product", Route = "/MainProductList", PermissionId = 5 },
+                new SubMenuItem { Title = "Variant", Route = "/ProductVariantList", PermissionId = 5 },
+                new SubMenuItem { Title = "Objects", Route = "/VariantObjects", PermissionId = 5 }
         }
     },
     new MenuItem
@@ -187,48 +190,66 @@
     private bool IsAgent = false;
     public List<int> UserPermissions { get; set; } = new List<int>();
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !isInitialized)
         {
+
+        if (firstRender && !isInitialized)
+            {
             isInitialized = true;
             await SidebarStateService.LoadStateAsync();
+
             StateHasChanged();
+            }
+
+        try
+            {
+            await JS.InvokeVoidAsync("handleThemePanel");
+            await JS.InvokeVoidAsync("handleResetLocalStorage");
+            }
+        catch (Exception ex)
+            {
+
+            }
+
+
         }
-    }
+
+
 
     private async Task ToggleMenuAsync(string menuId)
-    {
+        {
         await SidebarStateService.ToggleMenuAsync(menuId);
-    }
+        }
 
     private class MenuItem
-    {
+        {
         public string Title { get; set; }
         public string IconClass { get; set; }
         public List<string> Routes { get; set; }
         public List<SubMenuItem> SubItems { get; set; }
         public int PermissionId { get; set; }
-    }
+        }
 
     private class SubMenuItem
-    {
+        {
         public string Title { get; set; }
         public string Route { get; set; }
         public int PermissionId { get; set; }
-    }
+        }
 
 
     public string UserName = "";
     protected override async Task OnInitializedAsync()
-    {
+        {
 
         try
-        {
+            {
+
+
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
             if (user.Identity.IsAuthenticated)
-            {
+                {
 
                 UserName = user.Identity.Name;
                 var isAgentClaim = user.FindFirst(ClaimTypes.Actor)?.Value;
@@ -237,17 +258,20 @@
                               .Where(c => c.Type == ClaimTypes.Role)
                               .Select(c => int.Parse(c.Value))
                               .ToList();
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
+
+            }
 
         }
 
-    }
+
 
     private bool HasPermission(int permissionId)
-    {
+        {
         return UserPermissions.Contains(permissionId);
-    }
+        }
 }
+<script src="/assets/js/app.min.js"></script>

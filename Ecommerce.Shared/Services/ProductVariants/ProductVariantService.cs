@@ -237,7 +237,7 @@ public class ProductVariantService: IProductVariantService
           .Include(pv => pv.GeneralSize)
           .Include(pv => pv.GeneralColor)
           .Include(pv => pv.ModelYear)
-          .Where(pv => pv.ProductId == ProductId);
+           .Where(pv => ProductId == 0 || pv.ProductId == ProductId);
 
             // Apply additional filtering if the user is an agent
             if (IsAgent)

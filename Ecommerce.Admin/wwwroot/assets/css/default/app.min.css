@@ -40431,7 +40431,51 @@ body .sp-container {
 
 
 
-.mud-table-head {
+/*.mud-table-head {
     background-color: #348FE2;
     color: white;
+}
+*/
+.mud-table-head {
+    font-weight: bold !important;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bs-app-theme);
+    color: var(--bs-app-theme-color);
+}
+.btn-General {
+    --bs-btn-color: var(--bs-app-theme-color);
+    --bs-btn-bg: var(--bs-app-theme);
+    --bs-btn-border-color: var(--bs-app-theme-hover);
+    --bs-btn-hover-color: var(--bs-app-theme-hover);
+    --bs-btn-hover-bg: var(--bs-app-theme-color);
+    --bs-btn-hover-border-color: var(--bs-app-theme-active-border-color);
+    --bs-btn-focus-shadow-rgb: var(--bs-app-theme-active-border-color);
+    --bs-btn-active-color: var(--bs-app-theme-hover-color);
+    /*  --bs-btn-active-bg: #276baa;*/
+    --bs-btn-active-bg: var(--bs-app-theme-hover);
+    /* --bs-btn-active-border-color: #276baa;*/
+    --bs-btn-active-border-color: var(--bs-app-theme-hover-border-color);
+  /*  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);*/
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(var(--bs-app-theme-rgb), 0.125);
+    --bs-btn-disabled-color: #FFFFFF;
+    --bs-btn-disabled-bg: #67abe9;
+    --bs-btn-disabled-border-color: #67abe9
+}
+
+.btn-GeneralBack {
+    --bs-btn-color: var(--bs-app-theme);
+    --bs-btn-border-color: var(--bs-app-theme-hover);
+    --bs-btn-hover-color: var(--bs-app-theme-hover);
+    --bs-btn-hover-bg: var(--bs-app-theme-color);
+    --bs-btn-hover-border-color: var(--bs-app-theme-active-border-color);
+    --bs-btn-focus-shadow-rgb: var(--bs-app-theme-active-border-color);
+    --bs-btn-active-color: #FFFFFF;
+    --bs-btn-active-bg: var(--bs-app-theme-active);
+   
+    --bs-btn-active-border-color: #276baa;
+    /*    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);*/
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(var(--bs-app-theme-rgb), 0.125);
+    --bs-btn-disabled-color: #FFFFFF;
+    --bs-btn-disabled-bg: #67abe9;
+    --bs-btn-disabled-border-color: #67abe9;
 }

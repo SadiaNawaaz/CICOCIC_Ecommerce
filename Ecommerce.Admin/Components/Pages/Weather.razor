@@ -1,38 +1,38 @@
 ﻿@page "/Testing"
 
 @using System.Threading
+@inject CsvExportService CsvExportService
+@rendermode InteractiveServer
 
+<PageTitle>Index</PageTitle>
 
+<MudGrid>
+    <MudItem xs="12" sm="6" md="4">
+        <MudAutocomplete T=Country
+                         Label="Select Country"
+                         @bind-Value=selectedCountry
+                         SearchFunc=this.FilterCountriesAsync
+                         ToStringFunc=DisplayValue />
+    </MudItem>
+</MudGrid>
 
-    <PageTitle>Index</PageTitle>
+@code {
+    private Country? selectedCountry;
 
-    <MudGrid>
-        <MudItem xs="12" sm="6" md="4">
-            <MudAutocomplete T=Country
-                             Label="Select Country"
-                             @bind-Value=selectedCountry
-                             SearchFunc=this.FilterCountriesAsync
-                             ToStringFunc=DisplayValue />
-        </MudItem>
-    </MudGrid>
+    private Func<Country, string?> DisplayValue = item => item is null ? null : item.Name;
 
-    @code {
-        private Country? selectedCountry;
-
-        private Func<Country, string?> DisplayValue = item => item is null ? null : item.Name;
-
-        private async Task<IEnumerable<Country>> FilterCountriesAsync(string value)
+    private async Task<IEnumerable<Country>> FilterCountriesAsync(string value)
         {
-            // pretend to be a async api or Db call
-            await Task.Yield();
+        // pretend to be a async api or Db call
+        await Task.Yield();
 
-            if (!string.IsNullOrWhiteSpace(value))
-                return _countries.Where(item => item.Name.ToLower().Contains(value.ToLower())) ?? _countries;
+        if (!string.IsNullOrWhiteSpace(value))
+            return _countries.Where(item => item.Name.ToLower().Contains(value.ToLower())) ?? _countries;
 
-            return _countries;
+        return _countries;
         }
 
-        private List<Country> _countries = new()
+    private List<Country> _countries = new()
 {
        new Country("France"),
        new Country("Finland"),
@@ -40,5 +40,9 @@
        new Country("United States of America"),
     };
 
-        public record Country(string Name);
-    }
+    public record Country(string Name);
+
+
+
+
+}

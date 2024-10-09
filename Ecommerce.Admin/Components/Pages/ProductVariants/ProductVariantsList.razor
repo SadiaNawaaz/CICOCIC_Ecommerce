@@ -7,6 +7,8 @@
 @inject IJSRuntime jsRuntime
 @rendermode InteractiveServer
 @inherits AuthenticatedComponent
+@inject CsvExportService CsvExportService
+
 
 <style>
 
@@ -37,7 +39,24 @@
         </div>
     </div>
     <div class="panel-body">
-        <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="5" Striped="true" Bordered="true">
+        <div class="input-group mb-3">
+            <button class="btn btn-white" type="button" aria-haspopup="true" aria-expanded="false">Filter Variants <b class="caret"></b></button>
+
+
+
+            <div class="flex-fill position-relative">
+                <div class="input-group">
+                    <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                        <i class="fa fa-search opacity-5"></i>
+                    </div>
+                    <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..." @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterVariants" />
+                </div>
+            </div>
+            &nbsp; &nbsp; &nbsp;
+            <ExportComponent T="ProductVariant" Data="filteredVariants" FileNamePrefix="ProductVariants"  ColumnMappings="productVariantColumnMappings"/>
+
+        </div>
+        <MudDataGrid T="ProductVariant" Items="@filteredVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
             <!-- Define ColGroup for column widths -->
             <ColGroup>
                 <col style="width:40px;" />
@@ -175,8 +194,19 @@
     public long ProductId { get; set; }
 
     private bool _resizeColumn;
-    private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
+    private string searchTerm = string.Empty;
+    private List<ProductVariant> filteredVariants = new List<ProductVariant>();
+    private List<ProductVariant> productVariants = new List<ProductVariant>();
+    private Dictionary<string, string> productVariantColumnMappings = new Dictionary<string, string>
+    {
+        { "ProductId", "Product ID" },
+        { "Name", "Product Name" },
+        { "Price", "Price (USD)" },
+        { "GeneralSize", "Size" },
+        { "GeneralColor", "Color" },
+        { "Publish", "Is Published" },
 
+    };
     protected override async Task OnInitializedAsync()
         {
         await base.OnInitializedAsync();
@@ -191,6 +221,7 @@
             if (response.Success)
                 {
                 productVariants = response.Data;
+                filteredVariants = productVariants;
                 }
             else
                 {
@@ -203,11 +234,31 @@
             Console.Error.WriteLine($"Error in LoadProductVariants: {ex}");
             }
         }
+    private void FilterVariants()
+        {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+            filteredVariants = productVariants;
+            }
+        else
+            {
+            filteredVariants = productVariants.Where(v =>
+                (v.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (v.variantType?.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (v.TypeValue?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (v.GeneralSize.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
 
+            ).ToList();
+            }
+        }
     private void EditProductVariant(ProductVariant productVariant)
         {
         try
             {
+            if(ProductId==0 || ProductId==null)
+                {
+                ProductId = productVariant.ProductId;
+                }
             navigationManager.NavigateTo($"/AddEditProductVariants?Id={productVariant.Id}&ProductId={ProductId}");
             }
         catch (Exception ex)
@@ -263,6 +314,10 @@
         {
         try
             {
+            if (ProductId == 0 || ProductId == null)
+                {
+                ProductId = productVariant.ProductId;
+                }
             navigationManager.NavigateTo($"/AddEditVariantObject?Id={productVariant.Id}&ProductId={ProductId}");
             }
         catch (Exception ex)
@@ -271,4 +326,11 @@
             Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
             }
         }
+
+
+
+
+
+
+
 }

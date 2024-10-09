@@ -1,0 +1,46 @@
+﻿@typeparam T
+@inject CsvExportService CsvExportService
+@inject ISnackbar Snackbar
+
+<div id="" class="d-flex d-lg-inline-flex justify-content-center mb-md-2 mb-lg-0 mr-5">
+    <div class="dt-buttons btn-group flex-wrap">
+
+        <button class="btn btn-secondary buttons-csv buttons-html5 btn-sm" tabindex="0" aria-controls="data-table-combine" type="button" @onclick='() => Export("csv")'><span>CSV</span></button>
+        <button class="btn btn-secondary buttons-excel buttons-html5 btn-sm" tabindex="0" aria-controls="data-table-combine" type="button" @onclick='() => Export("excel")'>
+            <span>Excel</span>
+
+            
+        </button> <button class="btn btn-secondary buttons-print btn-sm" tabindex="0" aria-controls="data-table-combine" type="button" @onclick='() => Export("pdf")'><span>Print</span></button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<T> Data { get; set; } // Data passed from the parent
+    [Parameter] public string FileNamePrefix { get; set; } = "ExportedData"; // Optional file name prefix
+    [Parameter] public Dictionary<string, string> ColumnMappings { get; set; }
+
+    private async Task Export(string exportType)
+        {
+        if (Data == null || !Data.Any())
+            {
+            Snackbar.Add("No data to export.", Severity.Warning);
+            return;
+            }
+
+        switch (exportType)
+            {
+            case "csv":
+                await CsvExportService.ExportDataAsCsv(Data, $"{FileNamePrefix}_Export.csv", ColumnMappings);
+                break;
+            case "excel":
+                await CsvExportService.ExportDataAsExcel(Data, $"{FileNamePrefix}_Export.xlsx", ColumnMappings);
+                break;
+            case "pdf":
+                Snackbar.Add("PDF export functionality is not implemented yet.", Severity.Info);
+                break;
+            default:
+                Snackbar.Add("Unknown export type", Severity.Error);
+                break;
+            }
+        }
+}

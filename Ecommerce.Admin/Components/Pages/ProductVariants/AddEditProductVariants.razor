@@ -185,52 +185,117 @@
 
             <div class="card border-0 mb-4">
                 <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Specifications</b>
+               
+
+                    <button type="button" class="btn btn-indigo" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
+                        <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
+                        <b>View Product Specifications </b>
+                    </button>
                 </div>
                 <div class="card-body">
+                    <div class="modal" id="modal-without-animation">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="alert alert-indigo p-2 modal-header">
+                                    <h5>Product Specifications For @productVariant.Name</h5>
 
-                    <div>
-                        @if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
-                            {
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
 
-                            foreach (var clus in Product.ProductClusters)
-                                {
-
-
-                                <div class="row mb-3 gx-3 alert alert-indigo align-items-center">
-                                    <div class="col-10">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <ul class="list-unstyled mb-0">
-                                                    <li><strong>@clus.Cluster.Name</strong></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-2 text-end">
-
-                                    </div>
                                 </div>
-                                foreach (var f in clus.ProductClusterFeatures)
-                                    {
-                                    <div class="row mb-3 gx-3">
-                                        <div class="col-2">
-                                            <ul id="tag-size" class="primary">
-                                                <li>@f.Feature.Name</li>
+                                <div class="modal-body">
 
-                                            </ul>
-                                        </div>
-                                        <div class="col-4"><input type="text" class="form-control" @bind-value="@f.Value" readonly /></div>
+                                    <div>
+
+                                        @if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
+                                            {
+                                            @foreach (var clus in Product.ProductClusters)
+                                                {
+                                                <!-- Cluster Header with Collapse Toggle -->
+                                                <div class="mb-3 p-0" style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+                                                    <div class="d-flex justify-content-between align-items-center alert alert-indigo p-2" style="border-radius: 10px 10px 0 0;">
+                                                        <div>
+                                                            <strong>@clus.Cluster.Name</strong>
+                                                        </div>
+                                                        <div>
+                                                            <!-- Toggle Collapse Button -->
+                                                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCluster-@clus.Cluster.Id" aria-expanded="false">
+                                                                <i class="fa fa-chevron-down"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Collapsible Content (Features) -->
+                                                    <div id="collapseCluster-@clus.Cluster.Id" class="collapse">
+                                                        <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
+                                                            @foreach (var f in clus.ProductClusterFeatures)
+                                                                {
+                                                                <div class="row mb-2 align-items-center">
+                                                                    <div class="col-md-2">
+                                                                        <span>@f.Feature.Name</span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <input type="text" class="form-control" @bind-value="@f.Value" readonly />
+                                                                    </div>
+                                                                </div>
+                                                                }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                }
+                                            }
+
+
+                                        @*@if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
+        {
+
+        foreach (var clus in Product.ProductClusters)
+            {
+
+
+            <div class="row mb-3 gx-3 alert alert-indigo align-items-center">
+                <div class="col-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>@clus.Cluster.Name</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2 text-end">
+
+                </div>
+            </div>
+            foreach (var f in clus.ProductClusterFeatures)
+                {
+                <div class="row mb-3 gx-3">
+                    <div class="col-2">
+                        <ul id="tag-size" class="primary">
+                            <li>@f.Feature.Name</li>
+
+                        </ul>
+                    </div>
+                    <div class="col-4"><input type="text" class="form-control" @bind-value="@f.Value" readonly /></div>
+
+                </div>
+                }
+
+            }
+
+        }*@
+
 
                                     </div>
-                                    }
-
-                                }
-
-                            }
 
 
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+               
 
 
                 </div>

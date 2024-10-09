@@ -1,6 +1,7 @@
 using Blazored.SessionStorage;
 using Ecommerce.Admin.Authentication;
 using Ecommerce.Admin.Components;
+using Ecommerce.Admin.Components.Pages;
 using Ecommerce.Admin.Services;
 using Ecommerce.Mailer;
 using Ecommerce.Shared.Context;
@@ -60,7 +61,7 @@ builder.Services.AddScoped<ISliderService, SliderService>();
 builder.Services.AddTransient<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 builder.Services.AddScoped<IPopularCategoryService, PopularCategoryService>();
-
+builder.Services.AddScoped<CsvExportService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(

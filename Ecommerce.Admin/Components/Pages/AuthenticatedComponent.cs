@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
+using OfficeOpenXml;
+using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 
 namespace Ecommerce.Admin.Components.Pages;
 
@@ -47,3 +51,8 @@ public class AuthenticatedComponent : ComponentBase
     }
 
 }
+
+
+
+
+

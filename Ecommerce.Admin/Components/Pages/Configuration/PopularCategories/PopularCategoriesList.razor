@@ -34,7 +34,7 @@
                         <div class="mb-lg-0 mt-15px">
                             <label class="form-label">Upload Banner</label>
                             <InputFile OnChange="@(e => HandleFileChange(e))" style="display: none;" name="image" />
-                            <label class="btn btn-primary" style="cursor: pointer;">
+                            <label class="btn btn-General" style="cursor: pointer;">
                                 <i class="fa fa-fw fa-upload"></i> Select Banner
                                 <InputFile OnChange="@(e => HandleFileChange(e))" style="display:none" />
                             </label>
@@ -46,7 +46,7 @@
 
                     </div>
                     <div class="col-2 mt-15px">
-                        <button class="btn btn-primary" @onclick="@MarkCategory">Add To List</button>
+                        <button class="btn btn-General" @onclick="@MarkCategory">Add To List</button>
                     </div>
                 </div>
             </div>
