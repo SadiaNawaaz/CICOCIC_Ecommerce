@@ -1,28 +1,60 @@
-﻿@page "/counter"
+﻿@page "/Counter"
 
+<div class="container-fluid p-0">
+    <div class="row align-items-start">
+        <div class="col-xl-7 col-lg-12 col-md-12">
+            <div class="map-area" style="position: relative;">
+                <!-- Background Map Image -->
+                <img src="https://pixio.dexignzone.com/xhtml/images/map/map2.png" alt="Map" style="width: 100%;">
 
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-        Launch demo modal
-    </button>
-
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                <!-- Left Location Marker (Marker A) -->
+                <div class="loction-a wow" style="position: absolute; top: 30%; left: 5%; animation: bounce 2s ease-in-out infinite;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="47" viewBox="0 0 35 47" fill="none">
+                        <path d="M17.8211 5.10059C11.2718 5.10059 5.96484 10.4115 5.96484 16.9568C5.96484 23.5061 11.2757 28.8131 17.8211 28.8131C24.3704 28.8131 29.6773 23.5061 29.6773 16.9568C29.6773 10.4075 24.3704 5.10059 17.8211 5.10059Z" fill="#CC0D39"></path>
+                    </svg>
                 </div>
-                <div class="modal-body">
-                    ...
+
+                <!-- Right Location Marker (Marker B) -->
+                <div class="loction-b wow" style="position: absolute; top: 30%; right: 5%; animation: bounce 2s ease-in-out infinite;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="47" viewBox="0 0 35 47" fill="none">
+                        <path d="M17.8211 5.10059C11.2718 5.10059 5.96484 10.4115 5.96484 16.9568C5.96484 23.5061 11.2757 28.8131 17.8211 28.8131C24.3704 28.8131 29.6773 23.5061 29.6773 16.9568C29.6773 10.4075 24.3704 5.10059 17.8211 5.10059Z" fill="#CC0D39"></path>
+                    </svg>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+
+                <!-- Distance Line (1 km) -->
+                <div class="map-line" style="position: absolute; top: 35%; left: 25%; right: 25%; height: 1px; background-color: #CC0D39; animation: moveLine 2s ease-in-out infinite;">
+                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); color: #CC0D39; font-weight: bold;">
+                        1 km
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- CSS for Animation and Layout -->
+<style>
+    /* Bounce Animation for the Markers */
+    @@keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    /* Line Movement Animation */
+    @@keyframes moveLine {
+        0%, 100% {
+            transform: scaleX(1);
+        }
+        50% {
+            transform: scaleX(1.1);
+        }
+    }
+
+    .wow {
+        visibility: visible;
+    }
+</style>

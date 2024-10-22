@@ -4,6 +4,7 @@ using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.CategoryConfigurations;
 using Ecommerce.Shared.Services.Configurations;
+using Ecommerce.Shared.Services.Customers;
 using Ecommerce.Shared.Services.PopularBrands;
 using Ecommerce.Shared.Services.PopularCategories;
 using Ecommerce.Shared.Services.ProductVariants;
@@ -27,6 +28,7 @@ builder.Services.AddScoped<IPopularBrandService, PopularBrandService>();
 builder.Services.AddScoped<ISliderService, SliderService>();
 builder.Services.AddScoped<IPopularCategoryService,PopularCategoryService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

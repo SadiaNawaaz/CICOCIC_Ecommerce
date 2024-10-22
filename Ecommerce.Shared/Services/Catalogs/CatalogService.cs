@@ -15,7 +15,7 @@ public interface ICatalogService
     Task<ServiceResponse<Catalog>> AddCatalogAsync(Catalog catalog);
     Task<ServiceResponse<Catalog>> UpdateCatalogAsync(Catalog catalog);
     Task<ServiceResponse<bool>> DeleteCatalogAsync(long id);
-    Task<ServiceResponse<List<Catalog>>> SearchCatalogsAsync(string searchTerm);
+    Task<ServiceResponse<List<CatalogDto>>> SearchCatalogsAsync(string searchTerm);
     Task<ServiceResponse<List<CatalogDto>>> GetCatalogsWithBrandAsync();
 }
 public class CatalogService: ICatalogService
@@ -232,32 +232,75 @@ public class CatalogService: ICatalogService
         }
     }
 
-    public async Task<ServiceResponse<List<Catalog>>> SearchCatalogsAsync(string searchTerm)
-{
-    try
-    {
-        var catalogs = await _context.Catalogs
-            .Where(c => c.Name.Contains(searchTerm) || 
-                        c.Description.Contains(searchTerm) || 
-                        c.ShortDescription.Contains(searchTerm)|| c.Code.Contains(searchTerm))
-            .ToListAsync();
 
-        return new ServiceResponse<List<Catalog>>
+    public async Task<ServiceResponse<List<CatalogDto>>> SearchCatalogsAsync(string searchTerm)
         {
-            Data = catalogs,
-            Success = true,
-            Message = "Catalogs fetched successfully"
-        };
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error occurred while searching catalogs.");
-        return new ServiceResponse<List<Catalog>>
-        {
-            Success = false,
-            Message = "Error occurred while searching catalogs"
-        };
-    }
-}
+        try
+            {
+            var catalogs = await _context.Catalogs
+                .Where(c => c.Name.Contains(searchTerm) ||
+                            c.Description.Contains(searchTerm) ||
+                            c.ShortDescription.Contains(searchTerm) ||
+                            c.Code.Contains(searchTerm) ||
+                            c.Brand.Name.Contains(searchTerm)||
+                            (c.Brand != null && (c.Brand.Name + " " + c.Name).Contains(searchTerm)) ||
+                            (c.Brand != null && (c.Brand.Name + " - " + c.Name).Contains(searchTerm))
+                            )
+                .ToListAsync();
+            var catalogDtos = catalogs.Select(c => new CatalogDto
+                {
+                Id = c.Id,
+                Name = (c.Brand != null ? $"{c.Brand.Name} " : "") + c.Name,
+                BrandName = c.Brand.Name,  
+                Thumbnail = c.Thumbnail,  
+                Price = c.Price,          
+                Code = c.Code
+                }).ToList();
 
-}
+            return new ServiceResponse<List<CatalogDto>>
+                {
+                Data = catalogDtos,
+                Success = true,
+                Message = "Catalogs fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while searching catalogs.");
+            return new ServiceResponse<List<CatalogDto>>
+                {
+                Success = false,
+                Message = "Error occurred while searching catalogs"
+                };
+            }
+        }
+
+    //    public async Task<ServiceResponse<List<Catalog>>> SearchCatalogsAsync(string searchTerm)
+    //{
+    //    try
+    //    {
+    //        var catalogs = await _context.Catalogs
+    //            .Where(c => c.Name.Contains(searchTerm) || 
+    //                        c.Description.Contains(searchTerm) || 
+    //                        c.ShortDescription.Contains(searchTerm)|| c.Code.Contains(searchTerm)|| c.Brand.Name.Contains(searchTerm))
+    //            .ToListAsync();
+
+    //        return new ServiceResponse<List<Catalog>>
+    //        {
+    //            Data = catalogs,
+    //            Success = true,
+    //            Message = "Catalogs fetched successfully"
+    //        };
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error occurred while searching catalogs.");
+    //        return new ServiceResponse<List<Catalog>>
+    //        {
+    //            Success = false,
+    //            Message = "Error occurred while searching catalogs"
+    //        };
+    //    }
+    //}
+
+    }

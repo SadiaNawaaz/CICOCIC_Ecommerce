@@ -1,19 +1,54 @@
 ﻿@using Ecommerce.Shared.Entities.PopularBrands;
 @using Ecommerce.Shared.Services.PopularBrands;
 @inject IPopularBrandService popularBrandService
-
+<style>
+    .section-title 
+    {
+        margin:none!important;
+    }
+    .container{
+        margin-top:-10px;
+    }
+</style>
 <div id="promotions" class="section-container bg-component">
     <!-- BEGIN container -->
     <div class="container">
         <!-- BEGIN section-title -->
         <h4 class="section-title clearfix">
             <span class="flex-1">Most popular brands, <small>up to 90% off est. retail</small></span>
-            <a href="#" class="btn">SHOW ALL</a>
+          
+
+                 <div id="circle">
+                <!-- Rotating text -->
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100px" height="100px" viewBox="0 0 120 120" enable-background="new 0 0 120 120" xml:space="preserve">
+                <defs>
+        <!-- Adjusted the size of the circle path and radius to minimize rotation -->
+                <path id="circlePath" d="M 60, 60 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
+              </defs>
+                <circle cx="60" cy="60" r="35" fill="none" />
+                <g>
+                <use xlink:href="#circlePath" fill="none" />
+                <text fill="#000">
+                <textPath xlink:href="#circlePath">Explore All Products - With Our CICO - Keep Exploring!</textPath>
+              </text>
+                </g>
+               </svg>
+
+                <!-- Icon in the center -->
+                <div class="icon-container">
+                    <a href="#">
+                        <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
         </h4>
+
+    
         <!-- END section-title -->
         <!-- BEGIN row for popular brands -->
         @if (featuredBrand != null)
-        {
+            {
             <div class="row gx-2">
                 <!-- Featured Brand -->
                 <div class="col-lg-6">
@@ -34,7 +69,7 @@
                 <div class="col-lg-3 col-md-6">
 
                     @if (brand1 != null)
-                    {
+                        {
 
                         <div class="promotion bg-blue">
                             <div class="promotion-image promotion-image-overflow-bottom promotion-image-overflow-top">
@@ -42,16 +77,16 @@
                             </div>
                             <div class="promotion-caption promotion-caption-inverse text-end">
                                 <h4 class="promotion-title">@brand1.Name</h4>
-                                
+
                                 <p class="promotion-desc"></p>
                                 <a href="/Brand/@brand1.BrandId" class="promotion-btn">View More</a>
                             </div>
                         </div>
 
-                    }
+                        }
 
                     @if (brand2 != null)
-                    {
+                        {
 
                         <div class="promotion bg-gray-200">
                             <div class="promotion-image text-center promotion-image-overflow-bottom">
@@ -59,32 +94,32 @@
                             </div>
                             <div class="promotion-caption text-center">
                                 <h4 class="promotion-title">@brand2.Name</h4>
-                             
+
                                 <p class="promotion-desc"></p>
                                 <a href="/Brand/@brand2.BrandId" class="promotion-btn">View More</a>
                             </div>
                         </div>
 
-                    }
+                        }
                 </div>
                 <div class="col-lg-3 col-md-6">
                     @if (brand3 != null)
-                    {
-                         <div class="promotion bg-gray-200">
-                             <div class="promotion-image promotion-image-overflow-right promotion-image-overflow-bottom text-end">
-                                 <img src="@UrlHelper.GetPopularBrandImageUrl(brand3.Id, brand3.BannerUrl)" alt="@brand3.Name" />
-                             </div>
-                             <div class="promotion-caption text-center">
-                                 <h4 class="promotion-title">Apple Accessories</h4>
-                         
-                                 <a href="/Brand/@brand3.BrandId" class="promotion-btn">View More</a>
-                             </div>
-                         </div>
+                        {
+                        <div class="promotion bg-gray-200">
+                            <div class="promotion-image promotion-image-overflow-right promotion-image-overflow-bottom text-end">
+                                <img src="@UrlHelper.GetPopularBrandImageUrl(brand3.Id, brand3.BannerUrl)" alt="@brand3.Name" />
+                            </div>
+                            <div class="promotion-caption text-center">
+                                <h4 class="promotion-title">Apple Accessories</h4>
 
-                    }
+                                <a href="/Brand/@brand3.BrandId" class="promotion-btn">View More</a>
+                            </div>
+                        </div>
+
+                        }
 
                     @if (brand4 != null)
-                    {
+                        {
 
                         <div class="promotion bg-dark">
                             <div class="promotion-image text-end">
@@ -92,16 +127,16 @@
                             </div>
                             <div class="promotion-caption promotion-caption-inverse">
                                 <h4 class="promotion-title">@brand4.Name</h4>
-                              
+
                                 <p class="promotion-desc"></p>
                                 <a href="/Brand/@brand4.BrandId" class="promotion-btn">View More</a>
                             </div>
                         </div>
 
-                    }
+                        }
                 </div>
-                </div>
-        }
+            </div>
+            }
         <!-- END row -->
     </div>
     <!-- END container -->

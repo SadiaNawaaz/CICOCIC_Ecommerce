@@ -236,20 +236,31 @@
         }
     private void FilterVariants()
         {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-            filteredVariants = productVariants;
-            }
-        else
-            {
-            filteredVariants = productVariants.Where(v =>
-                (v.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (v.variantType?.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (v.TypeValue?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (v.GeneralSize.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
 
-            ).ToList();
+        try
+            {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                filteredVariants = productVariants;
+                }
+            else
+                {
+                filteredVariants = productVariants.Where(v =>
+                    (v.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (v.variantType?.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (v.TypeValue?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (v.GeneralSize?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+
+                ).ToList();
+
+
+                }
             }
+        catch(Exception ex)
+                {
+
+                }
+
         }
     private void EditProductVariant(ProductVariant productVariant)
         {

@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\assets\img\Logo\" />
+    <Folder Include="wwwroot\assets\img\Account\" />
+    <Folder Include="wwwroot\assets\img\loader\" />
   </ItemGroup>
 
   <ItemGroup>

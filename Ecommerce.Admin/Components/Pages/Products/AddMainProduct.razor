@@ -67,115 +67,124 @@
     }
 </style>
 
-<div class="modal fade" id="modal-dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Modal Dialog</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-            </div>
-            <div class="modal-body">
 
-                <RadzenAutoComplete Data=@features Change="@(args => OnFeatureNameChanged(args))"
-                                    TextProperty="Name"
-                                    Style="width:100%"
-                                    FilterOperator="StringFilterOperator.StartsWith"
-                                    FilterDelay="100"
-                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Feature Name" } })" />
 
-            </div>
-            <div class="modal-footer">
-                <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
-                <button class="btn btn-success" @onclick="@AddNewFeature">Add</button>
-            </div>
-        </div>
+@if (isLoading)
+    {
+    <div class="loading-spinner">
+        <img src="/assets/img/theme/animation.gif" alt="Loading..." />
     </div>
-</div>
-
-
-<EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
-    <DataAnnotationsValidator />
-
-
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div>
-            <ol class="breadcrumb mb-2">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/MainProductList">Products</a></li>
-                <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product</li>
-            </ol>
-            <h1 class="page-header mb-0"> Product </h1>
-        </div>
-        <div>
-            <button type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <button type="submit" class="btn btn-primary w-100px">Save</button>
-        </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information </b>
+    }
+else
+    {
+    <div class="modal fade" id="modal-dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Modal Dialog</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
-                <div class="card-body">
+                <div class="modal-body">
 
-                    <div class="row">
+                    <RadzenAutoComplete Data=@features Change="@(args => OnFeatureNameChanged(args))"
+                                        TextProperty="Name"
+                                        Style="width:100%"
+                                        FilterOperator="StringFilterOperator.StartsWith"
+                                        FilterDelay="100"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Feature Name" } })" />
 
-                        <div class="col-md-12 mb-10px">
-
-                            <div class="accordion" id="accordionExample">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingTwo">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                            Product From Catalogs
-                                        </button>
-                                    </h2>
-                                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <span>Search Catalog by Name || Desc||Code||Price</span>
-                                            <RadzenDropDownDataGrid TValue="long" @bind-Value=catalog.Id Data=@catalogs LoadData=@LoadData Count="@count" AllowVirtualization="true" AllowClear="true" Style="width:100%" Change="@(args => CloneCatalog(args))"
-                                                                    AllowFiltering="true" TextProperty="@nameof(Catalog.Name)" ValueProperty="@nameof(Catalog.Id)" Name="DropDownDataGridVirtualizationLoadData">
-                                                <Columns>
-                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Name)" Title="Name" Width="100px" />
-                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Price)" Title="Price" Width="200px" />
-                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.Code)" Title="Code" Width="200px" />
-                                                    <RadzenDropDownDataGridColumn Property="@nameof(Catalog.ShortDescription)" Title="Desc" Width="200px" />
-
-                                                </Columns>
-                                            </RadzenDropDownDataGrid>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                    <button class="btn btn-success" @onclick="@AddNewFeature">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
+    <EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" FormName="brandForm">
+        <DataAnnotationsValidator />
 
 
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/MainProductList">Products</a></li>
+                    <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i> Product</li>
+                </ol>
+                <h1 class="page-header mb-0"> Product </h1>
+            </div>
+            <div>
+                <button type="submit" disabled style="display: none" aria-hidden="true"></button>
+                <button type="submit" class="btn btn-primary w-100px">Save</button>
+            </div>
+        </div>
 
 
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information </b>
+                    </div>
+                    <div class="card-body">
 
-                        </div>
                         <div class="row">
 
-                            <div class="col-md-6">
-                                <label class="form-label"> Title</label>
-                                <InputText @bind-Value="product.Name" class="form-control" id="exampleInputEmail2" placeholder=" Title" />
-                                <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
+                            <div class="col-md-12 mb-10px">
+
+                                <div class="accordion" id="accordionExample">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="headingTwo">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                Product From Catalogs
+                                            </button>
+                                        </h2>
+                                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                            <div class="accordion-body">
+                                                <span>Search Catalog by Name || Desc||Code||Price</span>
+                                                <RadzenDropDownDataGrid TValue="long" @bind-Value=catalog.Id Data=@catalogs LoadData=@LoadData Count="@count" AllowVirtualization="true" AllowClear="true" Style="width:100%" Change="@(args => CloneCatalog(args))"
+                                                                        AllowFiltering="true" TextProperty="@nameof(Catalog.Name)" ValueProperty="@nameof(CatalogDto.Id)" Name="DropDownDataGridVirtualizationLoadData">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Property="@nameof(CatalogDto.Name)" Title="Name" Width="200px" />
+                                                        <RadzenDropDownDataGridColumn Property="@nameof(CatalogDto.Price)" Title="Price" Width="200px" />
+                                                        <RadzenDropDownDataGridColumn Property="@nameof(CatalogDto.Code)" Title="Code" Width="200px" />
+
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+
+
+
+
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label"> Code</label>
-                                <InputText @bind-Value="product.Code" class="form-control" id="exampleInputEmail2" placeholder=" Code" />
-                                <span class="text-danger"><ValidationMessage For="@(() => product.Code)" /> </span>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label"> Slug</label>
-                                <InputText @bind-Value="product.Slug" class="form-control" id="exampleInputEmail2" placeholder=" Slug" />
-                                <span class="text-danger"><ValidationMessage For="@(() => product.Slug)" /> </span>
-                            </div>
+                            <div class="row">
+
+                                <div class="col-md-6">
+                                    <label class="form-label"> Title</label>
+                                    <InputText @bind-Value="product.Name" class="form-control" id="exampleInputEmail2" placeholder=" Title" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label"> Code</label>
+                                    <InputText @bind-Value="product.Code" class="form-control" id="exampleInputEmail2" placeholder=" Code" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.Code)" /> </span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label"> Slug</label>
+                                    <InputText @bind-Value="product.Slug" class="form-control" id="exampleInputEmail2" placeholder=" Slug" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.Slug)" /> </span>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
@@ -199,56 +208,20 @@
 
                         </div>
                     </div>
-            </div>
-
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Levels</b>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="mb-lg-0 mb-3">
-                                <label class="form-label"> Main Category</label>
 
-
-                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
-                                    <Columns>
-                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                    </Columns>
-                                </RadzenDropDownDataGrid>
-
-
-
-
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="mb-lg-0 mb-3">
-                                <label class="form-label">Sub Category</label>
-
-                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
-                                    <Columns>
-                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                    </Columns>
-                                </RadzenDropDownDataGrid>
-
-
-
-
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Levels</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
                             <div class="col-lg-6">
                                 <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Sub Sub Category</label>
+                                    <label class="form-label"> Main Category</label>
 
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
+
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
                                         <Columns>
                                             <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
 
@@ -257,13 +230,15 @@
                                     </RadzenDropDownDataGrid>
 
 
+
+
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Group Category </label>
+                                    <label class="form-label">Sub Category</label>
 
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
                                         <Columns>
                                             <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
 
@@ -272,181 +247,165 @@
                                     </RadzenDropDownDataGrid>
 
 
+
+
                                 </div>
                             </div>
-                    
 
-                           
+                            <div class="row mt-3">
+                                <div class="col-lg-6">
+                                    <div class="mb-lg-0 mb-3">
+                                        <label class="form-label">Sub Sub Category</label>
+
+                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
+                                            <Columns>
+                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                            </Columns>
+                                        </RadzenDropDownDataGrid>
+
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-lg-0 mb-3">
+                                        <label class="form-label">Group Category </label>
+
+                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
+                                            <Columns>
+                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                            </Columns>
+                                        </RadzenDropDownDataGrid>
+
+
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+
 
                         </div>
-
-
                     </div>
                 </div>
-            </div>
 
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
 
-                    <button type="button" class="btn btn-primary" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
-                        <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
-                        <b>Add/Edit Product Specifications </b>
-                    </button>
+                        <button type="button" class="btn btn-primary" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
+                            <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
+                            <b>Add/Edit Product Specifications </b>
+                        </button>
 
-                </div>
-                <div class="card-body">
+                    </div>
+                    <div class="card-body">
 
 
-                    <div class="modal" id="modal-without-animation">
-                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                            <div class="modal-content">
-                                <div class="alert alert-primary p-2 modal-header">
-                                    <h5>Product Specifications For <b>@product.Name</b></h5>
+                        <div class="modal" id="modal-without-animation">
+                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="alert alert-primary p-2 modal-header">
+                                        <h5>Product Specifications For <b>@product.Name</b></h5>
 
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
 
-                                </div>
-                                <div class="modal-body">
-                                    <div class="row mb-9px">
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row mb-9px">
 
-                                        <div class="col-md-8">
+                                            <div class="col-md-8">
 
-                                            <RadzenAutoComplete TValue="Cluster"
-                                                                Data=@clusters
-                                                                TextProperty="Name"
-                                                                ValueProperty="Id" Style="width:100%"
-                                                                FilterOperator="StringFilterOperator.StartsWith"
-                                                                FilterDelay="100"
-                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Cluster Name" } })"
-                                                                Change="@(args => OnClusterChange(args))" />
+                                                <RadzenAutoComplete TValue="Cluster"
+                                                                    Data=@clusters
+                                                                    TextProperty="Name"
+                                                                    ValueProperty="Id" Style="width:100%"
+                                                                    FilterOperator="StringFilterOperator.StartsWith"
+                                                                    FilterDelay="100"
+                                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Cluster Name" } })"
+                                                                    Change="@(args => OnClusterChange(args))" />
+                                            </div>
+
+                                        </div>
+                                        @*//New Code is here /*@
+                                        <div>
+                                            @if (product != null && product.ProductClusters != null && product.ProductClusters.Count > 0)
+                                                {
+                                                <ul class="list-group" ondragover="event.preventDefault();" style="list-style-type: none; padding: 0;">
+                                                    @foreach (var clus in product.ProductClusters.OrderBy(c => c.Order))
+                                                        {
+                                                        <li class="mb-3 p-0"
+                                                            style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);"
+                                                            @ondrop="() => HandleDrop(clus)"
+                                                            draggable="true"
+                                                            @ondragstart="() => draggingCluster = clus"
+                                                            @ondragend="() => draggingCluster = null">
+
+                                                            <!-- Cluster Heading -->
+                                                            <div class="d-flex justify-content-between align-items-center alert alert-primary p-2"
+                                                                 style="border-radius: 10px 10px 0 0;">
+                                                                <div>
+                                                                    <strong>@clus.Cluster.Name</strong>
+                                                                </div>
+                                                                <div>
+                                                                    <!-- Toggle Collapse Button -->
+                                                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCluster-@clus.Cluster.Id" aria-expanded="false">
+                                                                        <i class="fa fa-chevron-down"></i>
+                                                                    </button>
+                                                                    <!-- Remove Cluster Button -->
+                                                                    <button type="button" @onclick="() => RemoveCluster(clus)" class="btn btn-outline-danger btn-sm">
+                                                                        <i class="fa fa-trash"></i>
+                                                                    </button>
+                                                                    <!-- Add New Cluster Button -->
+                                                                    <button type="button" @onclick="() => AddNewCluster(clus)" class="btn btn-outline-primary btn-sm">
+                                                                        <i class="fa fa-plus"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Cluster Features (Collapsible Content) -->
+                                                            <div id="collapseCluster-@clus.Cluster.Id" class="collapse">
+                                                                <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
+                                                                    @if (clus.ProductClusterFeatures != null && clus.ProductClusterFeatures.Count > 0)
+                                                                        {
+                                                                        @foreach (var f in clus.ProductClusterFeatures)
+                                                                            {
+                                                                            <div class="row mb-2 align-items-center">
+                                                                                <div class="col-md-2">
+                                                                                    <span>@f.Feature.Name</span>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <input type="text" class="form-control" @bind-value="@f.Value" />
+                                                                                </div>
+                                                                                <div class="col-md-1 text-end">
+                                                                                    <button type="button" @onclick="() => RemoveFeature(clus, f)" class="btn btn-default d-block">
+                                                                                        <i class="fa fa-trash"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                            }
+                                                                        }
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        }
+                                                </ul>
+                                                }
                                         </div>
 
+
                                     </div>
-                                    @*//New Code is here /*@
-                                    <div>
-                                        @if (product != null && product.ProductClusters != null && product.ProductClusters.Count > 0)
-                                            {
-                                            <ul class="list-group" ondragover="event.preventDefault();" style="list-style-type: none; padding: 0;">
-                                                @foreach (var clus in product.ProductClusters.OrderBy(c => c.Order))
-                                                    {
-                                                    <li class="mb-3 p-0"
-                                                        style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);"
-                                                        @ondrop="() => HandleDrop(clus)"
-                                                        draggable="true"
-                                                        @ondragstart="() => draggingCluster = clus"
-                                                        @ondragend="() => draggingCluster = null">
-
-                                                        <!-- Cluster Heading -->
-                                                        <div class="d-flex justify-content-between align-items-center alert alert-primary p-2"
-                                                             style="border-radius: 10px 10px 0 0;">
-                                                            <div>
-                                                                <strong>@clus.Cluster.Name</strong>
-                                                            </div>
-                                                            <div>
-                                                                <!-- Toggle Collapse Button -->
-                                                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCluster-@clus.Cluster.Id" aria-expanded="false">
-                                                                    <i class="fa fa-chevron-down"></i>
-                                                                </button>
-                                                                <!-- Remove Cluster Button -->
-                                                                <button type="button" @onclick="() => RemoveCluster(clus)" class="btn btn-outline-danger btn-sm">
-                                                                    <i class="fa fa-trash"></i>
-                                                                </button>
-                                                                <!-- Add New Cluster Button -->
-                                                                <button type="button" @onclick="() => AddNewCluster(clus)" class="btn btn-outline-primary btn-sm">
-                                                                    <i class="fa fa-plus"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Cluster Features (Collapsible Content) -->
-                                                        <div id="collapseCluster-@clus.Cluster.Id" class="collapse">
-                                                            <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
-                                                                @if (clus.ProductClusterFeatures != null && clus.ProductClusterFeatures.Count > 0)
-                                                                    {
-                                                                    @foreach (var f in clus.ProductClusterFeatures)
-                                                                        {
-                                                                        <div class="row mb-2 align-items-center">
-                                                                            <div class="col-md-2">
-                                                                                <span>@f.Feature.Name</span>
-                                                                            </div>
-                                                                            <div class="col-md-3">
-                                                                                <input type="text" class="form-control" @bind-value="@f.Value" />
-                                                                            </div>
-                                                                            <div class="col-md-1 text-end">
-                                                                                <button type="button" @onclick="() => RemoveFeature(clus, f)" class="btn btn-default d-block">
-                                                                                    <i class="fa fa-trash"></i>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                        }
-                                                                    }
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    }
-                                            </ul>
-                                            }
+                                    <div class="modal-footer">
+                                        <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
                                     </div>
-
-                              
-                                </div>
-                                <div class="modal-footer">
-                                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-
-
-                </div>
-            </div>
-        </div>
-
-
-
-        <div class="col-lg-4">
-
-
-            <div class="card border-0 mb-3">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div> <i class="fa fa-circle-info fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Information</b></div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-primary">
-                        Add Related Data
-                    </div>
-
-
-                    <div class="form-horizontal form-bordered">
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Brand</label>
-                            <div class="col-lg-8">
-                                <RadzenDropDownDataGrid TValue="long" @bind-Value="product.BrandId" Data=@Brands TextProperty="Name" ValueProperty="Id" Class="form-control">
-                                    <Columns>
-                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                    </Columns>
-                                </RadzenDropDownDataGrid>
-                            </div>
-                        </div>
-
-
-
-                    </div>
-
-                    <div class="form-horizontal form-bordered">
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Price</label>
-                            <div class="col-lg-8">
-                                <InputNumber @bind-Value="product.Price" class="form-control" id="exampleInputEmail2" placeholder=" Price" />
-                                <span class="text-danger"><ValidationMessage For="@(() => product.Price)" /> </span>
-                            </div>
-                        </div>
 
 
 
@@ -454,113 +413,167 @@
                 </div>
             </div>
 
-            <div class="card border-0 mb-3">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
+
+
+            <div class="col-lg-4">
+
+
+                <div class="card border-0 mb-3">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div> <i class="fa fa-circle-info fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Information</b></div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-primary">
+                            Add Related Data
+                        </div>
+
+
+                        <div class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Brand</label>
+                                <div class="col-lg-8">
+                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="product.BrandId" Data=@Brands TextProperty="Name" ValueProperty="Id" Class="form-control">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Price</label>
+                                <div class="col-lg-8">
+                                    <InputNumber @bind-Value="product.Price" class="form-control" id="exampleInputEmail2" placeholder=" Price" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.Price)" /> </span>
+                                </div>
+                            </div>
+
+
+
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-primary">
-                        Add Image Thumbnail
+
+                <div class="card border-0 mb-3">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
+                        </div>
                     </div>
-                    <div class="form-horizontal form-bordered">
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Thumbnail</label>
-                            <div class="col-lg-8">
+                    <div class="card-body">
+                        <div class="alert alert-primary">
+                            Add Image Thumbnail
+                        </div>
+                        <div class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Thumbnail</label>
+                                <div class="col-lg-8">
 
-                                <InputText @bind-Value="product.Thumbnail" class="form-control" />
+                                    <InputText @bind-Value="product.Thumbnail" class="form-control" />
 
-                                @if (!String.IsNullOrEmpty(product.Thumbnail))
-                                    {
-                                    <img src="@product.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
-                                    }
+                                    @if (!String.IsNullOrEmpty(product.Thumbnail))
+                                        {
+                                        <img src="@product.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
+                                        }
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-images fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLs</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-10">
+                                <InputText @bind-Value="newMediaUrl" class="form-control" placeholder="Enter image URL" />
+                            </div>
+                            <div class="col-md-2">
+
+                                <button type="button" class="btn btn-primary" @onclick="AddMediaUrl">
+                                    <i class="fa fa-plus"></i>
+                                </button>
 
                             </div>
                         </div>
-
-
-                    </div>
-                </div>
-
-            </div>
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-images fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLs</b>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-10">
-                            <InputText @bind-Value="newMediaUrl" class="form-control" placeholder="Enter image URL" />
-                        </div>
-                        <div class="col-md-2">
-
-                            <button type="button" class="btn btn-primary" @onclick="AddMediaUrl">
-                                <i class="fa fa-plus"></i>
-                            </button>
-
-                        </div>
-                    </div>
-                    @if (product.ProductMedias != null && product.ProductMedias.Count > 0)
-                        {
-                        @foreach (var media in product.ProductMedias)
+                        @if (product.ProductMedias != null && product.ProductMedias.Count > 0)
                             {
-                            <div class="row align-items-center mb-3">
+                            @foreach (var media in product.ProductMedias)
+                                {
+                                <div class="row align-items-center mb-3">
 
-                                <div class="col-md-8">
-                                    <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
-                                </div>
-                                <div class="col-md-4">
+                                    <div class="col-md-8">
+                                        <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                    </div>
+                                    <div class="col-md-4">
 
 
-                                    <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
+                                        <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
 
-
-                                </div>
-                            </div>
-                            }
-                        }
-                </div>
-            </div>
-
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b> Media</b>
-                </div>
-                <div class="card-body">
-                    <div id="dropzone">
-                        <div>
-                            <div class="dz-message needsclick">
-                                <b>click</b> to upload.<br />
-
-                                <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
-
-                                @if (selectedFiles != null && selectedFiles.Count() > 0)
-                                    {
-                                    <div>
-
-                                        @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
-                                            {
-                                            <div style="display:inline-block; margin: 10px; position: relative;">
-                                                <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
-                                                <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
-                                            </div>
-                                            }
 
                                     </div>
-                                    }
+                                </div>
+                                }
+                            }
+                    </div>
+                </div>
 
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b> Media</b>
+                    </div>
+                    <div class="card-body">
+                        <div id="dropzone">
+                            <div>
+                                <div class="dz-message needsclick">
+                                    <b>click</b> to upload.<br />
+
+                                    <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
+
+                                    @if (selectedFiles != null && selectedFiles.Count() > 0)
+                                        {
+                                        <div>
+
+                                            @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
+                                                {
+                                                <div style="display:inline-block; margin: 10px; position: relative;">
+                                                    <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
+                                                    <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
+                                                </div>
+                                                }
+
+                                        </div>
+                                        }
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
         </div>
 
-    </div>
+    </EditForm>
+    }
 
-</EditForm>
+
+
 @code {
 
     #region Variables
@@ -584,21 +597,56 @@
     private List<Feature> features = new List<Feature>();
     private Feature feature = new Feature();
     private string newMediaUrl = string.Empty; // New URL input
+    private bool isLoading = false;
     #endregion
 
     #region
 
     protected override async Task OnInitializedAsync()
         {
-        await LoadCategoryTreeAsync();
-        await LoadBrands();
-        await LoadClusters();
-        await LoadFeatures();
-        if (ProductId > 0)
+        await ReloadDataAsync(true);
+        //await LoadCategoryTreeAsync();
+        //await LoadBrands();
+        //await LoadClusters();
+        //await LoadFeatures();
+        //if (ProductId > 0)
+        //    {
+        //    await LoadProductForEdit();
+
+        //    }
+
+        }
+
+    private async Task ReloadDataAsync(bool setupData)
+        {
+
+        isLoading = true;
+        StateHasChanged();
+        try
             {
-            await LoadProductForEdit();
+            if (setupData)
+                {
+                await LoadCategoryTreeAsync();
+                await LoadBrands();
+                await LoadClusters();
+                await LoadFeatures();
+                }
+
+
+            if (ProductId > 0)
+                {
+                await LoadProductForEdit();
+                }
+            }
+        catch (Exception ex)
+            {
 
             }
+        finally
+            {
+            isLoading = false;
+            }
+
 
         }
 
@@ -768,6 +816,14 @@
                 Snackbar.Add($"Please select Brand", Severity.Info);
                 return;
                 }
+            if (product.CategoryId == 0 || product.CategoryId==null)
+                {
+                Snackbar.Add($"Please select Category", Severity.Info);
+                return;
+                }
+
+
+
             ServiceResponse<Product> response;
 
 
@@ -775,10 +831,8 @@
 
             if (ProductId > 0)
                 {
-
-
-
                 response = await IProductService.UpdateProductAsync(product);
+
                 }
             else
                 {
@@ -789,6 +843,8 @@
             if (response.Success)
                 {
                 Snackbar.Add(response.Message, Severity.Success);
+                ProductId = product.Id;
+                await ReloadDataAsync(true);
 
                 }
             else
@@ -901,7 +957,7 @@
     string value;
     int count;
     Catalog catalog = new Catalog();
-    private IEnumerable<Catalog> catalogs = new List<Catalog>();
+    private IEnumerable<CatalogDto> catalogs = new List<CatalogDto>();
     async Task LoadData(LoadDataArgs args)
         {
         await Task.Yield();
@@ -912,7 +968,7 @@
 
             var result = await CatalogService.SearchCatalogsAsync(searchTerm);
 
-            catalogs = result.Data ?? new List<Catalog>();
+            catalogs = result.Data ?? new List<CatalogDto>();
             count = catalogs.Count();
             }
         catch (Exception ex)
@@ -937,9 +993,7 @@
                 if (response.Success)
                     {
                     Catalog catalogObj = response.Data;
-
-                    // Clone the catalog data to the product
-                    product.Name = catalogObj.Name;
+                    product.Name = (catalogObj.Brand?.Name ?? string.Empty) + " " + catalogObj.Name;
                     product.Price = (double)catalogObj.Price;
                     product.BrandId = catalogObj.BrandId ?? 0;
                     product.CategoryId = catalogObj.CategoryId;

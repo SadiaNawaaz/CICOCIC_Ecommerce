@@ -43,6 +43,8 @@ public class Catalog : BaseEntity
 
     public List<CatalogCluster> CatalogClusters { get; set; } = new List<CatalogCluster>();
     public List<CatalogMedia> CatalogMedias { get; set; } = new List<CatalogMedia>();
+
+
 }
 public class CatalogCluster : BaseEntity
 {

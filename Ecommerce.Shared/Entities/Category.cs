@@ -21,3 +21,9 @@ public class Category: BaseEntity
     [NotMapped]
     public byte[] ImageByte { get; set; }
 }
+public class CategoryVariantCountDto
+    {
+    public long CategoryId { get; set; } // The ID of the category
+    public string CategoryName { get; set; } // The name of the category
+    public int VariantCount { get; set; } // The count of all product variants under this category
+    }

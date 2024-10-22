@@ -17,6 +17,7 @@ public interface ICategoryService
     Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync();
     Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTopLevelDtoAsync();
     Task<ServiceResponse<bool>> UpdateCategoryOrderAsync(long categoryId, int newOrder);
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync(long categoryId);
 
 }
 
@@ -351,7 +352,51 @@ public class CategoryService : ICategoryService
         }
     }
 
-}
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync(long categoryId)
+        {
+        try
+            {
+            var categoryDtos = new List<CategoryDto>();
+            var category = await _context.Categories.FindAsync(categoryId);
+            while (category != null)
+                {
+                categoryDtos.Insert(0, new CategoryDto
+                    {
+                    Id = category.Id,
+                    Name = category.Name
+                    });
+                if (category.ParentCategoryId != null)
+                    {
+                    category = await _context.Categories.FindAsync(category.ParentCategoryId);
+                    }
+                else
+                    {
+                    category = null;
+                    }
+                }
+
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Data = categoryDtos,
+                Success = true,
+                Message = "Category hierarchy fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching category hierarchy.");
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching category hierarchy"
+                };
+            }
+        }
+
+
+
+
+    }
 
 
 

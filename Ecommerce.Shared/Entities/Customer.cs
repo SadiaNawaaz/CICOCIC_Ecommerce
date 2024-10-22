@@ -6,12 +6,16 @@ namespace Ecommerce.Shared.Entities;
 
 public class Customer: BaseEntity
 {
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-    public required string Email { get; set; }
+    [Required]
+    public  string FirstName { get; set; }
+    [Required]
+    public  string LastName { get; set; }
+    [Required]
+    public  string Email { get; set; }
+    [Required]
     [StringLength(20)]
     [DataType(DataType.Password)]
-    public required string   Password { get; set; }
+    public  string   Password { get; set; }
     public string FullName => $"{FirstName} {LastName}";
     public DateTime? DateOfBirth { get; set; }
     public string? ProfilePicture { get; set; }

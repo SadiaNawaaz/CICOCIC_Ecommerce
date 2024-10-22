@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities;
+using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Entities.TrendingProducts;
 using Ecommerce.Shared.Services.Products;
@@ -30,6 +31,9 @@ public interface IProductVariantService
     Task<ServiceResponse<bool>> RemoveTrendingProduct(long id);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsWithinDistanceAsync(string Keyword, long ? CategoryId, string PostalCode, int? Distance);
     Task<ServiceResponse<bool>> SaveVariantObjectMediaAsync(List<VariantObjectMedia> mediaList);
+    Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync();
+    Task<ServiceResponse<List<ProductVariantDto>>> GetTopTenProductVariantsByCategoryAsync(long categoryId);
+    Task<ServiceResponse<List<BrandVariantCountDto>>> GetBrandsWithVariantCountsAsync();
 }
 
 public class ProductVariantService: IProductVariantService
@@ -265,15 +269,37 @@ public class ProductVariantService: IProductVariantService
         }
     }
     public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId)
-    {
+        {
         var response = new ServiceResponse<List<ProductVariantDto>>();
 
         try
-        {
-            var productVariants = await _context.ProductVariants
-                .Where(pv => pv.Product.CategoryId == categoryId && pv.Publish==true)
-                .Select(pv => new ProductVariantDto
+            {
+            var category = await _context.Categories.FindAsync(categoryId);
+
+            if (category == null)
                 {
+                response.Success = false;
+                response.Message = "Category not found.";
+                return response;
+                }
+
+            List<long> categoryIds = new List<long>();
+
+            if (category.Level == 4)
+                {
+
+                categoryIds.Add(categoryId);
+                }
+            else
+                {
+                categoryIds = await GetAllDescendantCategoryIdsAsync(categoryId);
+                }
+
+            // Fetch product variants for the identified categories
+            var productVariants = await _context.ProductVariants
+                .Where(pv => categoryIds.Contains(pv.Product.CategoryId) && pv.Publish == true)
+                .Select(pv => new ProductVariantDto
+                    {
                     ProductId = pv.ProductId,
                     Id = pv.Id,
                     Name = pv.Name,
@@ -283,23 +309,86 @@ public class ProductVariantService: IProductVariantService
                     VariantPrice = pv.Price,
                     ProductPrice = pv.Product.Price,
                     Sku = pv.Sku,
-                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null 
-                })
+                    Thumbnail=pv.Thumbnail,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null
+                    })
                 .ToListAsync();
 
             response.Data = productVariants;
             response.Success = true;
             response.Message = "Product variants fetched successfully.";
-        }
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error fetching product variants.");
             response.Success = false;
             response.Message = $"An error occurred while fetching product variants: {ex.Message}";
-        }
+            }
 
         return response;
-    }
+        }
+    private async Task<List<long>> GetAllDescendantCategoryIdsAsync(long parentId)
+        {
+        var allCategories = await _context.Categories.ToListAsync();
+        var descendantCategoryIds = new List<long>();
+
+        void AddChildCategories(long categoryId)
+            {
+            var childCategories = allCategories.Where(c => c.ParentCategoryId == categoryId).ToList();
+            foreach (var child in childCategories)
+                {
+                if (child.Level == 4)
+                    {
+                    descendantCategoryIds.Add(child.Id);
+                    }
+                else
+                    {
+                    AddChildCategories(child.Id); // Recursively add further descendants
+                    }
+                }
+            }
+
+        AddChildCategories(parentId);
+        return descendantCategoryIds;
+        }
+
+
+    //public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId)
+    //{
+    //    var response = new ServiceResponse<List<ProductVariantDto>>();
+
+    //    try
+    //    {
+    //        var productVariants = await _context.ProductVariants
+    //            .Where(pv => pv.Product.CategoryId == categoryId && pv.Publish==true)
+    //            .Select(pv => new ProductVariantDto
+    //            {
+    //                ProductId = pv.ProductId,
+    //                Id = pv.Id,
+    //                Name = pv.Name,
+    //                Category = pv.Product.Category.Name,
+    //                Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
+    //                Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
+    //                VariantPrice = pv.Price,
+    //                ProductPrice = pv.Product.Price,
+    //                Sku = pv.Sku,
+    //                DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null 
+    //            })
+    //            .ToListAsync();
+
+    //        response.Data = productVariants;
+    //        response.Success = true;
+    //        response.Message = "Product variants fetched successfully.";
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error fetching product variants.");
+    //        response.Success = false;
+    //        response.Message = $"An error occurred while fetching product variants: {ex.Message}";
+    //    }
+
+    //    return response;
+    //}
     public async Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long Id)
     {
         var response = new ServiceResponse<ProductVariantDetailDto>();
@@ -311,6 +400,7 @@ public class ProductVariantService: IProductVariantService
                 .Include(p => p.Product.Category)
                 .Include(p => p.GeneralColor)
                 .Include(p => p.GeneralSize)
+                .Include(p => p.Product.Brand)
                 .Include(p => p.productVariantImages) 
                 .Where(pv => pv.Id == Id)
                 .Select(pv => new ProductVariantDetailDto
@@ -319,6 +409,7 @@ public class ProductVariantService: IProductVariantService
                     Id = pv.Id,
                     Name = pv.Name,
                     Category = pv.Product.Category.Name,
+                    CategoryId=pv.Product.CategoryId,
                     Color = pv.GeneralColor != null ? pv.GeneralColor.Name : null,
                     Size = pv.GeneralSize != null ? pv.GeneralSize.Name : null,
                     VariantPrice = pv.Price,
@@ -326,8 +417,9 @@ public class ProductVariantService: IProductVariantService
                     Sku = pv.Sku,
                     Description=pv.Description,
                     year = pv.ModelYear != null ? pv.ModelYear.Year : 0,
-                    //TemplateMasterId=pv.Product.TemplateMasterId,
+                    Thumbnail=pv.Thumbnail,
                     DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null,
+                    Brand = pv.Product.Brand != null ? pv.Product.Brand.Name : null,
                     productVariantImages = pv.productVariantImages.Select(vi => new ProductVariantImages
                     {
                         ImageName = vi.ImageName ,
@@ -357,6 +449,14 @@ public class ProductVariantService: IProductVariantService
                     int discountPercentage = (int)Math.Round((discount / productVariant.ProductPrice) * 100);
                     productVariant.discountPercentage=discountPercentage;
                 }
+
+                if (productVariant.ProductVariantMedia == null || !productVariant.ProductVariantMedia.Any())
+                    {
+                    productVariant.ProductVariantMedia.Add(new ProductVariantMedia
+                        {
+                        ImageUrl = productVariant.Thumbnail
+                        });
+                    }
 
                 response.Data = productVariant;
                 response.Success = true;
@@ -471,6 +571,7 @@ public class ProductVariantService: IProductVariantService
                     VariantPrice = pv.Price,
                     ProductPrice = pv.Product.Price,
                     Sku = pv.Sku,
+                    Thumbnail = pv.Thumbnail,
                     DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null
                 })
                 .ToListAsync();
@@ -784,7 +885,121 @@ public class ProductVariantService: IProductVariantService
             }
         }
 
+    public async Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync()
+        {
+        var response = new ServiceResponse<List<CategoryVariantCountDto>>();
 
+        try
+            {
+            // Query Level 1 categories and their product variants across multiple levels
+            var categoriesWithCounts = await _context.Categories
+                .Where(c => c.Level == 1) // Level 1 categories only
+                .Select(c => new CategoryVariantCountDto
+                    {
+                    CategoryId = c.Id,
+                    CategoryName = c.Name,
+
+                    // Count product variants from all nested levels (via join)
+                    VariantCount = (
+                        from level2 in _context.Categories
+                        join level3 in _context.Categories on level2.Id equals level3.ParentCategoryId
+                        join level4 in _context.Categories on level3.Id equals level4.ParentCategoryId
+                        join product in _context.Products on level4.Id equals product.CategoryId
+                        join variant in _context.ProductVariants on product.Id equals variant.ProductId
+                        where level2.ParentCategoryId == c.Id
+                        select variant
+                    ).Count()
+                    })
+              .OrderByDescending(cat => cat.VariantCount) 
+            .ToListAsync();
+
+            response.Data = categoriesWithCounts;
+            response.Success = true;
+            response.Message = "Categories with variant counts fetched successfully.";
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error fetching categories with product variant counts.");
+            response.Success = false;
+            response.Message = $"An error occurred: {ex.Message}";
+            }
+
+        return response;
+        }
+
+    public async Task<ServiceResponse<List<ProductVariantDto>>> GetTopTenProductVariantsByCategoryAsync(long categoryId)
+        {
+        var response = new ServiceResponse<List<ProductVariantDto>>();
+
+        try
+            {
+            var productVariants = await _context.ProductVariants
+                .Where(pv => pv.Product.CategoryId == categoryId)
+                .Select(pv => new ProductVariantDto
+                    {
+                    ProductId = pv.ProductId,
+                    Id = pv.Id,
+                    Name = pv.Product.Name,
+                    Category = pv.Product.Category.Name,
+                    Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
+                    Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
+                    VariantPrice = pv.Price,
+                    ProductPrice = pv.Product.Price,
+                    Sku = pv.Sku,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null
+                    }).Take(10)
+                .ToListAsync();
+
+            response.Data = productVariants;
+            response.Success = true;
+            response.Message = "Product variants fetched successfully.";
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error fetching product variants.");
+            response.Success = false;
+            response.Message = $"An error occurred while fetching product variants: {ex.Message}";
+            }
+
+        return response;
+        }
+
+
+    public async Task<ServiceResponse<List<BrandVariantCountDto>>> GetBrandsWithVariantCountsAsync()
+        {
+        var response = new ServiceResponse<List<BrandVariantCountDto>>();
+
+        try
+            {
+            var brandsWithCounts = await _context.Brands
+                .Select(b => new BrandVariantCountDto
+                    {
+                    BrandId = b.Id,
+                    BrandName = b.Name,
+                    VariantCount = (
+                        from product in _context.Products
+                        join variant in _context.ProductVariants on product.Id equals variant.ProductId
+                        where product.BrandId == b.Id && variant.Publish == true
+                        select variant
+                    ).Count()
+                    })
+                .Where(brand => brand.VariantCount > 0)
+                .OrderByDescending(brand => brand.VariantCount)
+                .ToListAsync();
+
+            response.Data = brandsWithCounts;
+            response.Success = true;
+            response.Message = "Brands with variant counts greater than 0 fetched successfully.";
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error fetching brands with product variant counts.");
+            response.Success = false;
+            response.Message = $"An error occurred: {ex.Message}";
+            }
+
+        return response;
+        }
 
 
     }

@@ -5,6 +5,7 @@
 @inject ICartService CartService
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@inject ICategoryService CategoryService
 <style>
     /* Custom style */
     .accordion-button {
@@ -38,21 +39,41 @@
 
 
 @if (ProductVariant != null && ProductVariant.Id > 0)
-{
+    {
 
 
     <div id="product" class="section-container pt-20px">
         <!-- BEGIN container -->
         <div class="container">
+
             <!-- BEGIN breadcrumb -->
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Mobile Phone</a></li>
-                <li class="breadcrumb-item"><a href="#">Apple</a></li>
-                <li class="breadcrumb-item active">iPhone 6S Plus</li>
-            </ul>
+            @if (CategoryTree != null && CategoryTree.Any())
+                {
+                <ul class="breadcrumb">
+                    @for (int i = 0; i < CategoryTree.Count; i++)
+                        {
+                        var category = CategoryTree[i];
+                        if (i == CategoryTree.Count - 1) 
+                            {
+                            <li class="breadcrumb-item active">@category.Name</li>
+                            }
+                        else
+                            {
+                            <li class="breadcrumb-item">
+                                <a href="/ProductByCategory?Id=@category.Id">@category.Name</a>
+                            </li>
+                            }
+                        }
+                </ul>
+                }
+            else
+                {
+                }
+
             <!-- END breadcrumb -->
             <!-- BEGIN product -->
+
+
             <div class="product">
                 <!-- BEGIN product-detail -->
                 <div class="product-detail">
@@ -61,37 +82,42 @@
                         <!-- BEGIN product-thumbnail -->
                         <div class="product-thumbnail">
                             <ul class="product-thumbnail-list">
-                                <li class="active"><a href="#" data-click="show-main-image" data-url="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)"><img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" /></a></li>
 
                                 @if (ProductVariant.productVariantImages != null && ProductVariant.productVariantImages.Count() > 0)
-                                {
-                                    foreach (var variant in ProductVariant.productVariantImages)
                                     {
+                                    foreach (var variant in ProductVariant.productVariantImages)
+                                        {
 
                                         <li><a href="#" data-click="show-main-image" data-url="@UrlHelper.GetImageUrl(ProductVariant.Id, variant.ImageName)"><img src="@UrlHelper.GetImageUrl(ProductVariant.Id, variant.ImageName)" alt="" /></a></li>
 
-                                    }
+                                        }
 
-                                }
+                                    }
                                 @if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
-                                {
-                                    foreach (var variant in ProductVariant.ProductVariantMedia)
                                     {
+                                    foreach (var variant in ProductVariant.ProductVariantMedia)
+                                        {
 
-                                        <li><a href="#" data-click="show-main-image" data-url="@variant.ImageUrl"><img src=@variant.ImageUrl alt="" /></a></li>
+                                        <li class="active"><a href="#" data-click="show-main-image" data-url="@variant.ImageUrl"><img src=@variant.ImageUrl alt="" /></a></li>
+
+                                        }
 
                                     }
-
-                                }
 
                             </ul>
                         </div>
                         <!-- END product-thumbnail -->
                         <!-- BEGIN product-main-image -->
                         <div class="product-main-image" data-id="main-image">
-                          
+                            @if (ProductVariant.DefaultImageUrl != null)
+                                {
+                                <img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" />
+                                }
+                            else
+                                {
+                                <img src="@ProductVariant.Thumbnail" alt="" />
+                                }
 
-                            <img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" />
                         </div>
                         <!-- END product-main-image -->
                     </div>
@@ -103,30 +129,24 @@
 
                             <h1 class="product-title">
                                 @if (ProductVariant.discountPercentage > 0)
-                                {
+                                    {
                                     <span class="badge bg-primary">@ProductVariant.discountPercentage % OFF</span>
-                                }
+                                    }
                                 @ProductVariant.Name - #@ProductVariant.Sku
                             </h1>
                             <ul class="product-category">
-                                <li><a href="#">iPhone</a></li>
-                                <li>/</li>
-                                <li><a href="#">mobile phone</a></li>
-                                <li>/</li>
-                                <li><a href="#">electronics</a></li>
-                                <li>/</li>
-                                <li><a href="#">lifestyle</a></li>
+                                @Categories
                             </ul>
                         </div>
 
                         <div class="product-warranty">
                             <div class="pull-right">Availability: In stock</div>
                             @if (ProductVariant.year > 0)
-                            {
+                                {
                                 <div><b>Build Year</b> @ProductVariant.year</div>
-                            }
+                                }
                             @if (ProductVariant.Color != null)
-                            {
+                                {
                                 <div>
                                     <b>Color:</b>
 
@@ -134,30 +154,36 @@
                                     </button>
 
                                 </div>
-                            }
+                                }
 
                             @if (ProductVariant.Size != null)
-                            {
+                                {
 
 
                                 <div> <b>Size: &nbsp;&nbsp;&nbsp;</b> @ProductVariant.Size</div>
 
 
-                            }
+                                }
                             @if (ProductVariant.Sku != null)
-                            {
+                                {
                                 <div><b>SKU: &nbsp;&nbsp;&nbsp;</b> @ProductVariant.Sku</div>
 
 
-                            }
+                                }
+                            @if (ProductVariant.Brand != null && ProductVariant.Brand!="")
+                                {
+                                <div><b>Brand: &nbsp;&nbsp;&nbsp;</b> @ProductVariant.Brand</div>
+
+
+                                }
                         </div>
 
-                        <ul class="product-info-list">
-                            <li><i class="fa fa-circle"></i> ...........</li>
-                            <li><i class="fa fa-circle"></i> ...........</li>
-                            <li><i class="fa fa-circle"></i> ...........</li>
+                        @*<ul class="product-info-list">
+                        <li><i class="fa fa-circle"></i> ...........</li>
+                        <li><i class="fa fa-circle"></i> ...........</li>
+                        <li><i class="fa fa-circle"></i> ...........</li>
 
-                        </ul>
+                    </ul>*@
 
                         <div class="product-social">
                             <ul>
@@ -172,12 +198,15 @@
                         <!-- BEGIN product-purchase-container -->
                         <div class="product-purchase-container">
                             <div class="product-discount">
-                                <span class="discount">€@ProductVariant.ProductPrice</span>
+                                <span class="discount text-gray">€@ProductVariant.ProductPrice</span>
                             </div>
                             <div class="product-price">
                                 <div class="price">€@ProductVariant.VariantPrice</div>
+                                <span class="text-danger text-bold"> Only 1 left in stock - order soon. </span>
                             </div>
+
                             <button type="button" @onclick="@AddToCart" class="btn btn-dark btn-theme btn-lg w-200px">ADD TO CART</button>
+
                         </div>
                         <!-- END product-purchase-container -->
                     </div>
@@ -200,7 +229,9 @@
                             <!-- BEGIN product-desc -->
                             <div class="product-desc">
                                 <div class="image">
-                                    <img src="@UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl)" alt="" />
+                                    <img src="@(string.IsNullOrEmpty(ProductVariant.Thumbnail) ? UrlHelper.GetImageUrl(ProductVariant.Id, ProductVariant.DefaultImageUrl) : ProductVariant.Thumbnail)"
+                                         alt="Product Image" style="max-height:200px;max-width:200px" />
+
                                 </div>
                                 <div class="desc">
                                     <h4>@ProductVariant.Name</h4>
@@ -215,33 +246,42 @@
 
                         <div class="tab-pane fade" id="product-info">
                             <!-- BEGIN table-responsive -->
-                            <div class="accordion" id="accordionExample">
-                                @if (clusters != null && clusters.Count() > 0)
-                                {
-                                    <div class="card border-0 mb-4">
-                                        <!--!--><div class="card-header h6 mb-0 bg-none p-3">
-                                            <i class="fa fa-sitemap fa-lg fa-fw text-dark text-opacity-50 me-1"></i> .Product Specifications
-                                        </div>
-                                        @foreach (var cluster in clusters)
-                                        {
-                                            <div>
-                                                <div class="row gx-3 alert alert-primary align-items-center">
-                                                    <div class="col-10"><div class="d-flex justify-content-between align-items-center"><div><ul class="list-unstyled mb-0"><li><strong>Memory</strong></li></ul></div></div></div><!--!-->
-                                                    <div class="col-2 text-end"></div>
-                                                </div>
-                                                @foreach (var feature in cluster.Features)
-                                                {
-                                                    <div class="row  gx-3">
-                                                        <div class="col-2"><ul id="tag-size" class="primary"><li>@feature.Feature</li></ul></div><!--!-->
-                                                        <div class="col-4">@feature.Value</div>
-                                                    </div>
-                                                }
 
-                                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-md table-bordered">
+                                    @if (clusters != null && clusters.Count() > 0)
+                                        {
+                                        <!-- Table Headers -->
+                                        @foreach (var cluster in clusters)
+                                            {
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th colspan="2"><strong>@cluster.Cluster</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var feature in cluster.Features)
+                                                    {
+                                                    <tr>
+                                                        <td>@feature.Feature</td>
+                                                        <td>@feature.Value</td>
+                                                    </tr>
+                                                    }
+                                            </tbody>
+                                            }
                                         }
-                                    </div>
+                                    else
+                                        {
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2">No Data Available</th>
+                                            </tr>
+                                        </thead>
                                         }
-                                    </div>
+                                </table>
+                            </div>
+
 
 
                             <!-- END table-responsive -->
@@ -437,126 +477,73 @@
             <!-- BEGIN similar-product -->
             <h4 class="mb-15px mt-30px">You Might Also Like</h4>
             <div class="row gx-2">
-                <div class="col-lg-2 col-md-4">
-                    <!-- BEGIN item -->
-                    <div class="item item-thumbnail">
-                        <a href="product_detail.html" class="item-image">
-                            <img src="../assets/img/product/product-iphone.png" alt="">
-                            <div class="discount">15% OFF</div>
-                        </a>
-                        <div class="item-info">
-                            <h4 class="item-title">
-                                <a href="product_detail.html">iPhone 6s Plus<br>16GB</a>
-                            </h4>
-                            <p class="item-desc">3D Touch. 12MP photos. 4K video.</p>
-                            <div class="item-price">$649.00</div>
-                            <div class="item-discount-price">$739.00</div>
+                @if (TopTenProducts != null && TopTenProducts.Count > 0)
+                    {
+
+                    int count = 0;
+                    foreach (var variant in TopTenProducts)
+                        {
+                        if (count >= 6) break; //
+                        <div class="col-lg-2 col-md-4">
+                            <!-- BEGIN item -->
+                            <div class="item item-thumbnail">
+                                <a href="/" class="item-image">
+                                    <img src="@(!string.IsNullOrEmpty(variant.Thumbnail) ? variant.Thumbnail : UrlHelper.GetVariantImageUrl(variant.Id, variant.DefaultImageUrl))"
+                                         class="img-fluid"
+                                         style="object-fit: contain; max-width: 100%; max-height: 100%;"
+                                         alt="Product Image">
+
+
+
+                                    @{
+                                        int discountPercentage;
+                                        double discount = variant.ProductPrice - variant.VariantPrice;
+                                        if (discount > 0)
+                                            {
+                                            discountPercentage = (int)Math.Round((discount / variant.ProductPrice) * 100);
+
+                                            <div class="discount">
+                                                @discountPercentage% OFF
+                                            </div>
+                                            }
+                                    }
+                                </a>
+                                <div class="item-info">
+                                    <h4 class="item-title" style="min-height: 3em; align-items: center; overflow: hidden;">
+                                        <a href="/" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;text-align:center">
+                                            @variant.Name
+                                        </a>
+                                    </h4>
+
+
+
+                                    <p class="item-desc">@variant.Description</p>
+                                    <div class="item-price">@variant.VariantPrice</div>
+                                    <div class="item-discount-price">@variant.ProductPrice</div>
+                                </div>
+                            </div>
+                            <!-- END item -->
                         </div>
-                    </div>
-                    <!-- END item -->
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <!-- BEGIN item -->
-                    <div class="item item-thumbnail">
-                        <a href="product_detail.html" class="item-image">
-                            <img src="../assets/img/product/product-samsung-note5.png" alt="">
-                            <div class="discount">32% OFF</div>
-                        </a>
-                        <div class="item-info">
-                            <h4 class="item-title">
-                                <a href="product.html">Samsung Galaxy Note 5<br>Black</a>
-                            </h4>
-                            <p class="item-desc">Super. Computer. Now in two sizes.</p>
-                            <div class="item-price">$599.00</div>
-                            <div class="item-discount-price">$799.00</div>
-                        </div>
-                    </div>
-                    <!-- END item -->
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <!-- BEGIN item -->
-                    <div class="item item-thumbnail">
-                        <a href="product_detail.html" class="item-image">
-                            <img src="../assets/img/product/product-iphone-se.png" alt="">
-                            <div class="discount">20% OFF</div>
-                        </a>
-                        <div class="item-info">
-                            <h4 class="item-title">
-                                <a href="product.html">iPhone SE<br>32/64Gb</a>
-                            </h4>
-                            <p class="item-desc">A big step for small.</p>
-                            <div class="item-price">$499.00</div>
-                            <div class="item-discount-price">$599.00</div>
-                        </div>
-                    </div>
-                    <!-- END item -->
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <!-- BEGIN item -->
-                    <div class="item item-thumbnail">
-                        <a href="product_detail.html" class="item-image">
-                            <img src="../assets/img/product/product-zenfone2.png" alt="">
-                            <div class="discount">15% OFF</div>
-                        </a>
-                        <div class="item-info">
-                            <h4 class="item-title">
-                                <a href="product_detail.html">Assus ZenFone 2<br>‏(ZE550ML)</a>
-                            </h4>
-                            <p class="item-desc">See What Others Can’t See</p>
-                            <div class="item-price">$399.00</div>
-                            <div class="item-discount-price">$453.00</div>
-                        </div>
-                    </div>
-                    <!-- END item -->
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <!-- BEGIN item -->
-                    <div class="item item-thumbnail">
-                        <a href="product_detail.html" class="item-image">
-                            <img src="../assets/img/product/product-xperia-z.png" alt="">
-                            <div class="discount">32% OFF</div>
-                        </a>
-                        <div class="item-info">
-                            <h4 class="item-title">
-                                <a href="product.html">Sony Xperia Z<br>Black Color</a>
-                            </h4>
-                            <p class="item-desc">For unexpectedly beautiful moments</p>
-                            <div class="item-price">$599.00</div>
-                            <div class="item-discount-price">$799.00</div>
-                        </div>
-                    </div>
-                    <!-- END item -->
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <!-- BEGIN item -->
-                    <div class="item item-thumbnail">
-                        <a href="product_detail.html" class="item-image">
-                            <img src="../assets/img/product/product-lumia-532.png" alt="">
-                            <div class="discount">20% OFF</div>
-                        </a>
-                        <div class="item-info">
-                            <h4 class="item-title">
-                                <a href="product.html">Microsoft Lumia 531<br>Smartphone Orange</a>
-                            </h4>
-                            <p class="item-desc">1 Year Local Manufacturer Warranty</p>
-                            <div class="item-price">$99.00</div>
-                            <div class="item-discount-price">$199.00</div>
-                        </div>
-                    </div>
-                    <!-- END item -->
-                </div>
+
+                count++;
+                                           
+                   }
+          }
+
+
+
             </div>
             <!-- END similar-product -->
         </div>
         <!-- END container -->
     </div>
 
-}
+    }
 
 else
-{
+    {
 
-}
+    }
 
 
 @code
@@ -569,80 +556,109 @@ else
     public long Id { get; set; }
     private ProductVariantDetailDto ProductVariant = new ProductVariantDetailDto();
     private List<ClusterFeatureDto> clusters;
-
+    private string Categories="";
+    private List<CategoryDto> CategoryTree= new List<CategoryDto>();
+    private List<ProductVariantDto> TopTenProducts = new List<ProductVariantDto>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
         {
+        if (firstRender)
+            {
             try
-            {
+                {
                 await LoadProductVariants(Id);
-            }
+                await GetCategoryHierarchyAsync(ProductVariant.CategoryId);
+                StateHasChanged();
+                _ = LoadTopTenProductsAsync();
+                }
             catch (Exception ex)
-            {
+                {
 
                 Console.WriteLine("Error loading cart items: " + ex.Message);
-            }
+                }
 
-        }
+            }
 
         await base.OnAfterRenderAsync(firstRender);
-    }
+        }
 
     private async Task LoadProductVariants(long Id)
-    {
-        try
         {
+        try
+            {
             var response = await productVariantService.GetProductVariantDetailByIdAsync(Id);
             if (response.Success)
-            {
+                {
                 ProductVariant = response.Data;
-                StateHasChanged();
                 await LoadProductVariantFeatures(ProductVariant.ProductId);
-            }
+                }
             else
+                {
+
+                }
+            }
+        catch (Exception ex)
             {
 
             }
         }
-        catch (Exception ex)
-        {
 
+
+    private async Task GetCategoryHierarchyAsync(long Id)
+        {
+        try
+            {
+            var response = await CategoryService.GetCategoryHierarchyAsync(Id);
+            if (response.Success)
+                {
+                CategoryTree = response.Data;
+                if(CategoryTree!=null && CategoryTree.Count()==4)
+                    {
+                    Categories = CategoryTree[3].Name + " / "+ CategoryTree[2].Name+ " / "+CategoryTree[2].Name +" / "+ CategoryTree[0].Name;
+                    }
+                }
+            else
+                {
+
+                }
+            }
+        catch (Exception ex)
+            {
+
+            }
         }
-    }
 
     private async Task LoadProductVariantFeatures(long ProductId)
-    {
-        try
         {
+        try
+            {
             var response = await productVariantService.GetClusterFeaturesAsync(ProductId);
             if (response.Success)
-            {
+                {
                 clusters = response.Data;
                 StateHasChanged();
-            }
+                }
             else
+                {
+                }
+            }
+        catch (Exception ex)
             {
+
             }
         }
-        catch (Exception ex)
-        {
-
-        }
-    }
     private async Task AddToCart()
-    {
-        try
         {
+        try
+            {
             var currentCartItems = await CartService.GetItems();
             var existingItem = currentCartItems.FirstOrDefault(item => item.VariantId == ProductVariant.Id);
 
             if (existingItem == null)
-            {
+                {
 
                 var cartItem = new CartItemDto
-                {
+                    {
                     VariantId = ProductVariant.Id,
                     ProductId = ProductVariant.ProductId,
                     VariantName = ProductVariant.Name,
@@ -651,24 +667,39 @@ else
                     ProducrPrice = ProductVariant.ProductPrice,
                     ImageName = ProductVariant.DefaultImageUrl,
                     Color = ProductVariant.Color
-                };
+                    };
                 await CartService.AddItem(cartItem);
 
-            }
+                }
             else
-            {
+                {
 
-            }
+                }
             NavigationManager.NavigateTo("/Checkout");
 
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Console.WriteLine("Error adding item to cart: " + ex.Message);
+            }
         }
-    }
 
 
-
+    private async Task LoadTopTenProductsAsync()
+        {
+        try
+            {
+            var response = await productVariantService.GetTopTenProductVariantsByCategoryAsync(ProductVariant.CategoryId);
+            if (response.Success)
+                {
+                TopTenProducts = response.Data;
+                StateHasChanged();
+                }
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine("Error loading top 10 products: " + ex.Message);
+            }
+        }
 
 }

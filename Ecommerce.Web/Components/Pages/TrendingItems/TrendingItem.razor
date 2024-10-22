@@ -1,5 +1,8 @@
 ﻿@using Ecommerce.Shared.Entities.TrendingProducts;
 @inject IProductVariantService productVariantService
+
+
+   
 <div id="trending-items" class="section-container">
     <!-- BEGIN container -->
     <div class="container">
@@ -24,7 +27,7 @@
                     <div class="col-lg-2 col-md-4 col-sm-6">
                         <!-- BEGIN item -->
                         <div class="item item-thumbnail">
-                            <a href="product_detail.html" class="item-image">
+                            <a href="/Product?Id=@trendingProduct.ProductVariantId" class="item-image">
                                 <img src="@UrlHelper.GetImageUrl(trendingProduct.ProductVariantId, trendingProduct.DefaultImageUrl)" alt="" />
                                 @if (trendingProduct.discountPercentage > 0)
                                 {
@@ -34,7 +37,7 @@
                             </a>
                             <div class="item-info">
                                 <h4 class="item-title">
-                                    <a href="product_detail.html">@trendingProduct.Name<br /></a>
+                                    <a href="/Product?Id=@trendingProduct.ProductVariantId">@trendingProduct.Name<br /></a>
                                 </h4>
                                 <p class="item-desc">@trendingProduct.Description</p>
                                 <div class="item-price">$@trendingProduct.VariantPrice</div>

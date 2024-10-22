@@ -8,8 +8,10 @@ public class ProductVariantDetailDto
     public long Id { get; set; }
     public long ProductId { get; set; }
     public long TemplateMasterId { get; set; }
+    public long CategoryId { get; set; }
     public string Name { get; set; }
     public string Category { get; set; }
+    public string? Brand { get; set; }
     public string? Color { get; set; }
     public string ?Size { get; set; }
     public int year { get; set; }
@@ -21,6 +23,7 @@ public class ProductVariantDetailDto
     public string? SSN { get; set; }
     public string? Description { get; set; }
     public int discountPercentage { get; set; }
+    public string? Thumbnail { get; set; }
     public bool Publish { get; set; }
     public string? DefaultImageUrl { get; set; }
     public List<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; } = new List<ProductVariantFeatureValue>();

@@ -1,6 +1,33 @@
-﻿<div id="top-nav" class="top-nav" style=" height:75px; display: flex; justify-content: center; align-items: center;">
+﻿
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+<style>
+    /*    .search-container {
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+    */
+    .search-input {
+        width: 80%;
+    }
+
+    .has-search .form-control-feedback {
+        position: absolute;
+        z-index: 2;
+        display: block;
+        width: 2.375rem;
+        height: 2.375rem;
+        line-height: 2.375rem;
+        text-align: center;
+        pointer-events: none;
+        color: #aaa;
+    }
+</style>
+<div id="top-nav" class="top-nav ">
     <!-- BEGIN container -->
-    <div class="container">
+    <div class="container-fluid mt-2 mb-2">
+
         <div class="collapse navbar-collapse">
 
             <div class="header-logo" style="margin-right:10px">
@@ -10,91 +37,82 @@
                 </a>
             </div>
 
-            <ul class="nav navbar-nav">
+            <div class="search-container flex-grow-1 d-flex align-items-center">
 
-                <li><a href="#">Help and information</a></li>
-                <li><a href="#">Conditions</a></li>
-                <li><a href="#">Safety center</a></li>
+                <div class="mx-10px">
 
-                <li class="dropdown">
-                    <a href="#" data-bs-toggle="dropdown">
-                        <i class="fa fa-search search-btn"></i>
-                        <span class="arrow top"></span>
-                    </a>
-                    <div class="dropdown-menu p-15px" style="width:250px">
-                        <form action="#search" method="POST" name="search_form">
-                            <div class="input-group">
-                                <input type="text" placeholder="Search" class="form-control bg-light" />
-                                <button class="btn btn-dark" type="submit"><i class="fa fa-search"></i></button>
-                            </div>
-                        </form>
+                    <span class="text-ligt" style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.7);">&nbsp;&nbsp;  Deliver to</span>
+                    <span class="text-white">
+                        <b style="display: flex; align-items: center;">
+                            <i class="bi bi-geo-alt" style="margin-right: 5px;"></i> Ireland
+                        </b>
+                    </span>
+
+                </div>
+
+
+
+                <div class="input-group mx-10px">
+                    <input type="text" class="form-control" placeholder="Search cicocic items">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fa fa-search"></i>
+                        </button>
                     </div>
-                </li>
-
-
-            </ul>
-
-            @*<ul class="nav navbar-nav">
-            <li class="dropdown dropdown-hover">
-                <a href="#" data-bs-toggle="dropdown"><img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                    <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English</a></li>
-                    <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/flag-german.png" class="flag-img" alt="" /> German</a></li>
-                    <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/flag-spanish.png" class="flag-img" alt="" /> Spanish</a></li>
-                    <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/flag-french.png" class="flag-img" alt="" /> French</a></li>
-                    <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/flag-chinese.png" class="flag-img" alt="" /> Chinese</a></li>
-                </ul>
-            </li>
-            <li><a href="#">Customer Care</a></li>
-            <li><a href="#">Order Tracker</a></li>
-        </ul>*@
-        <ul class="nav navbar-nav navbar-end">
-
-
-
-
-
-
-
-
-
-            <li>
-                <a href="/">
-                    <img src="../assets/img/user/user-1.jpg" style="float:left;width:36px; height: 36px; border-radius:120px;" />
-
-                    <span class="d-none d-xl-inline">Login / Register</span>
-                </a>
-            </li>
-
-         
-                <li class="dropdown dropdown-hover">
-                    <a href="#" data-bs-toggle="dropdown"><img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English <b class="caret"></b></a>
-                   
-                    <ul class="dropdown-menu">
-                        <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English</a></li>
-                        <li><a href="#" class="dropdown-item"><img src="../assets/img/flag/OIP.jpg" class="flag-img" alt="" /> Dutch</a></li>
-
-                    </ul>
-                </li>
-                
-         
-
-            @*<li>
-
-            <div class="input-group">
-                <input type="text" placeholder="Search" class="form-control bg-light" style="width:300px" />
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button">
-                        <i class="fas fa-search"></i>
-                    </button>
                 </div>
             </div>
+            <div class="nav navbar-nav">
 
-        </li>*@
+            </div>
+            <ul class="nav navbar-nav navbar-end">
+                <li>  <a href="#" data-bs-toggle="dropdown"><img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English <b class="caret"></b></a></li>
 
 
-        </ul>
+                <li>
+                    <a href="/Signup">
+                        Hello,
+                        @if (!String.IsNullOrEmpty(userName))
+                            {
+                            <span class="d-none d-xl-inline"><b>@userName</b></span>
+                            }
+                        else
+                            {
+                            <span class="d-none d-xl-inline"><b>Login / Register</b></span>
+                            }
+
+                    </a>
+                </li>
+
+
+                <li><a href="#"><i class="fab fa-facebook-f f-s-14"></i></a></li>
+                <li><a href="#"><i class="fab fa-instagram f-s-14"></i></a></li>
+                <li><a href="#"><i class="fab fa-google f-s-14"></i></a></li>
+            </ul>
         </div>
     </div>
     <!-- END container -->
 </div>
+
+@code {
+    private string userName = string.Empty;
+
+    private bool hasInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender && !hasInitialized)
+            {
+            var result = await ProtectedSessionStore.GetAsync<string>("UserName");
+
+            if (result.Success && !string.IsNullOrEmpty(result.Value))
+                {
+                userName = result.Value;
+                }
+            hasInitialized = true;
+
+            // Now that we have the value, trigger re-render
+            StateHasChanged();
+            }
+        }
+
+}

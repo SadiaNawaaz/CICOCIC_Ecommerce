@@ -28,530 +28,538 @@
 @inject IJSRuntime JS
 
 
-
-
-<EditForm Model="@productVariant" OnValidSubmit="HandleValidSubmitVariant" FormName="Variants">
-    <DataAnnotationsValidator />
-
-    <div class="d-flex align-items-center mb-3">
-        <div>
-            <ol class="breadcrumb mb-2">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
-                <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Variants</li>
-            </ol>
-            <h1 class="page-header mb-0"> Variants</h1>
-        </div>
-
-        <div class="ms-auto">
-            <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-indigo w-100px me-5px mt-20px">Save</button>
-        </div>
+@if (isLoading)
+    {
+    <div class="loading-spinner">
+        <img src="/assets/img/theme/animation.gif" alt="Loading..." />
     </div>
+    }
+else
+    {
+    <EditForm Model="@productVariant" OnValidSubmit="HandleValidSubmitVariant" FormName="Variants">
+        <DataAnnotationsValidator />
 
-
-    <!-- The Modal -->
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-                    <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information</b>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-9">
-                            <label class="form-label">Title</label>
-                            <InputText id="name" class="form-control" @bind-Value="productVariant.Name" />
-
-                            <span class="text-danger"> <ValidationMessage For="@(() => productVariant.Name)" /></span>
-
-                        </div>
-
-
-
-
-                    </div>
-                    <div class="col-lg-12">
-                        <label class="form-label">Description</label>
-                        <div class="form-control p-0 overflow-hidden">
-                            <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind-Value="@productVariant.Description"></InputTextArea>
-                        </div>
-                    </div>
-                </div>
+        <div class="d-flex align-items-center mb-3">
+            <div>
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
+                    <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Variants</li>
+                </ol>
+                <h1 class="page-header mb-0"> Variants</h1>
             </div>
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Media</b>
+
+            <div class="ms-auto">
+                <button type="submit" @onkeypress="KeyHandler" @onkeypress:preventDefault class="btn btn-indigo w-100px me-5px mt-20px">Save</button>
+            </div>
+        </div>
+
+
+        <!-- The Modal -->
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Product Information</b>
                     </div>
-                    <div>
-                        <label>
-                            <input type="checkbox" @onchange="OnCheckboxChanged" />
-                            Clone Product images
-                        </label>
-                    </div>
-                </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-9">
+                                <label class="form-label">Title</label>
+                                <InputText id="name" class="form-control" @bind-Value="productVariant.Name" />
+
+                                <span class="text-danger"> <ValidationMessage For="@(() => productVariant.Name)" /></span>
+
+                            </div>
 
 
-                <div class="card-body">
-                    <div id="dropzone">
-                        <div>
-                            <div class="dz-message needsclick">
-                                <b>Click</b> to upload.<br />
 
-                                <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
 
-                                @if (selectedFiles != null && selectedFiles.Count() > 0)
-                                    {
-                                    <div style="display: flex; flex-wrap: wrap; margin-top: 10px;">
-                                        @foreach (var file in selectedFiles.OrderBy(f => f.Order).Where(a => !a.IsDeleted))
-                                            {
-                                            <div style="position: relative; margin: 10px; cursor: grab;" draggable="true"
-                                                 @ondragstart="(e) => HandleDragStart(e, file)"
-                                                 ondragover="event.preventDefault();"
-                                                 @ondrop="() => HandleDrop(file)">
-                                                <img src="@file.ImageUrl" alt="Image Preview" style="height: 150px; width: 150px;" />
-                                                <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
-                                            </div>
-                                            }
-                                    </div>
-                                    }
+                        </div>
+                        <div class="col-lg-12">
+                            <label class="form-label">Description</label>
+                            <div class="form-control p-0 overflow-hidden">
+                                <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind-Value="@productVariant.Description"></InputTextArea>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Media</b>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" @onchange="OnCheckboxChanged" />
+                                Clone Product images
+                            </label>
+                        </div>
+                    </div>
 
 
-                @*<div class="card-body">
+                    <div class="card-body">
                         <div id="dropzone">
                             <div>
                                 <div class="dz-message needsclick">
-                                    <b>click</b> to upload.<br />
+                                    <b>Click</b> to upload.<br />
 
                                     <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
 
                                     @if (selectedFiles != null && selectedFiles.Count() > 0)
-                                    {
-                                        <div>
-
-                                            @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
-                                            {
-                                                <div style="display:inline-block; margin: 10px; position: relative;">
-                                                    <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
+                                        {
+                                        <div style="display: flex; flex-wrap: wrap; margin-top: 10px;">
+                                            @foreach (var file in selectedFiles.OrderBy(f => f.Order).Where(a => !a.IsDeleted))
+                                                {
+                                                <div style="position: relative; margin: 10px; cursor: grab;" draggable="true"
+                                                     @ondragstart="(e) => HandleDragStart(e, file)"
+                                                     ondragover="event.preventDefault();"
+                                                     @ondrop="() => HandleDrop(file)">
+                                                    <img src="@file.ImageUrl" alt="Image Preview" style="height: 150px; width: 150px;" />
                                                     <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
                                                 </div>
-                                            }
-
+                                                }
                                         </div>
-                                    }
-
+                                        }
                                 </div>
                             </div>
                         </div>
-                    </div>*@
-            </div>
-
-
-
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLS</b>
                     </div>
 
-                </div>
-                <div class="card-body">
-                    @if (productVariant.ProductVariantMedias != null && productVariant.ProductVariantMedias.Count > 0)
-                        {
-                        @foreach (var media in productVariant.ProductVariantMedias)
-                            {
-                            <div class="row align-items-center mb-3">
 
-                                <div class="col-md-4">
-                                    <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                    @*<div class="card-body">
+                            <div id="dropzone">
+                                <div>
+                                    <div class="dz-message needsclick">
+                                        <b>click</b> to upload.<br />
+
+                                        <InputFile id="productImage" OnChange="@HandleSelected" class="form-control" multiple />
+
+                                        @if (selectedFiles != null && selectedFiles.Count() > 0)
+                                        {
+                                            <div>
+
+                                                @foreach (var file in selectedFiles.Where(a => a.IsDeleted == false))
+                                                {
+                                                    <div style="display:inline-block; margin: 10px; position: relative;">
+                                                        <img src="@file.ImageUrl" alt="Image Preview" style="height:150px;width:150px" />
+                                                        <button type="button" @onclick="() => RemoveImage(file)" class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;">X</button>
+                                                    </div>
+                                                }
+
+                                            </div>
+                                        }
+
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
+                            </div>
+                        </div>*@
+                </div>
 
 
-                                    <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i></button>
 
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLS</b>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        @if (productVariant.ProductVariantMedias != null && productVariant.ProductVariantMedias.Count > 0)
+                            {
+                            @foreach (var media in productVariant.ProductVariantMedias)
+                                {
+                                <div class="row align-items-center mb-3">
+
+                                    <div class="col-md-4">
+                                        <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                    </div>
+                                    <div class="col-md-4">
+
+
+                                        <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i></button>
+
+
+                                    </div>
+                                </div>
+                                }
+                            }
+
+                    </div>
+                </div>
+
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+
+
+                        <button type="button" class="btn btn-indigo" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
+                            <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
+                            <b>View Product Specifications </b>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="modal" id="modal-without-animation">
+                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="alert alert-indigo p-2 modal-header">
+                                        <h5>Product Specifications For @productVariant.Name</h5>
+
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <div>
+
+                                            @if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
+                                                {
+                                                @foreach (var clus in Product.ProductClusters)
+                                                    {
+                                                    <!-- Cluster Header with Collapse Toggle -->
+                                                    <div class="mb-3 p-0" style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+                                                        <div class="d-flex justify-content-between align-items-center alert alert-indigo p-2" style="border-radius: 10px 10px 0 0;">
+                                                            <div>
+                                                                <strong>@clus.Cluster.Name</strong>
+                                                            </div>
+                                                            <div>
+                                                                <!-- Toggle Collapse Button -->
+                                                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCluster-@clus.Cluster.Id" aria-expanded="false">
+                                                                    <i class="fa fa-chevron-down"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Collapsible Content (Features) -->
+                                                        <div id="collapseCluster-@clus.Cluster.Id" class="collapse">
+                                                            <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
+                                                                @foreach (var f in clus.ProductClusterFeatures)
+                                                                    {
+                                                                    <div class="row mb-2 align-items-center">
+                                                                        <div class="col-md-2">
+                                                                            <span>@f.Feature.Name</span>
+                                                                        </div>
+                                                                        <div class="col-md-4">
+                                                                            <input type="text" class="form-control" @bind-value="@f.Value" readonly />
+                                                                        </div>
+                                                                    </div>
+                                                                    }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    }
+                                                }
+
+
+                                            @*@if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
+                                                {
+
+                                                foreach (var clus in Product.ProductClusters)
+                                                    {
+
+
+                                                    <div class="row mb-3 gx-3 alert alert-indigo align-items-center">
+                                                        <div class="col-10">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        <li><strong>@clus.Cluster.Name</strong></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-2 text-end">
+
+                                                        </div>
+                                                    </div>
+                                                    foreach (var f in clus.ProductClusterFeatures)
+                                                        {
+                                                        <div class="row mb-3 gx-3">
+                                                            <div class="col-2">
+                                                                <ul id="tag-size" class="primary">
+                                                                    <li>@f.Feature.Name</li>
+
+                                                                </ul>
+                                                            </div>
+                                                            <div class="col-4"><input type="text" class="form-control" @bind-value="@f.Value" readonly /></div>
+
+                                                        </div>
+                                                        }
+
+                                                    }
+
+                                                }*@
+
+
+                                        </div>
+
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+                @*<div class="card border-0 mb-4">
+                        <div class="card-header h6 mb-0 bg-none p-3">
+                            <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
+                        </div>
+                        <div class="card-body">
+
+                            <div class="row">
+
+                                <div class="col-6">
+                                    <label class="form-label">Type</label>
+
+                                    <select id="variantType" @bind="productVariant.variantType" class="form-control">
+                                        @foreach (var variant in Enum.GetValues(typeof(VariantType)).Cast<VariantType>())
+                                        {
+                                            <option value="@variant">@variant</option>
+                                        }
+                                    </select>
+                                </div>
+
+
+                                <div class="col-6">
+                                    <label class="form-label">Value</label>
+                                    <InputText id="name" class="form-control" @bind-Value="productVariant.TypeValue" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Note</label>
+                                    <div class="form-control p-0 overflow-hidden">
+                                        <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind-Value="@productVariant.Note"></InputTextArea>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                    </div>*@
+
+
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-arrow-right-from-file fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Publish</b></div>
+                        </div>
+                        <div><a href="#" class="text-decoration-none text-gray-500">Manage</a></div>
+                    </div>
+                    <div class="card-body fw-bold">
+                        <div class="d-flex">
+                            <div class="flex-1 d-flex">
+                                <div class="me-2">
+                                    <div class="form-check">
+                                        <InputCheckbox @bind-Value="@productVariant.Publish" class="form-check-input" type="checkbox" id="widget_todolist_1" />
+                                    </div>
+                                </div>
+                                <div>Publish to Site</div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="d-flex">
+                            @if (productVariant != null && productVariant.Id > 0)
+                                {
+                                <div class="flex-1 d-flex">
+
+                                    <a href="@(webAppUrl + "Product?Id=" + productVariant.Id)" class="text-decoration-none" target="_blank">
+                                        <i class="fa fa-lg fa-fw fa-eye"></i>
+                                    </a>
+
+                                    <p> &nbsp;&nbsp;&nbsp; Save before Preview!</p>
+                                </div>
+                                <hr />
+                                }
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-seedling fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Product Level</b></div>
+                        </div>
+                    </div>
+                    <div class="card-body fw-bold">
+
+                        <div class="mb-0 mt-10px">
+                            <label class="form-label">
+                                Product
+                                <a href="/MainProduct" class="text-success me-1 mb-1">  Add New</a>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" value="@Product.Name" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-navicon fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Brand</b></div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center position-relative fw-bold mb-2">
+                            <input type="text" value="@((Product?.Brand?.Name) ?? "No Brand Available")" class="form-control" readonly />
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-list-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Variants</b></div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-indigo">
+                            Add variants if this product comes in multiple versions, like different sizes or colors.
+                        </div>
+                        <form class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Size</label>
+                                <div class="col-lg-8">
+
+                                    <select class="form-select" @bind="@productVariant.GeneralSizeId">
+                                        <option value="">-- Select Size --</option>
+                                        @foreach (var size in Sizes)
+                                            {
+                                            <option value="@size.Id">@size.Name</option>
+                                            }
+                                    </select>
 
                                 </div>
                             </div>
-                            }
-                        }
-
-                </div>
-            </div>
-
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3">
-               
-
-                    <button type="button" class="btn btn-indigo" style="width:100%" data-bs-toggle="modal" data-bs-target="#modal-without-animation">
-                        <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
-                        <b>View Product Specifications </b>
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="modal" id="modal-without-animation">
-                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                            <div class="modal-content">
-                                <div class="alert alert-indigo p-2 modal-header">
-                                    <h5>Product Specifications For @productVariant.Name</h5>
-
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-
-                                </div>
-                                <div class="modal-body">
-
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">
+                                    Color  &nbsp;&nbsp;
                                     <div>
 
-                                        @if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
+                                        @if (productVariant.GeneralColorId != null)
                                             {
-                                            @foreach (var clus in Product.ProductClusters)
+                                            var selectedColor = colors.FirstOrDefault(c => c.Id == productVariant.GeneralColorId);
+                                            if (selectedColor != null)
                                                 {
-                                                <!-- Cluster Header with Collapse Toggle -->
-                                                <div class="mb-3 p-0" style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
-                                                    <div class="d-flex justify-content-between align-items-center alert alert-indigo p-2" style="border-radius: 10px 10px 0 0;">
-                                                        <div>
-                                                            <strong>@clus.Cluster.Name</strong>
-                                                        </div>
-                                                        <div>
-                                                            <!-- Toggle Collapse Button -->
-                                                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCluster-@clus.Cluster.Id" aria-expanded="false">
-                                                                <i class="fa fa-chevron-down"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Collapsible Content (Features) -->
-                                                    <div id="collapseCluster-@clus.Cluster.Id" class="collapse">
-                                                        <div class="p-3" style="background-color: white; border-radius: 0 0 10px 10px;">
-                                                            @foreach (var f in clus.ProductClusterFeatures)
-                                                                {
-                                                                <div class="row mb-2 align-items-center">
-                                                                    <div class="col-md-2">
-                                                                        <span>@f.Feature.Name</span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <input type="text" class="form-control" @bind-value="@f.Value" readonly />
-                                                                    </div>
-                                                                </div>
-                                                                }
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <span class="badge" style="background-color:@selectedColor.HexCode; color:@selectedColor.HexCode;border-color:black"> . .</span>
                                                 }
                                             }
 
 
-                                        @*@if (Product != null && Product.ProductClusters != null && Product.ProductClusters.Count > 0)
-        {
-
-        foreach (var clus in Product.ProductClusters)
-            {
-
-
-            <div class="row mb-3 gx-3 alert alert-indigo align-items-center">
-                <div class="col-10">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <ul class="list-unstyled mb-0">
-                                <li><strong>@clus.Cluster.Name</strong></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2 text-end">
-
-                </div>
-            </div>
-            foreach (var f in clus.ProductClusterFeatures)
-                {
-                <div class="row mb-3 gx-3">
-                    <div class="col-2">
-                        <ul id="tag-size" class="primary">
-                            <li>@f.Feature.Name</li>
-
-                        </ul>
-                    </div>
-                    <div class="col-4"><input type="text" class="form-control" @bind-value="@f.Value" readonly /></div>
-
-                </div>
-                }
-
-            }
-
-        }*@
-
-
                                     </div>
+                                </label>
+                                <div class="col-lg-8">
+                                    <select class="form-select" @bind="@productVariant.GeneralColorId">
+                                        <option value="">-- Select Color --</option>
+                                        @if (colors != null && colors.Count > 0)
+                                            {
+                                            @foreach (var col in colors)
+                                                {
 
 
-                                </div>
-                                <div class="modal-footer">
-                                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                                                <option value="@col.Id">@col.Name</option>
+                                                }
+                                            }
+
+                                    </select>
+
+
+
                                 </div>
                             </div>
-                        </div>
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">SKU</label>
+                                <div class="col-lg-8">
+                                    <InputText @bind-Value="@productVariant.Sku" class="form-control" id="masked-input-tid" placeholder="#sku00001" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Price</label>
+                                <div class="col-lg-8">
+                                    <InputNumber @bind-Value="@productVariant.Price" class="form-control" id="masked-input-pkey" placeholder="300" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Build Year</label>
+                                <div class="col-lg-8">
+
+                                    <select class="form-select" @bind="@productVariant.ModelYearId">
+                                        <option value="">-- Select Model Year --</option>
+                                        @foreach (var modelYear in ModelYears)
+                                            {
+                                            <option value="@modelYear.Id">@modelYear.Year</option>
+                                            }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">SSN</label>
+                                <div class="col-lg-8">
+                                    <InputText @bind-Value="@productVariant.SSN" class="form-control" id="masked-input-pno" placeholder="AAA-9999-A" />
+                                </div>
+                            </div>
+                        </form>
                     </div>
-               
-
-
                 </div>
 
 
 
-            </div>
-
-
-            @*<div class="card border-0 mb-4">
-                    <div class="card-header h6 mb-0 bg-none p-3">
-                        <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
+                <div class="card border-0 mb-3">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
+                        </div>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-indigo">
+                            Add Image Thumbnail
+                        </div>
+                        <div class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Thumbnail</label>
+                                <div class="col-lg-8">
 
-                        <div class="row">
+                                    <InputText @bind-Value="productVariant.Thumbnail" class="form-control" />
 
-                            <div class="col-6">
-                                <label class="form-label">Type</label>
+                                    @if (!String.IsNullOrEmpty(productVariant.Thumbnail))
+                                        {
+                                        <img src="@productVariant.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
+                                        }
 
-                                <select id="variantType" @bind="productVariant.variantType" class="form-control">
-                                    @foreach (var variant in Enum.GetValues(typeof(VariantType)).Cast<VariantType>())
-                                    {
-                                        <option value="@variant">@variant</option>
-                                    }
-                                </select>
-                            </div>
-
-
-                            <div class="col-6">
-                                <label class="form-label">Value</label>
-                                <InputText id="name" class="form-control" @bind-Value="productVariant.TypeValue" />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Note</label>
-                                <div class="form-control p-0 overflow-hidden">
-                                    <InputTextArea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind-Value="@productVariant.Note"></InputTextArea>
                                 </div>
                             </div>
 
+
                         </div>
-
-
                     </div>
-
-
-
-                </div>*@
+                </div>
+            </div>
 
 
         </div>
-        <div class="col-xl-4">
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div>  <i class="fa fa-arrow-right-from-file fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Publish</b></div>
-                    </div>
-                    <div><a href="#" class="text-decoration-none text-gray-500">Manage</a></div>
-                </div>
-                <div class="card-body fw-bold">
-                    <div class="d-flex">
-                        <div class="flex-1 d-flex">
-                            <div class="me-2">
-                                <div class="form-check">
-                                    <InputCheckbox @bind-Value="@productVariant.Publish" class="form-check-input" type="checkbox" id="widget_todolist_1" />
-                                </div>
-                            </div>
-                            <div>Publish to Site</div>
-                        </div>
-                    </div>
-                    <br />
-                    <div class="d-flex">
-                        @if (productVariant != null && productVariant.Id > 0)
-                            {
-                            <div class="flex-1 d-flex">
+    </EditForm>
+    }
 
-                                <a href="@(webAppUrl + "Product?Id=" + productVariant.Id)" class="text-decoration-none" target="_blank">
-                                    <i class="fa fa-lg fa-fw fa-eye"></i>
-                                </a>
-
-                                <p> &nbsp;&nbsp;&nbsp; Save before Preview!</p>
-                            </div>
-                            <hr />
-                            }
-
-                    </div>
-
-
-
-                </div>
-            </div>
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div>  <i class="fa fa-seedling fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Product Level</b></div>
-                    </div>
-                </div>
-                <div class="card-body fw-bold">
-
-                    <div class="mb-0 mt-10px">
-                        <label class="form-label">
-                            Product
-                            <a href="/MainProduct" class="text-success me-1 mb-1">  Add New</a>
-                        </label>
-                        <div class="input-group">
-                            <input type="text" value="@Product.Name" class="form-control" readonly />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div>  <i class="fa fa-navicon fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Brand</b></div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center position-relative fw-bold mb-2">
-                        <input type="text" value="@((Product?.Brand?.Name) ?? "No Brand Available")" class="form-control" readonly />
-
-                    </div>
-
-                </div>
-            </div>
-            <div class="card border-0 mb-4">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div>  <i class="fa fa-list-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Variants</b></div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-indigo">
-                        Add variants if this product comes in multiple versions, like different sizes or colors.
-                    </div>
-                    <form class="form-horizontal form-bordered">
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Size</label>
-                            <div class="col-lg-8">
-
-                                <select class="form-select" @bind="@productVariant.GeneralSizeId">
-                                    <option value="">-- Select Size --</option>
-                                    @foreach (var size in Sizes)
-                                        {
-                                        <option value="@size.Id">@size.Name</option>
-                                        }
-                                </select>
-
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">
-                                Color  &nbsp;&nbsp;
-                                <div>
-
-                                    @if (productVariant.GeneralColorId != null)
-                                        {
-                                        var selectedColor = colors.FirstOrDefault(c => c.Id == productVariant.GeneralColorId);
-                                        if (selectedColor != null)
-                                            {
-                                            <span class="badge" style="background-color:@selectedColor.HexCode; color:@selectedColor.HexCode;border-color:black"> . .</span>
-                                            }
-                                        }
-
-
-                                </div>
-                            </label>
-                            <div class="col-lg-8">
-                                <select class="form-select" @bind="@productVariant.GeneralColorId">
-                                    <option value="">-- Select Color --</option>
-                                    @if (colors != null && colors.Count > 0)
-                                        {
-                                        @foreach (var col in colors)
-                                            {
-
-
-                                            <option value="@col.Id">@col.Name</option>
-                                            }
-                                        }
-
-                                </select>
-
-
-
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">SKU</label>
-                            <div class="col-lg-8">
-                                <InputText @bind-Value="@productVariant.Sku" class="form-control" id="masked-input-tid" placeholder="#sku00001" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Price</label>
-                            <div class="col-lg-8">
-                                <InputNumber @bind-Value="@productVariant.Price" class="form-control" id="masked-input-pkey" placeholder="300" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Build Year</label>
-                            <div class="col-lg-8">
-
-                                <select class="form-select" @bind="@productVariant.ModelYearId">
-                                    <option value="">-- Select Model Year --</option>
-                                    @foreach (var modelYear in ModelYears)
-                                        {
-                                        <option value="@modelYear.Id">@modelYear.Year</option>
-                                        }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">SSN</label>
-                            <div class="col-lg-8">
-                                <InputText @bind-Value="@productVariant.SSN" class="form-control" id="masked-input-pno" placeholder="AAA-9999-A" />
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-
-
-            <div class="card border-0 mb-3">
-                <div class="card-header h6 mb-0 bg-none p-3 d-flex">
-                    <div class="flex-1">
-                        <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-indigo">
-                        Add Image Thumbnail
-                    </div>
-                    <div class="form-horizontal form-bordered">
-                        <div class="form-group row">
-                            <label class="form-label col-form-label col-lg-4">Thumbnail</label>
-                            <div class="col-lg-8">
-
-                                <InputText @bind-Value="productVariant.Thumbnail" class="form-control" />
-
-                                @if (!String.IsNullOrEmpty(productVariant.Thumbnail))
-                                    {
-                                    <img src="@productVariant.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
-                                    }
-
-                            </div>
-                        </div>
-
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-    </div>
-</EditForm>
 @code {
 
     #region Veriable
@@ -578,6 +586,7 @@
     private Catalog catalog = new Catalog();
     private List<GeneralColor> colors;
     string webAppUrl = "";
+    private bool isLoading = false;
 
 
     #endregion
@@ -585,23 +594,47 @@
         {
         await base.OnInitializedAsync();
 
-        webAppUrl = Configuration["WebAppUrl"];
-        await GetProduct();
-        await LoadCategoryTreeAsync();
-        await LoadModelYears();
-        await LoadBrands();
-        await LoadSizes();
-        await LoadColors();
+        await InitializeComponentDataAsync(true);
 
 
 
-        if (Id > 0)
+
+        }
+
+
+
+    private async Task InitializeComponentDataAsync(bool SetupData)
+        {
+        isLoading = true;
+        StateHasChanged();
+        try
             {
-            await LoadVariantForEdit();
+            webAppUrl = Configuration["WebAppUrl"];
+            await GetProduct();
+            if (SetupData)
+                {
+                await LoadCategoryTreeAsync();
+                await LoadModelYears();
+                await LoadBrands();
+                await LoadSizes();
+                await LoadColors();
+                }
+
+
+            if (Id > 0)
+                {
+                await LoadVariantForEdit();
+                }
+            }
+        catch (Exception ex)
+            {
 
             }
+        finally
+            {
+            isLoading = false;
+            }
 
-        //await LoadTemplate(Product.TemplateMasterId);
 
 
         }
@@ -707,6 +740,8 @@
                     productVariant.Name = Product.Name;
                     productVariant.ProductId = Product.Id;
                     productVariant.Price = Product.Price;
+                    productVariant.Description = Product.Description;
+
                     if (Product.CatalogId != null && Product.CatalogId > 0)
                         {
                         var Catresponse = await CatalogService.GetCatalogByIdAsync(Product.CatalogId.Value);
@@ -857,13 +892,13 @@
                 if (response.Success)
                     {
                     Snackbar.Add(response.Message, Severity.Success);
+                    await InitializeComponentDataAsync(false);
 
                     }
                 else
                     {
                     Snackbar.Add(response.Message, Severity.Error);
                     Console.Error.WriteLine($"Error : {response.InnerException}");
-
                     await JS.InvokeVoidAsync("console.log", response.InnerException);
                     }
                 }
@@ -878,6 +913,8 @@
                     {
                     Snackbar.Add(response.Message, Severity.Success);
 
+                    Id = productVariant.Id;
+                    await InitializeComponentDataAsync(false);
                     }
                 else
                     {

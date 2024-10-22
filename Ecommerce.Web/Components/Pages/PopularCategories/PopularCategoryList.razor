@@ -25,39 +25,111 @@
 
     .section-title {
         font-weight: bold;
-        
+    }    .position-relative {
+        position: relative;
+    }
+
+     .position-relative {
+        position: relative;
+    }
+
+    /* Position the text in the corner */
+    .animated-text {
+        position: absolute;
+        bottom: 20px;  /* 20px from the bottom */
+        left: 20px;  /* 20px from the left */
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.5);  /* Optional: Background for better visibility */
+        padding: 10px;
+        border-radius: 5px;
+        animation: moveUpDown 3s ease-in-out infinite;  /* Infinite bounce animation */
+    }
+
+    /* Keyframes for the continuous up-down movement */
+    @@keyframes moveUpDown {
+        0%, 100% {
+            transform: translateY(0); /* Start and end at the original position */
+        }
+        50% {
+            transform: translateY(-15px); /* Move up 15px */
+        }
     }
 </style>
+
+
 <div id="mobile-list" class="section-container pt-0">
     <!-- BEGIN container -->
     <div class="container">
         <div class="container py-5 text-center">
             <h4 class="section-title mb-5">Explore Popular Categories</h4>
             <div class="row justify-content-center">
-
                 @if (Categories != null && Categories.Count > 0)
-                {
-                    foreach (var cat in Categories.OrderBy(a => a.Order))
                     {
+                    foreach (var cat in Categories.OrderBy(a => a.Order))
+                        {
                         <div class="col">
-                            <div class="category-item">
-                                <img src="@UrlHelper.GetPopularCategoriesImageUrl(cat.Id, cat.BannerUrl)" class="img-fluid rounded-circle mb-3" alt="Luxury" />
-                                <h6 class="category-title">@cat.Name.</h6>
-                            </div>
+                            <a href="/ProductByCategory?Id=@cat.CategoryId"
+                               style="text-decoration: none; color: inherit;">
+                                <div class="card h-100">
+                                    <img src="@UrlHelper.GetPopularCategoriesImageUrl(cat.Id, cat.BannerUrl)"
+                                         class="card-img-top" alt="Hollywood Sign on The Hill" style="max-height:170px" />
+                                </div>
+                                <h5 class="card-title">@cat.Name</h5>
+                            </a>
                         </div>
+                        }
                     }
-
-                }
-
             </div>
 
 
-                  
+
+
         </div>
 
     </div>
     <!-- END container -->
 </div>
+<div id="mobile-list" class="section-container pt-0">
+    <!-- BEGIN container -->
+    <div class="container">
+        <div class="container py-5 text-center" style="position: relative;">
+            <img src="https://d-themes.com/wordpress/riode/demo-23/wp-content/uploads/sites/25/2021/01/banner-5.jpg" style="width: 100%;" />
+            <div style="position: absolute; top: 50%; left: 20%; transform: translate(-50%, -50%); color: white; font-size: 2rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
+                Discover More. Pay Less.
+            </div>
+            <!-- Position the first SVG at the top right corner of the image -->
+            <svg class="star-2" xmlns="http://www.w3.org/2000/svg" width="82" height="94" viewBox="0 0 82 94" fill="none" style="position: absolute; top:0px; right: 10px;">
+                <path d="M41 0L45.277 39.592L81.7032 23.5L49.554 47L81.7032 70.5L45.277 54.408L41 94L36.723 54.408L0.296806 70.5L32.446 47L0.296806 23.5L36.723 39.592L41 0Z" fill="gray"></path>
+            </svg>
+            <!-- Position the second yellow SVG at the bottom left corner of the image -->
+            <svg class="star-2" xmlns="http://www.w3.org/2000/svg" width="82" height="94" viewBox="0 0 82 94" fill="none" style="position: absolute; bottom: 0px; left: 10px;">
+                <path d="M41 0L45.277 39.592L81.7032 23.5L49.554 47L81.7032 70.5L45.277 54.408L41 94L36.723 54.408L0.296806 70.5L32.446 47L0.296806 23.5L36.723 39.592L41 0Z" fill="orange"></path>
+            </svg>
+        </div>
+    </div>
+    <!-- END container -->
+</div>
+
+
+
+<div class="container">
+    <div class="row g-0">
+        <!-- Left Image -->
+        <div class="col-lg-6 p-0">
+            <img src="/assets/img/work/Map.gif" style="max-height: 400px; width: 100%; object-fit: cover;" />
+        </div>
+
+        <!-- Right Image with Moving Text -->
+        <div class="col-lg-6 p-0 position-relative">
+            <img src="/assets/img/work/banner-media.png" style="height: 400px; width: 100%; object-fit: cover;" />
+            <!-- Overlay Text on the Right Image -->
+            <h2 class="animated-text">Discovering the Hottest Nearby Destinations in Your Area</h2>
+        </div>
+    </div>
+</div>
+<br /><br />
 
 @code
 {
@@ -66,26 +138,26 @@
     #region FetchData
 
     protected override async Task OnInitializedAsync()
-    {
+        {
         await LoadCategories();
-    }
+        }
 
     private async Task LoadCategories()
-    {
-        try
         {
+        try
+            {
             var response = await PopularCategoryService.GetPopularCategoriesAsync();
             if (response.Success)
-            {
+                {
                 Categories = response.Data;
                 StateHasChanged();
+                }
+
             }
-
-        }
         catch (Exception ex)
-        {
+            {
 
+            }
         }
-    }
     #endregion
 }

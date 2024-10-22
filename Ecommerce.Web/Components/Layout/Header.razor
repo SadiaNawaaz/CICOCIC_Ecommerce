@@ -25,7 +25,7 @@
 
 <div id="header" class="header">
     <!-- BEGIN container -->
-    <div class="container">
+    <div class="container-fluid">
         <!-- BEGIN header-container -->
         <div class="header-container">
             <!-- BEGIN navbar-toggle -->
@@ -49,11 +49,11 @@
             <!-- BEGIN header-nav -->
             <div class="header-nav">
                 <div class="collapse navbar-collapse" id="navbar-collapse">
-                    <ul class="nav justify-content-center">
+                    <ul class="nav justify-content-start">
                         @*<li class="active"><a href="/">Home</a></li>*@
                         <li class="dropdown dropdown-full-width dropdown-hover">
                             <a href="#" data-bs-toggle="dropdown">
-                                 Categories
+                                 All
                                 <b class="caret"></b>
                                 <span class="arrow top"></span>
                             </a>
@@ -206,7 +206,7 @@
 
                         @if (Categories != null && Categories.Count() > 0)
                         {
-                            @foreach (var category in Categories.Take(6).OrderBy(a => a.Order))
+                            @foreach (var category in Categories.Take(7).OrderBy(a => a.Order))
                             {
                                 <li class="dropdown dropdown-hover">
                                     <a href="#" data-bs-toggle="dropdown">
@@ -224,7 +224,7 @@
 
 
 
-                                                <a class="dropdown-item" href="#">@subCategory.Name</a>
+                                                <a class="dropdown-item" href="/ProductByCategory?Id=@subCategory.Id">@subCategory.Name</a>
                                             }
                                         </div>
                                     }
@@ -240,7 +240,7 @@
                 <ul class="nav justify-content-center">
 
 
-                    @if (Categories != null && Categories.Count > 6)
+                    @*@if (Categories != null && Categories.Count > 6)
                     {
                         @foreach (var category in Categories.Skip(6).Take(1).OrderBy(a => a.Order))
                         {
@@ -262,7 +262,7 @@
                                 }
                             </li>
                         }
-                    }
+                    }*@
                     <li style="width:20px">
                         <a href="#" class="header-cart" data-bs-toggle="dropdown">
                             <i class="fa fa-shopping-bag"></i>
@@ -393,7 +393,7 @@
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
 
-        NavigationManager.NavigateTo($"/ProductByCategory/{id}");
+        NavigationManager.NavigateTo($"/ProductByCategory?Id={id}");
     }
     private async Task SearchProductsAsync()
     {
@@ -411,6 +411,6 @@
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
 
-        NavigationManager.NavigateTo($"/Brand/{id}");
+        NavigationManager.NavigateTo($"/Brand?Id={id}");
     }
 }
