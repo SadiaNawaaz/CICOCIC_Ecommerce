@@ -1,60 +1,32 @@
-﻿@page "/Counter"
+﻿
+@page "/gameportal"
+@inject IJSRuntime JSRuntime
+<h1>Game Portal Embed Test</h1>
 
-<div class="container-fluid p-0">
-    <div class="row align-items-start">
-        <div class="col-xl-7 col-lg-12 col-md-12">
-            <div class="map-area" style="position: relative;">
-                <!-- Background Map Image -->
-                <img src="https://pixio.dexignzone.com/xhtml/images/map/map2.png" alt="Map" style="width: 100%;">
+<iframe id="gameIframe" width="1000px" height="600px"></iframe>
 
-                <!-- Left Location Marker (Marker A) -->
-                <div class="loction-a wow" style="position: absolute; top: 30%; left: 5%; animation: bounce 2s ease-in-out infinite;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="47" viewBox="0 0 35 47" fill="none">
-                        <path d="M17.8211 5.10059C11.2718 5.10059 5.96484 10.4115 5.96484 16.9568C5.96484 23.5061 11.2757 28.8131 17.8211 28.8131C24.3704 28.8131 29.6773 23.5061 29.6773 16.9568C29.6773 10.4075 24.3704 5.10059 17.8211 5.10059Z" fill="#CC0D39"></path>
-                    </svg>
-                </div>
-
-                <!-- Right Location Marker (Marker B) -->
-                <div class="loction-b wow" style="position: absolute; top: 30%; right: 5%; animation: bounce 2s ease-in-out infinite;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="47" viewBox="0 0 35 47" fill="none">
-                        <path d="M17.8211 5.10059C11.2718 5.10059 5.96484 10.4115 5.96484 16.9568C5.96484 23.5061 11.2757 28.8131 17.8211 28.8131C24.3704 28.8131 29.6773 23.5061 29.6773 16.9568C29.6773 10.4075 24.3704 5.10059 17.8211 5.10059Z" fill="#CC0D39"></path>
-                    </svg>
-                </div>
-
-                <!-- Distance Line (1 km) -->
-                <div class="map-line" style="position: absolute; top: 35%; left: 25%; right: 25%; height: 1px; background-color: #CC0D39; animation: moveLine 2s ease-in-out infinite;">
-                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); color: #CC0D39; font-weight: bold;">
-                        1 km
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CSS for Animation and Layout -->
-<style>
-    /* Bounce Animation for the Markers */
-    @@keyframes bounce {
-        0%, 100% {
-            transform: translateY(0);
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender)
+            {
+            await JSRuntime.InvokeVoidAsync("initializeIframe");
+            }
         }
-        50% {
-            transform: translateY(-15px);
-        }
-    }
+}
 
-    /* Line Movement Animation */
-    @@keyframes moveLine {
-        0%, 100% {
-            transform: scaleX(1);
-        }
-        50% {
-            transform: scaleX(1.1);
-        }
-    }
 
-    .wow {
-        visibility: visible;
-    }
-</style>
+<script>
+window.initializeIframe = () => {
+    const companyKey = 'AB12002';  // Set your companyKey
+    const customerId = '63849';     // Set your customerId
+    const iframeUrl = `https://cbscloud.live:8003/`;
+    const iframe = document.getElementById('gameIframe');
+    iframe.src = iframeUrl;
+    iframe.onload = function () {
+        const data = { companyKey, customerId };
+        iframe.contentWindow.postMessage(data, 'https://cbscloud.live:8003/');
+    };
+};
+
+</script>

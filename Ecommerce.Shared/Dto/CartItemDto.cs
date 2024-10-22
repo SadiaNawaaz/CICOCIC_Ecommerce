@@ -17,4 +17,5 @@ public class CartItemDto
     public double ProducrPrice { get; set; }
     public string?  ImageName { get; set; }
     public string? Color { get; set; }
+    public string? Thumbnail { get; set; }
 }

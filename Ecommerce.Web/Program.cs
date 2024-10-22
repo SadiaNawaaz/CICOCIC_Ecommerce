@@ -29,6 +29,7 @@ builder.Services.AddScoped<ISliderService, SliderService>();
 builder.Services.AddScoped<IPopularCategoryService,PopularCategoryService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<CartStateService>();
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

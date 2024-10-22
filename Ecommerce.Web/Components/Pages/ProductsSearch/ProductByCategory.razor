@@ -23,7 +23,7 @@
                             <label class="form-label">Keywords</label>
 
 
-                            <input type="text" class="form-control input-sm" name="keyword" value="@_Category.Name" placeholder="Enter Keywords" />
+                            <input type="text" class="form-control input-sm" name="keyword" value="@Keyword" placeholder="Enter Keywords" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price</label>
@@ -65,8 +65,8 @@
                         <div class="row">
                             <div class="col-lg-6">
 
+                                <h4>We found @ProductVariants.Count() Items For @(string.IsNullOrEmpty(_Category.Name) ? Keyword : _Category.Name) </h4>
 
-                                <h4>We found @ProductVariants.Count() Items For @_Category.Name </h4>
                             </div>
                             <!-- END col-6 -->
                             <!-- BEGIN col-6 -->
@@ -190,6 +190,12 @@
         [Parameter]
         [SupplyParameterFromQuery(Name = "Id")]
         public long Id { get; set; }
+
+        [Parameter]
+        [SupplyParameterFromQuery(Name = "keyword")]
+        public string Keyword { get; set; }
+
+
         private IEnumerable<ProductVariantDto> ProductVariants = new List<ProductVariantDto>();
         private IEnumerable<CategoryVariantCountDto> CategoryVariantCount = new List<CategoryVariantCountDto>();
         private IEnumerable<ProductVariantDto> FilteredProductVariants = new List<ProductVariantDto>();
@@ -202,8 +208,12 @@
             {
             if (Id > 0)
                 {
-                await LoadCategoryTreeAsync();  // Load the new category when the Id changes
-                await LoadProductVariants();    // Load the new products when the Id changes
+                await LoadCategoryTreeAsync();
+                await LoadProductVariants();
+                }
+            if (!string.IsNullOrEmpty(Keyword))
+                {
+                FilterByKeyword();
                 }
             }
 
@@ -323,4 +333,30 @@
             SortAndFilterProductVariants();
             }
         #endregion
+
+
+        private  async void FilterByKeyword()
+            {
+            try
+                {
+
+
+                var response = await productVariantService.SearchProductVariantsByKeywordAsync(Keyword);
+                if (response.Success)
+                    {
+                    ProductVariants = response.Data;
+                    FilteredProductVariants = ProductVariants;
+                    StateHasChanged();
+                    }
+                else
+                    {
+
+                    }
+                }
+            catch (Exception ex)
+                {
+
+                }
+
+            }
     }

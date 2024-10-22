@@ -66,7 +66,8 @@
                                             <tr>
                                                 <th>Product Name</th>
                                                 <th class="text-center">Price</th>
-                                                <th class="text-center">Quantity</th>
+                                                <th class="text-center">Color</th>
+                                              
                                                 <th class="text-center">Total</th>
                                             </tr>
                                         </thead>
@@ -79,27 +80,17 @@
                                                         <div class="d-flex">
                                                             <div class="product-img h-150px w-100px d-flex align-items-center justify-content-center">
                                                                 @*<img src="../assets/img/product/product-iphone-12.png" class="mw-100 mh-100" alt="" />*@
-
-
-                                                                <img src="@UrlHelper.GetImageUrl(item.VariantId, item.ImageName)" class="mw-100 mh-100" alt="" />
+                                                                <img src="@(!string.IsNullOrEmpty(item.Thumbnail) ? item.Thumbnail : UrlHelper.GetImageUrl(item.VariantId,item.ImageName))"
+                                                                     class="mw-100 mh-100" alt="" />
                                                             </div>
                                                             <div class="product-info ms-3">
-                                                                <div class="title">
-                                                                    @item.ImageName  <button class="btn btn-outline-secondary btn-sm m-1" style="background-color:@(item.Color); height:20px"></button>
-                                                                </div>
-                                                                @*<div class="desc">Delivers Tue 26/04/2024 - Free</div>*@
+                                                                <h5>@item.VariantName</h5>
+                                                                <div class="desc"> </div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td class="cart-price text-center">€@item.VariantPrice</td>
-                                                    <td class="cart-qty text-center">
-                                                        <div class="cart-qty-input">
-                                                            <a href="#" class="qty-control left disabled" data-click="decrease-qty" data-target="#qty"><i class="fa fa-minus"></i></a>
-                                                            <input type="text" name="qty" value="1" class="form-control" id="qty" readonly />
-                                                            <a href="#" class="qty-control right disabled" data-click="increase-qty" data-target="#qty"><i class="fa fa-plus"></i></a>
-                                                        </div>
-                                                        <div class="qty-desc">1 to max order</div>
-                                                    </td>
+                                                    <td class="cart-price text-center">Black</td>
                                                     <td class="cart-total text-center">
                                                         €@item.VariantPrice
                                                     </td>

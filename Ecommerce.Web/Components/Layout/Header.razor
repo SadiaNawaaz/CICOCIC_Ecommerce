@@ -5,7 +5,8 @@
 @inject IBrandService BrandService
 @using Ecommerce.Shared.Services.Configurations
 @inject ISliderService SliderService
-
+@using Ecommerce.Web.Services; 
+@inject CartStateService CartStateService
 <style>
     details summary {
         list-style: none;
@@ -18,7 +19,7 @@
 
     a:hover {
         color: #348fe2 !important;
-        text-decoration: none; 
+        text-decoration: none;
     }
 </style>
 
@@ -53,7 +54,7 @@
                         @*<li class="active"><a href="/">Home</a></li>*@
                         <li class="dropdown dropdown-full-width dropdown-hover">
                             <a href="#" data-bs-toggle="dropdown">
-                                 All
+                                All
                                 <b class="caret"></b>
                                 <span class="arrow top"></span>
                             </a>
@@ -67,9 +68,9 @@
 
                                         <ul class="dropdown-menu-list">
                                             @if (Categories != null && Categories.Count > 0)
-                                            {
-                                                foreach (var cat in Categories)
                                                 {
+                                                foreach (var cat in Categories)
+                                                    {
                                                     <li>
 
 
@@ -80,9 +81,9 @@
                                                         </a>
                                                     </li>
 
-                                                }
+                                                    }
 
-                                            }
+                                                }
                                         </ul>
                                     </div>
                                     <div class="dropdown-menu-content">
@@ -97,12 +98,12 @@
                                                     <select class="form-control border-0" @bind="filter.CategoryId">
                                                         <option value="" selected>Choose category:</option>
                                                         @if (Categories != null && Categories.Count > 0)
-                                                        {
-                                                            @foreach (var cat in Categories)
                                                             {
+                                                            @foreach (var cat in Categories)
+                                                                {
                                                                 <option value="@cat.Id">@cat.Name</option>
+                                                                }
                                                             }
-                                                        }
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2 border">
@@ -110,7 +111,7 @@
                                                 </div>
                                                 <div class="col-md-2 border">
                                                     <select class="form-control border-0" @bind="filter.Distance">
-                                                         <option value="" selected>Distance</option>
+                                                        <option value="" selected>Distance</option>
                                                         <option value="3">&lt; 3 km</option>
                                                         <option value="5">&lt; 5 km</option>
                                                         <option value="10">&lt; 10 km</option>
@@ -132,7 +133,7 @@
 
 
                                             @foreach (var category in SubCategories)
-                                            {
+                                                {
                                                 <div class="col-lg-3">
                                                     <span style="text-align:center;margin:5px;font-size:medium">
                                                         <b>
@@ -141,9 +142,9 @@
                                                     </span>
                                                     <ul class="dropdown-menu-list" style="margin-top:10px">
                                                         @if (category.SubCategories != null)
-                                                        {
-                                                            foreach (var subCategory in category.SubCategories)
                                                             {
+                                                            foreach (var subCategory in category.SubCategories)
+                                                                {
                                                                 <li>
                                                                     <details>
                                                                         <summary>
@@ -154,43 +155,43 @@
                                                                         </summary>
                                                                         <div class="details">
                                                                             @if (subCategory.SubCategories != null)
-                                                                            {
+                                                                                {
                                                                                 <ul>
                                                                                     @foreach (var subChild in subCategory.SubCategories)
-                                                                                    {
+                                                                                        {
                                                                                         <li>
                                                                                             <a style="font-size:small" @onclick="@(async () => await fnDetails(subChild.Id))">
                                                                                                 @subChild.Name
                                                                                             </a>
                                                                                         </li>
-                                                                                    }
+                                                                                        }
                                                                                 </ul>
-                                                                            }
+                                                                                }
                                                                         </div>
                                                                     </details>
                                                                 </li>
+                                                                }
                                                             }
-                                                        }
                                                     </ul>
                                                 </div>
-                                            }
+                                                }
                                         </div>
                                         <h4 class="title">Shop By Brand</h4>
                                         <ul class="dropdown-brand-list mb-0">
 
                                             @if (Brands != null && Brands.Count > 0)
-                                            {
-                                                @foreach (var b in Brands.Take(10))
                                                 {
+                                                @foreach (var b in Brands.Take(10))
+                                                    {
                                                     <li>
                                                         <a @onclick="@(async () => await fnBrandDetails(b.Id))">
                                                             <img src="@UrlHelper.GetBrandImageUrl(b.Id, b.ImageUrl)" alt="@b.Name" />
                                                         </a>
                                                     </li>
 
-                                                }
+                                                    }
 
-                                            }
+                                                }
 
 
                                         </ul>
@@ -205,9 +206,9 @@
 
 
                         @if (Categories != null && Categories.Count() > 0)
-                        {
-                            @foreach (var category in Categories.Take(7).OrderBy(a => a.Order))
                             {
+                            @foreach (var category in Categories.Take(7).OrderBy(a => a.Order))
+                                {
                                 <li class="dropdown dropdown-hover">
                                     <a href="#" data-bs-toggle="dropdown">
 
@@ -217,20 +218,20 @@
                                         <span class="arrow top"></span>
                                     </a>
                                     @if (category.SubCategories.Any())
-                                    {
+                                        {
                                         <div class="dropdown-menu">
                                             @foreach (var subCategory in category.SubCategories)
-                                            {
+                                                {
 
 
 
                                                 <a class="dropdown-item" href="/ProductByCategory?Id=@subCategory.Id">@subCategory.Name</a>
-                                            }
+                                                }
                                         </div>
-                                    }
+                                        }
                                 </li>
+                                }
                             }
-                        }
                     </ul>
                 </div>
             </div>
@@ -241,32 +242,36 @@
 
 
                     @*@if (Categories != null && Categories.Count > 6)
-                    {
-                        @foreach (var category in Categories.Skip(6).Take(1).OrderBy(a => a.Order))
                         {
-                            <li class="dropdown dropdown-hover">
-                                <a href="#" data-bs-toggle="dropdown">
+                            @foreach (var category in Categories.Skip(6).Take(1).OrderBy(a => a.Order))
+                            {
+                                <li class="dropdown dropdown-hover">
+                                    <a href="#" data-bs-toggle="dropdown">
 
-                                    @category.Name
-                                    <b class="caret"></b>
-                                    <span class="arrow top"></span>
-                                </a>
-                                @if (category.SubCategories.Any())
-                                {
-                                    <div class="dropdown-menu">
-                                        @foreach (var subCategory in category.SubCategories)
-                                        {
-                                            <a class="dropdown-item" href="product.html">@subCategory.Name</a>
-                                        }
-                                    </div>
-                                }
-                            </li>
-                        }
-                    }*@
+                                        @category.Name
+                                        <b class="caret"></b>
+                                        <span class="arrow top"></span>
+                                    </a>
+                                    @if (category.SubCategories.Any())
+                                    {
+                                        <div class="dropdown-menu">
+                                            @foreach (var subCategory in category.SubCategories)
+                                            {
+                                                <a class="dropdown-item" href="product.html">@subCategory.Name</a>
+                                            }
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        }*@
                     <li style="width:20px">
                         <a href="#" class="header-cart" data-bs-toggle="dropdown">
                             <i class="fa fa-shopping-bag"></i>
-                            <span class="total">2</span>
+                            @if(CartStateService.CartItemCount!=null && @CartStateService.CartItemCount>0)
+                {
+
+                }
+                            <span class="total">@CartStateService.CartItemCount</span>
                             <span class="arrow top"></span>
                         </a>
                     </li>
@@ -288,7 +293,7 @@
     public List<Brand> Brands = new List<Brand>();
     private List<Ecommerce.Shared.Entities.Configurations.Slider> sliders = new List<Ecommerce.Shared.Entities.Configurations.Slider>();
     private SearchFilter filter = new SearchFilter();
-    
+
 
     #endregion
 
@@ -297,38 +302,38 @@
     #region FetchData
 
     protected override async Task OnInitializedAsync()
-    {
+        {
         await LoadCategoryTreeAsync();
         await LoadBrands();
 
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-
         }
-    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender)
+            {
+
+            }
+        }
 
 
 
     private async Task LoadCategoryTreeAsync()
-    {
-        try
         {
+        try
+            {
             var response = await CategoryService.GetCategoriesTreeDtoAsync();
             if (response.Success)
-            {
+                {
                 Categories = response.Data;
                 StateHasChanged();
+                }
+
             }
-
-        }
         catch (Exception ex)
-        {
+            {
 
+            }
         }
-    }
     #endregion
 
     #region FetechbyLevel2
@@ -336,25 +341,25 @@
     //this is level 2
 
     private async Task GetData(CategoryDto selectedCate)
-    {
+        {
         MainCat = selectedCate.Name;
         SubCategories = selectedCate.SubCategories.ToList();
 
-    }
+        }
 
     private async Task LoadBrands()
-    {
+        {
         var response = await BrandService.GetBrandsAsync();
         if (response.Success)
-        {
+            {
             Brands = response.Data;
             StateHasChanged();
-        }
+            }
         else
-        {
+            {
 
+            }
         }
-    }
 
     #endregion
 
@@ -363,7 +368,7 @@
     public string MainCat = "";
 
     private async Task fnOpenSubsub(SubCategory product)
-    {
+        {
 
         List<SubCategory> dummyData;
 
@@ -377,26 +382,26 @@
         _subsubCategory = dummyData;
 
 
-    }
+        }
 
 
     public class SubCategory
-    {
+        {
         public string Name { get; set; }
         public string Category { get; set; }
         public List<SubCategory> Childs { get; set; }
 
-    }
+        }
 
     public async Task fnDetails(long id)
-    {
+        {
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
 
         NavigationManager.NavigateTo($"/ProductByCategory?Id={id}");
-    }
+        }
     private async Task SearchProductsAsync()
-    {
+        {
         var keyword = filter.KeyWord ?? "";
         var categoryId = filter.CategoryId;
         var postalCode = filter.PostelCode ?? "";
@@ -405,12 +410,34 @@
         NavigationManager.NavigateTo($"/ProductZipCode?{queryString}");
 
 
-    }
+        }
     public async Task fnBrandDetails(long id)
-    {
+        {
 
         await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
 
         NavigationManager.NavigateTo($"/Brand?Id={id}");
-    }
+        }
+
+
+
+    protected override void OnInitialized()
+        {
+        CartStateService.OnChange += StateHasChanged;
+         CartStateService.InitializeCartCountAsync();
+
+        }
+
+
+    public void Dispose()
+        {
+        CartStateService.OnChange -= HandleStateChanged;
+        }
+
+    private async void HandleStateChanged()
+        {
+
+        await InvokeAsync(StateHasChanged);
+        }
+
 }

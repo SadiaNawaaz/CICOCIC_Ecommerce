@@ -1,13 +1,10 @@
-﻿
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 @inject ProtectedSessionStorage ProtectedSessionStore
+@using Ecommerce.Shared.Services.ProductVariants;
+@inject IProductVariantService ProductVariantService
+@inject NavigationManager Navigation
 
 <style>
-    /*    .search-container {
-            flex-grow: 1;
-            padding: 0 20px;
-        }
-    */
     .search-input {
         width: 80%;
     }
@@ -23,50 +20,67 @@
         pointer-events: none;
         color: #aaa;
     }
+
+    .dropdown-menu {
+        display: none;
+    }
+
+        .dropdown-menu.show {
+            display: block;
+        }
 </style>
-<div id="top-nav" class="top-nav ">
-    <!-- BEGIN container -->
+
+<div id="top-nav" class="top-nav">
     <div class="container-fluid mt-2 mb-2">
-
         <div class="collapse navbar-collapse">
-
             <div class="header-logo" style="margin-right:10px">
                 <a href="/">
-                    <span class="brand-logo">  <img src="/assets/img/Logo/thumb_Wit op transparantSmall.png" style="max-height:30px" /></span>
-
+                    <span class="brand-logo">
+                        <img src="/assets/img/Logo/thumb_Wit op transparantSmall.png" style="max-height:30px" />
+                    </span>
                 </a>
             </div>
 
             <div class="search-container flex-grow-1 d-flex align-items-center">
-
                 <div class="mx-10px">
-
-                    <span class="text-ligt" style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.7);">&nbsp;&nbsp;  Deliver to</span>
+                    <span class="text-ligt" style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.7);">
+                        &nbsp;&nbsp; Deliver to
+                    </span>
                     <span class="text-white">
                         <b style="display: flex; align-items: center;">
                             <i class="bi bi-geo-alt" style="margin-right: 5px;"></i> Ireland
                         </b>
                     </span>
-
                 </div>
 
-
-
                 <div class="input-group mx-10px">
-                    <input type="text" class="form-control" placeholder="Search cicocic items">
+                    <input type="text" class="form-control" placeholder="Search items" @bind="searchTerm" @oninput="OnSearchTermChanged" id="searchInput">
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="button">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
+
+                    @if (searchResults?.Any() == true)
+                        {
+                        <ul class="dropdown-menu show" style="position: absolute; background-color:white; width:100%" id="dropdownMenu">
+                            @foreach (var item in searchResults)
+                                {
+                                <li class="dropdown-item" @onclick="() => SelectItem(item)">
+                                    @item
+                                </li>
+                                }
+                        </ul>
+                        }
                 </div>
             </div>
-            <div class="nav navbar-nav">
 
-            </div>
             <ul class="nav navbar-nav navbar-end">
-                <li>  <a href="#" data-bs-toggle="dropdown"><img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English <b class="caret"></b></a></li>
-
+                <li>
+                    <a href="#" data-bs-toggle="dropdown">
+                        <img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English <b class="caret"></b>
+                    </a>
+                </li>
 
                 <li>
                     <a href="/Signup">
@@ -79,10 +93,8 @@
                             {
                             <span class="d-none d-xl-inline"><b>Login / Register</b></span>
                             }
-
                     </a>
                 </li>
-
 
                 <li><a href="#"><i class="fab fa-facebook-f f-s-14"></i></a></li>
                 <li><a href="#"><i class="fab fa-instagram f-s-14"></i></a></li>
@@ -90,12 +102,14 @@
             </ul>
         </div>
     </div>
-    <!-- END container -->
 </div>
+
+
 
 @code {
     private string userName = string.Empty;
-
+    private string searchTerm = string.Empty;
+    private List<string> searchResults = new List<string>();
     private bool hasInitialized = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -109,10 +123,65 @@
                 userName = result.Value;
                 }
             hasInitialized = true;
-
-            // Now that we have the value, trigger re-render
             StateHasChanged();
             }
         }
 
+    private async Task OnSearchTermChanged(ChangeEventArgs e)
+        {
+        searchTerm = e.Value.ToString();
+
+        if (searchTerm.Length >= 3)
+            {
+            searchResults = await SearchFromDatabase(searchTerm);
+            }
+        else
+            {
+            searchResults.Clear();
+            }
+
+        StateHasChanged();
+        }
+
+    private async Task<List<string>> SearchFromDatabase(string searchTerm)
+        {
+        var response = await ProductVariantService.SearchProductVariantsByKeywordAsync(searchTerm);
+
+        if (response.Success && response.Data != null)
+            {
+            return response.Data.Select(pv => pv.Name).Distinct().ToList();
+            }
+
+        return new List<string>();
+        }
+
+    private void SelectItem(string item)
+        {
+        searchTerm = item;
+        searchResults.Clear();
+        Navigation.NavigateTo($"/ProductByCategory?Id=0&keyword={searchTerm}");
+
+        StateHasChanged();
+        }
 }
+<script>
+
+    document.addEventListener('click', function(event) {
+        const searchInput = document.getElementById('searchInput');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        if (dropdownMenu && searchInput) {
+            if (!searchInput.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        }
+    });
+
+    // Show dropdown when search input is focused or typed in
+    document.getElementById('searchInput').addEventListener('focus', function() {
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (dropdownMenu && dropdownMenu.children.length > 0) {
+            dropdownMenu.classList.add('show');
+        }
+    });
+</script>

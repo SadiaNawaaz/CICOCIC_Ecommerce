@@ -6,6 +6,8 @@
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject ICategoryService CategoryService
+@using Ecommerce.Web.Services;
+@inject CartStateService CartStateService
 <style>
     /* Custom style */
     .accordion-button {
@@ -53,7 +55,7 @@
                     @for (int i = 0; i < CategoryTree.Count; i++)
                         {
                         var category = CategoryTree[i];
-                        if (i == CategoryTree.Count - 1) 
+                        if (i == CategoryTree.Count - 1)
                             {
                             <li class="breadcrumb-item active">@category.Name</li>
                             }
@@ -170,7 +172,7 @@
 
 
                                 }
-                            @if (ProductVariant.Brand != null && ProductVariant.Brand!="")
+                            @if (ProductVariant.Brand != null && ProductVariant.Brand != "")
                                 {
                                 <div><b>Brand: &nbsp;&nbsp;&nbsp;</b> @ProductVariant.Brand</div>
 
@@ -179,11 +181,11 @@
                         </div>
 
                         @*<ul class="product-info-list">
-                        <li><i class="fa fa-circle"></i> ...........</li>
-                        <li><i class="fa fa-circle"></i> ...........</li>
-                        <li><i class="fa fa-circle"></i> ...........</li>
+                                <li><i class="fa fa-circle"></i> ...........</li>
+                                <li><i class="fa fa-circle"></i> ...........</li>
+                                <li><i class="fa fa-circle"></i> ...........</li>
 
-                    </ul>*@
+                            </ul>*@
 
                         <div class="product-social">
                             <ul>
@@ -525,10 +527,10 @@
                             <!-- END item -->
                         </div>
 
-                count++;
-                                           
-                   }
-          }
+                        count++;
+
+                        }
+                    }
 
 
 
@@ -556,8 +558,8 @@ else
     public long Id { get; set; }
     private ProductVariantDetailDto ProductVariant = new ProductVariantDetailDto();
     private List<ClusterFeatureDto> clusters;
-    private string Categories="";
-    private List<CategoryDto> CategoryTree= new List<CategoryDto>();
+    private string Categories = "";
+    private List<CategoryDto> CategoryTree = new List<CategoryDto>();
     private List<ProductVariantDto> TopTenProducts = new List<ProductVariantDto>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -612,9 +614,9 @@ else
             if (response.Success)
                 {
                 CategoryTree = response.Data;
-                if(CategoryTree!=null && CategoryTree.Count()==4)
+                if (CategoryTree != null && CategoryTree.Count() == 4)
                     {
-                    Categories = CategoryTree[3].Name + " / "+ CategoryTree[2].Name+ " / "+CategoryTree[2].Name +" / "+ CategoryTree[0].Name;
+                    Categories = CategoryTree[3].Name + " / " + CategoryTree[2].Name + " / " + CategoryTree[2].Name + " / " + CategoryTree[0].Name;
                     }
                 }
             else
@@ -666,9 +668,13 @@ else
                     VariantPrice = ProductVariant.VariantPrice,
                     ProducrPrice = ProductVariant.ProductPrice,
                     ImageName = ProductVariant.DefaultImageUrl,
+                    Thumbnail = ProductVariant.Thumbnail,
                     Color = ProductVariant.Color
                     };
                 await CartService.AddItem(cartItem);
+
+                var cartItems = await CartService.GetItems();
+                CartStateService.CartItemCount = cartItems.Count;
 
                 }
             else

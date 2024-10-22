@@ -34,6 +34,7 @@ public interface IProductVariantService
     Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync();
     Task<ServiceResponse<List<ProductVariantDto>>> GetTopTenProductVariantsByCategoryAsync(long categoryId);
     Task<ServiceResponse<List<BrandVariantCountDto>>> GetBrandsWithVariantCountsAsync();
+    Task<ServiceResponse<List<ProductVariantDto>>> SearchProductVariantsByKeywordAsync(string keyword);
 }
 
 public class ProductVariantService: IProductVariantService
@@ -1001,5 +1002,62 @@ public class ProductVariantService: IProductVariantService
         return response;
         }
 
+    public async Task<ServiceResponse<List<ProductVariantDto>>> SearchProductVariantsByKeywordAsync(string keyword)
+        {
+        var response = new ServiceResponse<List<ProductVariantDto>>();
+
+        try
+            {
+            if (string.IsNullOrEmpty(keyword))
+                {
+                response.Success = false;
+                response.Message = "Keyword cannot be empty.";
+                return response;
+                }
+
+            // Search product variants by keyword in product variant name or product name
+            var productVariants = await _context.ProductVariants
+                .Include(pv => pv.Product)
+                .Include(pv => pv.GeneralSize)
+                .Include(pv => pv.GeneralColor)
+                .Include(pv => pv.productVariantImages)
+                .Where(pv => pv.Name.Contains(keyword) || pv.Product.Name.Contains(keyword))
+                .Select(pv => new ProductVariantDto
+                    {
+                    ProductId = pv.ProductId,
+                    Id = pv.Id,
+                    Name = pv.Name,
+                    Category = pv.Product.Category.Name,
+                    Color = pv.GeneralColor != null ? pv.GeneralColor.Name : "No Color",
+                    Size = pv.GeneralSize != null ? pv.GeneralSize.Name : "No Size",
+                    VariantPrice = pv.Price,
+                    ProductPrice = pv.Product.Price,
+                    Sku = pv.Sku,
+                    Thumbnail = pv.Thumbnail,
+                    DefaultImageUrl = pv.productVariantImages.FirstOrDefault() != null ? pv.productVariantImages.FirstOrDefault().ImageName : null
+                    })
+                .ToListAsync();
+
+            if (!productVariants.Any())
+                {
+                response.Success = false;
+                response.Message = "No product variants found for the given keyword.";
+                }
+            else
+                {
+                response.Data = productVariants;
+                response.Success = true;
+                response.Message = "Product variants fetched successfully.";
+                }
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error searching product variants by keyword.");
+            response.Success = false;
+            response.Message = $"An error occurred while searching product variants: {ex.Message}";
+            }
+
+        return response;
+        }
 
     }
