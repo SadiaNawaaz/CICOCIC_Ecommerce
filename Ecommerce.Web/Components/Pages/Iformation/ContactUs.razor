@@ -1,0 +1,91 @@
+﻿
+@page "/ContactUS"
+<div id="product" class="section-container pt-20px">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN breadcrumb -->
+        <ul class="breadcrumb mb-10px fs-12px">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Support</a></li>
+            <li class="breadcrumb-item active">Contact Us</li>
+        </ul>
+        <!-- END breadcrumb -->
+        <!-- BEGIN row -->
+        <div class="row row-space-30">
+            <!-- BEGIN col-8 -->
+            <div class="col-md-8">
+                <h4 class="mt-0">Contact Us</h4>
+                <p class="mb-30px fs-13px">
+                    Thank you for your interest in reaching out to us! We are here to assist you with any questions, concerns, or feedback you may have.
+                    Please feel free to contact our customer support team via email or phone, and we will respond to your inquiry as quickly as possible.
+                    Our goal is to provide excellent service and ensure that all your needs are met. We look forward to hearing from you and are always
+                    ready to help.
+                </p>
+                <form class="form-horizontal" name="contact_us_form" action="contact_us.html" method="GET">
+                    <div class="mb-2 row">
+                        <label class="col-form-label col-md-3 text-lg-end">Name <span class="text-danger">*</span></label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control" name="name" />
+                        </div>
+                    </div>
+                    <div class="mb-2 row">
+                        <label class="col-form-label col-md-3 text-lg-end">Email <span class="text-danger">*</span></label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control" name="email" />
+                        </div>
+                    </div>
+                    <div class="mb-2 row">
+                        <label class="col-form-label col-md-3 text-lg-end">Subject <span class="text-danger">*</span></label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control" name="subject" />
+                        </div>
+                    </div>
+                    <div class="mb-2 row">
+                        <label class="col-form-label col-md-3 text-lg-end">Message <span class="text-danger">*</span></label>
+                        <div class="col-md-7">
+                            <textarea class="form-control" rows="10" name="message"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-2 row">
+                        <label class="col-form-label col-md-3"></label>
+                        <div class="col-md-7">
+                            <button type="submit" class="btn btn-dark btn-theme">SEND MESSAGE</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- END col-8 -->
+            <!-- BEGIN col-4 -->
+            <div class="col-md-4">
+                <h4 class="mt-0">Our Contacts</h4>
+                <div class="ratio ratio-16x9 mb-15px">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2433.7342531256127!2d6.876695216188746!3d52.778319079864655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c7b7dc0070c4b3%3A0xb7c85de7e7e73958!2sHoenderkamp%2020%2C%207812%20VZ%20Emmen%2C%20Netherlands!5e0!3m2!1sen!2s!4v1697642498612!5m2!1sen!2s"
+                            width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div><b>Cicocic , Inc</b></div>
+                <p class="mb-15px">
+                    Hoenderkamp 20<br />
+                    7812 VZ Emmen<br />
+                    P: (+31) 623 195 505br />
+                </p>
+                <div><b>Email</b></div>
+                <p class="mb-15px">
+                    <a href="mailto:sales@cicocic.com" class="text-dark">sales@cicocic.com</a><br />
+                    <a href="mailto:hello@emailaddress.com" class="text-dark">business@cicocic.co</a><br />
+                    <a href="mailto:hello@emailaddress.com" class="text-dark">support@cicocic.com</a><br />
+                </p>
+                <div class="mb-5px"><b>Social Network</b></div>
+                <p class="mb-15px">
+                    <a href="#" class="btn btn-icon btn-white btn-circle"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="btn btn-icon btn-white btn-circle"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="btn btn-icon btn-white btn-circle"><i class="fab fa-google-plus"></i></a>
+                    <a href="#" class="btn btn-icon btn-white btn-circle"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="btn btn-icon btn-white btn-circle"><i class="fab fa-dribbble"></i></a>
+                </p>
+            </div>
+            <!-- END col-4 -->
+        </div>
+        <!-- END row -->
+    </div>
+    <!-- END row -->
+</div>

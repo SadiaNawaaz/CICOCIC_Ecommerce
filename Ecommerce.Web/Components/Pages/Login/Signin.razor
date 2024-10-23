@@ -1,0 +1,108 @@
+﻿@page "/login"
+@using Ecommerce.Shared.Services.Customers;
+@inject ICustomerService CustomerService
+@inject NavigationManager NavigationManager
+
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject ProtectedLocalStorage ProtectedLocalStor
+<style>
+    .card:hover {
+        /* Remove any specific hover styles */
+        transform: none;
+        transition: none;
+        box-shadow: none;
+        animation: none;
+    }
+</style>
+<EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+    <DataAnnotationsValidator />
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-9">
+                <div class="card">
+
+
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <h4 class="text-center mb-4 mt-4">Get Login</h4>
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+                                     class="img-fluid" alt="Phone image">
+                                <h4 class="text-center mb-4 mt-4">Cicocic Awaits!</h4>
+                            </div>
+                            <div class="col-md-6">
+
+                                <div class="d-flex align-items-center gap-3 mt-5 mb-5">
+                                    <a class="btn btn-white w-100 text-dark border fw-bold d-flex align-items-center justify-content-center rounded-1 py-6 shadow-none" href="javascript:void(0)" role="button">
+                                        <img src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/svgs/google-icon.svg" alt="spike-img" class="img-fluid me-2" width="24" height="24">
+                                        <span class="d-none d-sm-block me-1 flex-shrink-0">Sign in with</span>Google
+                                    </a>
+                                    <a class="btn btn-white w-100 text-dark border fw-bold d-flex align-items-center justify-content-center rounded-1 py-6 shadow-none" href="javascript:void(0)" role="button">
+                                        <img src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/svgs/icon-facebook.svg" alt="spike-img" class="img-fluid me-2" width="24" height="24">
+                                        <span class="d-none d-sm-block me-1 flex-shrink-0">Sign in with</span>FB
+                                    </a>
+                                </div>
+                                <div class="position-relative text-center my-7 mt-10px mb-10px">
+                                    <p class="mb-0  px-3 d-inline-block bg-white z-1 position-relative">or sign in with</p>
+                                    <span class="border-top w-100 position-absolute top-50 start-50 translate-middle"></span>
+                                </div>
+
+                                <div class="input-field mt-2">
+                                    <label for="Email">Email</label>
+                                    <InputText id="Email" class="form-control" @bind-Value="loginModel.Email" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => loginModel.Email)" /></span>
+                                </div>
+                                <div class="input-field mt-2">
+                                    <label for="Password">Password</label>
+                                    <InputText id="Password" class="form-control" @bind-Value="loginModel.Password" type="password" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => loginModel.Password)" /></span>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                                </div>
+                                @if (!string.IsNullOrEmpty(errorMessage))
+                                    {
+                                    <div class="mt-2 text-danger text-center">
+                                        @errorMessage
+                                    </div>
+                                    }
+
+                                <div class="member mt-1">
+                                    <span>Don't have an account?</span>
+                                    <a class="text-decoration-none text-primary" href="/signup">Signup</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string errorMessage;
+
+    private async Task HandleLogin()
+        {
+        var result = await CustomerService.ValidateUserAsync(loginModel.Email, loginModel.Password);
+        if (result.Success)
+            {
+            await ProtectedLocalStor.SetAsync("UserName", result.Data.FirstName); // Store user info in session
+            NavigationManager.NavigateTo("/MyAccount", forceLoad: true);
+            }
+        else
+            {
+            errorMessage = result.Message;
+            }
+        }
+
+    public class LoginModel
+        {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        }
+}

@@ -1,0 +1,85 @@
+﻿
+@page "/PaymentMethods"
+
+<style>
+    .payment-method {
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+        .payment-method img {
+            width: 40px;
+            margin-right: 15px;
+        }
+
+        .payment-method label {
+            margin: 0;
+            font-size: 1.2em;
+        }
+</style>
+<body>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">Payment Methods</h2>
+
+        <div class="row">
+            <!-- Paypal -->
+            <div class="col-md-6">
+                <div class="payment-method" style="background-color: #f9f9f9; border-radius: 5px;">
+                    <div class="d-flex align-items-center">
+                        <img src="https://pixio.dexignzone.com/xhtml/images/shop/payment/paypal.svg" alt="Paypal" style="height:30px">
+                        <label for="paypal">Paypal</label>
+                    </div>
+                    <input type="radio" name="payment" id="paypal">
+                </div>
+            </div>
+            <!-- Credit or Debit Card -->
+            <div class="col-md-6">
+                <div class="payment-method" style="background-color: #f9f9f9; border-radius: 5px;">
+                    <div class="d-flex align-items-center">
+                        <img src="https://pixio.dexignzone.com/xhtml/images/shop/payment/debit.svg" alt="Credit or Debit Card" style="height:30px">
+                        <label for="credit-card">Credit or Debit Card</label>
+                    </div>
+                    <input type="radio" name="payment" id="credit-card">
+                </div>
+            </div>
+            <!-- Direct Bank Transfer -->
+            <div class="col-md-6">
+                <div class="payment-method" style="background-color: #f9f9f9; border-radius: 5px;">
+                    <div class="d-flex align-items-center">
+                        <img src="https://pixio.dexignzone.com/xhtml/images/shop/payment/bank.svg" alt="Direct Bank Transfer" style="height:30px">
+                        <label for="bank-transfer">Direct Bank Transfer</label>
+                    </div>
+                    <input type="radio" name="payment" id="bank-transfer">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="payment-method" style="background-color: #f9f9f9; border-radius: 5px;">
+                    <div class="d-flex align-items-center">
+                        <img src="https://pixio.dexignzone.com/xhtml/images/shop/payment/cash.svg" alt="Direct Bank Transfer" style="height:30px">
+                        <label for="bank-transfer">Direct Bank Transfer</label>
+                    </div>
+                    <input type="radio" name="payment" id="bank-transfer">
+                </div>
+            </div>
+            <!-- Cash on Delivery -->
+            @*<div class="col-md-6">
+            <div class="payment-method"  style="background-color: #f9f9f9; border-radius: 5px;">
+                <div class="d-flex align-items-center">
+                    <img src="https://pixio.dexignzone.com/xhtml/images/shop/payment/cash.svg" alt="Cash on Delivery">
+                    <label for="cod">Cash on Delivery</label>
+                </div>
+                <input type="radio" name="payment" id="cod">
+            </div>
+        </div>*@
+        </div>
+    </div>
+
+
+</body>
+

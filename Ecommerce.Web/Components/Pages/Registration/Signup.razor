@@ -5,7 +5,17 @@
 @inject ICustomerService CustomerService
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-@inject ProtectedSessionStorage ProtectedSessionStore
+@inject ProtectedLocalStorage ProtectedLocalStor
+
+<style>
+    .card:hover {
+        /* Remove any specific hover styles */
+        transform: none;
+        transition: none;
+        box-shadow: none;
+        animation: none;
+    }
+</style>
 <EditForm Model="@customer" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
 
@@ -20,7 +30,7 @@
                                 <h4 class="text-center mb-4 mt-4">Get Registered</h4>
                                 <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
                                      class="img-fluid" alt="Phone image">
-                                <h4 class="text-center mb-4 mt-4">CICOCIC Awaits!</h4>
+                                <h4 class="text-center mb-4 mt-4">Cicocic Awaits!</h4>
                             </div>
 
                             <div class="col-md-6">
@@ -63,7 +73,7 @@
                                         }
                                     <div class="member mt-1">
                                         <span>Already a member?</span>
-                                        <a class="text-decoration-none text-primary" href="/MyAccount">Sign In</a>
+                                        <a class="text-decoration-none text-primary" href="/Login">Sign In</a>
                                     </div>
                                 </div>
                             </div>
@@ -81,12 +91,12 @@
     private async Task HandleValidSubmit()
         {
         var response = await CustomerService.AddCustomerAsync(customer);
-
+        customer.Password = string.Empty;
         if (response.Success)
             {
-            await ProtectedSessionStore.SetAsync("UserName", customer.FirstName);
-        ;
-            NavigationManager.NavigateTo("/MyAccount", forceLoad: true); ;
+            await ProtectedLocalStor.SetAsync("UserName", customer.FirstName);
+            ;
+            NavigationManager.NavigateTo("/MyAccount", forceLoad: true);
             }
         else
             {

@@ -120,39 +120,60 @@
 
 
                                                 </div>
+                                                @if (variant.Brand != null)
+                                                    {
+                                                    <span class="brand"
+                                                          style="font-size: 12px; font-weight: bold; color: #555;text-align:center">
+                                                        @variant.Brand
+                                                    </span>
+                                                    }
+                                                <br />
+                                                <!-- Year -->
+                                                @if (variant.Year != null)
+                                                    {
+                                                    <span class="year"
+                                                          style="font-size: 12px; color: #999; text-align: center">
+                                                        @variant.Year
+                                                    </span>
+                                                    }
                                             </div>
 
 
                                             <div class="card-body text-center">
 
                                                 <div class="mb-2">
-                                                    <NavLink class="text-muted" data-abc="true" href="@GetProductUrl(variant.Id)" title="@variant.Name" style="display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@variant.Name<br /></NavLink>
-                                                </div>
-
-                                                @{
-                                                    double discount = variant.ProductPrice - variant.VariantPrice;
-                                                    if (discount > 0)
-                                                        {
-                                                        discountPercentage = (int)Math.Round((discount / variant.ProductPrice) * 100);
-
-                                                        <div class="discount-badge"
-                                                             style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background-color: black; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 600 ">
-                                                            @discountPercentage% OFF
-                                                        </div>
+                                                    <NavLink class="text-muted" data-abc="true" href="@GetProductUrl(variant.Id)" title="@variant.Name" style="display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                        @variant.Name<br />
 
 
-                                                        }
-                                                }
-                                                <h3 class="mb-0 font-weight-semibold">€ @variant.VariantPrice</h3>
-                                                <div class="item-discount-price">
+                                                </NavLink>
+                                            </div>
 
-                                                    <span class="item-discount-price" style="text-decoration: line-through; color: gray;">
-                                                        @variant.ProductPrice.ToString("C")
-                                                    </span>
-                                                </div>
+                                            @{
+                                             
+                                                double discount = variant.ProductPrice - variant.VariantPrice;
+                                                if (discount > 0)
+                                                    {
+                                                    discountPercentage = (int)Math.Round((discount / variant.ProductPrice) * 100);
+
+                                                    <div class="discount-badge"
+                                                         style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background-color: black; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 600 ">
+                                                        @discountPercentage% OFF
+                                                    </div>
 
 
-                                                <a href="@GetProductUrl(variant.Id)" class="btn bg-cart"><i class="fa fa-cart-plus mr-2"></i> Add to cart</a>
+                                                    }
+                                            }
+                                            <h3 class="mb-0 font-weight-semibold">€ @variant.VariantPrice</h3>
+                                            <div class="item-discount-price">
+
+                                                <span class="item-discount-price" style="text-decoration: line-through; color: gray;">
+                                                    @variant.ProductPrice.ToString("C")
+                                                </span>
+                                            </div>
+
+
+                                            <a href="@GetProductUrl(variant.Id)" class="btn bg-cart"><i class="fa fa-cart-plus mr-2"></i> Add to cart</a>
 
 
                                             </div>

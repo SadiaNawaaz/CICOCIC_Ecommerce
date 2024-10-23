@@ -13,7 +13,7 @@ public class Customer: BaseEntity
     [Required]
     public  string Email { get; set; }
     [Required]
-    [StringLength(20)]
+    [StringLength(256)]
     [DataType(DataType.Password)]
     public  string   Password { get; set; }
     public string FullName => $"{FirstName} {LastName}";

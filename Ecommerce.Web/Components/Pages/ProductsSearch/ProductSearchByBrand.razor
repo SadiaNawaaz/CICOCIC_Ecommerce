@@ -95,7 +95,17 @@
                                                          style="object-fit: contain; max-width: 100%; max-height: 100%;"
                                                          alt="Product Image">
                                                 </div>
+                                                @if (variant.Year != null)
+                                                    {
+                                                    <span class="year"
+                                                          style="font-size: 12px; color: #999; text-align: center">
+                                                        @variant.Year
+                                                    </span>
+                                                    }
                                             </div>
+                                   
+                                            <!-- Year -->
+                                       
                                             <div class="card-body text-center">
                                                 <div class="mb-2">
                                                     <NavLink class="text-muted" data-abc="true" href="@GetProductUrl(variant.Id)" title="@variant.Name" style="display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@variant.Name<br /></NavLink>

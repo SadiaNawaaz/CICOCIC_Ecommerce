@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-@inject ProtectedSessionStorage ProtectedSessionStore
+@inject ProtectedLocalStorage ProtectedLocalStore
 @using Ecommerce.Shared.Services.ProductVariants;
 @inject IProductVariantService ProductVariantService
 @inject NavigationManager Navigation
@@ -82,18 +82,24 @@
                     </a>
                 </li>
 
-                <li>
-                    <a href="/Signup">
-                        Hello,
-                        @if (!String.IsNullOrEmpty(userName))
-                            {
-                            <span class="d-none d-xl-inline"><b>@userName</b></span>
-                            }
-                        else
-                            {
-                            <span class="d-none d-xl-inline"><b>Login / Register</b></span>
-                            }
-                    </a>
+                <li class="dropdown dropdown-hover">
+                    @if (!String.IsNullOrEmpty(userName))
+                        {
+                        <a href="#" data-bs-toggle="dropdown">
+                            @userName
+                            <b class="caret"></b>
+                            <span class="arrow top"></span>
+                        </a>
+                        <div class="dropdown-menu" style="background-color:white">
+                            <a class="dropdown-item" href="javascript:void(0)" @onclick="HandleLogout">Logout</a>
+                        </div>
+                        }
+                    else
+                        {
+                        <a href="/Signup">
+                            <span><b>Login / Register</b></span>
+                        </a>
+                        }
                 </li>
 
                 <li><a href="#"><i class="fab fa-facebook-f f-s-14"></i></a></li>
@@ -116,7 +122,7 @@
         {
         if (firstRender && !hasInitialized)
             {
-            var result = await ProtectedSessionStore.GetAsync<string>("UserName");
+            var result = await ProtectedLocalStore.GetAsync<string>("UserName");
 
             if (result.Success && !string.IsNullOrEmpty(result.Value))
                 {
@@ -162,6 +168,12 @@
         Navigation.NavigateTo($"/ProductByCategory?Id=0&keyword={searchTerm}");
 
         StateHasChanged();
+        }
+
+    private async Task HandleLogout()
+        {
+        await ProtectedLocalStore.DeleteAsync("UserName");
+        Navigation.NavigateTo("/login", forceLoad: true);
         }
 }
 <script>
