@@ -2,7 +2,7 @@
 @inject IProductVariantService productVariantService
 
 
-   
+
 <div id="trending-items" class="section-container">
     <!-- BEGIN container -->
     <div class="container">
@@ -19,9 +19,9 @@
         </h4>
         <div class="row gx-2">
             @if (trendingProducts != null && trendingProducts.Count() > 0)
-            {
-                @foreach (var trendingProduct in trendingProducts)
                 {
+                @foreach (var trendingProduct in trendingProducts)
+                    {
 
 
                     <div class="col-lg-2 col-md-4 col-sm-6">
@@ -30,9 +30,9 @@
                             <a href="/Product?Id=@trendingProduct.ProductVariantId" class="item-image">
                                 <img src="@UrlHelper.GetImageUrl(trendingProduct.ProductVariantId, trendingProduct.DefaultImageUrl)" alt="" />
                                 @if (trendingProduct.discountPercentage > 0)
-                                {
+                                    {
                                     <div class="discount">@trendingProduct.discountPercentage% OFF</div>
-                                }
+                                    }
 
                             </a>
                             <div class="item-info">
@@ -47,41 +47,44 @@
                         <!-- END item -->
                     </div>
 
-                    @*</div>*@
+            
 
+                    }
                 }
-            }
 
         </div>
     </div>
-    </div>
-@code {
-    private List<TrendingProductDto> trendingProducts = new List<TrendingProductDto>();
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadTrendingProduct();
- 
-    }
+</div>
 
-    private async Task LoadTrendingProduct()
-    {
-        try
-        {
-            var response = await productVariantService.GetTrendingProductVariantsAsync();
-            if (response.Success)
+
+
+    @code {
+        private List<TrendingProductDto> trendingProducts = new List<TrendingProductDto>();
+        protected override async Task OnInitializedAsync()
             {
-                trendingProducts = response.Data;
-             
+            await LoadTrendingProduct();
+
             }
-            else
+
+        private async Task LoadTrendingProduct()
             {
-               
+            try
+                {
+                var response = await productVariantService.GetTrendingProductVariantsAsync();
+                if (response.Success)
+                    {
+                    trendingProducts = response.Data;
+
+                    }
+                else
+                    {
+
+                    }
+                }
+
+            catch (Exception ex)
+                {
+
+                }
             }
-        }
-
-        catch (Exception ex)
-        {
-
-        }
     }
-}

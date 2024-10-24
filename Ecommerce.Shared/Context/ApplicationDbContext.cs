@@ -10,6 +10,7 @@ using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.Configurations;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ModelYears;
+using Ecommerce.Shared.Entities.Orders;
 using Ecommerce.Shared.Entities.Permissions;
 using Ecommerce.Shared.Entities.PopularBrands;
 using Ecommerce.Shared.Entities.PopularCategories;
@@ -75,6 +76,10 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<CategoryConfiguration> CategoryConfigurations { get; set; }
+
+    public DbSet<Order> Orders { get; set; }
+
+    public DbSet<OrderItem> OrderItems { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 

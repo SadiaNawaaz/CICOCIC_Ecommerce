@@ -1,5 +1,6 @@
 using Blazored.LocalStorage;
 using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Services;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.CategoryConfigurations;
@@ -30,6 +31,9 @@ builder.Services.AddScoped<IPopularCategoryService,PopularCategoryService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<CartStateService>();
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

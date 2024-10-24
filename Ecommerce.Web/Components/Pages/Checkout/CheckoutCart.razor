@@ -2,6 +2,12 @@
 @using Ecommerce.Web.Services
 @inject ICartService CartService
 @using Ecommerce.Web.Components.Toast
+@using Ecommerce.Shared.Entities.Orders;
+@using Ecommerce.Shared.Services;
+@inject IOrderService OrderService
+
+
+
 <div class="section-container" id="checkout-cart">
     <div class="container">
         <div class="checkout">
@@ -56,29 +62,32 @@
                 </div>
                 <div class="checkout-body">
                     @if (currentStep == 1)
-                    {<div class="checkout-body">
+                        {
+
+
+                        <div class="checkout-body">
                             <div class="table-responsive">
 
                                 @if (CartItems != null && CartItems.Count > 0)
-                                {
+                                    {
                                     <table class="table table-cart">
-                                        <thead>
+                                        <thead style="border-bottom: 1px dotted #ccc;;">
                                             <tr>
-                                                <th>Product Name</th>
+                                                <th>Product</th>
                                                 <th class="text-center">Price</th>
                                                 <th class="text-center">Color</th>
-                                              
-                                                <th class="text-center">Total</th>
+
                                             </tr>
+
                                         </thead>
                                         <tbody>
 
                                             @foreach (var item in CartItems)
-                                            {
+                                                {
                                                 <tr>
                                                     <td class="cart-product">
                                                         <div class="d-flex">
-                                                            <div class="product-img h-150px w-100px d-flex align-items-center justify-content-center">
+                                                            <div class="product-img h-100px w-100px d-flex align-items-md-start justify-content-center">
                                                                 @*<img src="../assets/img/product/product-iphone-12.png" class="mw-100 mh-100" alt="" />*@
                                                                 <img src="@(!string.IsNullOrEmpty(item.Thumbnail) ? item.Thumbnail : UrlHelper.GetImageUrl(item.VariantId,item.ImageName))"
                                                                      class="mw-100 mh-100" alt="" />
@@ -91,13 +100,16 @@
                                                     </td>
                                                     <td class="cart-price text-center">€@item.VariantPrice</td>
                                                     <td class="cart-price text-center">Black</td>
-                                                    <td class="cart-total text-center">
-                                                        €@item.VariantPrice
+
+                                                    <td class="cart-action text-center">
+                                                        <i @onclick="() => RemoveItemFromCart(item.VariantId)" class="fa fa-trash text-dark" style="cursor: pointer;"></i>
                                                     </td>
+
+
                                                 </tr>
 
 
-                                            }
+                                                }
                                             <tr>
                                                 <td class="cart-summary" colspan="4">
                                                     <div class="summary-container">
@@ -119,29 +131,47 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                }
+                                    }
 
                             </div>
                         </div>
 
-                    }
+                        }
                     else if (currentStep == 2)
-                    {
-                        <CheckoutInfo />
-                    }
+                        {
+                        <CheckoutInfo  @ref="checkoutInfoComponent"/>
+                        }
                     else if (currentStep == 3)
-                    {
+                        {
                         <CheckoutPayment />
-                    }
+                        }
                     else if (currentStep == 4)
-                    {
+                        {
                         <CheckoutComplete />
-                    }
+                        }
                 </div>
-                <div class="checkout-footer d-flex">
-                    <a href="#" class="btn btn-white btn-lg me-auto btn-theme w-250px">CONTINUE SHOPPING</a>
-                    <button type="submit" class="btn btn-dark btn-lg btn-theme w-250px">CHECKOUT</button>
+                <div class="checkout-footer d-flex justify-content-between">
+                    @if (currentStep > 1)
+                        {
+                        <button type="button" @onclick="BackStep" class="btn btn-white btn-theme me-auto w-150px">Back</button>
+                        }
+
+                <div class="ms-auto">
+                    @if (currentStep < 4)
+                        {
+                        <button type="button" @onclick="NextStep" class="btn btn-dark btn-sm btn-theme w-150px">Next</button>
+                        }
+                    @if (currentStep == 2)
+                        {
+                        <button @onclick="PlaceOrder" class="btn btn-dark btn-lg">Place order</button>
+                        }
+                    else
+                        {
+                     
+                        }
                 </div>
+                </div>
+
             </form>
         </div>
     </div>
@@ -183,43 +213,153 @@
 
 @code {
     private List<CartItemDto> CartItems = new List<CartItemDto>();
+    private CheckoutInfo checkoutInfoComponent;
     private int currentStep = 1;
     [Inject]
     public ToastService ToastService { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
+        {
 
         if (firstRender)
-        {
-            try
             {
+            try
+                {
                 CartItems = await CartService.GetItems();
                 StateHasChanged();
-            }
+                }
             catch (Exception ex)
-            {
+                {
                 Console.WriteLine("Error loading cart items: " + ex.Message);
+                }
+
             }
+
 
         }
-
-
-    }
     public void ShowToast()
-    {
+        {
         ToastService.ShowToast("Employee addded Successfully", ToastLevel.Success);
-    }
+        }
 
 
 
     private void SetStep(int step)
-    {
+        {
         currentStep = step;
-    }
+        }
 
-    private  double CalculateCartTotal()
-    {
+    private double CalculateCartTotal()
+        {
         return CartItems.Sum(item => item.VariantPrice * item.Qty);
-    }
+        }
+
+    private async Task RemoveItemFromCart(long variantId)
+        {
+        await CartService.RemoveItem(variantId);
+        CartItems = await CartService.GetItems();
+        StateHasChanged();
+        ToastService.ShowToast("Item removed successfully", ToastLevel.Success);
+        }
+
+    private void NextStep()
+        {
+
+        if (currentStep < 4)
+            {
+            currentStep++;
+            }
+        }
+
+    private void BackStep()
+        {
+        if (currentStep > 1)
+            {
+            currentStep--;
+            }
+        }
+
+    private async Task PlaceOrder()
+        {
+        try
+            {
+
+            if (checkoutInfoComponent == null)
+                {
+                ToastService.ShowToast("Shipping information is missing.", ToastLevel.Error);
+                return;
+                }
+
+            var shippingInfo = checkoutInfoComponent.shippingInfo;
+
+            if (string.IsNullOrEmpty(shippingInfo.FirstName) ||
+                string.IsNullOrEmpty(shippingInfo.LastName) ||
+                string.IsNullOrEmpty(shippingInfo.StreetAddress) ||
+                string.IsNullOrEmpty(shippingInfo.AreaCode) ||
+                string.IsNullOrEmpty(shippingInfo.PrimaryPhone) ||
+                string.IsNullOrEmpty(shippingInfo.ZipCode))
+                {
+                ToastService.ShowToast("Please fill out all the required shipping information.", ToastLevel.Error);
+                return;
+                }
+
+            if (CartItems == null || !CartItems.Any())
+                {
+                ToastService.ShowToast("Your cart is empty. Add some items before placing an order.", ToastLevel.Error);
+                return;
+                }
+            Order order = new Order
+                {
+                FirstName = shippingInfo.FirstName,
+                LastName = shippingInfo.LastName,
+                StreetAddress = shippingInfo.StreetAddress,
+                AreaCode = shippingInfo.AreaCode,
+                PrimaryPhone = shippingInfo.PrimaryPhone,
+                ZipCode = shippingInfo.ZipCode,
+                IsBusinessAddress = shippingInfo.IsBusinessAddress,
+                TotalAmount = CartItems.Sum(item => item.VariantPrice * item.Qty) // Calculate total amount
+                };
+
+            foreach (var cartItem in CartItems)
+                {
+                order.OrderItems.Add(new OrderItem
+                    {
+                    ProductName = cartItem.VariantName,
+                    Price = cartItem.VariantPrice,
+                    ProductId = cartItem.ProductId,
+                    Quantity = cartItem.Qty
+                    });
+                }
+            var response = await OrderService.PlaceOrder(order);
+            if (response != null && response.Success)
+                {
+                ToastService.ShowToast("Order placed successfully.", ToastLevel.Success);
+
+                }
+            else
+                {
+
+                string errorMessage = response?.Message ?? "Unknown error occurred during order placement.";
+                Console.WriteLine("Error placing order: " + errorMessage);
+                ToastService.ShowToast("Error placing order: " + errorMessage, ToastLevel.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine("Exception during order placement: " + ex.Message);
+            ToastService.ShowToast("An error occurred while placing the order. Please try again.", ToastLevel.Error);
+            }
+        }
+
+
 }
+
+
+<script>
+    function showAlert(){
+    $('#alert').show();
+    setTimeout(function() {
+        $('#alert').hide();
+    }, 5000);
+}
+</script>

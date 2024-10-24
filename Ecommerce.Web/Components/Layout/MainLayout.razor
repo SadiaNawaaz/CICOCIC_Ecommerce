@@ -28,43 +28,5 @@
     private List<Brand> Brands { get; set; } = new List<Brand>();
     private bool dataLoaded = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (!dataLoaded)
-        {
 
-        }
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            //await LoadDataAsync();
-            //dataLoaded = true;
-        }
-    }
-    private async Task LoadDataAsync()
-    {
-        await LoadCategoriesAsync();
-        await LoadBrandsAsync();
-    }
-
-    private async Task LoadCategoriesAsync()
-    {
-        var response = await CategoryService.GetCategoriesTreeDtoAsync();
-        if (response.Success)
-        {
-            Categories = response.Data;
-            StateHasChanged();
-        }
-    }
-
-    private async Task LoadBrandsAsync()
-    {
-        var response = await BrandService.GetBrandsAsync();
-        if (response.Success)
-        {
-            Brands = response.Data;
-        }
-    }
 }
