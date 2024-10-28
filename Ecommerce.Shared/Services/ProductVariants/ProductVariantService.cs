@@ -243,11 +243,9 @@ public class ProductVariantService: IProductVariantService
           .Include(pv => pv.GeneralColor)
           .Include(pv => pv.ModelYear)
            .Where(pv => ProductId == 0 || pv.ProductId == ProductId);
-
-            // Apply additional filtering if the user is an agent
             if (IsAgent)
             {
-                productVariantsQuery = productVariantsQuery.Where(pv => pv.CreatedBy == UserId);
+                productVariantsQuery = productVariantsQuery.Where(pv => pv.CreatedBy == UserId && pv.Sold == 0);
             }
 
             var productVariants = await productVariantsQuery.ToListAsync();
@@ -298,7 +296,7 @@ public class ProductVariantService: IProductVariantService
 
             // Fetch product variants for the identified categories
             var productVariants = await _context.ProductVariants
-                .Where(pv => categoryIds.Contains(pv.Product.CategoryId) && pv.Publish == true)
+                .Where(pv => categoryIds.Contains(pv.Product.CategoryId) && pv.Publish == true && pv.Sold==0)
                 .Select(pv => new ProductVariantDto
                     {
                     ProductId = pv.ProductId,
@@ -562,7 +560,7 @@ public class ProductVariantService: IProductVariantService
         try
         {
             var productVariants = await _context.ProductVariants
-                .Where(pv => pv.Product.BrandId == brandId)
+                .Where(pv => pv.Product.BrandId == brandId&& pv.Sold==0)
                 .Select(pv => new ProductVariantDto
                 {
                     ProductId = pv.ProductId,
@@ -910,7 +908,7 @@ public class ProductVariantService: IProductVariantService
                         join level4 in _context.Categories on level3.Id equals level4.ParentCategoryId
                         join product in _context.Products on level4.Id equals product.CategoryId
                         join variant in _context.ProductVariants on product.Id equals variant.ProductId
-                        where level2.ParentCategoryId == c.Id
+                        where level2.ParentCategoryId == c.Id && variant.Sold==0
                         select variant
                     ).Count()
                     })
@@ -983,7 +981,7 @@ public class ProductVariantService: IProductVariantService
                     VariantCount = (
                         from product in _context.Products
                         join variant in _context.ProductVariants on product.Id equals variant.ProductId
-                        where product.BrandId == b.Id && variant.Publish == true
+                        where product.BrandId == b.Id && variant.Publish == true && variant.Sold==0
                         select variant
                     ).Count()
                     })
@@ -1024,7 +1022,7 @@ public class ProductVariantService: IProductVariantService
                 .Include(pv => pv.GeneralSize)
                 .Include(pv => pv.GeneralColor)
                 .Include(pv => pv.productVariantImages)
-                .Where(pv => pv.Name.Contains(keyword) || pv.Product.Name.Contains(keyword))
+               .Where(pv => (pv.Name.Contains(keyword) || pv.Product.Name.Contains(keyword)) && pv.Sold == 0)
                 .Select(pv => new ProductVariantDto
                     {
                     ProductId = pv.ProductId,

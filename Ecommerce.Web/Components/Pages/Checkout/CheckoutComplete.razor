@@ -2,30 +2,22 @@
 <div class="section-container" id="checkout-cart">
     <!-- BEGIN container -->
     <div class="container">
-        <!-- BEGIN checkout -->
-        <div class="checkout">
-            <form action="my_account.html" method="GET" name="form_checkout">
-                <!-- BEGIN checkout-header -->
-             
-                <!-- END checkout-header -->
-                <!-- BEGIN checkout-body -->
-                <div class="checkout-body">
-                    <!-- BEGIN checkout-message -->
-                    <div class="checkout-message">
-                   
-                    </div>
-                    <!-- END checkout-message -->
-                </div>
-                <!-- END checkout-body -->
-                <!-- BEGIN checkout-footer -->
-                <div class="checkout-footer text-center">
-                    <button type="submit" class="btn btn-white btn-theme">MANAGE ORDERS</button>
-                </div>
-                <!-- END checkout-footer -->
-            </form>
+        <div class="checkout-footer text-center">
+            <button type="button" class="btn btn-white btn-theme" @onclick="OnPlaceOrder">PLACE ORDERS</button>
         </div>
-        <!-- END checkout -->
     </div>
     <!-- END container -->
 </div>
 <!-- END #checkout-cart -->
+@code {
+    [Parameter]
+    public EventCallback PlaceOrderCallback { get; set; }
+
+    private async Task OnPlaceOrder()
+        {
+        if (PlaceOrderCallback.HasDelegate)
+            {
+            await PlaceOrderCallback.InvokeAsync();
+            }
+        }
+}

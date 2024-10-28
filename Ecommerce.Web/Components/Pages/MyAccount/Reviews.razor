@@ -1,32 +1,32 @@
 ﻿
 
 <div class="container mt-1">
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item">
-            <a href="#" class="nav-link @(activeTab == "Reviewed" ? "fw-bold" : "")" @onclick='() => SetActiveTab(" Reviewed")'>Reviewed</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link @(activeTab == "ToBeReviewed" ? "fw-bold" : "")" @onclick='() => SetActiveTab(" ToBeReviewed")'>To Be Reviewed</a>
-        </li>
-    </ul>
+    <div class="row">
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a href="#" class="nav-link @(activeTab == "Reviewed" ? "fw-bold" : "")" @onclick='() => SetActiveTab(" Reviewed")'>Reviewed</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link @(activeTab == "ToBeReviewed" ? "fw-bold" : "")" @onclick='() => SetActiveTab(" ToBeReviewed")'>To Be Reviewed</a>
+            </li>
+        </ul>
 
-    <!-- Tab content -->
-    @if (activeTab == "Reviewed")
-        {
-      
-        }
-    else if (activeTab == "ToBeReviewed")
-        {
-      
-        }
+        <!-- Tab content -->
+        @if (activeTab == "Reviewed")
+            {
+
+            }
+        else if (activeTab == "ToBeReviewed")
+            {
+
+            }
+    </div>
 </div>
+    @code {
+        private string activeTab = "Reviewed"; // Default active tab is "Reviewed"
 
-@code {
-    private string activeTab = "Reviewed"; // Default active tab is "Reviewed"
-
-    private void SetActiveTab(string tab)
-        {
-        activeTab = tab;
-        }
-}
+        private void SetActiveTab(string tab)
+            {
+            activeTab = tab;
+            }
+    }

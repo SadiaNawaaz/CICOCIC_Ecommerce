@@ -1,11 +1,11 @@
 ﻿
 @using Ecommerce.Shared.Entities.Orders;
-<div class="section-container" id="checkout-info">
+
     <!-- BEGIN container -->
     <div class="container">
         <!-- BEGIN checkout -->
         <div class="checkout">
-            <EditForm Model="@shippingInfo" OnValidSubmit="@HandleValidSubmit">
+            <EditForm Model="@ShippingInfo" OnValidSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator />
 
                 <!-- BEGIN checkout-body -->
@@ -15,8 +15,8 @@
                             First Name <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-4">
-                            <InputText class="form-control" @bind-Value="shippingInfo.FirstName" placeholder="First Name" />
-                            <ValidationMessage For="@(() => shippingInfo.FirstName)" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.FirstName" placeholder="First Name" />
+                            <ValidationMessage For="@(() => ShippingInfo.FirstName)" />
                         </div>
                     </div>
 
@@ -25,8 +25,8 @@
                             Last Name <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-4">
-                            <InputText class="form-control" @bind-Value="shippingInfo.LastName" placeholder="Last Name" />
-                            <ValidationMessage For="@(() => shippingInfo.LastName)" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.LastName" placeholder="Last Name" />
+                            <ValidationMessage For="@(() => ShippingInfo.LastName)" />
                         </div>
                     </div>
 
@@ -35,7 +35,7 @@
                             Company Name (optional)
                         </label>
                         <div class="col-md-8">
-                            <InputText class="form-control" @bind-Value="shippingInfo.CompanyName" placeholder="Company Name" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.CompanyName" placeholder="Company Name" />
                         </div>
                     </div>
 
@@ -44,8 +44,8 @@
                             Area Code <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-4">
-                            <InputText class="form-control" @bind-Value="shippingInfo.AreaCode" placeholder="Area Code" />
-                            <ValidationMessage For="@(() => shippingInfo.AreaCode)" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.AreaCode" placeholder="Area Code" />
+                            <ValidationMessage For="@(() => ShippingInfo.AreaCode)" />
                         </div>
                     </div>
 
@@ -54,8 +54,8 @@
                             Primary Phone <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-4">
-                            <InputText class="form-control" @bind-Value="shippingInfo.PrimaryPhone" placeholder="Primary Phone" />
-                            <ValidationMessage For="@(() => shippingInfo.PrimaryPhone)" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.PrimaryPhone" placeholder="Primary Phone" />
+                            <ValidationMessage For="@(() => ShippingInfo.PrimaryPhone)" />
                         </div>
                     </div>
 
@@ -64,8 +64,8 @@
                             Street Address <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-4">
-                            <InputText class="form-control" @bind-Value="shippingInfo.StreetAddress" placeholder="Street Address" />
-                            <ValidationMessage For="@(() => shippingInfo.StreetAddress)" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.StreetAddress" placeholder="Street Address" />
+                            <ValidationMessage For="@(() => ShippingInfo.StreetAddress)" />
                         </div>
                     </div>
 
@@ -74,8 +74,8 @@
                             ZIP Code <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-4">
-                            <InputText class="form-control" @bind-Value="shippingInfo.ZipCode" placeholder="ZIP Code" />
-                            <ValidationMessage For="@(() => shippingInfo.ZipCode)" />
+                            <InputText class="form-control" @bind-Value="ShippingInfo.ZipCode" placeholder="ZIP Code" />
+                            <ValidationMessage For="@(() => ShippingInfo.ZipCode)" />
                         </div>
                     </div>
 
@@ -83,7 +83,7 @@
                         <label class="col-form-label col-md-4"></label>
                         <div class="col-md-4">
                             <div class="form-check">
-                                <InputCheckbox class="form-check-input" @bind-Value="shippingInfo.IsBusinessAddress" />
+                                <InputCheckbox class="form-check-input" @bind-Value="ShippingInfo.IsBusinessAddress" />
                                 <label class="form-check-label" for="business_address">
                                     This is a business address
                                 </label>
@@ -99,16 +99,17 @@
         <!-- END checkout -->
     </div>
     <!-- END container -->
-</div>
+
 
 
 @code {
-    public Order shippingInfo = new Order();
+    [Parameter]
+    public Order ShippingInfo { get; set; }
 
     private void HandleValidSubmit()
         {
         // Handle the submission logic, e.g., saving shipping information
         Console.WriteLine("Shipping info saved successfully");
         }
- 
+
 }

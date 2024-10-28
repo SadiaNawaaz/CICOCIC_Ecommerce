@@ -8,6 +8,7 @@ public interface ICartService
     Task AddItem(CartItemDto item);
     Task<List<CartItemDto>> GetItems();
     Task RemoveItem(long variantId);
+    Task DeleteItems();
     }
 
 public class CartService : ICartService
@@ -50,6 +51,18 @@ public class CartService : ICartService
                 cart.Remove(itemToRemove);
                 await _localStorage.SetItemAsync(StorageKey, cart);
                 }
+            }
+        catch (Exception ex)
+            {
+            throw;
+            }
+        }
+    public async Task DeleteItems()
+        {
+        try
+            {
+            // Simply remove the cart from local storage
+            await _localStorage.RemoveItemAsync(StorageKey);
             }
         catch (Exception ex)
             {

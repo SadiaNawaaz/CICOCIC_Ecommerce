@@ -34,6 +34,7 @@ public class ProductVariant : BaseEntity
    public VariantType? variantType { get; set; }
     public string? TypeValue { get; set; }
     public string? Note { get; set; }
+    public int Sold { get; set; } = 0;
     public List<ProductVariantImages> productVariantImages { get; set; } = new List<ProductVariantImages>();
     public List<ProductVariantMedia> ProductVariantMedias { get; set; } = new List<ProductVariantMedia>();
 

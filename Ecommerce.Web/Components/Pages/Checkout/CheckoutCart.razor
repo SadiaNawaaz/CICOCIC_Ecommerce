@@ -5,15 +5,58 @@
 @using Ecommerce.Shared.Entities.Orders;
 @using Ecommerce.Shared.Services;
 @inject IOrderService OrderService
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject ProtectedLocalStorage ProtectedLocalStor
+@inject IJSRuntime IJSRuntime;
+@inject NavigationManager NavigationManager
+@inject CartStateService CartStateService
+<!-- Message display area -->
+<style>
+    .notification-alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999; /* Make sure it's on top */
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        min-width: 250px;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
 
+        .notification-alert.success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .notification-alert.error {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .notification-alert.info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .notification-alert.warning {
+            background-color: #ffc107;
+            color: black;
+        }
+</style>
+
+<div id="alert" class="alert alert-info notification-alert" style="display: none;"></div>
 
 
 <div class="section-container" id="checkout-cart">
     <div class="container">
         <div class="checkout">
-            <form name="form_checkout">
+
+            <div>
+
                 <div class="checkout-header">
                     <div class="row">
+
                         <div class="col-lg-3">
                             <div class="step @(currentStep == 1 ? "active" : "")">
                                 <a href="#" @onclick="() => SetStep(1)">
@@ -139,15 +182,16 @@
                         }
                     else if (currentStep == 2)
                         {
-                        <CheckoutInfo  @ref="checkoutInfoComponent"/>
+                        <CheckoutInfo @ref="checkoutInfoComponent" ShippingInfo="shippingInfo" />
                         }
                     else if (currentStep == 3)
                         {
                         <CheckoutPayment />
+
                         }
                     else if (currentStep == 4)
                         {
-                        <CheckoutComplete />
+                        <CheckoutComplete PlaceOrderCallback="PlaceOrder" />
                         }
                 </div>
                 <div class="checkout-footer d-flex justify-content-between">
@@ -156,23 +200,17 @@
                         <button type="button" @onclick="BackStep" class="btn btn-white btn-theme me-auto w-150px">Back</button>
                         }
 
-                <div class="ms-auto">
-                    @if (currentStep < 4)
-                        {
-                        <button type="button" @onclick="NextStep" class="btn btn-dark btn-sm btn-theme w-150px">Next</button>
-                        }
-                    @if (currentStep == 2)
-                        {
-                        <button @onclick="PlaceOrder" class="btn btn-dark btn-lg">Place order</button>
-                        }
-                    else
-                        {
-                     
-                        }
-                </div>
+                    <div class="ms-auto">
+                        @if (currentStep < 4)
+                            {
+                            <button type="button" @onclick="NextStep" class="btn btn-dark btn-sm btn-theme w-150px">Next</button>
+                            }
+
+
+                    </div>
                 </div>
 
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -215,34 +253,44 @@
     private List<CartItemDto> CartItems = new List<CartItemDto>();
     private CheckoutInfo checkoutInfoComponent;
     private int currentStep = 1;
-    [Inject]
-    public ToastService ToastService { get; set; }
+    private Order shippingInfo = new Order();
+    private bool isUserLoggedIn;
+    long CustomerId = 0;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-
         if (firstRender)
             {
             try
                 {
+
+
+                var result = await ProtectedLocalStor.GetAsync<string>("UserName");
+                var resultId = await ProtectedLocalStor.GetAsync<long>("CustomerId");
+                CustomerId = result.Success ? resultId.Value : 0;
+
+                var userName = result.Value;
+
+                if (string.IsNullOrEmpty(userName) || CustomerId == 0)
+                    {
+                    NavigationManager.NavigateTo("/login", forceLoad: true);
+                    }
+                else
+                    {
+                    isUserLoggedIn = true;
+                    }
+
+
                 CartItems = await CartService.GetItems();
                 StateHasChanged();
                 }
             catch (Exception ex)
                 {
                 Console.WriteLine("Error loading cart items: " + ex.Message);
+                ShowMessage("Error loading cart items: " + ex.Message, "danger");
                 }
-
             }
-
-
         }
-    public void ShowToast()
-        {
-        ToastService.ShowToast("Employee addded Successfully", ToastLevel.Success);
-        }
-
-
 
     private void SetStep(int step)
         {
@@ -259,12 +307,11 @@
         await CartService.RemoveItem(variantId);
         CartItems = await CartService.GetItems();
         StateHasChanged();
-        ToastService.ShowToast("Item removed successfully", ToastLevel.Success);
+        ShowMessage("Item removed successfully", "success");
         }
 
     private void NextStep()
         {
-
         if (currentStep < 4)
             {
             currentStep++;
@@ -286,11 +333,10 @@
 
             if (checkoutInfoComponent == null)
                 {
-                ToastService.ShowToast("Shipping information is missing.", ToastLevel.Error);
+                ShowMessage("Shipping information is missing.", "danger");
                 return;
                 }
-
-            var shippingInfo = checkoutInfoComponent.shippingInfo;
+            var shippingInfo = checkoutInfoComponent.ShippingInfo;
 
             if (string.IsNullOrEmpty(shippingInfo.FirstName) ||
                 string.IsNullOrEmpty(shippingInfo.LastName) ||
@@ -299,15 +345,20 @@
                 string.IsNullOrEmpty(shippingInfo.PrimaryPhone) ||
                 string.IsNullOrEmpty(shippingInfo.ZipCode))
                 {
-                ToastService.ShowToast("Please fill out all the required shipping information.", ToastLevel.Error);
+
+                ShowMessage("Please fill out all the required shipping information.", "danger");
+                currentStep = 2;
                 return;
                 }
 
+
             if (CartItems == null || !CartItems.Any())
                 {
-                ToastService.ShowToast("Your cart is empty. Add some items before placing an order.", ToastLevel.Error);
+                ShowMessage("Your cart is empty. Add some items before placing an order.", "danger");
                 return;
                 }
+
+
             Order order = new Order
                 {
                 FirstName = shippingInfo.FirstName,
@@ -317,9 +368,9 @@
                 PrimaryPhone = shippingInfo.PrimaryPhone,
                 ZipCode = shippingInfo.ZipCode,
                 IsBusinessAddress = shippingInfo.IsBusinessAddress,
-                TotalAmount = CartItems.Sum(item => item.VariantPrice * item.Qty) // Calculate total amount
+                CustomerId = CustomerId,
+                TotalAmount = CartItems.Sum(item => item.VariantPrice * item.Qty)
                 };
-
             foreach (var cartItem in CartItems)
                 {
                 order.OrderItems.Add(new OrderItem
@@ -327,13 +378,20 @@
                     ProductName = cartItem.VariantName,
                     Price = cartItem.VariantPrice,
                     ProductId = cartItem.ProductId,
+                    VariantId = cartItem.VariantId,
                     Quantity = cartItem.Qty
                     });
                 }
+
             var response = await OrderService.PlaceOrder(order);
+
             if (response != null && response.Success)
                 {
-                ToastService.ShowToast("Order placed successfully.", ToastLevel.Success);
+                ShowMessage("Order placed successfully.", "success");
+                await CartService.DeleteItems();
+                CartItems.Clear();
+                CartStateService.CartItemCount = 0;
+                StateHasChanged();
 
                 }
             else
@@ -341,25 +399,43 @@
 
                 string errorMessage = response?.Message ?? "Unknown error occurred during order placement.";
                 Console.WriteLine("Error placing order: " + errorMessage);
-                ToastService.ShowToast("Error placing order: " + errorMessage, ToastLevel.Error);
+                ShowMessage("Error placing order: " + errorMessage, "danger");
                 }
             }
         catch (Exception ex)
             {
             Console.WriteLine("Exception during order placement: " + ex.Message);
-            ToastService.ShowToast("An error occurred while placing the order. Please try again.", ToastLevel.Error);
+            ShowMessage("An error occurred while placing the order. Please try again.", "danger");
             }
         }
 
+
+    private void ShowMessage(string message, string type)
+        {
+        IJSRuntime.InvokeVoidAsync("showAlert", message, type);
+        }
 
 }
 
 
 <script>
-    function showAlert(){
-    $('#alert').show();
-    setTimeout(function() {
-        $('#alert').hide();
-    }, 5000);
-}
+    function showAlert(message, type) {
+        const alertDiv = document.getElementById('alert');
+        alertDiv.textContent = message;
+
+        // Remove previous class if any
+        alertDiv.classList.remove('success', 'error', 'info', 'warning');
+
+        // Add appropriate class for alert type
+        alertDiv.classList.add(type);
+
+        alertDiv.style.display = 'block'; // Show the alert
+        alertDiv.style.opacity = '1'; // Make it visible
+        alertDiv.style.visibility = 'visible'; // Ensure visibility is toggled
+
+        setTimeout(function () {
+            alertDiv.style.opacity = '0'; // Fade out
+            alertDiv.style.visibility = 'hidden'; // Hide after fading out
+        }, 10000); // Hide after 5 seconds
+    }
 </script>

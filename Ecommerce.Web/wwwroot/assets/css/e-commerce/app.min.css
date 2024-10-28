@@ -7541,9 +7541,9 @@ textarea.form-control-lg {
         opacity: 0
     }
 
-    .toast:not(.show) {
+ /*   .toast:not(.show) {
         display: none
-    }
+    }*/
 
 .toast-container {
     --bs-toast-zindex: 1090;
@@ -30644,17 +30644,25 @@ a {
         transform: rotate(360deg);
     }
 }
-.card:hover {
+.card-body {
+    padding-bottom: 20px; /* Add more padding if needed */
+    position: relative;
+}
+
+/* Style for the brand text */
+.brand {
+    position: relative;
+    z-index: 2;
+}
+
+/* Make sure the card content scales on hover without hiding elements */
+.card:hover .card-body {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1;
 }
 
-/* Style for the image inside the card */
-.card-img-actions img {
-    transition: transform 0.3s ease;
-}
-
-/* Image scale effect on hover */
+/* Adjust image hover effect */
 .card:hover .card-img-actions img {
     transform: scale(1.1);
 }

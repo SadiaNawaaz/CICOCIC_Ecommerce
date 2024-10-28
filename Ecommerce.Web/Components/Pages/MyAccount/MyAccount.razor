@@ -23,100 +23,111 @@
         <!-- BEGIN account-container -->
         <div class="account-container">
             <!-- BEGIN account-sidebar -->
-            <div class="account-sidebar" style="min-height:600px">
-                <div class="account-sidebar-cover">
-                    <img src="../assets/img/cover/cover-14.jpg" alt="" />
+
+            <div class="row">
+
+                <div class="col-3">
+                    <div class="account-sidebar" style="min-height:600px">
+                        <div class="account-sidebar-cover">
+                            <img src="../assets/img/cover/cover-14.jpg" alt="" />
+                        </div>
+                        <div class="account-sidebar-content">
+                            <h4 class="mb-1 mb-lg-3">Your Account</h4>
+                            <p class="mb-0 mb-md-2 mb-lg-3"></p>
+                            <p class="mb-0 mb-lg-3">
+                                <ul class="nav flex-column">
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Dashboard" ? "active" : "")" @onclick='(() => SetActiveSection("Dashboard"))'>
+                                            <i class="fas fa-sliders-h"></i> Dashboards
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Orders" ? "active" : "")" @onclick='() => SetActiveSection("Orders")'>
+                                            <i class="fas fa-box"></i> Orders
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Reviews" ? "active" : "")" @onclick='() => SetActiveSection("Reviews")'>
+                                            <i class="fas fa-star"></i> Reviews
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Wishlist" ? "active" : "")" @onclick='() => SetActiveSection("Wishlist")'>
+                                            <i class="fas fa-heart"></i> Wishlist
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Address" ? "active" : "")" @onclick='() => SetActiveSection("Address")'>
+                                            <i class="fas fa-map-marker-alt"></i> Address
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "AccountInfo" ? "active" : "")" @onclick='() => SetActiveSection("AccountInfo")'>
+                                            <i class="fas fa-user"></i> Account Info
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Email" ? "active" : "")" @onclick='() => SetActiveSection("Email")'>
+                                            <i class="fas fa-user"></i> Email
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mb-5px">
+                                        <a href="#" class="nav-link @(activeSection == "Password" ? "active" : "")" @onclick='() => SetActiveSection("Password")'>
+                                            <i class="fas fa-key"></i> Password
+                                        </a>
+                                    </li>
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="account-sidebar-content">
-                    <h4 class="mb-1 mb-lg-3">Your Account</h4>
-                    <p class="mb-0 mb-md-2 mb-lg-3"></p>
-                    <p class="mb-0 mb-lg-3">
-                        <ul class="nav flex-column">
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Dashboard" ? "active" : "")" @onclick='(() => SetActiveSection("Dashboard"))'>
-                                    <i class="fas fa-sliders-h"></i> Dashboards
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Orders" ? "active" : "")" @onclick='() => SetActiveSection("Orders")'>
-                                    <i class="fas fa-box"></i> Orders
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Reviews" ? "active" : "")" @onclick='() => SetActiveSection("Reviews")'>
-                                    <i class="fas fa-star"></i> Reviews
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Wishlist" ? "active" : "")" @onclick='() => SetActiveSection("Wishlist")'>
-                                    <i class="fas fa-heart"></i> Wishlist
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Address" ? "active" : "")" @onclick='() => SetActiveSection("Address")'>
-                                    <i class="fas fa-map-marker-alt"></i> Address
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "AccountInfo" ? "active" : "")" @onclick='() => SetActiveSection("AccountInfo")'>
-                                    <i class="fas fa-user"></i> Account Info
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Email" ? "active" : "")" @onclick='() => SetActiveSection("Email")'>
-                                    <i class="fas fa-user"></i> Email
-                                </a>
-                            </li>
-                            <li class="nav-item mb-5px">
-                                <a href="#" class="nav-link @(activeSection == "Password" ? "active" : "")" @onclick='() => SetActiveSection("Password")'>
-                                    <i class="fas fa-key"></i> Password
-                                </a>
-                            </li>
-                        </ul>
-                    </p>
+                <div class="col-8">
+                    <div class="account-body">
+                        <!-- BEGIN row -->
+                        <div class="row">
+                            @if (activeSection == "Dashboard")
+                                {
+                                <Dashboards></Dashboards>
+                                }
+                            else if (activeSection == "Orders")
+                                {
+                                <Orders></Orders>
+                                }
+                            else if (activeSection == "Reviews")
+                                {
+                                <!-- Add Reviews component -->
+                                <Reviews></Reviews>
+                                }
+                            else if (activeSection == "Wishlist")
+                                {
+                                <!-- Add Wishlist component -->
+                                <Wishlist></Wishlist>
+                                }
+                            else if (activeSection == "Address")
+                                {
+                                <!-- Add Address component -->
+                                <Address></Address>
+                                }
+                            else if (activeSection == "AccountInfo")
+                                {
+                                <!-- Add Account Info component -->
+                                <AccountInfo></AccountInfo>
+                                }
+                            else if (activeSection == "Password")
+                                {
+                                <!-- Add Password component -->
+
+                                }
+                        </div>
+                        <!-- END row -->
+                    </div>
+
                 </div>
             </div>
+           
             <!-- END account-sidebar -->
             <!-- BEGIN account-body -->
-            <div class="account-body">
-                <!-- BEGIN row -->
-                <div class="row">
-                    @if (activeSection == "Dashboard")
-                        {
-                        <Dashboards></Dashboards>
-                        }
-                    else if (activeSection == "Orders")
-                        {
-                        <Orders></Orders>
-                        }
-                    else if (activeSection == "Reviews")
-                        {
-                        <!-- Add Reviews component -->
-                        <Reviews></Reviews>
-                        }
-                    else if (activeSection == "Wishlist")
-                        {
-                        <!-- Add Wishlist component -->
-                        <Wishlist></Wishlist>
-                        }
-                    else if (activeSection == "Address")
-                        {
-                        <!-- Add Address component -->
-                        <Address></Address>
-                        }
-                    else if (activeSection == "AccountInfo")
-                        {
-                        <!-- Add Account Info component -->
-                        <AccountInfo></AccountInfo>
-                        }
-                    else if (activeSection == "Password")
-                        {
-                        <!-- Add Password component -->
-                      
-                        }
-                </div>
-                <!-- END row -->
-            </div>
+       
             <!-- END account-body -->
         </div>
         <!-- END account-container -->

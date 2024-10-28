@@ -1,57 +1,105 @@
-﻿<div class="container mt-1px">
+﻿
+@page "/orders"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject ProtectedLocalStorage ProtectedLocalStor
+@using  Ecommerce.Shared.Services;
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+    <style>
+        .card:hover {
+            /* Remove any specific hover styles */
+            transform: none;
+            transition: none;
+            box-shadow: none;
+            animation: none;
+        }
+    </style>
+<div class="container mt-1px">
     <h5 class="mb-4">ORDERS</h5>
-    <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between">
-            <span>Customer: Janson (628716224212) / 08 Feb 2023, 23:09 WIB</span>
-            <span>No. Order: 227728277621422</span>
-        </div>
-        <div class="card-body">
-            <div class="row">
-
-                <div class="col-2">
-                    <img src="/assets/img/product/product-cameras.jpg" class="img-fluid" alt="Product Image">
-                </div>
-                <div class="col-7">
-                    <h5 class="card-title">STANDOUT BACKPACK</h5>
-                    <p class="card-text">Black, 1 Product</p>
-                    <p class="card-text"><strong>Notes:</strong> The color should not be red but blue</p>
-                </div>
-                <div class="col-3">
-                    <p><strong>Total Payment:</strong> Rp50.000</p>
-                    <p><strong>Status:</strong> Being processed</p>
-                    <p><strong>Shipping limit:</strong> 4 more days</p>
-                    <p><strong>Delivery service:</strong> Regular</p>
-                </div>
+    <div class="row">
+ 
+            <div class="order-list" style="max-height: 500px; overflow-y: auto;">
+                @if (orders == null)
+                    {
+                    <p>Loading orders...</p>
+                    }
+                else if (!orders.Any())
+                    {
+                    <p>No orders found for this customer.</p>
+                    }
+                else
+                    {
+                    @foreach (var order in orders.OrderByDescending(o => o.OrderDate))
+                        {
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between">
+                                <span>Customer: @order.FirstName @order.LastName / @order.OrderDate.ToString("dd MMM yyyy, HH:mm")</span>
+                                <span>No. Order: @order.Id</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @foreach (var item in order.OrderItems)
+                                        {
+                                        <div class="col-2">
+                                            <img src="@item.DefaultImageUrl" class="img-fluid" alt="Product Image" />
+                                        </div>
+                                        <div class="col-7">
+                                            <h5 class="card-title">@item.ProductName</h5>
+                                            <p class="card-text">Variant: @item.VariantName, @item.Quantity Product(s)</p>
+                                        </div>
+                                        <div class="col-3">
+                                            <p><strong>Price:</strong> €@item.Price</p>
+                                        </div>
+                                        }
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col">
+                                        <p><strong>Total Order Amount:</strong> €@order.TotalAmount</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        }
+                    }
             </div>
-        </div>
+            <!-- End of scrollable container -->
 
+        
     </div>
-
-    <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between">
-            <span>Customer: Janson (628716224212) / 08 Feb 2023, 23:09 WIB</span>
-            <span>No. Order: 227728277621423</span>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-2">
-
-                    <img src="/assets/img/product/product-technology.jpg" class="img-fluid" alt="Product Image">
-                </div>
-                <div class="col-7">
-                    <h5 class="card-title">MINT EMBROIDERED CAP</h5>
-                    <p class="card-text">Black, 1 Product</p>
-                    <p class="card-text"><strong>Notes:</strong> The color should not be red but blue</p>
-                </div>
-                <div class="col-3">
-                    <p><strong>Total Payment:</strong> Rp50.000</p>
-                    <p><strong>Status:</strong> Being processed</p>
-                    <p><strong>Shipping limit:</strong> 4 more days</p>
-                    <p><strong>Delivery service:</strong> Regular</p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
 </div>
+
+    @code {
+        private List<OrderDto> orders;
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+            {
+            if (firstRender)
+                {
+                try
+                    {
+                    var resultId = await ProtectedLocalStor.GetAsync<long>("CustomerId");
+                    long customerId = resultId.Success ? resultId.Value : 0;
+                    if (customerId == 0)
+                        {
+                        NavigationManager.NavigateTo("/login");
+                        return;
+                        }
+
+                    var response = await OrderService.GetOrdersByCustomerId(customerId);
+
+                    if (response.Success)
+                        {
+                        orders = response.Data;
+                        StateHasChanged();
+                        }
+                    else
+                        {
+
+                        }
+                    }
+                catch (Exception ex)
+                    {
+                    Console.WriteLine($"Error loading orders: {ex.Message}");
+                    }
+                }
+            }
+    }

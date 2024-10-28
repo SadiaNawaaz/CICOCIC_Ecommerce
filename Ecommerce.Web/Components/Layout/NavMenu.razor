@@ -92,6 +92,7 @@
                         </a>
                         <div class="dropdown-menu" style="background-color:white">
                             <a class="dropdown-item" href="javascript:void(0)" @onclick="HandleLogout">Logout</a>
+                            <a class="dropdown-item" href="/myAccount">Account</a>
                         </div>
                         }
                     else
@@ -173,6 +174,7 @@
     private async Task HandleLogout()
         {
         await ProtectedLocalStore.DeleteAsync("UserName");
+        await ProtectedLocalStore.DeleteAsync("CustomerId");
         Navigation.NavigateTo("/login", forceLoad: true);
         }
 }

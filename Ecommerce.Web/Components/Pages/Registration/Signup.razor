@@ -98,7 +98,7 @@
         if (response.Success)
             {
             await ProtectedLocalStor.SetAsync("UserName", customer.FirstName);
-            ;
+            await ProtectedLocalStor.SetAsync("CustomerId", customer.Id);
             NavigationManager.NavigateTo("/MyAccount", forceLoad: true);
             }
         else

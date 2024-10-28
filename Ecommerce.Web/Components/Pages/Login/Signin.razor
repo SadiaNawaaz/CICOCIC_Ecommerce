@@ -94,7 +94,8 @@
         var result = await CustomerService.ValidateUserAsync(loginModel.Email, loginModel.Password);
         if (result.Success)
             {
-            await ProtectedLocalStor.SetAsync("UserName", result.Data.FirstName); // Store user info in session
+            await ProtectedLocalStor.SetAsync("UserName", result.Data.FirstName);
+            await ProtectedLocalStor.SetAsync("CustomerId", result.Data.Id);
             NavigationManager.NavigateTo("/MyAccount", forceLoad: true);
             }
         else

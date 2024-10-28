@@ -229,7 +229,7 @@ public class ProductService : IProductService
                     FROM 
                      Products p
                      LEFT JOIN 
-                     ProductVariants pv ON p.Id = pv.ProductId
+                     ProductVariants pv ON p.Id = pv.ProductId AND (ISNULL(pv.Sold, 0) = 0)
                     LEFT JOIN 
                     Brands b ON p.BrandId = b.Id
                      LEFT JOIN 

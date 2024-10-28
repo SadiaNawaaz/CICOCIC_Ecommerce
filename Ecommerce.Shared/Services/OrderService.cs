@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities.Orders;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ public interface IOrderService
     {
     Task<ServiceResponse<Order>> PlaceOrder(Order order);
     Task<ServiceResponse<Order>> GetOrderById(long orderId);
-    Task<ServiceResponse<List<Order>>> GetOrdersByCustomerId(long customerId);
+    Task<ServiceResponse<List<OrderDto>>> GetOrdersByCustomerId(long customerId);
     }
 public class OrderService : IOrderService
     {
@@ -30,29 +31,52 @@ public class OrderService : IOrderService
 
     public async Task<ServiceResponse<Order>> PlaceOrder(Order order)
         {
-        try
+        using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-            order.OrderDate = DateTime.Now;
-            await _context.Orders.AddAsync(order);
-            await _context.SaveChangesAsync();
+            try
+                {
+                order.OrderDate = DateTime.Now;
+                await _context.Orders.AddAsync(order);
+                foreach (var orderItem in order.OrderItems)
+                    {
+                    var product = await _context.ProductVariants.FirstOrDefaultAsync(p => p.Id == orderItem.VariantId);
 
-            return new ServiceResponse<Order>
+                    if (product == null)
+                        {
+                        throw new Exception($"Product with ID {orderItem.ProductId} not found.");
+                        }
+                    if (product.Sold == 1)
+                        {
+                        throw new Exception($"Product with ID {product.Id} is already sold.");
+                        }
+                    product.Sold = 1;
+                    product.Publish = false;
+                    _context.ProductVariants.Update(product);
+                    }
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ServiceResponse<Order>
+                    {
+                    Data = order,
+                    Success = true,
+                    Message = "Order placed successfully"
+                    };
+                }
+            catch (Exception ex)
                 {
-                Data = order,
-                Success = true,
-                Message = "Order placed successfully"
-                };
-            }
-        catch (Exception ex)
-            {
-            _logger.LogError(ex, "Error occurred while placing order.");
-            return new ServiceResponse<Order>
-                {
-                Success = false,
-                Message = "Error occurred while placing order"
-                };
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error occurred while placing order.");
+
+                return new ServiceResponse<Order>
+                    {
+                    Success = false,
+                    Message = ex.Message 
+                    };
+                }
             }
         }
+
 
     public async Task<ServiceResponse<Order>> GetOrderById(long orderId)
         {
@@ -87,18 +111,39 @@ public class OrderService : IOrderService
             }
         }
 
-    public async Task<ServiceResponse<List<Order>>> GetOrdersByCustomerId(long customerId)
+    public async Task<ServiceResponse<List<OrderDto>>> GetOrdersByCustomerId(long customerId)
         {
         try
             {
+            // Fetch orders and related order items
             var orders = await _context.Orders
-                .Include(o => o.OrderItems)
+                .Include(o => o.OrderItems) // Include OrderItems
                 .Where(o => o.CustomerId == customerId)
                 .ToListAsync();
 
-            return new ServiceResponse<List<Order>>
+            // Map orders and order items to DTOs
+            var orderDtos = orders.Select(order => new OrderDto
                 {
-                Data = orders,
+                Id = order.Id,
+                CustomerId = order.CustomerId,
+                FirstName = order.FirstName,
+                LastName = order.LastName,
+                TotalAmount = order.TotalAmount,
+                OrderDate = order.OrderDate,
+                OrderItems = order.OrderItems.Select(item => new OrderItemDto
+                    {
+                    Id = item.Id,
+                    ProductName = item.ProductName,
+                    VariantName = _context.ProductVariants.FirstOrDefault(pv => pv.Id == item.VariantId)?.Name ?? "N/A", // Fetch VariantName directly
+                    Price = item.Price,
+                    Quantity = item.Quantity,
+                    DefaultImageUrl = _context.ProductVariants.FirstOrDefault(pv => pv.Id == item.VariantId)?.Thumbnail ?? "N/A"
+                    }).ToList()
+                }).ToList();
+
+            return new ServiceResponse<List<OrderDto>>
+                {
+                Data = orderDtos,
                 Success = true,
                 Message = "Orders retrieved successfully"
                 };
@@ -106,11 +151,13 @@ public class OrderService : IOrderService
         catch (Exception ex)
             {
             _logger.LogError(ex, "Error occurred while retrieving orders.");
-            return new ServiceResponse<List<Order>>
+            return new ServiceResponse<List<OrderDto>>
                 {
                 Success = false,
                 Message = "Error occurred while retrieving orders"
                 };
             }
         }
+
+
     }
