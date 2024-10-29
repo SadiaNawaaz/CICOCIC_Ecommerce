@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Mailer", "Ecommer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Agent", "Ecommerce.Web.Mvc.Agent\Ecommerce.Agent.csproj", "{53D735A2-FD85-4B7A-B30F-EDF3362749F9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Cicosafe", "Ecommerce.Cicosafe\Ecommerce.Cicosafe.csproj", "{34ACA6D0-395C-421C-9C09-150A3838A697}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{53D735A2-FD85-4B7A-B30F-EDF3362749F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53D735A2-FD85-4B7A-B30F-EDF3362749F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53D735A2-FD85-4B7A-B30F-EDF3362749F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34ACA6D0-395C-421C-9C09-150A3838A697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34ACA6D0-395C-421C-9C09-150A3838A697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34ACA6D0-395C-421C-9C09-150A3838A697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34ACA6D0-395C-421C-9C09-150A3838A697}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

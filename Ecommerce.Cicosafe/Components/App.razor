@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="shortcut icon" href="/assets/Images/fave_icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap-lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/font-awesome-lib/icon/font-awesome.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/responsive.css">
+    <link rel="stylesheet" href="/assets/css/slick.min.css">
+    <link rel="stylesheet" href="/assets/css/aos.css">
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer"/>
+    <script src="_framework/blazor.web.js"></script>
+    <script src="/assets/js/jquery.js"></script>
+    <script src="/assets/js/waypoints.min.js"></script>
+    <script src="/assets/js/javascript-lib/bootstrap.min.js"></script>
+    <script src="/assets/js/slick.min.js"></script>
+    <script src="/assets/js/custom.js"></script>
+    <script src="/assets/js/aos.js"></script>
+    <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+
+</html>
+
+<script>
+    initializeAOS();
+function initializeAOS() {
+
+    AOS.init({
+        once: true,
+        duration: 1500,
+    });
+}
+
+</script>

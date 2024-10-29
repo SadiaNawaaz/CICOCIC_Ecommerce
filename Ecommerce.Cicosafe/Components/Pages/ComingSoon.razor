@@ -1,0 +1,25 @@
+﻿
+
+@page  "/comingSoon"
+@inject NavigationManager Navigation
+<!-- ====== 6.1. 404 / Coming Soon page -->
+<section data-aos="zoom-in" class="coming-soon d-flex flex-column justify-content-center align-items-center text-center gap-3">
+    <figure><img src="/assets/Images/icon/coming-soon.png" alt="coming-soon"></figure>
+    <h2>We Are</h2>
+    <h1>Binnenkort Verwacht</h1>
+    <p>Binnenkort gaat onze zustersite, de website van Cicocic.com life.</p>
+    <a href="/" class="btn_hover1 mt-3">Terug naar Home</a>
+</section>
+<!-- ====== End of 6.1. 404 / Coming Soon page -->
+
+
+<!-- button back to top -->
+<button @onclick="GoToHomePage" id="backToTopBtn" class="btn_hover2"><i class="fa-solid fa-arrow-turn-up"></i></button>
+
+
+@code {
+    private void GoToHomePage()
+        {
+        Navigation.NavigateTo("/");
+        }
+}

@@ -1,0 +1,92 @@
+﻿
+@page  "/pricingPlan"
+
+
+<div class="header-service">
+    <!-- ====== 3.2. hero section ====== -->
+    <section class="container serv-hero">
+        <h2> Prijs Pakketten Plannen </h2>
+        <div class="d-flex justify-content-center align-items-center">
+            <a href="#">Home</a>
+            <span> // </span>
+            <a href="#">Prijzen Plan</a>
+        </div>
+    </section>
+    <!-- ====== End of 3.2. hero section ====== -->
+</div>
+
+
+
+<!-- ====== 1.12. Pricing section ====== -->
+<section id="pricing">
+    <div class="container">
+        <div class="pricing-card d-flex gap-md-0 gap-sm-4 gap-4 flex-md-row flex-sm-column flex-column justify-content-center text-center">
+            <div data-aos="fade-up" class="d-flex flex-column align-items-center gap-4">
+                <h3>BRONS</h3>
+                <h2>€0</h2>
+                <h6>Registreren Bezittingen</h6>
+                <h6>Beheren Dashboard</h6>
+                <h6>Digitaal Dossier</h6>
+                <h6>Ondersteuning</h6>
+                <a asp-controller="PricingPlan" asp-action="Index" class="btn_hover1">Ga voor Brons</a>
+            </div>
+            <div class="d-flex flex-column align-items-center gap-4">
+                <h3>ZILVER</h3>
+                <h2>€39</h2>
+                <h6>Registreren Bezittingen</h6>
+                <h6>Beheren Dashboard</h6>
+                <h6>EXTRA Diensten</h6>
+                <h6>Jaarlijkse Ondersteuning</h6>
+                <a asp-controller="PricingPlan" asp-action="Index" class="btn_hover2">Ga voor Zilver</a>
+            </div>
+            <div data-aos="fade-down" class="d-flex flex-column align-items-center gap-4">
+                <h3>GOUD</h3>
+                <h2>€169</h2>
+                <h6>Registreren Bezittingen</h6>
+                <h6>Beheren Dashboard</h6>
+                <h6>EXTRA Diensten</h6>
+                <h6>Lifetime Ondersteuning</h6>
+                <a asp-controller="PricingPlan" asp-action="Index" class="btn_hover1">Ga voor Goud</a>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ====== End of 1.12. Pricing section ====== -->
+<!-- ====== 1.9. How we work section ====== -->
+<section class="work pt-1">
+    <div class="container position-relative">
+        <div class="work-para text-center" data-aos="fade-up">
+            <h5>OPSLAAN IN CICOSAFE. </h5>
+            <h2 class="h2_margin">NU UW BEZIT REGISTREREN IN 4 STAPPEN</h2>
+            <p>
+                Met onze gratis digitale kluis kunt u al uw bezittingen veilig opslaan, met een overzichtelijk dashboard dat gemak biedt, niet alleen voor nu, maar ook voor later.
+            </p>
+        </div>
+        <div class="work-hr d-flex align-items-center gap-2">
+            <hr>
+            <h6>Project Stappenplan</h6>
+        </div>
+        <div class="work-line d-flex justify-content-center gap-4 flex-wrap position-relative">
+            <div data-aos="zoom-in">
+                <h2>01.</h2>
+                <h4>Zoek Uw Bezit in Onze Catalogus</h4>
+            </div>
+            <div data-aos="zoom-in">
+                <h2>02.</h2>
+                <h4>Registreer En Bepaal De Waarde</h4>
+            </div>
+            <div data-aos="zoom-in">
+                <h2>03.</h2>
+                <h4>Toevoegen Aan Uw Dossier</h4>
+            </div>
+            <div data-aos="zoom-in">
+                <h2>04.</h2>
+                <h4>Extra Documenten en Foto's Opslaan</h4>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center" data-aos="zoom-in">
+            <a asp-controller="Contact" asp-action="Index" class="btn_hover2">Registreer Nu</a>
+        </div>
+    </div>
+</section>
+<!-- ====== End of 1.9. How we work section ====== -->
