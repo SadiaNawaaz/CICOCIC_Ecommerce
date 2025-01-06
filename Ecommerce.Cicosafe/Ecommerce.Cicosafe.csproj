@@ -6,4 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="wwwroot\assets\Images\Images\NewFolder\**" />
+    <Content Remove="wwwroot\assets\Images\Images\NewFolder\**" />
+    <EmbeddedResource Remove="wwwroot\assets\Images\Images\NewFolder\**" />
+    <None Remove="wwwroot\assets\Images\Images\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.Shared\Ecommerce.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

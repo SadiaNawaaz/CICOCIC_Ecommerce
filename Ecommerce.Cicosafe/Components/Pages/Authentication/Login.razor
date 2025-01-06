@@ -1,0 +1,120 @@
+﻿@page "/Login"
+@using Layout
+@using Ecommerce.Shared.Services.Users
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.WebUtilities
+@using Ecommerce.Shared.Dto
+@inject IUserService UserService
+@inject IJSRuntime JS
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+    <style>
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #000C7B inset !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+    </style>
+<div class="header-about">
+    <!-- ====== 3.2. hero section ====== -->
+    <section class="container serv-hero">
+        <h2>Login </h2>
+        <div class="d-flex justify-content-center align-items-center">
+            <a href="#">Home</a>
+            <span> // </span>
+            <a href="#">Login</a>
+        </div>
+    </section>
+    <!-- ====== End of 3.2. hero section ====== -->
+</div>
+
+<section class="contact">
+    <div class="container pt-5">
+
+        <EditForm Model="@user" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="d-flex gap-md-5 gap-sm-3 gap-3 flex-md-row flex-sm-column flex-column mb-3">
+                <div class="flex-fill">
+                    <InputText id="Email" placeholder="Email" @bind-Value="user.Email" />
+                    <span class="text-danger"><ValidationMessage For="@(() => user.Email)" /></span>
+                </div>
+                <div class="flex-fill">
+                    <InputText id="Password" placeholder="Password" @bind-Value="user.Password" type="password" />
+                    <span class="text-danger"><ValidationMessage For="@(() => user.Password)" /></span>
+                </div>
+            </div>
+            <button type="submit" class="w-100 btn_hover1 mt-5">Login</button>
+        </EditForm>
+        <div class="text-center mt-4">
+            <p class="new-here-text text-white">
+                <span style="margin-top:-10px">New to Cicosafe ?</span> 
+                <a href="/Registration" class="text-danger" style="text-align:left">Register now </a>
+            </p>
+        </div>
+
+    </div>
+</section>
+
+@code {
+    private LoginDto user = new LoginDto();
+    private string errorMessage;
+    private string successMessage;
+
+    protected override async Task OnInitializedAsync()
+        {
+        var uri = new Uri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("error", out var error))
+            {
+            if (!string.IsNullOrEmpty(error))
+                {
+                errorMessage = error;
+                await ShowAlert("error", errorMessage);
+                }
+            }
+        }
+
+    private async Task HandleValidSubmit()
+        {
+        try
+            {
+            errorMessage = "";
+            successMessage = "";
+
+            // Make an HTTP POST request to login endpoint
+            var response = await UserService.LoginAsync(user.Email, user.Password);
+
+            if (response.Success)
+                {
+                successMessage = "Login successful!";
+                await ShowAlert("success", successMessage);
+                NavigationManager.NavigateTo("/services");
+                }
+            else
+                {
+                errorMessage = response.Message;
+                await ShowAlert("error", errorMessage);
+                }
+            }
+        catch (Exception ex)
+            {
+            errorMessage = "Something went wrong. Please try again.";
+            await ShowAlert("error", errorMessage);
+            }
+        }
+
+    private async Task ShowAlert(string type, string message)
+        {
+        if (type == "success")
+            {
+            await JS.InvokeVoidAsync("showSuccessAlert", message);
+            }
+        else if (type == "error")
+            {
+            await JS.InvokeVoidAsync("showErrorAlert", message);
+            }
+        }
+}
+
+

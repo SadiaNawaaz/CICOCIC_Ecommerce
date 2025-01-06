@@ -1,0 +1,77 @@
+﻿
+@page "/ProductList"
+<div class="header-service">
+    <!-- ====== 3.2. hero section ====== -->
+    <!-- ====== End of 3.2. hero section ====== -->
+</div>
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+                        <h4 class="card-title mb-0">Product - List</h4>
+                        <div>
+                            <button class="btn btn-sm btn-default"><i class="fa fa-expand"></i></button>
+                            <button class="btn btn-sm btn-success"><i class="fa fa-redo"></i></button>
+                            <button class="btn btn-sm btn-warning"><i class="fa fa-minus"></i></button>
+                            <button class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <button class="btn btn-outline-secondary" type="button">Filter Product</button>
+                            <input type="text" class="form-control" placeholder="Search ...">
+                        </div>
+
+                        <table class="table table-striped table-bordered">
+                            <thead class="table">
+                                <tr>
+                                    <th scope="col">Thumbnail</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Stock</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Manage Records</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Demo Product 1 -->
+                                <tr>
+                                    <td><img src="https://applepakistan.com.pk/wp-content/uploads/2024/09/iphone-16-model-unselect-gallery-2-202409_GEO_EMEA-scaled.webp" alt="NoImage" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';"></td>
+                                    <td>Medeo Speed / Black Mat / Dames / 2023</td>
+                                    <td>3</td>
+                                    <td>3799</td>
+                                    <td>Elektrische-Fiets</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" title="Add Variants"><i class="fas fa-plus-square"></i></button>
+                                        <button class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-danger btn-sm" title="Delete"><i class="fas fa-trash"></i></button>
+                                        <button class="btn btn-info btn-sm" title="List Product Variants"><i class="fas fa-list"></i></button>
+                                        <button class="btn btn-secondary btn-sm" title="Product Objects"><i class="fas fa-file-circle-check"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Demo Product 2 -->
+                                <tr>
+                                    <td><img src="https://applepakistan.com.pk/wp-content/uploads/2024/09/iphone-16-model-unselect-gallery-2-202409_GEO_EMEA-scaled.webp" alt="NoImage" style="width:65px; height:30px; object-fit: cover;" onerror="this.onerror=null; this.src='NoImage.png';"></td>
+                                    <td>Iphone 14 Plus</td>
+                                    <td>4</td>
+                                    <td>932</td>
+                                    <td>Smartphone</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" title="Add Variants"><i class="fas fa-plus-square"></i></button>
+                                        <button class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-danger btn-sm" title="Delete"><i class="fas fa-trash"></i></button>
+                                        <button class="btn btn-info btn-sm" title="List Product Variants"><i class="fas fa-list"></i></button>
+                                        <button class="btn btn-secondary btn-sm" title="Product Objects"><i class="fas fa-file-circle-check"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @code {
+
+    }

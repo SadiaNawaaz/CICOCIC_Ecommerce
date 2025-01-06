@@ -1,10 +1,20 @@
 using Ecommerce.Cicosafe.Components;
+using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Services.Roles;
+using Ecommerce.Shared.Services.Users;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddDbContext<ApplicationDbContext>(
+ o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+
 
 var app = builder.Build();
 

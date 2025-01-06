@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="/assets/css/responsive.css">
     <link rel="stylesheet" href="/assets/css/slick.min.css">
     <link rel="stylesheet" href="/assets/css/aos.css">
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/png" href="/assets/Images/fave_icon.png" />
     <HeadOutlet />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer"/>
+    <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
     <script src="/assets/js/jquery.js"></script>
     <script src="/assets/js/waypoints.min.js"></script>
@@ -27,6 +27,7 @@
     <script src="/assets/js/aos.js"></script>
     <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
@@ -41,4 +42,24 @@ function initializeAOS() {
     });
 }
 
+
+
+
+    function showErrorAlert(message) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: message,
+            confirmButtonText: 'OK'
+        });
+    }
+
+    function showSuccessAlert(message) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: message,
+            confirmButtonText: 'OK'
+        });
+    }
 </script>

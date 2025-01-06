@@ -419,7 +419,7 @@ nav a {
 }
 
 nav img {
-    width: 100px;
+    width: 140px;
 }
 
 .navbar-nav {
@@ -1860,7 +1860,7 @@ aside .pages {
 .pricing-card div:nth-child(2) {
     transform: scale(1.09);
     z-index: 2;
-    background: linear-gradient(11deg, #246AC9 0.01%, #3282F6 100%);
+/*   /// background: linear-gradient(11deg, #246AC9 0.01%, #3282F6 100%);*/
 }
 
 .pricing-card div:nth-child(2):hover {

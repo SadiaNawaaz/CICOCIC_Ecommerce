@@ -119,18 +119,45 @@
     private List<string> searchResults = new List<string>();
     private bool hasInitialized = false;
 
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    //    {
+    //    if (firstRender && !hasInitialized)
+    //        {
+    //        var result = await ProtectedLocalStore.GetAsync<string>("UserName");
+
+    //        if (result.Success && !string.IsNullOrEmpty(result.Value))
+    //            {
+    //            userName = result.Value;
+    //            }
+    //        hasInitialized = true;
+    //        StateHasChanged();
+    //        }
+    //    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
         {
         if (firstRender && !hasInitialized)
             {
-            var result = await ProtectedLocalStore.GetAsync<string>("UserName");
-
-            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            try
                 {
-                userName = result.Value;
+                var result = await ProtectedLocalStore.GetAsync<string>("UserName");
+
+                if (result.Success && !string.IsNullOrEmpty(result.Value))
+                    {
+                    userName = result.Value;
+                    }
+                else
+                    {
+                    userName = string.Empty;
+                    }
+
+                hasInitialized = true;
+                StateHasChanged();
                 }
-            hasInitialized = true;
-            StateHasChanged();
+            catch (Exception ex)
+                {
+                Console.WriteLine($"Error retrieving userName from ProtectedLocalStorage: {ex.Message}");
+                userName = string.Empty; // Fallback to default state if retrieval fails
+                }
             }
         }
 

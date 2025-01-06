@@ -1,0 +1,198 @@
+﻿@page "/Registration"
+@using Ecommerce.Shared.Services.Users;
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IRoleService roleService
+@using Ecommerce.Shared.Services.Roles
+@inject IJSRuntime JS
+
+<style>
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #000C7B inset !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+</style>
+<div class="header-about">
+    <section class="container serv-hero">
+        <h2>Register </h2>
+        <div class="d-flex justify-content-center align-items-center">
+            <a href="/">Home</a>
+            <span> // </span>
+            <a href="#">Register</a>
+        </div>
+    </section>
+</div>
+
+
+
+<section class="contact">
+    <div class="container pt-5">
+     
+        @if (!string.IsNullOrEmpty(sucessMessage))
+            {
+
+      
+            <div class="service-card aos-init aos-animate" data-aos="fade-down">
+           
+                <h3>Thank you!</h3>
+                <p class="text-white">
+                    Dear,@user.FirstName,  @sucessMessage
+                    <br />
+                    <span>Thank you for reaching out to become one of our partners - we are truly honoured!</span>
+                </p>
+                <a href="/Login" class="p-0">Login<i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            }
+
+        else
+            {
+            <EditForm Model="@user" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+
+                <!-- First Name and Last Name -->
+                <div class="d-flex gap-md-5 gap-sm-3 gap-3 flex-md-row flex-sm-column flex-column mb-3">
+                    <div class="flex-fill">
+                        <InputText id="FirstName" placeholder="First Name" @bind-Value="user.FirstName" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.FirstName)" /></span>
+                    </div>
+                    <div class="flex-fill">
+                        <InputText id="LastName" placeholder="Last Name" @bind-Value="user.LastName" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.LastName)" /></span>
+                    </div>
+                </div>
+
+                <!-- Username and Email -->
+                <div class="d-flex gap-md-5 gap-sm-3 gap-3 flex-md-row flex-sm-column flex-column mb-3">
+                    <div class="flex-fill">
+                        <InputText id="UserName" placeholder="Username" @bind-Value="user.UserName" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.UserName)" /></span>
+                    </div>
+                    <div class="flex-fill">
+                        <InputText id="Email" placeholder="Email" @bind-Value="user.Email" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.Email)" /></span>
+                    </div>
+                </div>
+
+                <!-- Extra Email and Password -->
+                <div class="d-flex gap-md-5 gap-sm-3 gap-3 flex-md-row flex-sm-column flex-column mb-3">
+                    <div class="flex-fill">
+                        <InputText id="ExtraEmail" placeholder="Extra Email" @bind-Value="user.ExtraEmail" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.ExtraEmail)" /></span>
+                    </div>
+                    <div class="flex-fill">
+                        <InputText id="Password" placeholder="Password" type="password" @bind-Value="user.Password" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.Password)" /></span>
+                    </div>
+                </div>
+
+                <!-- Postal Code -->
+                <div>
+                    <div class="flex-fill">
+                        <InputText id="PostalCode" placeholder="Postal Code" @bind-Value="user.PostalCode" />
+                        <span class="text-danger"><ValidationMessage For="@(() => user.PostalCode)" /></span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-100 btn_hover1 mt-5">Register</button>
+            </EditForm>
+            }
+
+
+
+
+
+
+
+
+    </div>
+</section>
+
+@code {
+    [Parameter] public long? UserId { get; set; }
+    private User user = new User();
+    private Role role = new Role();
+    private string errorMessage = "";
+    private string sucessMessage = "";
+
+    protected override async Task OnInitializedAsync()
+        {
+        await LoadRoles();
+  
+        }
+
+
+    private async Task HandleValidSubmit()
+        {
+        try
+            {
+            errorMessage = "";
+            sucessMessage = "";
+            if (role == null || role.Id < 1)
+                {
+                errorMessage = "Please Contact to Admin For now Agent Configuration";
+                await ShowErrorAlert();
+                return;
+                }
+
+            user.UserRoles.Clear();
+            user.UserRoles.Add(new UserRole { RoleId = role.Id });
+            user.IsAgent = true;
+
+            var response = await UserService.AddUserAsync(user);
+            if (response.Success)
+                {
+                errorMessage = "";
+                sucessMessage = "Your request submitted successfully! An administrator will review it shortly.";
+                await Task.Delay(1000);
+                }
+            else
+                {
+                errorMessage = response.Message;
+                await ShowErrorAlert();
+                }
+            }
+        catch (Exception)
+            {
+            errorMessage = "Something went wrong please try again";
+            await ShowErrorAlert();
+            }
+        }
+
+    private async Task LoadRoles()
+        {
+        try
+            {
+            var response = await roleService.GetRolesAsyncByTag("Agent");
+            if (response.Success)
+                {
+                role = response.Data;
+                }
+            else
+                {
+                errorMessage = response.Message;
+                await ShowErrorAlert();
+                }
+            }
+        catch (Exception ex)
+            {
+            Console.Error.WriteLine($"Error in LoadRoles: {ex}");
+            }
+        }
+
+    private async Task ShowErrorAlert()
+        {
+        if (!string.IsNullOrEmpty(errorMessage))
+            {
+            await JS.InvokeVoidAsync("showErrorAlert", errorMessage);
+            errorMessage = ""; // Clear the message to prevent repeated alerts
+            }
+        }
+
+}

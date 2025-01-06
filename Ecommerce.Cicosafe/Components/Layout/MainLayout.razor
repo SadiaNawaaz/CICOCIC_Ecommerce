@@ -28,7 +28,7 @@
         <nav class="container navbar navbar-expand-lg">
             <div class="container-fluid">
                 <!-- site logo -->
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index"><img src="/assets/Images/logo.png" alt="logo"></a>
+                <a href="/" class="navbar-brand" asp-controller="Home" asp-action="Index"><img src="/assets/Images/logo.png" alt="logo"></a>
                 <button class="navbar-toggler" onclick="openNav()" type="button">
                     <span class="fa-solid fa-bars"></span>
                 </button>
@@ -264,3 +264,7 @@
     </footer>
     <!-- ====== End of 1.15. Footer section ====== -->
 </div>
+
+<button onclick="scrollToTop()" id="backToTopBtn" class="btn_hover2">
+    <i class="fa-solid fa-arrow-turn-up"></i>
+</button>

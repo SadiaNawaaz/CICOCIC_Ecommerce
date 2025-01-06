@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
+using SixLabors.ImageSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,7 +39,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddTransient<IClusterService, ClusterService>();
-builder.Services.AddTransient<IBrandService, BrandService>();
+builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddTransient<IPopularBrandService, PopularBrandService>();
 builder.Services.AddTransient<IModelYearService, ModelYearService>();
 builder.Services.AddTransient<IFeatureService, FeatureService>();
@@ -64,8 +65,19 @@ builder.Services.AddScoped<IPopularCategoryService, PopularCategoryService>();
 builder.Services.AddScoped<CsvExportService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 
-builder.Services.AddDbContext<ApplicationDbContext>(
- o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+//builder.Services.AddDbContext<ApplicationDbContext>(
+// o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
+
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
+
+
+
+
 //builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; });
 builder.Services.AddSignalR(opt => opt.MaximumReceiveMessageSize = 102400000);
 builder.Services.AddMudServices(config =>
