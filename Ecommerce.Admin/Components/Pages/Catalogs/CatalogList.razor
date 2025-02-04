@@ -7,15 +7,17 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@using Ecommerce.Shared.Services;
+@inject IDataDownloads DataDownloadsService
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-  <style>
+<style>
 
-      .mud-table-head {
-          background-color: #00acac;
-          color:white;
-      }
-  </style>
+    .mud-table-head {
+        background-color: #00acac;
+        color: white;
+    }
+</style>
 
 <div class="d-flex align-items-center mb-3">
     <div>
@@ -49,13 +51,13 @@
 
 
         <div class="input-group mb-3">
-            <button class="btn btn-white" type="button"  aria-haspopup="true" aria-expanded="false">Filter Catalog <b class="caret"></b></button>
+            <button class="btn btn-white" type="button" aria-haspopup="true" aria-expanded="false">Filter Catalog <b class="caret"></b></button>
             <div class="flex-fill position-relative">
                 <div class="input-group">
                     <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
                         <i class="fa fa-search opacity-5"></i>
                     </div>
-                    <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..."  @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged"/>
+                    <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..." @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged" />
                 </div>
             </div>
         </div>
@@ -87,6 +89,30 @@
                 <!-- Code Column (if you have a field like Code) -->
                 <PropertyColumn Property="x => x.Code" Title="Code" Style="width:15%" />
 
+
+                
+
+
+                <TemplateColumn Title="Marked Product">
+                    <CellTemplate>
+                        @{
+                            bool marked = context.Item.Mark;
+
+                            if (marked)
+                                {
+                                <span class="text-success" style="text-align:center">
+                                    <i class="fa fa-check-circle"></i> <!-- Bootstrap icon for checkmark -->
+                                </span>
+                                }
+                            else
+                                {
+                                <button class="btn btn-primary" @onclick="(() => MarkProduct(context.Item))">Mark</button>
+                                }
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+
+
                 <!-- Action Column -->
                 <TemplateColumn Style="width:20%">
                     <HeaderTemplate>
@@ -100,12 +126,17 @@
                             </button>
 
                             <!-- Delete Button with Tooltip -->
-                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete"   @onclick="@(e => DeleteCatalog(context.Item))">
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="@(e => DeleteCatalog(context.Item))">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>
+
+
+
+
+
             </Columns>
 
             <PagerContent>
@@ -251,5 +282,44 @@
                 c.Price.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase)
             );
             }
+        }
+
+
+    private async Task MarkProduct(CatalogDto catalog)
+        {
+
+        try
+            {
+
+            if (catalog.IntegratedId.HasValue)
+                {
+                // Attempt to download and save all products
+                var response = await DataDownloadsService.DownloadAndSaveAllProducts(catalog);
+                // Assume DownloadAndSaveAllProducts returns a boolean indicating success
+                if (response)
+                    {
+                    Snackbar.Add("Product Added Successfully", Severity.Success);
+
+                    var updatedCatalog = catalogs.FirstOrDefault(c => c.Id == catalog.Id);
+                    if (updatedCatalog != null)
+                        {
+                        updatedCatalog.Mark = true;                                                    
+                        StateHasChanged();
+                        }
+                    }
+                else
+                    {
+                    Snackbar.Add("Failed to add product", Severity.Error);
+                    }
+                }
+
+
+
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add(ex.Message, Severity.Success);
+            }
+
         }
 }

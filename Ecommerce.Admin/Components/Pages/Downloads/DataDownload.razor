@@ -1,0 +1,132 @@
+﻿@page "/downloadcategories"
+@using Ecommerce.Shared.Services;
+@inject IDataDownloads DataDownloadsService
+@using Ecommerce.Shared.Entities
+
+<h3>Download and Save Categories</h3>
+<button class="btn btn-primary" @onclick="HandleDownload">Download Categories</button>
+
+
+<button class="btn btn-primary" @onclick="HandleDownloadBrands">Download Brands</button>
+
+<button class="btn btn-primary" @onclick="HandleDownloadFeatureGroups">Download Feature Group</button>
+
+<button class="btn btn-primary" @onclick="HandleDownloadFeatures">Download Features</button>
+
+
+
+<button class="btn btn-primary" @onclick="HandleDownloadCatalogs">Download Catalogs</button>
+
+
+<button class="btn btn-primary" @onclick="HandleDownloadProducts">Download Products</button>
+
+
+<button class="btn btn-primary" @onclick="HandleDownloadCategoryFeatures">Category Features</button>
+
+@if (operationMessage != null)
+    {
+    <div class="alert alert-info mt-2">@operationMessage</div>
+    }
+
+@code {
+    private string operationMessage;
+
+    private async Task HandleDownload()
+        {
+        try
+            {
+            await DataDownloadsService.DownloadAndSaveCategories();
+            operationMessage = "Categories downloaded and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+
+    private async Task HandleDownloadBrands()
+        {
+        try
+            {
+            await DataDownloadsService.DownloadAndSaveBrands();
+            operationMessage = "Brands downloaded and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+
+    private async Task HandleDownloadFeatureGroups()
+        {
+        try
+            {
+            await DataDownloadsService.DownloadAndSaveFeatureGroups();
+            operationMessage = "Feature Groups downloaded and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+
+
+
+    private async Task HandleDownloadFeatures()
+        {
+        try
+            {
+            await DataDownloadsService.DownloadAndSaveFeatures();
+            operationMessage = "Feature downloaded and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+
+    private async Task HandleDownloadProducts()
+        {
+        try
+            {
+            //await DataDownloadsService.DownloadAndSaveAllProducts();
+            //operationMessage = "Feature downloaded and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+
+
+
+    //HandleDownloadCatalogs
+
+    private async Task HandleDownloadCatalogs()
+        {
+        try
+            {
+            await DataDownloadsService.DownloadAndSaveAllCatalogs();
+            operationMessage = "catalogs downloaded and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+
+
+
+    private async Task HandleDownloadCategoryFeatures()
+        {
+        try
+            {
+            await DataDownloadsService.DownloadAndSaveCategoryFeatures();
+            operationMessage = "Category-features and saved successfully!";
+            }
+        catch (Exception ex)
+            {
+            operationMessage = $"Error: {ex.Message}";
+            }
+        }
+}

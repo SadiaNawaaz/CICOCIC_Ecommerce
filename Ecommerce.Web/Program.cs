@@ -20,13 +20,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddScoped<HttpClient>();
-builder.Services.AddTransient<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddTransient<IBrandService, BrandService>();
 builder.Services.AddTransient<IProductVariantService, ProductVariantService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<IPopularBrandService, PopularBrandService>();
-builder.Services.AddScoped<ISliderService, SliderService>();
+builder.Services.AddTransient<ISliderService, SliderService>();
 builder.Services.AddScoped<IPopularCategoryService,PopularCategoryService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -36,9 +36,17 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")),
+//    ServiceLifetime.Transient);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")),
-    ServiceLifetime.Transient);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
+
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
+
+
 builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();
 string serverlessBaseURI = builder.Configuration["ApiUrl"];

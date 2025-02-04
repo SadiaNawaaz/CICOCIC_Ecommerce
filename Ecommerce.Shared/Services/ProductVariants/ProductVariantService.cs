@@ -428,7 +428,7 @@ public class ProductVariantService: IProductVariantService
                     }).ToList(),
                     ProductVariantMedia = pv.ProductVariantMedias.Select(vi => new ProductVariantMedia
                     {
-                        ImageUrl = vi.ImageUrl,
+                        MediaUrl = vi.MediaUrl,
                         
                     }).ToList()
 
@@ -455,7 +455,7 @@ public class ProductVariantService: IProductVariantService
                     {
                     productVariant.ProductVariantMedia.Add(new ProductVariantMedia
                         {
-                        ImageUrl = productVariant.Thumbnail
+                        MediaUrl = productVariant.Thumbnail
                         });
                     }
 
@@ -893,29 +893,34 @@ public class ProductVariantService: IProductVariantService
 
         try
             {
-            // Query Level 1 categories and their product variants across multiple levels
-            var categoriesWithCounts = await _context.Categories
-                .Where(c => c.Level == 1) // Level 1 categories only
-                .Select(c => new CategoryVariantCountDto
-                    {
-                    CategoryId = c.Id,
-                    CategoryName = c.Name,
+            var query = @"
+            WITH RecursiveCategory AS (
+                -- Start with Level 1 categories
+                SELECT c.Id AS RootCategoryId, c.Name AS CategoryName, c.Id AS CategoryId, c.ParentCategoryId
+                FROM Categories c
+                WHERE c.Level = 1
+                
+                UNION ALL
+                
+                -- Recursively join to get all subcategories
+                SELECT rc.RootCategoryId, rc.CategoryName, c.Id, c.ParentCategoryId
+                FROM Categories c
+                INNER JOIN RecursiveCategory rc ON c.ParentCategoryId = rc.CategoryId
+            )
+            SELECT 
+                rc.RootCategoryId AS CategoryId, 
+                rc.CategoryName,
+                COUNT(pv.Id) AS VariantCount
+            FROM RecursiveCategory rc
+            LEFT JOIN Products p ON rc.CategoryId = p.CategoryId
+            LEFT JOIN ProductVariants pv ON p.Id = pv.ProductId AND pv.Sold = 0
+            GROUP BY rc.RootCategoryId, rc.CategoryName
+            ORDER BY VariantCount DESC;
+        ";
 
-                    // Count product variants from all nested levels (via join)
-                    VariantCount = (
-                        from level2 in _context.Categories
-                        join level3 in _context.Categories on level2.Id equals level3.ParentCategoryId
-                        join level4 in _context.Categories on level3.Id equals level4.ParentCategoryId
-                        join product in _context.Products on level4.Id equals product.CategoryId
-                        join variant in _context.ProductVariants on product.Id equals variant.ProductId
-                        where level2.ParentCategoryId == c.Id && variant.Sold==0
-                        select variant
-                    ).Count()
-                    })
-              .OrderByDescending(cat => cat.VariantCount) 
-            .ToListAsync();
+            var result = await _context.Database.SqlQueryRaw<CategoryVariantCountDto>(query).ToListAsync();
 
-            response.Data = categoriesWithCounts;
+            response.Data = result;
             response.Success = true;
             response.Message = "Categories with variant counts fetched successfully.";
             }
@@ -928,6 +933,7 @@ public class ProductVariantService: IProductVariantService
 
         return response;
         }
+
 
     public async Task<ServiceResponse<List<ProductVariantDto>>> GetTopTenProductVariantsByCategoryAsync(long categoryId)
         {

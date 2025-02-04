@@ -173,8 +173,20 @@ else
                                 <div class="row align-items-center mb-3">
 
                                     <div class="col-md-4">
-                                        <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                       
+                                        @if (media.ContentType.StartsWith("image/"))
+                                            {
+                                            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                            }
+                                        else
+                                            {
+                                            <a href="@media.MediaUrl" target="_blank">View File</a>
+                                            }
+
+
+
                                     </div>
+
                                     <div class="col-md-4">
 
 
@@ -1006,8 +1018,11 @@ else
                     {
                     selectedFiles.ToList().ForEach(image =>
                     {
-                        image.ImageUrl = $"/ProductVariants/{productVariant.Id}/{image.ImageName}";
+                        image.ImageUrl = image.ImageName.StartsWith("http://") || image.ImageName.StartsWith("https://")
+                            ? image.ImageName
+                            : $"/ProductVariants/{productVariant.Id}/{image.ImageName}";
                     });
+
                     }
 
                 }
@@ -1090,8 +1105,8 @@ else
 
                         productVariant.ProductVariantMedias = Product.ProductMedias.Select(cm => new ProductVariantMedia
                             {
-                            ImageUrl = cm.ImageUrl,
-
+                            MediaUrl = cm.MediaUrl,
+                            ContentType=cm.ContentType,
                             }).ToList();
 
                         }
@@ -1101,15 +1116,18 @@ else
 
                         foreach (var cm in Product.ProductImages)
                             {
-                            // Check if the image with the same name already exists in the selectedFiles list
                             if (!selectedFiles.Any(img => img.ImageName == cm.ImageName && img.IsDeleted == false))
                                 {
                                 selectedFiles.Add(new ProductVariantImages
                                     {
-                                    ImageUrl = $"/Products/{Product.Id}/{cm.ImageName}",
+                                    ImageUrl = cm.ImageName.StartsWith("http://") || cm.ImageName.StartsWith("https://") ? cm.ImageName : $"/Products/{Product.Id}/{cm.ImageName}",
                                     ImageName = cm.ImageName,
                                     IsCloned = true
                                     });
+
+
+
+
                                 }
                             }
 

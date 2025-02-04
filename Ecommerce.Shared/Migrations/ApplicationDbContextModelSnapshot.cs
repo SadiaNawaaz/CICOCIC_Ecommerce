@@ -108,10 +108,19 @@ namespace Ecommerce.Shared.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EanNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long?>("GeneralColorId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("GeneralSizeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("Integrated")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("IntegratedId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("LastModifiedBy")
@@ -119,6 +128,9 @@ namespace Ecommerce.Shared.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("MarkProduct")
+                        .HasColumnType("bit");
 
                     b.Property<long?>("ModelYearId")
                         .HasColumnType("bigint");
@@ -339,6 +351,49 @@ namespace Ecommerce.Shared.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("CategoryConfigurations");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.CategoryFeatures.CategoryFeature", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FeatureGroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FeatureId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IceCatFeatureGroupId")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("MeasureId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CategoryFeatures");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Clusters.Cluster", b =>
@@ -927,7 +982,11 @@ namespace Ecommerce.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1010,6 +1069,9 @@ namespace Ecommerce.Shared.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EanNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("LastModifiedBy")
@@ -1201,7 +1263,11 @@ namespace Ecommerce.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

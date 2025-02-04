@@ -5,6 +5,7 @@ using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Entities.ProductVariants;
 using Ecommerce.Shared.Entities.Templates;
+using Ecommerce.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ public class Product : BaseEntity
     public double Price { get; set; }
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
+    public string? EanNumber { get; set; }
 
     public List<ProductCluster> ProductClusters { get; set; } = new List<ProductCluster>();
 
@@ -95,8 +97,12 @@ public class ProductMedia
     public long Id { get; set; }
 
     [Required]
-    public string ImageUrl { get; set; }
+    public string MediaUrl { get; set; }
 
     public long ProductId { get; set; }
     public Product Product { get; set; }
-}
+
+    public string ContentType  { get; set; }
+    }
+
+

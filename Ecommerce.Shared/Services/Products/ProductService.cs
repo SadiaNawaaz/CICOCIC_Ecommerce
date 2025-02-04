@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities.Catalogs;
+using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -90,30 +91,72 @@ public class ProductService : IProductService
         }
     }
 
+
     public async Task<ServiceResponse<Product>> AddProductAsync(Product product)
-    {
-        try
         {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-            return new ServiceResponse<Product>
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
             {
+            // Add product to the database
+            _context.Products.Add(product);
+            var catalog = await _context.Catalogs.FindAsync(product.CatalogId);
+            await _context.SaveChangesAsync();
+
+            if (catalog != null && catalog.Integrated == true)
+                {
+                // Extract Color from FeatureValue of FeatureId 1766
+                var featureWithColor = product.ProductClusters?
+                    .SelectMany(pc => pc.ProductClusterFeatures)
+                    .FirstOrDefault(f => f.FeatureId == 1766);
+
+                if (featureWithColor != null && !string.IsNullOrEmpty(featureWithColor.Value))
+                    {           
+                    var color = featureWithColor.Value.Split(',').FirstOrDefault()?.Trim();
+                    var existingColor = await _context.Colors.FirstOrDefaultAsync(c => c.Name == color);
+
+                    if (existingColor == null)
+                        {
+                        var newColor = new GeneralColor { Name = color,HexCode="" };
+                        _context.Colors.Add(newColor);
+                        await _context.SaveChangesAsync();
+                        catalog.GeneralColorId = newColor.Id;
+                        }
+                    else
+                        {
+                        catalog.GeneralColorId = existingColor.Id;
+                        }
+                    }
+                catalog.MarkProduct = true;
+                await _context.SaveChangesAsync();
+                }
+
+            // Commit transaction
+            await transaction.CommitAsync();
+
+            return new ServiceResponse<Product>
+                {
                 Data = product,
                 Success = true,
                 Message = "Product added successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while adding product." + ex.InnerException);
-            return new ServiceResponse<Product>
             {
+            // Rollback transaction in case of an error
+            await transaction.RollbackAsync();
+
+            _logger.LogError(ex, $"Error occurred while adding product. {ex.InnerException}");
+            return new ServiceResponse<Product>
+                {
                 Success = false,
-                InnerException=ex.InnerException.ToString(),
+                InnerException = ex.InnerException?.ToString(),
                 Message = "Error occurred while adding product"
-            };
+                };
+            }
         }
-    }
+
+
+
 
     public async Task<ServiceResponse<Product>> UpdateProductAsync(Product updatedProduct)
     {

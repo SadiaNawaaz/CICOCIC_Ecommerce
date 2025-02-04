@@ -1,0 +1,19 @@
+﻿@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+@if (Category != null)
+    {
+
+    }
+@code {
+    [Parameter]
+    public CategoryDto Category { get; set; }
+
+    public async Task fnDetails(long id)
+        {
+
+        await JSRuntime.InvokeVoidAsync("closeDropdownMenu");
+
+        NavigationManager.NavigateTo($"/ProductByCategory?Id={id}");
+        }
+}

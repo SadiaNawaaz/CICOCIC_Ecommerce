@@ -95,16 +95,16 @@
                                         }
 
                                     }
-                                @if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
+                                @*@if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
                                     {
                                     foreach (var variant in ProductVariant.ProductVariantMedia)
                                         {
 
-                                        <li class="active"><a href="#" data-click="show-main-image" data-url="@variant.ImageUrl"><img src=@variant.ImageUrl alt="" /></a></li>
+                                        <li class="active"><a href="#" data-click="show-main-image" data-url="@variant.MediaUrl"><img src=@variant.MediaUrl alt="" /></a></li>
 
                                         }
 
-                                    }
+                                    }*@
 
                             </ul>
                         </div>
@@ -178,6 +178,25 @@
 
 
                                 }
+
+
+
+                            @if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
+                                {
+                                foreach (var variant in ProductVariant.ProductVariantMedia)
+                                    {
+
+                 
+                                    <a href="@variant.MediaUrl" target="_blank">View Attachement</a>
+
+                                    }
+
+                                }
+
+
+
+
+
                         </div>
 
                         @*<ul class="product-info-list">

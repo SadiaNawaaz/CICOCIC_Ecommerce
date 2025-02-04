@@ -22,12 +22,13 @@ public interface ISliderService
 }
 public class SliderService : ISliderService
 {
-    private readonly ApplicationDbContext _context;
+ 
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<SliderService> _logger;
 
-    public SliderService(ApplicationDbContext context, ILogger<SliderService> logger)
+    public SliderService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<SliderService> logger)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _logger = logger;
     }
 
@@ -35,6 +36,7 @@ public class SliderService : ISliderService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var sliders = await _context.Sliders.Include(s => s.Product).ToListAsync();
             return new ServiceResponse<List<Slider>>
             {
@@ -60,6 +62,7 @@ public class SliderService : ISliderService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var sliders = await _context.Sliders.Where(a=>a.Active==true).OrderBy(s => s.OrderNo).Include(s => s.Product).ToListAsync();
             return new ServiceResponse<List<Slider>>
             {
@@ -82,6 +85,7 @@ public class SliderService : ISliderService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var slider = await _context.Sliders.Include(s => s.Product).FirstOrDefaultAsync(s => s.Id == id);
             return new ServiceResponse<Slider>
             {
@@ -106,6 +110,7 @@ public class SliderService : ISliderService
         try
         {
 
+            using var _context = _contextFactory.CreateDbContext();
             var existingSliderWithSameOrderNo = await _context.Sliders
         .Where(s => s.OrderNo == slider.OrderNo && s.Active)
         .ToListAsync();
@@ -139,6 +144,7 @@ public class SliderService : ISliderService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var existingSlider = await _context.Sliders.FindAsync(updatedSlider.Id);
 
             if (existingSlider == null)
@@ -195,6 +201,7 @@ public class SliderService : ISliderService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var slider = await _context.Sliders.FindAsync(id);
 
             if (slider == null)

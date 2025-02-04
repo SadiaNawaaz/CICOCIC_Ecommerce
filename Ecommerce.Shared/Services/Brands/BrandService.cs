@@ -11,10 +11,12 @@ namespace Ecommerce.Shared.Services.Brands;
 public interface IBrandService
 {
     Task<ServiceResponse<List<Brand>>> GetBrandsAsync();
+    Task<ServiceResponse<List<Brand>>> GetTopBrandsAsync();
     Task<ServiceResponse<Brand>> GetBrandByIdAsync(long id);
     Task<ServiceResponse<Brand>> AddBrandAsync(Brand brand);
     Task<ServiceResponse<Brand>> UpdateBrandAsync(Brand brand);
     Task<ServiceResponse<bool>> DeleteBrandAsync(long id);
+    Task<ServiceResponse<bool>> ImportBrandsAsync(List<Brand> brands);
 }
 public class BrandService : IBrandService
     {
@@ -33,6 +35,31 @@ public class BrandService : IBrandService
             {
             using var context = _contextFactory.CreateDbContext();
             var brands = await context.Brands.ToListAsync();
+            return new ServiceResponse<List<Brand>>
+                {
+                Data = brands,
+                Success = true,
+                Message = "Brands fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching brands.");
+            return new ServiceResponse<List<Brand>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching brands"
+                };
+            }
+        }
+
+
+    public async Task<ServiceResponse<List<Brand>>> GetTopBrandsAsync()
+        {
+        try
+            {
+            using var context = _contextFactory.CreateDbContext();
+            var brands = await context.Brands.Take(10).ToListAsync();
             return new ServiceResponse<List<Brand>>
                 {
                 Data = brands,
@@ -181,4 +208,71 @@ public class BrandService : IBrandService
                 };
             }
         }
+
+
+    public async Task<ServiceResponse<bool>> ImportBrandsAsync(List<Brand> brands)
+        {
+        using var context = _contextFactory.CreateDbContext();
+        using var transaction = context.Database.BeginTransaction();
+        try
+            {
+            // Check if there are any brands to insert with specified IDs
+            if (brands.Any(b => b.Id != 0))
+                {
+                // Enable IDENTITY_INSERT before adding new brands
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Brands ON");
+                }
+
+            var existingBrandIds = brands.Select(b => b.Id).ToList();
+            var existingBrands = await context.Brands
+                .Where(b => existingBrandIds.Contains(b.Id))
+                .ToListAsync();
+
+            var newBrands = brands.Where(b => !existingBrands.Any(eb => eb.Id == b.Id)).ToList();
+            var updatedBrands = brands.Where(b => existingBrands.Any(eb => eb.Id == b.Id)).ToList();
+
+            if (newBrands.Any())
+                context.Brands.AddRange(newBrands);
+
+            foreach (var updatedBrand in updatedBrands)
+                {
+                var existingBrand = existingBrands.FirstOrDefault(eb => eb.Id == updatedBrand.Id);
+                if (existingBrand != null)
+                    {
+                    context.Entry(existingBrand).CurrentValues.SetValues(updatedBrand);
+                    }
+                }
+
+            await context.SaveChangesAsync();
+
+            // Disable IDENTITY_INSERT after operations
+            if (brands.Any(b => b.Id != 0))
+                {
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Brands OFF");
+                }
+
+            transaction.Commit();
+
+            return new ServiceResponse<bool>
+                {
+                Data = true,
+                Success = true,
+                Message = "Brands imported successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            transaction.Rollback();
+            _logger.LogError(ex, "Error occurred while importing brands.");
+            return new ServiceResponse<bool>
+                {
+                Success = false,
+                Message = "Error occurred while importing brands"
+                };
+            }
+        }
+
+
+
+
     }

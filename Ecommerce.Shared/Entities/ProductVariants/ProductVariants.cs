@@ -84,11 +84,11 @@ public class ProductVariantMedia
     public long Id { get; set; }
 
     [Required]
-    public string ImageUrl { get; set; }
-
+    public string MediaUrl { get; set; }
     public long ProductVariantId { get; set; }
     public ProductVariant ProductVariant { get; set; }
-}
+    public string ContentType { get; set; }
+    }
 
 
 public class DistanceElement

@@ -2,6 +2,7 @@
 
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities.Catalogs;
+using Ecommerce.Shared.Migrations;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ public interface ICatalogService
     Task<ServiceResponse<bool>> DeleteCatalogAsync(long id);
     Task<ServiceResponse<List<CatalogDto>>> SearchCatalogsAsync(string searchTerm);
     Task<ServiceResponse<List<CatalogDto>>> GetCatalogsWithBrandAsync();
+    Task<ServiceResponse<List<Catalog>>> AddCatalogsAsync(List<Catalog> catalogs);
 }
 public class CatalogService: ICatalogService
 {
@@ -44,7 +46,10 @@ public class CatalogService: ICatalogService
                     BrandName = c.Brand != null ? c.Brand.Name : "No Brand",
                     Thumbnail = c.Thumbnail,
                     Price = c.Price,
-                    Code = c.Code
+                    Code = c.Code,
+                    Mark=c.MarkProduct,
+                    IntegratedId=c.IntegratedId,
+                    EanNumber=c.EanNumber,
                     })
                 .ToListAsync();
 
@@ -302,5 +307,31 @@ public class CatalogService: ICatalogService
     //        };
     //    }
     //}
+
+
+
+    public async Task<ServiceResponse<List<Catalog>>> AddCatalogsAsync(List<Catalog> catalogs)
+        {
+        try
+            {
+            _context.Catalogs.AddRange(catalogs);
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<List<Catalog>>
+                {
+                Data = catalogs,
+                Success = true,
+                Message = "Catalogs added successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while adding catalogs.");
+            return new ServiceResponse<List<Catalog>>
+                {
+                Success = false,
+                Message = "Error occurred while adding catalogs"
+                };
+            }
+        }
 
     }

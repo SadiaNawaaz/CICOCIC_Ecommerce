@@ -5,10 +5,12 @@ using Ecommerce.Admin.Components.Pages;
 using Ecommerce.Admin.Services;
 using Ecommerce.Mailer;
 using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Services;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Catalogs;
 using Ecommerce.Shared.Services.Categories;
 using Ecommerce.Shared.Services.CategoryConfigurations;
+using Ecommerce.Shared.Services.CategoryFeatures;
 using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Colors;
 using Ecommerce.Shared.Services.Configurations;
@@ -64,6 +66,9 @@ builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 builder.Services.AddScoped<IPopularCategoryService, PopularCategoryService>();
 builder.Services.AddScoped<CsvExportService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
+builder.Services.AddScoped<IDataDownloads, DataDownloads>();
+
+builder.Services.AddScoped<ICategoryFeatureService, CategoryFeatureService>();
 
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));

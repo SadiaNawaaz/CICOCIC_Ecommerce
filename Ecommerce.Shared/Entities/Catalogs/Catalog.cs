@@ -27,9 +27,6 @@ public class Catalog : BaseEntity
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
     public decimal Price { get; set; }
-
-
-
     public long CategoryId { get; set; }
     public Category Category { get; set; }
     public long? BrandId { get; set; }
@@ -41,6 +38,10 @@ public class Catalog : BaseEntity
     public long? ModelYearId { get; set; }
     public ModelYear? ModelYear { get; set; }
 
+    public bool? Integrated { get; set; }
+    public long? IntegratedId { get; set; }
+    public string ? EanNumber { get; set; }
+    public bool MarkProduct { get; set; } = false;
     public List<CatalogCluster> CatalogClusters { get; set; } = new List<CatalogCluster>();
     public List<CatalogMedia> CatalogMedias { get; set; } = new List<CatalogMedia>();
 
@@ -81,6 +82,8 @@ public class CatalogMedia
     public string ImageUrl { get; set; }
     public long CatalogId { get; set; }
     public Catalog Catalog { get; set; }
+
+
 }
 
 
@@ -92,4 +95,7 @@ public class CatalogDto
     public string Thumbnail { get; set; }
     public decimal Price { get; set; }
     public string Code { get; set; }
+    public bool Mark { get; set; }
+    public long? IntegratedId { get; set; }
+    public string? EanNumber { get; set; }
     }

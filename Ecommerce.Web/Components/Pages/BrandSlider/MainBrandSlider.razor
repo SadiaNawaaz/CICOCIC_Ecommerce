@@ -89,7 +89,7 @@ else
 
     private async Task LoadBrandsAsync()
         {
-        var response = await BrandService.GetBrandsAsync();
+        var response = await BrandService.GetTopBrandsAsync();
         if (response.Success)
             {
             Brands = response.Data;

@@ -16,11 +16,22 @@ public static class UrlHelper
 
     public static string GetImageUrl(long productId, string imageUrl)
     {
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            {
+            return imageUrl;
+            }
+
         return $"{_baseUrl}/ProductVariants/{productId}/{imageUrl}";
     }
 
     public static string GetBrandImageUrl(long productId, string imageUrl)
     {
+
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            {
+            return imageUrl; 
+            }
+
         return $"{_baseUrl}/Brands/{productId}/{imageUrl}";
     }
 
@@ -30,7 +41,15 @@ public static class UrlHelper
     }
     public static string GetMenuIconImageUrl(long productId, string imageUrl)
     {
-        return $"{_baseUrl}/Category/{productId}/{imageUrl}";
+        if (!string.IsNullOrEmpty(imageUrl))
+            {
+            return $"{_baseUrl}/Category/{productId}/{imageUrl}";
+            }
+        else
+            {
+            return "/assets/img/icon/icon-star.png";
+            }
+        
     }
 
     public static string GetVariantImageUrl(long VariantId, string imageUrl)

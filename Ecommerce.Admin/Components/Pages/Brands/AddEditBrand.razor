@@ -97,7 +97,13 @@
             if (response.Success)
                 {
                 brand = response.Data;
-                brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;
+                //brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;
+
+                if (!brand.ImageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+       && !brand.ImageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                    brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;
+                    }
                 StateHasChanged();
                 }
             else

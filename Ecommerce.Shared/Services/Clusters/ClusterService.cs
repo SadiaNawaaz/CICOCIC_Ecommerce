@@ -4,6 +4,7 @@ using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Ecommerce.Shared.Services.Clusters;
@@ -14,23 +15,26 @@ public interface IClusterService
     Task<ServiceResponse<Cluster>> AddClusterAsync(Cluster cluster);
     Task<ServiceResponse<Cluster>> UpdateClusterAsync(Cluster cluster);
     Task<ServiceResponse<bool>> DeleteClusterAsync(long id);
+    Task<ServiceResponse<bool>> ImportFeatureGroupsAsync(List<Cluster> clusters);
 }
 
 public class ClusterService : IClusterService
 {
-    private readonly ApplicationDbContext _context;
+
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<ClusterService> _logger;
 
-    public ClusterService(ApplicationDbContext context, ILogger<ClusterService> logger)
+    public ClusterService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<ClusterService> logger)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _logger = logger;
     }
 
     public async Task<ServiceResponse<List<Cluster>>> GetClustersAsync()
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             var clusters = await _context.Clusters.ToListAsync();
             return new ServiceResponse<List<Cluster>>
             {
@@ -53,7 +57,8 @@ public class ClusterService : IClusterService
     public async Task<ServiceResponse<Cluster>> GetClusterByIdAsync(long id)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             var cluster = await _context.Clusters.FindAsync(id);
             return new ServiceResponse<Cluster>
             {
@@ -76,7 +81,8 @@ public class ClusterService : IClusterService
     public async Task<ServiceResponse<Cluster>> AddClusterAsync(Cluster cluster)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             _context.Clusters.Add(cluster);
             await _context.SaveChangesAsync();
             return new ServiceResponse<Cluster>
@@ -100,7 +106,8 @@ public class ClusterService : IClusterService
     public async Task<ServiceResponse<Cluster>> UpdateClusterAsync(Cluster updatedCluster)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             var existingCluster = await _context.Clusters.FindAsync(updatedCluster.Id);
 
             if (existingCluster == null)
@@ -137,7 +144,8 @@ public class ClusterService : IClusterService
     public async Task<ServiceResponse<bool>> DeleteClusterAsync(long id)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             var cluster = await _context.Clusters.FindAsync(id);
 
             if (cluster == null)
@@ -169,6 +177,79 @@ public class ClusterService : IClusterService
             };
         }
     }
-}
+
+
+
+    public async Task<ServiceResponse<bool>> ImportFeatureGroupsAsync(List<Cluster> clusters)
+        {
+        using var context = _contextFactory.CreateDbContext();
+        using var transaction = context.Database.BeginTransaction();
+
+        try
+            {
+            var hasExplicitIds = clusters.Any(c => c.Id != 0);
+
+            if (hasExplicitIds)
+                {
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Clusters ON");
+                }
+
+            var clusterIds = clusters.Select(c => c.Id).Distinct().ToList();
+            var existingClusters = await context.Clusters
+                                            .Where(c => clusterIds.Contains(c.Id))
+                                            .ToListAsync();
+
+            var newClusters = clusters.Where(c => !existingClusters.Any(ec => ec.Id == c.Id)).ToList();
+            var updatedClusters = clusters.Where(c => existingClusters.Any(ec => ec.Id == c.Id)).ToList();
+
+            if (newClusters.Any())
+                {
+                context.Clusters.AddRange(newClusters);
+                }
+
+            foreach (var updatedCluster in updatedClusters)
+                {
+                var existingCluster = existingClusters.FirstOrDefault(ec => ec.Id == updatedCluster.Id);
+                if (existingCluster != null)
+                    {
+                    existingCluster.Name = updatedCluster.Name;
+                    context.Clusters.Update(existingCluster);
+                    }
+                }
+
+            await context.SaveChangesAsync();
+
+            if (hasExplicitIds)
+                {
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Clusters OFF");
+                }
+
+            transaction.Commit();
+
+            return new ServiceResponse<bool>
+                {
+                Data = true,
+                Success = true,
+                Message = "Clusters imported successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            transaction.Rollback();
+            _logger.LogError(ex, "Error occurred while importing clusters.");
+            return new ServiceResponse<bool>
+                {
+                Data = false,
+                Success = false,
+                Message = "Error occurred while importing clusters"
+                };
+            }
+        }
+
+
+
+
+
+    }
 
 

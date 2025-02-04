@@ -5,6 +5,7 @@ using Ecommerce.Shared.Entities;
 using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Entities.Catalogs;
 using Ecommerce.Shared.Entities.CategoryConfigurations;
+using Ecommerce.Shared.Entities.CategoryFeatures;
 using Ecommerce.Shared.Entities.Clusters;
 using Ecommerce.Shared.Entities.Colors;
 using Ecommerce.Shared.Entities.Configurations;
@@ -78,6 +79,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<CategoryConfiguration> CategoryConfigurations { get; set; }
 
     public DbSet<Order> Orders { get; set; }
+    public DbSet<CategoryFeature> CategoryFeatures { get; set; }
+
+    
 
     public DbSet<OrderItem> OrderItems { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -155,5 +159,7 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(ur => ur.RoleId);
 
     }
+
+
 }
 

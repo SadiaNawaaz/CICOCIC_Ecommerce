@@ -131,70 +131,108 @@
 
                                         <div class="row">
 
-
                                             @foreach (var category in SubCategories)
                                                 {
                                                 <div class="col-lg-3">
-                                                    <span style="text-align:center;margin:5px;font-size:medium">
+                                                    <span style="text-align:center; margin:5px; font-size:medium">
                                                         <b>
-                                                            <img src="@UrlHelper.GetMenuIconImageUrl(category.Id, category.Icon)" alt="" style="height:20px;width:20px" /> @category.Name
+                                                            <img src="@UrlHelper.GetMenuIconImageUrl(category.Id, category.Icon)" alt="" style="height:20px; width:20px"/> @category.Name
                                                         </b>
                                                     </span>
                                                     <ul class="dropdown-menu-list" style="margin-top:10px">
-                                                        @if (category.SubCategories != null)
+                                                        @if (category.SubCategories != null && category.SubCategories.Any())
                                                             {
                                                             foreach (var subCategory in category.SubCategories)
                                                                 {
                                                                 <li>
-                                                                    <details>
-                                                                        <summary>
-                                                                            <i class="fa fa-angle-right"></i>
-
-
-                                                                            &nbsp;@subCategory.Name
-                                                                        </summary>
-                                                                        <div class="details">
-                                                                            @if (subCategory.SubCategories != null)
-                                                                                {
+                                                                    @if (subCategory.SubCategories != null && subCategory.SubCategories.Any())
+                                                                        {
+                                                                        <details>
+                                                                            <summary>
+                                                                                <i class="fa fa-angle-right"></i>&nbsp;@subCategory.Name
+                                                                            </summary>
+                                                                            <div class="details">
                                                                                 <ul>
                                                                                     @foreach (var subChild in subCategory.SubCategories)
                                                                                         {
                                                                                         <li>
-                                                                                            <a style="font-size:small" @onclick="@(async () => await fnDetails(subChild.Id))">
-                                                                                                @subChild.Name
-                                                                                            </a>
+                                                                                            @if (subChild.SubCategories != null && subChild.SubCategories.Any())
+                                                                                                {
+                                                                                                <details>
+                                                                                                    <summary>
+                                                                                                        <i class="fa fa-angle-right"></i>&nbsp;@subChild.Name
+                                                                                                    </summary>
+                                                                                                    <div class="details">
+                                                                                                        <ul>
+                                                                                                            @foreach (var subSubChild in subChild.SubCategories)
+                                                                                                                {
+                                                                                                                <li>
+                                                                                                                    <a style="font-size:small" @onclick="@(async () => await fnDetails(subSubChild.Id))">
+                                                                                                                        @subSubChild.Name
+                                                                                                                    </a>
+                                                                                                                </li>
+                                                                                                                }
+                                                                                                        </ul>
+                                                                                                    </div>
+                                                                                                </details>
+                                                                                                }
+                                                                                            else
+                                                                                                {
+                                                                                                <a style="font-size:small" @onclick="@(async () => await fnDetails(subChild.Id))">
+                                                                                                    @subChild.Name
+                                                                                                </a>
+                                                                                                }
                                                                                         </li>
                                                                                         }
                                                                                 </ul>
-                                                                                }
-                                                                        </div>
-                                                                    </details>
+                                                                            </div>
+                                                                        </details>
+                                                                        }
+                                                                    else
+                                                                        {
+                                                                        <ul>
+                                                                            <li>
+                                                                                <a style="font-size:small" @onclick="@(async () => await fnDetails(subCategory.Id))">
+                                                                                    @subCategory.Name
+                                                                                </a>
+                                                                            </li>
+                                                                        </ul>
+
+                                                                        }
                                                                 </li>
                                                                 }
+                                                            }
+                                                        else
+                                                            {
+                                                            <li>
+                                                                <a style="font-size:small" @onclick="@(async () => await fnDetails(category.Id))">
+                                                                    @category.Name
+                                                                </a>
+                                                            </li>
                                                             }
                                                     </ul>
                                                 </div>
                                                 }
+
                                         </div>
                                         <h4 class="title">Shop By Brand</h4>
                                         <ul class="dropdown-brand-list mb-0">
-
                                             @if (Brands != null && Brands.Count > 0)
                                                 {
                                                 @foreach (var b in Brands.Take(10))
                                                     {
-                                                    <li>
+                                                    var imageUrl = UrlHelper.GetBrandImageUrl(b.Id, b.ImageUrl);
+                                                    <li style="display: inline-block; vertical-align: middle; margin: 5px;">
                                                         <a @onclick="@(async () => await fnBrandDetails(b.Id))">
-                                                            <img src="@UrlHelper.GetBrandImageUrl(b.Id, b.ImageUrl)" alt="@b.Name" />
+                                                            <img src="@imageUrl" alt="@b.Name"
+                                                                 onerror="this.onerror=null; this.src='/images/default-placeholder.png';"
+                                                                 style="width: auto; height: 50px; object-fit: contain; filter: grayscale(100%);" />
                                                         </a>
                                                     </li>
-
                                                     }
-
                                                 }
-
-
                                         </ul>
+
                                     </div>
 
                                 </div>
@@ -212,7 +250,12 @@
                                 <li class="dropdown dropdown-hover">
                                     <a href="#" data-bs-toggle="dropdown">
 
-                                        @category.Name
+                                        @{
+                                            var displayName = category.Name.Length > 20
+                                                ? category.Name.Substring(0, 20) + ".."
+                                                : category.Name;
+                                        }
+                                        @displayName
 
                                         <b class="caret"></b>
                                         <span class="arrow top"></span>
@@ -349,7 +392,7 @@
 
     private async Task LoadBrands()
         {
-        var response = await BrandService.GetBrandsAsync();
+        var response = await BrandService.GetTopBrandsAsync();
         if (response.Success)
             {
             Brands = response.Data;

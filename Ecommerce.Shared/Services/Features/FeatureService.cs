@@ -4,6 +4,7 @@ using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities.Features;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Ecommerce.Shared.Services.Features;
@@ -16,15 +17,16 @@ public interface IFeatureService
     Task<ServiceResponse<Feature>> UpdateFeatureAsync(Feature feature);
     Task<ServiceResponse<bool>> DeleteFeatureAsync(long id);
     Task<ServiceResponse<List<Feature>>> GetFeaturesByClusterId(long clusterId);
+    Task<ServiceResponse<bool>> ImportFeaturesAsync(List<Feature> features);
 }
 public class FeatureService : IFeatureService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<FeatureService> _logger;
 
-    public FeatureService(ApplicationDbContext context, ILogger<FeatureService> logger)
+    public FeatureService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<FeatureService> logger)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _logger = logger;
     }
 
@@ -32,6 +34,7 @@ public class FeatureService : IFeatureService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var features = await _context.Features.ToListAsync();
             return new ServiceResponse<List<Feature>>
             {
@@ -54,7 +57,8 @@ public class FeatureService : IFeatureService
     public async Task<ServiceResponse<Feature>> GetFeatureByIdAsync(long id)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             var feature = await _context.Features.FindAsync(id);
             return new ServiceResponse<Feature>
             {
@@ -77,7 +81,8 @@ public class FeatureService : IFeatureService
     public async Task<ServiceResponse<Feature>> AddFeatureAsync(Feature feature)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             _context.Features.Add(feature);
             await _context.SaveChangesAsync();
             return new ServiceResponse<Feature>
@@ -102,6 +107,7 @@ public class FeatureService : IFeatureService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var existingFeature = await _context.Features.FindAsync(updatedFeature.Id);
 
             if (existingFeature == null)
@@ -139,6 +145,7 @@ public class FeatureService : IFeatureService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var feature = await _context.Features.FindAsync(id);
 
             if (feature == null)
@@ -176,6 +183,7 @@ public class FeatureService : IFeatureService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var features = await _context.Features.Where(a=>a.ClusterId== clusterId).ToListAsync();
             return new ServiceResponse<List<Feature>>
             {
@@ -194,7 +202,71 @@ public class FeatureService : IFeatureService
             };
         }
     }
+    public async Task<ServiceResponse<bool>> ImportFeaturesAsync(List<Feature> features)
+        {
+        using var context = _contextFactory.CreateDbContext();
+        using var transaction = context.Database.BeginTransaction();
+
+        try
+            {
+            // Check if there are any features to insert with specified IDs
+            if (features.Any(f => f.Id != 0))
+                {
+                // Enable IDENTITY_INSERT before adding new features
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Features ON");
+                }
+
+            var existingFeatureIds = features.Select(f => f.Id).ToList();
+            var existingFeatures = await context.Features
+                .Where(f => existingFeatureIds.Contains(f.Id))
+                .ToListAsync();
+
+            var newFeatures = features.Where(f => !existingFeatures.Any(ef => ef.Id == f.Id)).ToList();
+            var updatedFeatures = features.Where(f => existingFeatures.Any(ef => ef.Id == f.Id)).ToList();
+
+            if (newFeatures.Any())
+                {
+                context.Features.AddRange(newFeatures);
+                }
+
+            foreach (var updatedFeature in updatedFeatures)
+                {
+                var existingFeature = existingFeatures.FirstOrDefault(ef => ef.Id == updatedFeature.Id);
+                if (existingFeature != null)
+                    {
+                    context.Entry(existingFeature).CurrentValues.SetValues(updatedFeature);
+                    }
+                }
+
+            await context.SaveChangesAsync();
+
+            // Disable IDENTITY_INSERT after operations
+            if (features.Any(f => f.Id != 0))
+                {
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Features OFF");
+                }
+
+            transaction.Commit();
+
+            return new ServiceResponse<bool>
+                {
+                Data = true,
+                Success = true,
+                Message = "Features imported successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            transaction.Rollback();
+            _logger.LogError(ex, "Error occurred while importing features.");
+            return new ServiceResponse<bool>
+                {
+                Success = false,
+                Message = "Error occurred while importing features"
+                };
+            }
+        }
 
 
 
-}
+    }

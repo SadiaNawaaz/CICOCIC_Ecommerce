@@ -216,82 +216,90 @@ else
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label"> Main Category</label>
+                            @if (product != null && product.Id > 0 && product.CatalogId > 0)
+                                {
+
+                                <div class="col-lg-6"> <b>Selected Category  :    @product.Category.Name</b></div>
+                                <div class="col-lg-6"></div>
+                                    <br /> <br />
+                                    }
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-lg-0 mb-3">
+                                            <label class="form-label"> Main Category</label>
 
 
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                                            <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
+                                                <Columns>
+                                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
 
 
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
-
-
-
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Sub Category</label>
-
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
+                                                </Columns>
+                                            </RadzenDropDownDataGrid>
 
 
 
 
-                                </div>
-                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="mb-lg-0 mb-3">
+                                            <label class="form-label">Sub Category</label>
 
-                            <div class="row mt-3">
-                                <div class="col-lg-6">
-                                    <div class="mb-lg-0 mb-3">
-                                        <label class="form-label">Sub Sub Category</label>
-
-                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
-                                            <Columns>
-                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                                            <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
+                                                <Columns>
+                                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
 
 
-                                            </Columns>
-                                        </RadzenDropDownDataGrid>
+                                                </Columns>
+                                            </RadzenDropDownDataGrid>
+
+
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-lg-6">
+                                            <div class="mb-lg-0 mb-3">
+                                                <label class="form-label">Sub Sub Category</label>
+
+                                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+
+
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="mb-lg-0 mb-3">
+                                                <label class="form-label">Group Category </label>
+
+                                                <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+
+
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+
+
+                                            </div>
+                                        </div>
+
+
 
 
                                     </div>
+
+
                                 </div>
-                                <div class="col-lg-6">
-                                    <div class="mb-lg-0 mb-3">
-                                        <label class="form-label">Group Category </label>
-
-                                        <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
-                                            <Columns>
-                                                <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                            </Columns>
-                                        </RadzenDropDownDataGrid>
-
-
-                                    </div>
-                                </div>
-
-
-
-
                             </div>
-
-
-                        </div>
-                    </div>
                 </div>
 
                 <div class="card border-0 mb-4">
@@ -460,6 +468,19 @@ else
 
 
                         </div>
+
+                        <div class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Ean Number</label>
+                                <div class="col-lg-8">
+                                    <InputText @bind-Value="product.EanNumber" class="form-control" id="exampleInputEmail2" placeholder=" Ean/Upc" />
+                                    <span class="text-danger"><ValidationMessage For="@(() => product.EanNumber)" /> </span>
+                                </div>
+                            </div>
+
+
+
+                        </div>
                     </div>
                 </div>
 
@@ -517,15 +538,20 @@ else
                                 <div class="row align-items-center mb-3">
 
                                     <div class="col-md-8">
-                                        <img src="@media.ImageUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
-                                    </div>
-                                    <div class="col-md-4">
-
-
-                                        <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
-
-
-                                    </div>
+                @if (media.ContentType.StartsWith("image/"))
+                {
+                    <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                }
+                else
+                {
+                    <a href="@media.MediaUrl" target="_blank">View File</a>
+                }
+            </div>
+            <div class="col-md-4">
+                <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
                                 </div>
                                 }
                             }
@@ -929,7 +955,14 @@ else
                     {
                     selectedFiles.ToList().ForEach(image =>
                     {
-                        image.ImageUrl = $"/Products/{product.Id}/{image.ImageName}";
+                        if (!image.ImageName.StartsWith("http://") && !image.ImageName.StartsWith("https://"))
+                            {
+                            image.ImageUrl = $"/Products/{product.Id}/{image.ImageName}";
+                            }
+                        else
+                            {
+                            image.ImageUrl = image.ImageName;
+                            }
                     });
                     }
 
@@ -1017,7 +1050,7 @@ else
                         {
                         product.ProductMedias = catalogObj.CatalogMedias.Select(cm => new ProductMedia
                             {
-                            ImageUrl = cm.ImageUrl,
+                            MediaUrl = cm.ImageUrl,
 
                             }).ToList();
                         }
@@ -1283,7 +1316,7 @@ else
         {
         if (!string.IsNullOrWhiteSpace(newMediaUrl))
             {
-            product.ProductMedias.Add(new ProductMedia { ImageUrl = newMediaUrl });
+            product.ProductMedias.Add(new ProductMedia { MediaUrl = newMediaUrl });
             newMediaUrl = string.Empty;
             }
         }
