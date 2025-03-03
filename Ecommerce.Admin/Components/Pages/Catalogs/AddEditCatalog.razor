@@ -106,62 +106,46 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label"> Main Category</label>
+                            @if (catalog != null && catalog.Id > 0 && catalog.IntegratedId > 0&& catalog.Category!=null)
+                                {
 
+                                <div class="col-lg-6"> <b>Selected Category :@catalog.Category.Name</b></div>
+                                <div class="col-lg-6"></div>
+                                <br /> <br />
+                                }
+                        </div>
 
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
+                        <div class="row">
 
+                            <div class="card border-0 mb-4">
+                                <div class="card-header h6 mb-0 bg-none p-3">
+                                    <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#product-category">
+                                        <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
+                                        <b>Select Category</b>
+                                    </button>
                                 </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Sub Category</label>
 
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
+                                <div class="modal" id="product-category">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header alert alert-success p-2">
+                                                <h5>Catalog Categories</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <Ecommerce.Admin.Components.Pages.Categories.ShowCategories OnCategorySelected="HandleCategorySelected" SelectedCategoryId="selectedCategoryId" />
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-white" @onclick="FnSelectCategory" data-bs-dismiss="modal">Select & Close</button>
+                                                <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
 
-
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
-
-
-
-
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Sub Sub Category</label>
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-lg-0 mb-3">
-                                    <label class="form-label">Group Category </label>
-
-                                    <RadzenDropDownDataGrid TValue="long" @bind-Value="catalog.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
-                                        <Columns>
-                                            <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-                                        </Columns>
-                                    </RadzenDropDownDataGrid>
-
-
-                                </div>
-                            </div>
-                        </div>
+                     
                     </div>
                 </div>
 
@@ -508,7 +492,7 @@
         private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
         private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
 
-        private List<Brand> Brands = new List<Brand>();
+        private List<BrandDto> Brands = new List<BrandDto>();
         private long selectedLevel1CategoryId;
         private long selectedLevel2CategoryId;
         private long selectedLevel3CategoryId;
@@ -521,6 +505,8 @@
         private IEnumerable<Cluster> clusters = new List<Cluster>();
         public string clusterName = "";
         private string newMediaUrl = string.Empty; // New URL input
+        private long selectedCategoryId;
+        private CategoryDto selectedCategory;
 
 
 
@@ -528,12 +514,12 @@
 
         protected override async Task OnInitializedAsync()
             {
-            await LoadCategoryTreeAsync();
+            ///await LoadCategoryTreeAsync();
             await LoadBrands();
             await LoadModelYears();
             await LoadSizes();
             await LoadColors();
-            await LoadClusters();
+            /*await LoadClusters();*/
 
             if (Id > 0)
                 {
@@ -541,7 +527,8 @@
                 if (response.Success)
                     {
                     catalog = response.Data;
-                    await OnLevel4Changed(catalog.CategoryId);
+                    selectedCategoryId = catalog.Category.Id;
+                    //await OnLevel4Changed(catalog.CategoryId);
                     }
                 else
                     {
@@ -683,6 +670,32 @@
                 }
             }
 
+
+
+
+        private void HandleCategorySelected(CategoryDto category)
+            {
+
+            Console.WriteLine($"Selected Category: {category.Name} (ID: {category.Id})");
+            selectedCategoryId = category.Id;
+            selectedCategory = category;
+            // You can now use `selectedCategory` as needed.
+            }
+
+        private void FnSelectCategory()
+            {
+
+            catalog.CategoryId = selectedCategoryId;
+            if (catalog.Category==null)
+                {
+                catalog.Category = new Category();
+                }
+
+            catalog.Category.Name = selectedCategory.Name;
+            StateHasChanged();
+
+            }
+
         #endregion
 
 
@@ -690,7 +703,7 @@
 
         private async Task LoadBrands()
             {
-            var response = await BrandService.GetBrandsAsync();
+            var response = await BrandService.GetBrandsDtoAsync();
             if (response.Success)
                 {
                 Brands = response.Data;

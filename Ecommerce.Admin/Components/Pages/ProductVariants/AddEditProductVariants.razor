@@ -173,15 +173,24 @@ else
                                 <div class="row align-items-center mb-3">
 
                                     <div class="col-md-4">
-                                       
-                                        @if (media.ContentType.StartsWith("image/"))
+                                        @if (media.MediaUrl.Contains("pdf", StringComparison.OrdinalIgnoreCase))
                                             {
-                                            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+                                            <a href="@media.MediaUrl" target="_blank" class="btn btn-secondary">
+                                                <i class="fas fa-file-pdf"></i> View PDF
+                                            </a>
                                             }
                                         else
                                             {
-                                            <a href="@media.MediaUrl" target="_blank">View File</a>
+                                            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" alt="@media.MediaUrl" />
                                             }
+                                        @*@if (media.ContentType.StartsWith("image/"))
+            {
+            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
+            }
+        else
+            {
+            <a href="@media.MediaUrl" target="_blank">View File</a>
+            }*@
 
 
 
@@ -960,40 +969,47 @@ else
         foreach (var image in selectedFiles)
             {
 
-            var filePath = Path.Combine(productVariantImagesPath, image.ImageName);
-            if (image.IsDeleted == true)
+            if (!(image.ImageName.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||image.ImageName.StartsWith("https", StringComparison.OrdinalIgnoreCase)))
                 {
-                if (image.IsDeleted)
+                var filePath = Path.Combine(productVariantImagesPath, image.ImageName);
+                if (image.IsDeleted == true)
                     {
-                    if (File.Exists(filePath))
+                    if (image.IsDeleted)
                         {
-                        File.Delete(filePath);
+                        if (File.Exists(filePath))
+                            {
+                            File.Delete(filePath);
+                            }
                         }
                     }
-                }
 
-            else if (image.IsCloned == true && !File.Exists(filePath))
-                {
-                // Copy the file from the original location if it's cloned
-                var sourceFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Products", Product.Id.ToString(), image.ImageName);
-                if (File.Exists(sourceFilePath))
+                else if (image.IsCloned == true && !File.Exists(filePath))
                     {
-                    File.Copy(sourceFilePath, filePath);
+                    // Copy the file from the original location if it's cloned
+                    var sourceFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Products", Product.Id.ToString(), image.ImageName);
+                    if (File.Exists(sourceFilePath))
+                        {
+                        File.Copy(sourceFilePath, filePath);
+                        }
+                    image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
                     }
-                image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
+
+
+
+                else if (image.IsDeleted == false && image.ImageByte == null)
+                    {
+
+                    }
+                else
+                    {
+                    await File.WriteAllBytesAsync(filePath, image.ImageByte);
+                    image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
+                    }
+
+
                 }
 
 
-
-            else if (image.IsDeleted == false && image.ImageByte == null)
-                {
-
-                }
-            else
-                {
-                await File.WriteAllBytesAsync(filePath, image.ImageByte);
-                image.ImageUrl = $"/ProductVariants/{productVariantId}/{image.ImageName}";
-                }
 
 
 

@@ -79,11 +79,25 @@ public class ApplicationDbContext : DbContext
     public DbSet<CategoryConfiguration> CategoryConfigurations { get; set; }
 
     public DbSet<Order> Orders { get; set; }
-    public DbSet<CategoryFeature> CategoryFeatures { get; set; }
-
+    public DbSet<Language> Languages { get; set; }
     
-
+    public DbSet<CategoryFeature> CategoryFeatures { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+
+    /*Translation*/
+
+    public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
+    public DbSet<ClusterTranslation> ClusterTranslations { get; set; }
+    public DbSet<FeatureTranslation> FeatureTranslations { get; set; }
+
+    public DbSet<ProductTranslation> ProductTranslations { get; set; }
+
+    /* public DbSet<FeatureTranslation> FeatureTranslations { get; set; }
+     public DbSet<ClusterTranslation> ClusterTranslations { get; set; }
+     public DbSet<ProductTranslation> ProductTranslations { get; set; }
+     public DbSet<CategoryTranslation> CategoryTranslations { get; set; }*/
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 

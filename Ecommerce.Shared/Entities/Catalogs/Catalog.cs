@@ -38,7 +38,7 @@ public class Catalog : BaseEntity
     public long? ModelYearId { get; set; }
     public ModelYear? ModelYear { get; set; }
 
-    public bool? Integrated { get; set; }
+    public bool? Integrated { get; set; } = false;
     public long? IntegratedId { get; set; }
     public string ? EanNumber { get; set; }
     public bool MarkProduct { get; set; } = false;
@@ -95,7 +95,9 @@ public class CatalogDto
     public string Thumbnail { get; set; }
     public decimal Price { get; set; }
     public string Code { get; set; }
+    public string CategoryName { get; set; } = "";
     public bool Mark { get; set; }
     public long? IntegratedId { get; set; }
     public string? EanNumber { get; set; }
+    public bool? Integrated { get; set; } = false;
     }

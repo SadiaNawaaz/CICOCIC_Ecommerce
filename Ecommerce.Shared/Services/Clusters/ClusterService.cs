@@ -55,28 +55,42 @@ public class ClusterService : IClusterService
     }
 
     public async Task<ServiceResponse<Cluster>> GetClusterByIdAsync(long id)
-    {
+        {
         try
             {
             using var _context = _contextFactory.CreateDbContext();
-            var cluster = await _context.Clusters.FindAsync(id);
+
+            var cluster = await _context.Clusters
+                .Include(c => c.Translations) // Load related translations
+                .AsNoTracking() // Ensures EF Core does not track changes (better for read operations)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (cluster == null)
+                {
+                return new ServiceResponse<Cluster>
+                    {
+                    Success = false,
+                    Message = "Cluster not found"
+                    };
+                }
+
             return new ServiceResponse<Cluster>
-            {
+                {
                 Data = cluster,
                 Success = true,
                 Message = "Cluster fetched successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error occurred while fetching cluster by ID.");
             return new ServiceResponse<Cluster>
-            {
+                {
                 Success = false,
                 Message = "Error occurred while fetching cluster by ID"
-            };
+                };
+            }
         }
-    }
 
     public async Task<ServiceResponse<Cluster>> AddClusterAsync(Cluster cluster)
     {
@@ -104,42 +118,83 @@ public class ClusterService : IClusterService
     }
 
     public async Task<ServiceResponse<Cluster>> UpdateClusterAsync(Cluster updatedCluster)
-    {
+        {
         try
             {
             using var _context = _contextFactory.CreateDbContext();
-            var existingCluster = await _context.Clusters.FindAsync(updatedCluster.Id);
+
+            var existingCluster = await _context.Clusters
+                .Include(c => c.Translations) // Load existing translations
+                .FirstOrDefaultAsync(c => c.Id == updatedCluster.Id);
 
             if (existingCluster == null)
-            {
-                return new ServiceResponse<Cluster>
                 {
+                return new ServiceResponse<Cluster>
+                    {
                     Success = false,
                     Message = "Cluster not found"
-                };
-            }
+                    };
+                }
 
+            // ✅ Update Cluster Name
             existingCluster.Name = updatedCluster.Name;
-            _context.Clusters.Update(existingCluster);
+
+            // ✅ Get existing translations
+            var existingTranslations = existingCluster.Translations.ToList();
+
+            // ✅ 1. Remove deleted translations
+            var translationsToRemove = existingTranslations
+                .Where(oldTranslation => !updatedCluster.Translations
+                .Any(t => t.LanguageId == oldTranslation.LanguageId))
+                .ToList();
+
+            if (translationsToRemove.Any())
+                {
+                _context.ClusterTranslations.RemoveRange(translationsToRemove);
+                }
+
+            // ✅ 2. Add or update translations
+            foreach (var newTranslation in updatedCluster.Translations)
+                {
+                var existingTranslation = existingTranslations
+                    .FirstOrDefault(t => t.LanguageId == newTranslation.LanguageId);
+
+                if (existingTranslation == null)
+                    {
+                    // Add new translation
+                    existingCluster.Translations.Add(new ClusterTranslation
+                        {
+                        LanguageId = newTranslation.LanguageId,
+                        TranslatedName = newTranslation.TranslatedName
+                        });
+                    }
+                else if (existingTranslation.TranslatedName != newTranslation.TranslatedName)
+                    {
+                    // Update existing translation only if the text has changed
+                    existingTranslation.TranslatedName = newTranslation.TranslatedName;
+                    }
+                }
+
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<Cluster>
-            {
+                {
                 Data = existingCluster,
                 Success = true,
                 Message = "Cluster updated successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error occurred while updating cluster.");
             return new ServiceResponse<Cluster>
-            {
+                {
                 Success = false,
                 Message = "Error occurred while updating cluster"
-            };
+                };
+            }
         }
-    }
+
 
     public async Task<ServiceResponse<bool>> DeleteClusterAsync(long id)
     {

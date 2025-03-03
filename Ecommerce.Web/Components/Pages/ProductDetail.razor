@@ -8,6 +8,7 @@
 @inject ICategoryService CategoryService
 @using Ecommerce.Web.Services;
 @inject CartStateService CartStateService
+@inject CultureStateService CultureState
 <style>
     /* Custom style */
     .accordion-button {
@@ -95,16 +96,16 @@
                                         }
 
                                     }
-                                @*@if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
+                                @if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
                                     {
-                                    foreach (var variant in ProductVariant.ProductVariantMedia)
+                                    foreach (var variant in ProductVariant.ProductVariantMedia.Where(a=>a.ContentType!= "application/pdf"))
                                         {
 
                                         <li class="active"><a href="#" data-click="show-main-image" data-url="@variant.MediaUrl"><img src=@variant.MediaUrl alt="" /></a></li>
 
                                         }
 
-                                    }*@
+                                    }
 
                             </ul>
                         </div>
@@ -142,10 +143,10 @@
                         </div>
 
                         <div class="product-warranty">
-                            <div class="pull-right">Availability: In stock</div>
+                            <div class="pull-right">@localizer["Availability"]: @localizer["InStock"]</div>
                             @if (ProductVariant.year > 0)
                                 {
-                                <div><b>Build Year</b> @ProductVariant.year</div>
+                                <div><b>@localizer["BuildYear"]</b> @ProductVariant.year</div>
                                 }
                             @if (ProductVariant.Color != null)
                                 {
@@ -183,11 +184,13 @@
 
                             @if (ProductVariant.ProductVariantMedia != null && ProductVariant.ProductVariantMedia.Count() > 0)
                                 {
-                                foreach (var variant in ProductVariant.ProductVariantMedia)
+                                <br />
+                                foreach (var variant in ProductVariant.ProductVariantMedia.Where(a=>a.ContentType== "application/pdf"))
                                     {
 
-                 
-                                    <a href="@variant.MediaUrl" target="_blank">View Attachement</a>
+
+                                    <a href="@variant.MediaUrl" target="_blank">Documents</a>
+                                    <br />
 
                                     }
 
@@ -223,10 +226,10 @@
                             </div>
                             <div class="product-price">
                                 <div class="price">€@ProductVariant.VariantPrice</div>
-                                <span class="text-danger text-bold"> Only 1 left in stock - order soon. </span>
+                                <span class="text-danger text-bold">@localizer["OrderSoon"]</span>
                             </div>
 
-                            <button type="button" @onclick="@AddToCart" class="btn btn-dark btn-theme btn-lg w-200px">ADD TO CART</button>
+                            <button type="button" @onclick="@AddToCart" class="btn btn-dark btn-theme btn-lg w-200px">@localizer["AddToCart"]</button>
 
                         </div>
                         <!-- END product-purchase-container -->
@@ -238,9 +241,9 @@
                 <div class="product-tab">
                     <!-- BEGIN #product-tab -->
                     <ul id="product-tab" class="nav nav-tabs">
-                        <li class="nav-item"><a class="nav-link active" href="#product-desc" data-bs-toggle="tab">Product Description</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#product-info" data-bs-toggle="tab">Additional Information</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#product-reviews" data-bs-toggle="tab">Rating & Reviews (5)</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="#product-desc" data-bs-toggle="tab">@localizer["ProductDescription"]</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#product-info" data-bs-toggle="tab">@localizer["AdditionalInformation"]</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#product-reviews" data-bs-toggle="tab">@localizer["RatingReviews "] (5)</a></li>
                     </ul>
                     <!-- END #product-tab -->
                     <!-- BEGIN #product-tab-content -->
@@ -496,7 +499,7 @@
             </div>
             <!-- END product -->
             <!-- BEGIN similar-product -->
-            <h4 class="mb-15px mt-30px">You Might Also Like</h4>
+            <h4 class="mb-15px mt-30px">@localizer["YouMightAlsoLike"]</h4>
             <div class="row gx-2">
                 @if (TopTenProducts != null && TopTenProducts.Count > 0)
                     {
@@ -508,7 +511,7 @@
                         <div class="col-lg-2 col-md-4">
                             <!-- BEGIN item -->
                             <div class="item item-thumbnail">
-                                <a href="/" class="item-image">
+                                <a  href="@($"/Product?Id={variant.Id}")" class="item-image">
                                     <img src="@(!string.IsNullOrEmpty(variant.Thumbnail) ? variant.Thumbnail : UrlHelper.GetVariantImageUrl(variant.Id, variant.DefaultImageUrl))"
                                          class="img-fluid"
                                          style="object-fit: contain; max-width: 100%; max-height: 100%;"
@@ -531,7 +534,7 @@
                                 </a>
                                 <div class="item-info">
                                     <h4 class="item-title" style="min-height: 3em; align-items: center; overflow: hidden;">
-                                        <a href="/" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;text-align:center">
+                                        <a  href="@($"/Product?Id={variant.Id}")"  style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;text-align:center">
                                             @variant.Name
                                         </a>
                                     </h4>
@@ -580,13 +583,21 @@ else
     private string Categories = "";
     private List<CategoryDto> CategoryTree = new List<CategoryDto>();
     private List<ProductVariantDto> TopTenProducts = new List<ProductVariantDto>();
+    string languageCode = "en";
+    protected override async Task OnInitializedAsync()
+        {
+        CultureState.OnChange += async () => await InvokeAsync(StateHasChanged);
 
+        }
     protected override async Task OnAfterRenderAsync(bool firstRender)
         {
         if (firstRender)
             {
             try
                 {
+                languageCode = !string.IsNullOrWhiteSpace(CultureState.CurrentCulture)
+? CultureState.CurrentCulture.Split('-')[0]
+: "en";
                 await LoadProductVariants(Id);
                 await GetCategoryHierarchyAsync(ProductVariant.CategoryId);
                 StateHasChanged();
@@ -629,7 +640,8 @@ else
         {
         try
             {
-            var response = await CategoryService.GetCategoryHierarchyAsync(Id);
+
+            var response = await CategoryService.GetCategoryHierarchyAsync(Id, languageCode);
             if (response.Success)
                 {
                 CategoryTree = response.Data;
@@ -653,7 +665,7 @@ else
         {
         try
             {
-            var response = await productVariantService.GetClusterFeaturesAsync(ProductId);
+            var response = await productVariantService.GetClusterFeaturesAsync(ProductId, languageCode);
             if (response.Success)
                 {
                 clusters = response.Data;

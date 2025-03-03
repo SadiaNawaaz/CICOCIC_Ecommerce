@@ -1,10 +1,8 @@
 ﻿@rendermode InteractiveServer
 @using Ecommerce.Shared.Dto;
 @inject ImageResizeService ImageResizeService
+@inject ISnackbar Snackbar
 <div class="col-xl-12">
-
-
-
     <div class="panel panel-inverse" data-sortable-id="form-validation-1">
         <div class="panel-body">
 
@@ -13,11 +11,39 @@
 
             </div>
             <div class="form-group">
-                <label class="col-lg-4 col-form-label form-label" for="Cate"></label>
+
                 <div class="col-lg-12">
-                    <input class="form-control" type="text" @bind="@this.input" />
+                    @if (@Languages != null && Languages.Count > 0)
+                        {
+                        <div class="mb-2">
+                            <label class="form-label">Select Language</label>
+                            <select class="form-select" @bind="SelectedLanguageId">
+                                @foreach (var lang in Languages)
+                                    {
+                                    <option value="@lang.Id">@lang.LanguageName</option>
+                                    }
+                            </select>
+                        </div>
+                        <h4 class="modal-title d-flex align-items-center"> <small class="fs-13px fw-bold ms-2"><b>@category.Name</b></small></h4>
+                        }
+
                 </div>
             </div>
+
+            <div class="form-group row">
+
+                <div class="col-lg-12 d-flex">
+                    <input class="form-control me-2" type="text" @bind="@this.input" placeholder="Category Name" />
+                    @if (IsEdit)
+                        {
+                        <input class="btn btn-primary" type="button" value="Add" @onclick="AddToLocalization" />
+                        }
+
+                </div>
+            </div>
+
+
+
             <div class="form-group">
                 <label class="col-lg-4 col-form-label form-label" for="Icon">Icon Image</label>
                 <div class="col-lg-12">
@@ -27,15 +53,34 @@
             </div>
             <div class="form-group">
                 @if (!string.IsNullOrEmpty(imageUrl))
-                {
+                    {
 
-                
+
                     <div style="display:inline-block; position: relative;">
                         <img src="@imageUrl" alt="Image Preview" style="height:100px" />
-                       
+
                     </div>
-                }
+                    }
             </div>
+
+            <div class="form-group mt-3">
+                @if (Translations != null && Translations.Count > 0)
+                    {
+                    <h5>Localized Categories:</h5>
+                    <ul class="list-group">
+                        @foreach (var translation in Translations)
+                            {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><strong>@Languages.FirstOrDefault(l => l.Id == translation.LanguageId)?.LanguageName:</strong> @translation.TranslatedName</span>
+                                <button class="btn btn-danger btn-sm" @onclick="() => RemoveTranslation(translation)">Delete</button>
+                            </li>
+                            }
+                    </ul>
+                    }
+
+            </div>
+
+
             <div class="form-group row mt-20px">
                 <label class="col-lg-5 col-form-label form-label">&nbsp;</label>
                 <div class="col-lg-7">
@@ -59,44 +104,45 @@
     CategoryDto category = new CategoryDto();
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; } = default!;
-
     [Parameter] public CategoryDto Item { get; set; }
     [Parameter]
     public bool IsEdit { get; set; }
-    //private void OK() => this.MudDialog.Close(DialogResult.Ok(this.input));
+    [Parameter] public List<Language> Languages { get; set; }
+    [Parameter] public List<CategoryTranslationDto> Translations { get; set; } = new List<CategoryTranslationDto>();
 
+    public int SelectedLanguageId;
+
+    Language SelectedLanguages;
     protected override void OnInitialized()
-    {
+        {
 
         // category = Item;
 
 
         if (category == null)
-        {
+            {
             category = new CategoryDto();
-        }
+            }
 
         if (IsEdit)
-        {
+            {
             category = Item;
             input = category.Name;
             imageUrl = "/Category/" + category.Id.ToString() + "/" + category.Icon;
-        }
+            }
 
-        if(Item!=null)
-        {
+        if (Item != null)
+            {
             category.Name = Item.Name;
+            }
+
         }
-
-    }
-
-
     private IBrowserFile? selectedFile;
     private string imageUrl = string.Empty;
     private async Task HandleFileChange(InputFileChangeEventArgs e)
-    {
-        try
         {
+        try
+            {
             var file = e.File;
             var extension = Path.GetExtension(file.Name).ToLower();
             var uniqueFileName = $"{Guid.NewGuid()}{extension}";
@@ -105,38 +151,75 @@
             await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
 
             if (extension == ".svg")
-            {
+                {
                 // SVG files are directly used without resizing
                 memoryStream.Position = 0;
                 var buffer = memoryStream.ToArray();
                 imageUrl = $"data:image/svg+xml;base64,{Convert.ToBase64String(buffer)}";
                 category.ImageByte = buffer;
-            }
+                }
             else
-            {
+                {
                 // Resize other image formats
                 memoryStream.Position = 0;
                 imageUrl = await ImageResizeService.ResizeImage(memoryStream, file.ContentType, 150, 150);
                 memoryStream.Position = 0;
                 var buffer = memoryStream.ToArray();
                 category.ImageByte = buffer;
-            }
+                }
 
             category.Icon = uniqueFileName;
             StateHasChanged();
-        }
+            }
         catch (Exception ex)
-        {
+            {
             // Handle exception
+            }
         }
-    }
-
-
 
     private void OK()
-    {
-        var result = new { Name = input, Icon = category.Icon, ImageByte = category.ImageByte };
+        {
+        var result = new { Name = input, Icon = category.Icon, ImageByte = category.ImageByte, Translations = Translations };
         MudDialog.Close(DialogResult.Ok(result));
-    }
+        }
+    private void AddToLocalization()
+        {
+        if (SelectedLanguageId == 0)
+            {
+            Snackbar.Add("Please select a language.", Severity.Warning);
+            return;
+            }
+
+        if (string.IsNullOrWhiteSpace(input))
+            {
+            Snackbar.Add("Category name cannot be empty.", Severity.Warning);
+            return;
+            }
+
+        var existingTranslation = Translations.FirstOrDefault(t => t.LanguageId == SelectedLanguageId);
+
+        if (existingTranslation != null)
+            {
+            existingTranslation.TranslatedName = input; // Update existing translation
+            Snackbar.Add("Translation updated successfully.", Severity.Success);
+            }
+        else
+            {
+            Translations.Add(new CategoryTranslationDto
+                {
+                TranslatedName = input,
+                LanguageId = SelectedLanguageId
+                });
+
+            Snackbar.Add("Translation added successfully.", Severity.Success);
+            }
+
+        input = string.Empty; // Clear input field after adding
+        }
+    private void RemoveTranslation(CategoryTranslationDto translation)
+        {
+        Translations.Remove(translation);
+        }
+
 
 }

@@ -2,6 +2,7 @@
 using Ecommerce.Shared.Entities.PopularCategories;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -13,58 +14,80 @@ namespace Ecommerce.Shared.Services.PopularCategories;
 
 public interface IPopularCategoryService
 {
-    Task<ServiceResponse<List<PopularCategoryDto>>> GetPopularCategoriesAsync();
+    Task<ServiceResponse<List<PopularCategoryDto>>> GetPopularCategoriesAsync(string languageCode = "en");
     Task<ServiceResponse<bool>> AddPopularCategoryAsync(PopularCategory popularCategory, byte[] bannerImage, string fileName);
     Task<ServiceResponse<bool>> RemovePopularCategoryAsync(long Id);
 }
 public class PopularCategoryService : IPopularCategoryService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<PopularCategoryService> _logger;
 
-    public PopularCategoryService(ApplicationDbContext context, ILogger<PopularCategoryService> logger)
+    public PopularCategoryService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<PopularCategoryService> logger)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _logger = logger;
     }
 
-    public async Task<ServiceResponse<List<PopularCategoryDto>>> GetPopularCategoriesAsync()
-    {
-        try
+
+    public async Task<ServiceResponse<List<PopularCategoryDto>>> GetPopularCategoriesAsync(string languageCode = "en")
         {
-            var popularCategories = await _context.PopularCategories
-                .Select(pc => new PopularCategoryDto
+        try
+            {
+            using var _context = _contextFactory.CreateDbContext();
+            var languageId = await _context.Languages
+                .Where(l => l.LanguageCode == languageCode)
+                .Select(l => l.Id)
+                .FirstOrDefaultAsync();
+
+            if (languageId == 0) 
                 {
+                languageId = await _context.Languages
+                    .Where(l => l.LanguageCode == "en")
+                    .Select(l => l.Id)
+                    .FirstOrDefaultAsync();
+                }
+
+            var popularCategories = await _context.PopularCategories
+                .Include(pc => pc.Category)
+                .ThenInclude(c => c.Translations)
+                .Select(pc => new PopularCategoryDto
+                    {
                     Id = pc.Id,
-                    Name = pc.Category.Name,
-                    BannerUrl = pc.BannerUrl,
                     CategoryId = pc.CategoryId,
-                    Order = pc.Order
-                })
+                    BannerUrl = pc.BannerUrl,
+                    Order = pc.Order,
+                    Name = pc.Category.Translations
+                        .Where(t => t.LanguageId == languageId)
+                        .Select(t => t.TranslatedName)
+                        .FirstOrDefault() ?? pc.Category.Name
+                    })
                 .ToListAsync();
 
             return new ServiceResponse<List<PopularCategoryDto>>
-            {
+                {
                 Data = popularCategories,
                 Success = true,
                 Message = "Popular categories loaded successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error loading popular categories.");
             return new ServiceResponse<List<PopularCategoryDto>>
-            {
+                {
                 Success = false,
                 Message = "Error loading popular categories."
-            };
+                };
+            }
         }
-    }
+
 
     public async Task<ServiceResponse<bool>> AddPopularCategoryAsync(PopularCategory popularCategory, byte[] bannerImage, string fileName)
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             _context.PopularCategories.Add(popularCategory);
             await _context.SaveChangesAsync();
 
@@ -81,6 +104,7 @@ public class PopularCategoryService : IPopularCategoryService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var popularCategory = await _context.PopularCategories.FirstOrDefaultAsync(pc => pc.Id == Id);
             if (popularCategory == null)
             {

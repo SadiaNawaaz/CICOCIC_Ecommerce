@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MostPopularBands" xml:space="preserve">
+    <value>Most popular brands</value>
+  </data>
+  <data name="Discount_UpTo90" xml:space="preserve">
+    <value>up to 90% off est. retail </value>
+  </data>
+  <data name="TrendingItems" xml:space="preserve">
+    <value>Trending Items</value>
+  </data>
+  <data name="TrendingItemsDesc" xml:space="preserve">
+    <value>Shop and get your favorite items at amazing prices!</value>
+  </data>
+  <data name="PopularCategories" xml:space="preserve">
+    <value>Explore Popular Categories</value>
+  </data>
+  <data name="DiscoverMore" xml:space="preserve">
+    <value> Discover More. Pay Less.</value>
+  </data>
+  <data name="DiscoverHottestDestinations" xml:space="preserve">
+    <value>Discovering the Hottest Nearby Destinations in Your Area</value>
+  </data>
+  <data name="GrowingWithBrands" xml:space="preserve">
+    <value>We're continuously growing with 50+ trusted brands</value>
+  </data>
+  <data name="FindBestProduct" xml:space="preserve">
+    <value>Find The Best Product
+from Our Shop</value>
+  </data>
+  <data name="ShopNow" xml:space="preserve">
+    <value>Shop Now</value>
+  </data>
+  <data name="AboutUsDesc1" xml:space="preserve">
+    <value>This unique web application is built with a site to register and this site to buy. You can register your possessions for resale on Cicosafe. By marking your possessions as available for sale, they will be offered on this website Cicocic. Just like the seller, these goods have been checked as a directed seller and as registered property</value>
+  </data>
+  <data name="AboutUs" xml:space="preserve">
+    <value>ABOUT US</value>
+  </data>
+  <data name="AboutUsDesc2" xml:space="preserve">
+    <value>This ensures comfort for you as buyers. All goods are unique at Cicocic and, just like when transferring a car, are physically handed over with all the history. At Cicocic you are guaranteed for a safe purchase. The offered goods have also been checked for Imei and serial numbers as not stolen in the known registers</value>
+  </data>
+  <data name="RelatedLinks" xml:space="preserve">
+    <value>RELATED LINKS</value>
+  </data>
+  <data name="LatestProduct" xml:space="preserve">
+    <value>LATEST PRODUCT</value>
+  </data>
+  <data name="OurContact" xml:space="preserve">
+    <value>OUR CONTACT</value>
+  </data>
+  <data name="CompanyName" xml:space="preserve">
+    <value>Cico Concepts BV.</value>
+  </data>
+  <data name="CompanyPhone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="ShopByPopularCategories" xml:space="preserve">
+    <value>Shop By Popular</value>
+  </data>
+  <data name="ShopByCategories" xml:space="preserve">
+    <value>Shop By Categories</value>
+  </data>
+  <data name="DeliverTo" xml:space="preserve">
+    <value>Deliver to</value>
+  </data>
+  <data name="FilterBy" xml:space="preserve">
+    <value>Filter By</value>
+  </data>
+  <data name="Keywords" xml:space="preserve">
+    <value>Keywords</value>
+  </data>
+  <data name="EnterKeywords" xml:space="preserve">
+    <value>Enter Keywords</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Sort By</value>
+  </data>
+  <data name="Popular" xml:space="preserve">
+    <value>Popular</value>
+  </data>
+  <data name="NewArrival" xml:space="preserve">
+    <value>New Arrival</value>
+  </data>
+  <data name="Discount" xml:space="preserve">
+    <value>Discount</value>
+  </data>
+  <data name="WeFound" xml:space="preserve">
+    <value>We found</value>
+  </data>
+  <data name="ItemsFor" xml:space="preserve">
+    <value>Items For</value>
+  </data>
+  <data name="ProductDescription" xml:space="preserve">
+    <value>Product Description</value>
+  </data>
+  <data name="AdditionalInformation" xml:space="preserve">
+    <value>Additional Information</value>
+  </data>
+  <data name="RatingReviews " xml:space="preserve">
+    <value>Rating &amp; Reviews </value>
+  </data>
+  <data name="Availability" xml:space="preserve">
+    <value>Availability</value>
+  </data>
+  <data name="InStock" xml:space="preserve">
+    <value>In Stock</value>
+  </data>
+  <data name="BuildYear" xml:space="preserve">
+    <value>Build Year</value>
+  </data>
+  <data name="OrderSoon" xml:space="preserve">
+    <value>Only 1 left in stock - order soon</value>
+  </data>
+  <data name="AddToCart" xml:space="preserve">
+    <value>ADD TO CART</value>
+  </data>
+  <data name="YouMightAlsoLike" xml:space="preserve">
+    <value>You Might Also Like</value>
+  </data>
+</root>

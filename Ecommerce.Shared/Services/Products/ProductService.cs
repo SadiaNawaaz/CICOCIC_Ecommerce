@@ -66,6 +66,7 @@ public class ProductService : IProductService
            .Include(c => c.Brand)                   
            .Include(c => c.Category)
            .Include(c => c.ProductImages)
+           .Include(c=>c.Translations)
            .Include(c => c.ProductMedias)
            .Include(c => c.ProductClusters)         
                .ThenInclude(cc => cc.Cluster)       

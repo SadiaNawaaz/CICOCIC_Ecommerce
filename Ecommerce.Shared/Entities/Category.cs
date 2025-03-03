@@ -20,7 +20,31 @@ public class Category: BaseEntity
 
     [NotMapped]
     public byte[] ImageByte { get; set; }
-}
+    public bool MarkCategory { get; set; } = false;
+
+    public ICollection<CategoryTranslation> Translations { get; set; } = new List<CategoryTranslation>();
+    }
+
+
+public class CategoryTranslation: BaseDetailEntity
+    {
+
+
+    [Required]
+    public long CategoryId { get; set; }
+
+    [ForeignKey("CategoryId")]
+    public Category Category { get; set; }
+
+    [Required]
+    public int LanguageId { get; set; }
+    [ForeignKey("LanguageId")]
+    public Language Language { get; set; }
+
+    [Required, MaxLength(255)]
+    public string TranslatedName { get; set; } = string.Empty;
+    }
+
 public class CategoryVariantCountDto
     {
     public long CategoryId { get; set; } // The ID of the category

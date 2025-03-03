@@ -15,6 +15,7 @@ using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Colors;
 using Ecommerce.Shared.Services.Configurations;
 using Ecommerce.Shared.Services.Features;
+using Ecommerce.Shared.Services.Languages;
 using Ecommerce.Shared.Services.ModelYears;
 using Ecommerce.Shared.Services.PopularBrands;
 using Ecommerce.Shared.Services.PopularCategories;
@@ -67,7 +68,7 @@ builder.Services.AddScoped<IPopularCategoryService, PopularCategoryService>();
 builder.Services.AddScoped<CsvExportService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 builder.Services.AddScoped<IDataDownloads, DataDownloads>();
-
+builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<ICategoryFeatureService, CategoryFeatureService>();
 
 //builder.Services.AddDbContext<ApplicationDbContext>(

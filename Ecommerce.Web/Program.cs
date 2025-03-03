@@ -12,7 +12,10 @@ using Ecommerce.Shared.Services.ProductVariants;
 using Ecommerce.Web;
 using Ecommerce.Web.Components;
 using Ecommerce.Web.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,24 +34,30 @@ builder.Services.AddScoped<IPopularCategoryService,PopularCategoryService>();
 builder.Services.AddScoped<ICategoryConfigurationService, CategoryConfigurationService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<CartStateService>();
-
 builder.Services.AddScoped<IOrderService, OrderService>();
-
-//builder.Services.AddDbContext<ApplicationDbContext>(
-// o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")),
-//    ServiceLifetime.Transient);
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Transient);
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
 
 
+builder.Services.AddSingleton<CultureStateService>();
+
+builder.Services.AddLocalization();
+builder.Services.AddControllers();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
+
+string[] supportedCultures = ["en-US","nl-NL", "de-CH"];
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[2])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
+
+
 string serverlessBaseURI = builder.Configuration["ApiUrl"];
 UrlHelper.Initialize(serverlessBaseURI);
 // Configure the HTTP request pipeline.
@@ -58,9 +67,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 app.Run();

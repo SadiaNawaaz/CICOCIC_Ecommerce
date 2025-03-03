@@ -15,4 +15,24 @@ public class Feature : BaseEntity
     public Cluster Cluster { get; set; }
     [NotMapped]
     public string Value { get; set; }
-}
+    public List<FeatureTranslation> Translations { get; set; } = new List<FeatureTranslation>();
+    }
+public class FeatureTranslation: BaseDetailEntity
+    {
+
+
+    [Required]
+    public long FeatureId { get; set; }
+
+    [ForeignKey("FeatureId")]
+    public Feature Feature { get; set; }
+
+    [Required]
+    public int LanguageId { get; set; }
+
+   [ForeignKey("LanguageId")]
+   public Language Language { get; set; }
+
+    [Required, MaxLength(255)]
+    public string TranslatedName { get; set; } = string.Empty;
+    }

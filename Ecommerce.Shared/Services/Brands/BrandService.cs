@@ -17,6 +17,9 @@ public interface IBrandService
     Task<ServiceResponse<Brand>> UpdateBrandAsync(Brand brand);
     Task<ServiceResponse<bool>> DeleteBrandAsync(long id);
     Task<ServiceResponse<bool>> ImportBrandsAsync(List<Brand> brands);
+    Task<ServiceResponse<List<BrandDto>>> GetBrandsDtoAsync();
+    Task<ServiceResponse<Brand>> MarkUnmarkBrandAsync(long id, bool isMarked);
+    Task<ServiceResponse<List<BrandDto>>> GetAllBrandsDtoAsync();
 }
 public class BrandService : IBrandService
     {
@@ -272,7 +275,107 @@ public class BrandService : IBrandService
             }
         }
 
+    public async Task<ServiceResponse<List<BrandDto>>> GetBrandsDtoAsync()
+        {
+        try
+            {
+            using var context = _contextFactory.CreateDbContext();
+            var brands = await context.Brands.Where(a=>a.MarkBrand==true)
+                
+                .Select(b => new BrandDto
+                    {
+                    Id = b.Id,
+                    Name = b.Name
+                    })
+                .ToListAsync();
 
+            return new ServiceResponse<List<BrandDto>>
+                {
+                Data = brands,
+                Success = true,
+                Message = "Brands fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching brands.");
+            return new ServiceResponse<List<BrandDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching brands"
+                };
+            }
+        }
 
+    public async Task<ServiceResponse<List<BrandDto>>> GetAllBrandsDtoAsync()
+        {
+        try
+            {
+            using var context = _contextFactory.CreateDbContext();
+            var brands = await context.Brands
+
+                .Select(b => new BrandDto
+                    {
+                    Id = b.Id,
+                    Name = b.Name,
+                    MarkBrand=b.MarkBrand
+                    })
+                .ToListAsync();
+
+            return new ServiceResponse<List<BrandDto>>
+                {
+                Data = brands,
+                Success = true,
+                Message = "Brands fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching brands.");
+            return new ServiceResponse<List<BrandDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching brands"
+                };
+            }
+        }
+
+    public async Task<ServiceResponse<Brand>> MarkUnmarkBrandAsync(long id, bool isMarked)
+        {
+        try
+            {
+            using var context = _contextFactory.CreateDbContext();
+            var brand = await context.Brands.FindAsync(id);
+
+            if (brand == null)
+                {
+                return new ServiceResponse<Brand>
+                    {
+                    Success = false,
+                    Message = "Brand not found"
+                    };
+                }
+
+            brand.MarkBrand = isMarked;
+            context.Brands.Update(brand);
+            await context.SaveChangesAsync();
+
+            return new ServiceResponse<Brand>
+                {
+                Data = brand,
+                Success = true,
+                Message = isMarked ? "Brand marked successfully" : "Brand unmarked successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while marking/unmarking brand.");
+            return new ServiceResponse<Brand>
+                {
+                Success = false,
+                Message = "Error occurred while marking/unmarking brand"
+                };
+            }
+        }
 
     }

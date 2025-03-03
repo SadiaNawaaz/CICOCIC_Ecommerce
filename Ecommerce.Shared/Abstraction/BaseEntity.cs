@@ -13,3 +13,9 @@ public abstract class BaseEntity
     public long? LastModifiedBy { get; set; }
     public DateTime? LastModifiedDate { get; set; } = DateTime.Now;
 }
+public abstract class BaseDetailEntity
+    {
+    [Key]
+    public long Id { get; set; }
+ 
+    }

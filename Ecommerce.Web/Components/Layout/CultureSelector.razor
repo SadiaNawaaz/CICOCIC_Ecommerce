@@ -1,0 +1,55 @@
+﻿@inject NavigationManager Navigation
+@using System.Globalization
+@inject CultureStateService CultureState
+@rendermode InteractiveServer
+<div>
+    <select @bind="Culture" class="nav-item dropdown mt-2">
+        <option value="en-US">English</option>
+        <option value="nl-NL">Dutch</option>
+        <option value="de-CH">German</option>
+    </select>
+</div>
+
+@code
+{
+    protected override void OnInitialized()
+        {
+        Culture = CultureInfo.CurrentCulture;
+        }
+
+    private CultureInfo Culture
+        {
+        get => new CultureInfo(CultureState.CurrentCulture);
+        set
+            {
+            if (CultureState.CurrentCulture != value.Name)
+                {
+                CultureState.CurrentCulture = value.Name; // ✅ Update global culture
+
+                var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+                var cultureEscaped = Uri.EscapeDataString(value.Name);
+                var uriEscaped = Uri.EscapeDataString(uri);
+
+                Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
+                }
+            }
+        }
+    //private CultureInfo Culture
+    //    {
+    //    get
+    //        {
+    //        return CultureInfo.CurrentCulture;
+    //        }
+    //    set
+    //        {
+    //        if (CultureInfo.CurrentCulture != value)
+    //            {
+    //            var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+    //            var cultureEscaped = Uri.EscapeDataString(value.Name);
+    //            var uriEscaped = Uri.EscapeDataString(uri);
+
+    //            Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
+    //            }
+    //        }
+    //    }
+}

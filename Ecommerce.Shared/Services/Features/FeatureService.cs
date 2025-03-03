@@ -55,28 +55,44 @@ public class FeatureService : IFeatureService
     }
 
     public async Task<ServiceResponse<Feature>> GetFeatureByIdAsync(long id)
-    {
+        {
         try
             {
             using var _context = _contextFactory.CreateDbContext();
-            var feature = await _context.Features.FindAsync(id);
+
+            var feature = await _context.Features
+                .Include(f => f.Translations) // Load related translations
+                .Include(f => f.Cluster) // Load related Cluster details (if needed)
+                .AsNoTracking() // Ensures EF Core does not track changes (better for read operations)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (feature == null)
+                {
+                return new ServiceResponse<Feature>
+                    {
+                    Success = false,
+                    Message = "Feature not found"
+                    };
+                }
+
             return new ServiceResponse<Feature>
-            {
+                {
                 Data = feature,
                 Success = true,
                 Message = "Feature fetched successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error occurred while fetching feature by ID.");
             return new ServiceResponse<Feature>
-            {
+                {
                 Success = false,
                 Message = "Error occurred while fetching feature by ID"
-            };
+                };
+            }
         }
-    }
+
 
     public async Task<ServiceResponse<Feature>> AddFeatureAsync(Feature feature)
     {
@@ -103,43 +119,66 @@ public class FeatureService : IFeatureService
         }
     }
 
+
     public async Task<ServiceResponse<Feature>> UpdateFeatureAsync(Feature updatedFeature)
-    {
-        try
         {
+        try
+            {
             using var _context = _contextFactory.CreateDbContext();
-            var existingFeature = await _context.Features.FindAsync(updatedFeature.Id);
+
+            var existingFeature = await _context.Features
+                .Include(f => f.Translations) // Load existing translations
+                .FirstOrDefaultAsync(f => f.Id == updatedFeature.Id);
 
             if (existingFeature == null)
-            {
-                return new ServiceResponse<Feature>
                 {
+                return new ServiceResponse<Feature>
+                    {
                     Success = false,
                     Message = "Feature not found"
-                };
-            }
+                    };
+                }
 
+            // ✅ Update Feature Name
             existingFeature.Name = updatedFeature.Name;
-            _context.Features.Update(existingFeature);
+            existingFeature.ClusterId = updatedFeature.ClusterId;
+
+            // ✅ 1. Remove ALL Previous Translations (Even if New List is Empty)
+            _context.FeatureTranslations.RemoveRange(existingFeature.Translations);
+            await _context.SaveChangesAsync(); // Save immediately to prevent conflicts
+
+            // ✅ 2. Add New Translations (If Any Exist)
+            if (updatedFeature.Translations != null && updatedFeature.Translations.Any())
+                {
+                foreach (var newTranslation in updatedFeature.Translations)
+                    {
+                    existingFeature.Translations.Add(new FeatureTranslation
+                        {
+                        LanguageId = newTranslation.LanguageId,
+                        TranslatedName = newTranslation.TranslatedName
+                        });
+                    }
+                }
+
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<Feature>
-            {
+                {
                 Data = existingFeature,
                 Success = true,
                 Message = "Feature updated successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error occurred while updating feature.");
             return new ServiceResponse<Feature>
-            {
+                {
                 Success = false,
                 Message = "Error occurred while updating feature"
-            };
+                };
+            }
         }
-    }
 
     public async Task<ServiceResponse<bool>> DeleteFeatureAsync(long id)
     {

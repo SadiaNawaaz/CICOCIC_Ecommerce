@@ -2,7 +2,6 @@
 
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities.Catalogs;
-using Ecommerce.Shared.Migrations;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,6 +18,7 @@ public interface ICatalogService
     Task<ServiceResponse<List<CatalogDto>>> SearchCatalogsAsync(string searchTerm);
     Task<ServiceResponse<List<CatalogDto>>> GetCatalogsWithBrandAsync();
     Task<ServiceResponse<List<Catalog>>> AddCatalogsAsync(List<Catalog> catalogs);
+    Task BulkUpdateCatalogsAsync(List<Catalog> catalogs);
 }
 public class CatalogService: ICatalogService
 {
@@ -37,8 +37,9 @@ public class CatalogService: ICatalogService
         try
             {
             // Project only the needed columns into CatalogDto
-            var catalogs = await _context.Catalogs
+            var catalogs = await _context.Catalogs.Take(100)
                 .Include(c => c.Brand)
+                .Include(c=>c.Category)
                 .Select(c => new CatalogDto
                     {
                     Id = c.Id,
@@ -48,8 +49,10 @@ public class CatalogService: ICatalogService
                     Price = c.Price,
                     Code = c.Code,
                     Mark=c.MarkProduct,
+                    Integrated=c.Integrated,
                     IntegratedId=c.IntegratedId,
                     EanNumber=c.EanNumber,
+                    CategoryName=c.Category.Name
                     })
                 .ToListAsync();
 
@@ -242,16 +245,32 @@ public class CatalogService: ICatalogService
         {
         try
             {
+            /* var catalogs = await _context.Catalogs
+                 .Where(c => c.Name.Contains(searchTerm) ||
+                             c.Description.Contains(searchTerm) ||
+                             c.ShortDescription.Contains(searchTerm) ||
+                             c.Code.Contains(searchTerm) ||
+                             c.Brand.Name.Contains(searchTerm)||
+                             (c.Brand != null && (c.Brand.Name + " " + c.Name).Contains(searchTerm)) ||
+                             (c.Brand != null && (c.Brand.Name + " - " + c.Name).Contains(searchTerm))
+                             )
+                 .ToListAsync();*/
+
             var catalogs = await _context.Catalogs
-                .Where(c => c.Name.Contains(searchTerm) ||
-                            c.Description.Contains(searchTerm) ||
-                            c.ShortDescription.Contains(searchTerm) ||
-                            c.Code.Contains(searchTerm) ||
-                            c.Brand.Name.Contains(searchTerm)||
-                            (c.Brand != null && (c.Brand.Name + " " + c.Name).Contains(searchTerm)) ||
-                            (c.Brand != null && (c.Brand.Name + " - " + c.Name).Contains(searchTerm))
-                            )
+                .AsNoTracking()
+                .Include(c => c.Brand) 
+                .Where(c => c.Brand != null && c.Brand.MarkBrand == true &&
+                    (EF.Functions.Like(c.Name, $"%{searchTerm}%") ||
+                     EF.Functions.Like(c.Description, $"%{searchTerm}%") ||
+                     EF.Functions.Like(c.ShortDescription, $"%{searchTerm}%") ||
+                     EF.Functions.Like(c.Code, $"%{searchTerm}%") ||
+                     EF.Functions.Like(c.Brand.Name, $"%{searchTerm}%") ||
+                     EF.Functions.Like(string.Concat(c.Brand.Name ?? "", " ", c.Name), $"%{searchTerm}%") ||
+                     EF.Functions.Like(string.Concat(c.Brand.Name ?? "", " - ", c.Name), $"%{searchTerm}%")))
                 .ToListAsync();
+
+
+
             var catalogDtos = catalogs.Select(c => new CatalogDto
                 {
                 Id = c.Id,
@@ -331,6 +350,26 @@ public class CatalogService: ICatalogService
                 Success = false,
                 Message = "Error occurred while adding catalogs"
                 };
+            }
+        }
+
+
+    public async Task BulkUpdateCatalogsAsync(List<Catalog> catalogs)
+        {
+        using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+            try
+                {
+                _context.Catalogs.UpdateRange(catalogs);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                Console.WriteLine($"Bulk updated {catalogs.Count} catalogs.");
+                }
+            catch (Exception ex)
+                {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error during bulk update of catalogs.");
+                }
             }
         }
 

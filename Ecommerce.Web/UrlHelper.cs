@@ -16,6 +16,10 @@ public static class UrlHelper
 
     public static string GetImageUrl(long productId, string imageUrl)
     {
+        if(imageUrl==null)
+            {
+            return "";
+            }
         if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
             {
             return imageUrl;
@@ -53,9 +57,15 @@ public static class UrlHelper
     }
 
     public static string GetVariantImageUrl(long VariantId, string imageUrl)
-    {
+        {
+        if (!string.IsNullOrEmpty(imageUrl) && (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://")))
+            {
+            return imageUrl;
+            }
+
         return $"{_baseUrl}/ProductVariants/{VariantId}/{imageUrl}";
-    }
+        }
+
 
     public static string GetPopularBrandImageUrl(long Id, string imageUrl)
     {

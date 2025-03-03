@@ -24,7 +24,7 @@
 @using Ecommerce.Shared.Services.Features;
 @inject IFeatureService FeatureService
 @inject IJSRuntime JS
-
+@inject ILanguageService languageService
 
 <style>
     /* General Accordion Styling */
@@ -210,96 +210,61 @@ else
                     </div>
                 </div>
 
+
+
+
+
+
+
+
+
+
+
                 <div class="card border-0 mb-4">
                     <div class="card-header h6 mb-0 bg-none p-3">
                         <i class="fa fa-shield-halved fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Levels</b>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @if (product != null && product.Id > 0 && product.CatalogId > 0)
+                            @if (product != null && product.Id > 0 && product.CatalogId > 0 && @product.Category!=null)
                                 {
 
                                 <div class="col-lg-6"> <b>Selected Category  :    @product.Category.Name</b></div>
                                 <div class="col-lg-6"></div>
-                                    <br /> <br />
-                                    }
+                                <br /> <br />
+                                }
 
-                                    <div class="col-lg-6">
-                                        <div class="mb-lg-0 mb-3">
-                                            <label class="form-label"> Main Category</label>
+                            <div class="card border-0 mb-4">
+                                <div class="card-header h6 mb-0 bg-none p-3">
+                                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#product-category">
+                                        <i class="fas fa-expand fa-lg fa-fw text-dark text-opacity-50 me-1"></i>
+                                        <b>Select Category</b>
+                                    </button>
+                                </div>
 
-
-                                            <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel1CategoryId" Data=@Level1Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel1Changed(args))" Class="form-control">
-                                                <Columns>
-                                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                                </Columns>
-                                            </RadzenDropDownDataGrid>
-
-
-
-
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="mb-lg-0 mb-3">
-                                            <label class="form-label">Sub Category</label>
-
-                                            <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel2CategoryId" Data=@Level2Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel2Changed(args))" Class="form-control">
-                                                <Columns>
-                                                    <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                                </Columns>
-                                            </RadzenDropDownDataGrid>
-
-
-
-
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-3">
-                                        <div class="col-lg-6">
-                                            <div class="mb-lg-0 mb-3">
-                                                <label class="form-label">Sub Sub Category</label>
-
-                                                <RadzenDropDownDataGrid TValue="long" @bind-Value="selectedLevel3CategoryId" Data=@Level3Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel3Changed(args))" Class="form-control">
-                                                    <Columns>
-                                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                                    </Columns>
-                                                </RadzenDropDownDataGrid>
-
+                                <div class="modal" id="product-category">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header alert alert-primary p-2">
+                                                <h5>Product Categories</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <Ecommerce.Admin.Components.Pages.Categories.ShowCategories OnCategorySelected="HandleCategorySelected" SelectedCategoryId="selectedCategoryId" />
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-white" @onclick="FnSelectCategory" data-bs-dismiss="modal">Select & Close</button>
+                                                <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
 
                                             </div>
                                         </div>
-                                        <div class="col-lg-6">
-                                            <div class="mb-lg-0 mb-3">
-                                                <label class="form-label">Group Category </label>
-
-                                                <RadzenDropDownDataGrid TValue="long" @bind-Value="product.CategoryId" Data=@Level4Categories TextProperty="Name" ValueProperty="Id" Change="@(args => OnLevel4Changed(args))" Class="form-control">
-                                                    <Columns>
-                                                        <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
-
-
-                                                    </Columns>
-                                                </RadzenDropDownDataGrid>
-
-
-                                            </div>
-                                        </div>
-
-
-
-
                                     </div>
-
-
                                 </div>
                             </div>
+
+
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card border-0 mb-4">
@@ -419,6 +384,115 @@ else
 
                     </div>
                 </div>
+
+
+
+
+                <div class="card border-0 mb-4">
+
+                    <hr />
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">Product Translations</h5>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#myCollapse">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <div class="m-4">
+                        <p>
+
+                        </p>
+                        <!-- Collapsible Element HTML -->
+                        <div class="collapses" id="myCollapse">
+                            <div class="card card-body">
+
+                                <div class="row mt-4">
+                                    <div class="col-4">
+                                        <label class="form-label">Select Language</label>
+                                        <select class="form-select" @bind="SelectedLanguageId">
+                                            <option value="0">-- Select Language --</option>
+                                            @foreach (var lang in Languages)
+                                                {
+                                                <option value="@lang.Id">@lang.LanguageName</option>
+                                                }
+                                        </select>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="form-label"> Title</label>
+                                        <input type="text" @bind="@productTranslation.TranslatedName" class="form-control" id="" placeholder=" Title" />
+                                        <span class="text-danger"><ValidationMessage For="@(() => product.Name)" /> </span>
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="button" class="btn btn-primary mt-4" @onclick="AddTranslation">Add</button>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Description</label>
+                                        <div class="form-control p-0 overflow-hidden">
+                                            <textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="12" @bind="@productTranslation.TranslatedDescription"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Short Description</label>
+                                        <div class="form-control p-0 overflow-hidden">
+                                            <textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="2" @bind="@productTranslation.TranslatedShortDescription"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    @if (product?.Translations?.Any() == true)
+                                        {
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Language</th>
+                                                    <th>Translated Name</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var translation in product.Translations)
+                                                    {
+                                                    <tr>
+                                                        <td>@GetLanguageName(translation.LanguageId)</td>
+                                                        <td>
+                                                            <InputText class="form-control" @bind-Value="translation.TranslatedName" />
+                                                        </td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveTranslation(translation.LanguageId)">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    }
+                                            </tbody>
+                                        </table>
+                                        }
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- Translation Section -->
+
+
+
+
+                </div>
+
+
             </div>
 
 
@@ -538,20 +612,22 @@ else
                                 <div class="row align-items-center mb-3">
 
                                     <div class="col-md-8">
-                @if (media.ContentType.StartsWith("image/"))
-                {
-                    <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
-                }
-                else
-                {
-                    <a href="@media.MediaUrl" target="_blank">View File</a>
-                }
-            </div>
-            <div class="col-md-4">
-                <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
+                                        @if (media.MediaUrl.Contains("pdf", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                            <a href="@media.MediaUrl" target="_blank" class="btn btn-secondary">
+                                                <i class="fas fa-file-pdf"></i> View PDF
+                                            </a>
+                                            }
+                                        else
+                                            {
+                                            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" alt="@media.MediaUrl" />
+                                            }
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 }
                             }
@@ -611,19 +687,24 @@ else
     private List<CategoryDto> Level3Categories { get; set; } = new List<CategoryDto>();
     private List<CategoryDto> Level4Categories { get; set; } = new List<CategoryDto>();
     private List<ProductFeatureValue> productFeatureValues = new List<ProductFeatureValue>();
-    private List<Brand> Brands = new List<Brand>();
+    private List<BrandDto> Brands = new List<BrandDto>();
     private long selectedLevel1CategoryId;
     private long selectedLevel2CategoryId;
     private long selectedLevel3CategoryId;
     private Product product = new Product();
+    ProductTranslation productTranslation = new ProductTranslation();
     private IEnumerable<Cluster> clusters = new List<Cluster>();
     public string clusterName = string.Empty;
     string featureName = string.Empty;
 
     private List<Feature> features = new List<Feature>();
     private Feature feature = new Feature();
-    private string newMediaUrl = string.Empty; // New URL input
+    private string newMediaUrl = string.Empty;
     private bool isLoading = false;
+    private int SelectedLanguageId;
+    private List<Language> Languages = new List<Language>();
+    private long selectedCategoryId;
+    private CategoryDto selectedCategory;
     #endregion
 
     #region
@@ -631,6 +712,7 @@ else
     protected override async Task OnInitializedAsync()
         {
         await ReloadDataAsync(true);
+        await LoadLanguagesAsync();
         //await LoadCategoryTreeAsync();
         //await LoadBrands();
         //await LoadClusters();
@@ -652,10 +734,10 @@ else
             {
             if (setupData)
                 {
-                await LoadCategoryTreeAsync();
+                /* await LoadCategoryTreeAsync(); Comment in case of icecat*/
                 await LoadBrands();
-                await LoadClusters();
-                await LoadFeatures();
+                ///await LoadClusters();
+                ////await LoadFeatures();
                 }
 
 
@@ -700,7 +782,19 @@ else
             Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
             }
         }
-
+    private async Task LoadLanguagesAsync()
+        {
+        var response = await languageService.GetLanguagesAsync();
+        if (response.Success)
+            {
+            Languages = response.Data;
+            SelectedLanguageId = Languages.FirstOrDefault()?.Id ?? 1;
+            }
+        else
+            {
+            Snackbar.Add("Error fetching languages", Severity.Error);
+            }
+        }
     #endregion
 
     #region level
@@ -809,13 +903,30 @@ else
             }
         }
 
+
+    private void HandleCategorySelected(CategoryDto category)
+        {
+
+        Console.WriteLine($"Selected Category: {category.Name} (ID: {category.Id})");
+        selectedCategoryId = category.Id;
+        selectedCategory = category;
+        // You can now use `selectedCategory` as needed.
+        }
+
+    private void FnSelectCategory()
+        {
+
+        product.CategoryId = selectedCategoryId;
+        product.Category.Name = selectedCategory.Name;
+
+        }
     #endregion
 
     #region Brand
 
     private async Task LoadBrands()
         {
-        var response = await BrandService.GetBrandsAsync();
+        var response = await BrandService.GetBrandsDtoAsync();
         if (response.Success)
             {
             Brands = response.Data;
@@ -842,7 +953,7 @@ else
                 Snackbar.Add($"Please select Brand", Severity.Info);
                 return;
                 }
-            if (product.CategoryId == 0 || product.CategoryId==null)
+            if (product.CategoryId == 0 || product.CategoryId == null)
                 {
                 Snackbar.Add($"Please select Category", Severity.Info);
                 return;
@@ -948,7 +1059,8 @@ else
             if (response.Success)
                 {
                 product = response.Data;
-                await OnLevel4Changed(product.CategoryId);
+                selectedCategoryId = product.Category.Id;
+                /// await OnLevel4Changed(product.CategoryId);
 
                 selectedFiles = product.ProductImages;
                 if (selectedFiles != null && selectedFiles.Count() > 0)
@@ -998,11 +1110,20 @@ else
         try
             {
             string searchTerm = args.Filter;
+            if (!string.IsNullOrWhiteSpace(searchTerm) && searchTerm.Length >= 3)
+                {
+                var result = await CatalogService.SearchCatalogsAsync(searchTerm);
+                catalogs = result.Data ?? new List<CatalogDto>();
+                count = catalogs.Count();
+                }
+            else
+                {
+                // Clear results if search term is less than 3 characters
+                catalogs = new List<CatalogDto>();
+                count = 0;
+                }
 
-            var result = await CatalogService.SearchCatalogsAsync(searchTerm);
 
-            catalogs = result.Data ?? new List<CatalogDto>();
-            count = catalogs.Count();
             }
         catch (Exception ex)
             {
@@ -1314,11 +1435,36 @@ else
 
     private void AddMediaUrl()
         {
+
         if (!string.IsNullOrWhiteSpace(newMediaUrl))
             {
-            product.ProductMedias.Add(new ProductMedia { MediaUrl = newMediaUrl });
+            var contentType = GetContentTypeFromUrl(newMediaUrl);
+            product.ProductMedias.Add(new ProductMedia { MediaUrl = newMediaUrl ,ContentType= contentType });
             newMediaUrl = string.Empty;
             }
+        }
+    private string GetContentTypeFromUrl(string url)
+        {
+        try
+            {
+            var extension = Path.GetExtension(url)?.ToLower();
+
+            return extension switch
+                {
+                    ".jpg" or ".jpeg" or ".png" or ".gif" => "Image",
+                    ".pdf" => "PDF",
+                    ".doc" or ".docx" => "Document",
+                    ".mp4" or ".avi" => "Video",
+                    ".mp3" => "Audio",
+                    _ => "image"
+                    };
+            }
+        catch(Exception ex)
+            {
+
+            return "";
+            }
+
         }
 
     private void RemoveMediaUrl(ProductMedia media)
@@ -1327,7 +1473,42 @@ else
         }
     #endregion
 
-}
+    #region Translation 
+
+    private void AddTranslation()
+        {
+        if (SelectedLanguageId == 0 || string.IsNullOrWhiteSpace(productTranslation.TranslatedName))
+            {
+            Snackbar.Add("Please select a valid language and enter a translated name.", Severity.Warning);
+            return;
+            }
+        productTranslation.LanguageId = SelectedLanguageId;
+        if (product.Translations.Any(t => t.LanguageId == SelectedLanguageId))
+            {
+            Snackbar.Add("Translation for this language already exists.", Severity.Warning);
+            return;
+            }
+
+        product.Translations.Add(productTranslation);
+        SelectedLanguageId = 0;
+        productTranslation = new ProductTranslation();
+
+        }
+
+    private string GetLanguageName(int languageId) =>
+Languages.FirstOrDefault(l => l.Id == languageId)?.LanguageName ?? "Unknown";
+
+
+    private void RemoveTranslation(int languageId)
+        {
+        var translation = product.Translations.FirstOrDefault(t => t.LanguageId == languageId);
+        if (translation != null)
+            {
+            product.Translations.Remove(translation);
+            }
+        }
+    #endregion
+    }
 <script>
     var myModal; // Declare a global variable to store the modal instance
 

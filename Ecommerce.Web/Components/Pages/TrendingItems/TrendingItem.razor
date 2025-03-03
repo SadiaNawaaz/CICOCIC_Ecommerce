@@ -1,6 +1,6 @@
 ﻿@using Ecommerce.Shared.Entities.TrendingProducts;
 @inject IProductVariantService productVariantService
-
+@inject CultureStateService CultureState
 
 
 <div id="trending-items" class="section-container">
@@ -47,7 +47,7 @@
                         <!-- END item -->
                     </div>
 
-            
+
 
                     }
                 }
@@ -58,33 +58,40 @@
 
 
 
-    @code {
-        private List<TrendingProductDto> trendingProducts = new List<TrendingProductDto>();
-        protected override async Task OnInitializedAsync()
+@code {
+    private List<TrendingProductDto> trendingProducts = new List<TrendingProductDto>();
+    protected override async Task OnInitializedAsync()
+        {
+        CultureState.OnChange += async () => await InvokeAsync(StateHasChanged);
+        await LoadTrendingProduct();
+
+        }
+
+    private async Task LoadTrendingProduct()
+        {
+        try
             {
-            await LoadTrendingProduct();
 
-            }
+            string languageCode = !string.IsNullOrWhiteSpace(CultureState.CurrentCulture)
+      ? CultureState.CurrentCulture.Split('-')[0]
+      : "en";
 
-        private async Task LoadTrendingProduct()
-            {
-            try
+
+            var response = await productVariantService.GetTrendingProductVariantsAsync(languageCode);
+            if (response.Success)
                 {
-                var response = await productVariantService.GetTrendingProductVariantsAsync();
-                if (response.Success)
-                    {
-                    trendingProducts = response.Data;
-
-                    }
-                else
-                    {
-
-                    }
-                }
-
-            catch (Exception ex)
-                {
+                trendingProducts = response.Data;
 
                 }
+            else
+                {
+
+                }
             }
-    }
+
+        catch (Exception ex)
+            {
+
+            }
+        }
+}

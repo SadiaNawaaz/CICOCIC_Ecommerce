@@ -11,6 +11,7 @@
 @using Ecommerce.Shared.Services.Clusters
 @using Pages.Shared
 @inject IClusterService clusterService
+@inject ILanguageService languageService
 @rendermode InteractiveServer
 
 <div class="d-flex align-items-center mb-3">
@@ -37,26 +38,90 @@
             <div class="panel-body">
                 <EditForm Model="@feature" OnValidSubmit="@HandleValidSubmit" FormName="featureForm">
                     <DataAnnotationsValidator />
+
                     <div class="row">
                         <div class="col-4 mb-3">
                             <label for="Name">Name</label>
                             <InputText id="Name" class="form-control" @bind-Value="feature.Name" />
-                            <span class="text-danger"> <ValidationMessage For="@(() => feature.Name)" /></span>
+                            <span class="text-danger"><ValidationMessage For="@(() => feature.Name)" /></span>
                         </div>
 
                         <div class="col-4 mb-3">
-                            <label for="Name">Cluster</label>
-                            <RadzenDropDownDataGrid TValue="long" @bind-Value="feature.ClusterId" Data=@clusters TextProperty="Name" ValueProperty="Id" Class="form-control">
+                            <label for="Cluster">Cluster</label>
+                            <RadzenDropDownDataGrid TValue="long" @bind-Value="feature.ClusterId" Data="@clusters" TextProperty="Name" ValueProperty="Id" Class="form-control">
                                 <Columns>
                                     <RadzenDropDownDataGridColumn Property="Name" Title="Name" Width="100px" />
                                 </Columns>
                             </RadzenDropDownDataGrid>
-                            <span class="text-danger"> <ValidationMessage For="@(() => feature.ClusterId)" /></span>
+                            <span class="text-danger"><ValidationMessage For="@(() => feature.ClusterId)" /></span>
                         </div>
 
-                        <div class="col-2 mt-20px">
+                        <div class="col-4 mt-3">
                             <button type="submit" class="btn btn-General">Save</button>
                         </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Feature Translations Section -->
+                    <h5>Feature Translations</h5>
+
+                    <div class="row mt-4">
+                        <div class="col-4">
+                            <label>Select Language</label>
+                            <select class="form-select" @bind="SelectedLanguageId">
+                                <option value="0">-- Select Language --</option>
+                                @foreach (var lang in Languages)
+                                    {
+                                    <option value="@lang.Id">@lang.LanguageName</option>
+                                    }
+                            </select>
+                        </div>
+
+                        <div class="col-4">
+                            <label>Translated Name</label>
+                            <InputText class="form-control" @bind-Value="TranslationText" />
+                        </div>
+
+                        <div class="col-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary" @onclick="AddTranslation">Add</button>
+                        </div>
+                    </div>
+
+                    @if (feature.Translations.Any())
+                        {
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Language</th>
+                                            <th>Translated Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var translation in feature.Translations)
+                                            {
+                                            <tr>
+                                                <td>@GetLanguageName(translation.LanguageId)</td>
+                                                <td>
+                                                    <InputText class="form-control" @bind-Value="translation.TranslatedName" />
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveTranslation(translation.LanguageId)">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        }
+
+                    <div class="row mt-4">
                         <div class="col-12">
                             <a href="javascript:history.back(-1);" class="btn btn-GeneralBack">
                                 <i class="fa fa-arrow-circle-left"></i> Back to previous page
@@ -65,94 +130,154 @@
                     </div>
                 </EditForm>
             </div>
+
         </div>
     </div>
 </div>
+
+
+
 
 @code {
     [Parameter] public long? FeatureId { get; set; }
     private IEnumerable<Cluster> clusters = new List<Cluster>();
     private Feature feature = new Feature();
+    private List<Language> Languages = new List<Language>();
+    private int SelectedLanguageId { get; set; } = 0;
+    private string TranslationText { get; set; } = string.Empty;
+
 
     protected override async Task OnInitializedAsync()
-    {
-        if (FeatureId.HasValue)
         {
+        await LoadLanguagesAsync();
+        if (FeatureId.HasValue)
+            {
             var response = await FeatureService.GetFeatureByIdAsync(FeatureId.Value);
             if (response.Success)
-            {
+                {
                 feature = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        await LoadClusters();
+        }
+
+
+    private async Task LoadLanguagesAsync()
+        {
+        var response = await languageService.GetLanguagesAsync();
+        if (response.Success)
+            {
+            Languages = response.Data;
+            SelectedLanguageId = Languages.FirstOrDefault()?.Id ?? 1;
+            }
+        else
+            {
+            Snackbar.Add("Error fetching languages", Severity.Error);
             }
         }
-        await LoadClusters();
-    }
 
     private async Task HandleValidSubmit()
-    {
-        try
         {
+        try
+            {
             ServiceResponse<Feature> response;
 
-            if(feature.ClusterId==0 || feature.ClusterId==null)
-            {
+            if (feature.ClusterId == 0 || feature.ClusterId == null)
+                {
                 Snackbar.Add("Please Select Cluster", Severity.Info);
                 return;
-            }
+                }
 
             if (FeatureId.HasValue)
-            {
+                {
                 response = await FeatureService.UpdateFeatureAsync(feature);
-            }
+                }
             else
-            {
+                {
                 response = await FeatureService.AddFeatureAsync(feature);
-            }
+                }
 
             if (response.Success)
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Success);
                 NavigationManager.NavigateTo("/FeatureList");
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
-        }
-    }
 
     private void GoBack()
-    {
+        {
         NavigationManager.NavigateTo("/FeatureList");
-    }
+        }
 
 
     private async Task LoadClusters()
-    {
-        try
         {
+        try
+            {
             var response = await clusterService.GetClustersAsync();
             if (response.Success)
-            {
+                {
                 clusters = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while loading clusters: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in LoadClusters: {ex}");
+            }
         }
-    }
+
+
+    private void AddTranslation()
+        {
+        if (SelectedLanguageId == 0 || string.IsNullOrWhiteSpace(TranslationText))
+            {
+            Snackbar.Add("Please select a valid language and enter a translated name.", Severity.Warning);
+            return;
+            }
+
+        if (feature.Translations.Any(t => t.LanguageId == SelectedLanguageId))
+            {
+            Snackbar.Add("Translation for this language already exists.", Severity.Warning);
+            return;
+            }
+
+        feature.Translations.Add(new FeatureTranslation
+            {
+            LanguageId = SelectedLanguageId,
+            TranslatedName = TranslationText
+            });
+
+        SelectedLanguageId = 0;
+        TranslationText = string.Empty;
+        }
+
+    private void RemoveTranslation(int languageId)
+        {
+        var translation = feature.Translations.FirstOrDefault(t => t.LanguageId == languageId);
+        if (translation != null)
+            {
+            feature.Translations.Remove(translation);
+            }
+        }
+    private string GetLanguageName(int languageId) =>
+        Languages.FirstOrDefault(l => l.Id == languageId)?.LanguageName ?? "Unknown";
 
 }

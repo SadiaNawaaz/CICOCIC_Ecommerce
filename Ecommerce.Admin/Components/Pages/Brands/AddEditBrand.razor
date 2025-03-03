@@ -99,7 +99,7 @@
                 brand = response.Data;
                 //brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;
 
-                if (!brand.ImageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                if (brand.ImageUrl!=null && !brand.ImageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
        && !brand.ImageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                     {
                     brand.ImageUrl = "/Brands/" + brand.Id + "/" + brand.ImageUrl;

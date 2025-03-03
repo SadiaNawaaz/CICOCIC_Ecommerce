@@ -7,6 +7,7 @@
 @inject ICategoryService CategoryService
 @inject ISnackbar Snackbar
 @using Ecommerce.Shared.Services.Shared;
+@inject ILanguageService languageService
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <style>
@@ -20,7 +21,6 @@
         background-color: rgb(185 207 231 / 10%);
         font-weight: bold;
     }
-
 </style>
 
 
@@ -28,8 +28,9 @@
 
     <div class="panel panel-inverse" data-sortable-id="tree-view-1" style="min-height:500px">
         <div class="panel-heading">
-            <h4 class="panel-title">Category
-               
+            <h4 class="panel-title">
+                Category
+
             </h4>
             <div class="panel-heading-btn">
                 <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
@@ -51,28 +52,28 @@
                 </button>
             </div>
             @if (IsLoading)
-            {
+                {
                 <div class="text-center">
                     <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                 </div>
-            }
+                }
 
-       
+
             <MudTreeView Items="@TreeItems" Hover="true" Width="100%">
                 <ItemTemplate Context="item">
-                    <MudTreeViewItem Class="@GetItemClass(item)" @onclick="() => SelectItem(item)" Items="@item.SubCategories" sm="6">                                                       
+                    <MudTreeViewItem Class="@GetItemClass(item)" @onclick="() => SelectItem(item)" Items="@item.SubCategories" sm="6" ExpandedChanged="@((bool expanded) => OnToggleClicked(item, expanded))">
                         <BodyContent>
                             @if (!string.IsNullOrEmpty(item.Icon))
-                            {
+                                {
 
                                 var icon = "/Category/" + item.Id.ToString() + "/" + item.Icon;
 
                                 <img src="@icon" alt="@icon" style="height: 24px; width: 24px" />
-                            }
+                                }
                             else
-                            {
+                                {
                                 <i class="fas fa-lg fa-fw me-10px fa-folder-open"></i>
-                            }
+                                }
                             <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
 
                                 <MudText Style="justify-self: start;">&nbsp;&nbsp;&nbsp; @item.Name </MudText>
@@ -81,15 +82,52 @@
 
 
 
-                                    <MudTooltip Text="Edit">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="text-success btn btn-sm" OnClick="() => OpenAddDialog(item)" />
-                                    </MudTooltip>
-                                    <MudTooltip Text="Edit">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" class="text-warning btn btn-sm" OnClick="() => OpenEditDialog(item)" />
-                                    </MudTooltip>
-                                    <MudTooltip Text="Delete">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" class="text-danger btn btn-sm" OnClick="() => ConfirmRemoveDialog(item)" />
-                                    </MudTooltip>
+                                    @if ((item.MarkCategory))
+                                        {
+
+
+
+
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item)">
+                                            <i class="fa fa-check"></i>
+                                        </button>
+
+
+                                        }
+                                    else
+                                        {
+
+
+
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item)">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                        }
+
+
+
+                                   
+                                    <button style="margin-left:3px" type="button" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenAddDialog(item)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+
+                                    <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenEditDialog(item)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => ConfirmRemoveDialog(item)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+
+                                    @*<MudTooltip Text="Edit">
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="text-success btn btn-sm" OnClick="() => OpenAddDialog(item)" />
+        </MudTooltip>
+        <MudTooltip Text="Edit">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" class="text-warning btn btn-sm" OnClick="() => OpenEditDialog(item)" />
+        </MudTooltip>
+        <MudTooltip Text="Delete">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" class="text-danger btn btn-sm" OnClick="() => ConfirmRemoveDialog(item)" />
+        </MudTooltip>*@
                                 </div>
                             </div>
                         </BodyContent>
@@ -108,55 +146,88 @@
 
     private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
     private bool IsLoading { get; set; } = false;
-
+    private List<Language> Languages = new List<Language>();
+    private int SelectedLanguageId;
     #region
 
     protected override async Task OnInitializedAsync()
-    {
-        await LoadCategoryTreeAsync();
-    }
+        {
+
+        }
+
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender)
+            {
+            await LoadCategoryTreeAsync();
+            await LoadLanguagesAsync();
+            StateHasChanged();
+            }
+        }
+
 
     private async Task LoadCategoryTreeAsync()
-    {
+        {
         try
-        {
+            {
             IsLoading = true;
-            var response = await CategoryService.GetCategoriesAsync();
+            var response = await CategoryService.GetCategoriesAsyncWithTranslation(null);
+
             if (response.Success)
-            {
-                var categories = response.Data;
-                TreeItems = categories.Where(c => c.ParentCategoryId == null)
-                              .Select(MapToCategoryDto)
-                              .ToHashSet();
-            }
+                {
+                TreeItems = new HashSet<CategoryDto>(response.Data);
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+            }
+        finally
+            {
+            IsLoading = false;
             }
         }
-        catch (Exception ex)
+
+
+    private async Task LoadLanguagesAsync()
         {
-            Snackbar.Add($"An error occurred while loading category tree: {ex.Message}", Severity.Error);
+        var response = await languageService.GetLanguagesAsync();
+        if (response.Success)
+            {
+            Languages = response.Data;
+            SelectedLanguageId = Languages.FirstOrDefault()?.Id ?? 1;
+            }
+        else
+            {
+            Snackbar.Add("Error fetching languages", Severity.Error);
+            }
         }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
 
     #endregion
     #region Save_Edit
 
     private async Task OpenAddDialog(CategoryDto? item)
-    {
-        try
         {
+        try
+            {
             var options = new DialogOptions { CloseButton = true, FullWidth = true };
             var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto() };
+
+
+
+
+
             var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
             string value = result.Data as string ?? string.Empty;
             if (!result.Cancelled && value != null)
-            {
+                {
 
 
                 var data = result.Data as dynamic;
@@ -165,12 +236,12 @@
                 byte[] newCategoryImageByte = data.ImageByte ?? Array.Empty<byte>();
 
                 if (!string.IsNullOrEmpty(newCategoryName))
-                {
+                    {
 
                     if (item == null)
-                    {
-                        var category = new Category
                         {
+                        var category = new Category
+                            {
                             Name = newCategoryName,
 
                             Level = 1,
@@ -181,101 +252,127 @@
 
 
 
-                        };
+                            };
 
-                        Category cate= await SaveOrUpdateCategoryAsync(category);
-                        if(cate!=null)
-                        {
-                            TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId,Icon= cate.Icon });
+                        Category cate = await SaveOrUpdateCategoryAsync(category);
+                        if (cate != null)
+                            {
+                            TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId, Icon = cate.Icon });
+                            }
+
                         }
-
-                    }
                     else
-                    {
-                        var category = new Category
                         {
+                        var category = new Category
+                            {
                             Name = newCategoryName,
                             Icon = newCategoryIcon ?? string.Empty,
                             ImageByte = newCategoryImageByte,
                             Level = item.Level + 1,
                             ParentCategoryId = item.Id
-                        };
+                            };
                         Category cate = await SaveOrUpdateCategoryAsync(category);
 
                         if (cate != null)
-                        {
-                            item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId,Icon = cate.Icon });
-                        }
+                            {
+                            item.SubCategories.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId, Icon = cate.Icon });
+                            }
 
+                        }
                     }
                 }
             }
-        }
 
 
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
         }
-    }
     private async Task OpenEditDialog(CategoryDto item)
-    {
+        {
 
         try
-        {
+            {
             var options = new DialogOptions { CloseButton = true, FullWidth = true };
-            var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto(), ["IsEdit"] = true };
+            /// var parameters = new DialogParameters { ["Item"] = item ?? new CategoryDto(), ["IsEdit"] = true };
+
+
+            var parameters = new DialogParameters
+                {
+                ["Item"] = item ?? new CategoryDto(),
+                ["IsEdit"] = true,
+                ["Languages"] = Languages,
+                ["Translations"] = item.Translations,
+                };
+
+
             var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
 
             if (!result.Cancelled)
-            {
+                {
 
                 var data = result.Data as dynamic;
                 string newName = data.Name ?? string.Empty;
                 string newCategoryIcon = data.Icon ?? string.Empty;
                 byte[] newCategoryImageByte = data.ImageByte ?? Array.Empty<byte>();
+                var updatedTranslations = data.Translations as List<CategoryTranslationDto> ?? new List<CategoryTranslationDto>();
+                updatedTranslations.ForEach(a => a.CategoryId = item.Id);
+
+                if (string.IsNullOrWhiteSpace(newName))
+                    {
+                    newName = updatedTranslations.FirstOrDefault(t => t.LanguageId == 1)?.TranslatedName ?? string.Empty;
+                    }
+
 
                 if (!string.IsNullOrEmpty(newName))
-                {
+                    {
                     item.Name = newName;
 
                     var category = new Category
-                    {
+                        {
                         Id = item.Id,
                         Name = item.Name,
                         Icon = newCategoryIcon ?? string.Empty,
                         ImageByte = newCategoryImageByte,
                         Level = item.Level,
                         ParentCategoryId = item.ParentCategoryId,
+                        Translations = updatedTranslations.Select(t => new CategoryTranslation
+                            {
+                            Id = t.Id,
+                            CategoryId = item.Id,
+                            LanguageId = t.LanguageId,
+                            TranslatedName = t.TranslatedName
+                            }).ToList()
 
-                    };
+                        };
 
                     await SaveOrUpdateCategoryAsync(category);
+                    }
                 }
-            }
 
-        }
+            }
 
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
         }
-    }
     private async Task<Category> SaveOrUpdateCategoryAsync(Category category)
-    {
-        try
         {
+        try
+            {
             ServiceResponse<Category> response;
             if (category.Id == 0)
-            {
+                {
                 response = await CategoryService.AddCategoryAsync(category);
-            }
+                }
             else
-            {
+                {
                 response = await CategoryService.UpdateCategoryAsync(category);
-            }
+                }
             if (response.Success)
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Success);
 
 
@@ -283,60 +380,60 @@
 
 
                 if (category.ImageByte != null && category.ImageByte.Length > 0)
-                {
+                    {
 
 
                     if (Directory.Exists(CategoryImagesPath))
-                    {
+                        {
                         Directory.Delete(CategoryImagesPath, true);
-                    }
+                        }
 
                     if (!Directory.Exists(CategoryImagesPath))
-                    {
+                        {
                         Directory.CreateDirectory(CategoryImagesPath);
-                    }
+                        }
 
                     var filePath = Path.Combine(CategoryImagesPath, category.Icon);
                     await File.WriteAllBytesAsync(filePath, category.ImageByte);
 
                     category.Icon = category.Icon;
-                }
+                    }
 
 
 
                 return category;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
                 return null;
+                }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
             return null;
+            }
         }
-    }
     #endregion
 
     private CategoryDto MapToCategoryDto(Category category)
-    {
-        return new CategoryDto
         {
+        return new CategoryDto
+            {
             Id = category.Id,
             Name = category.Name,
             Icon = category.Icon,
             Level = category.Level,
             ParentCategoryId = category.ParentCategoryId,
             SubCategories = category.SubCategories?.Select(MapToCategoryDto).ToHashSet()
-        };
-    }
+            };
+        }
 
     #region Remove
 
     private async Task ConfirmRemoveDialog(CategoryDto item)
-    {
+        {
         bool? result = await DialogService.ShowMessageBox(
             "Confirm Delete",
             $"Are you sure you want to delete '{item.Name}'?",
@@ -344,106 +441,163 @@
         );
 
         if (result == true)
-        {
+            {
 
 
 
             var success = await DeleteCategoryAsync(item.Id);
             if (success)
-            {
+                {
                 Snackbar.Add("Category deleted successfully", Severity.Success);
 
                 var CategoryImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Category", item.Id.ToString());
 
 
                 if (Directory.Exists(CategoryImagesPath))
-                {
+                    {
                     Directory.Delete(CategoryImagesPath, true);
-                }
+                    }
 
                 await LoadCategoryTreeAsync();
-            }
+                }
 
+            }
         }
-    }
 
 
 
     private async Task<bool> DeleteCategoryAsync(long id)
-    {
-        try
         {
+        try
+            {
             var response = await CategoryService.DeleteCategoryAsync(id);
             return response.Success;
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred while deleting category: {ex.Message}", Severity.Error);
             return false;
+            }
         }
-    }
 
 
     private async Task<bool> RemoveCategoryAndDeleteAsync(HashSet<CategoryDto> categories, long id)
-    {
+        {
         var itemToRemove = categories.FirstOrDefault(c => c.Id == id);
         if (itemToRemove != null)
-        {
-            if (await DeleteCategoryAsync(id))
             {
+            if (await DeleteCategoryAsync(id))
+                {
                 categories.Remove(itemToRemove);
 
-                Snackbar.Add(itemToRemove.Name+ "Category deleted successfully", Severity.Success);
+                Snackbar.Add(itemToRemove.Name + "Category deleted successfully", Severity.Success);
                 return true;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add("Failed to delete category", Severity.Error);
                 return false;
-            }
-        }
-        else
-        {
-            foreach (var category in categories)
-            {
-                if (await RemoveCategoryAndDeleteAsync(category.SubCategories, id))
-                {
-                    Snackbar.Add("Category deleted successfully", Severity.Success);
-                    return true;
                 }
             }
-        }
+        else
+            {
+            foreach (var category in categories)
+                {
+                if (await RemoveCategoryAndDeleteAsync(category.SubCategories, id))
+                    {
+                    Snackbar.Add("Category deleted successfully", Severity.Success);
+                    return true;
+                    }
+                }
+            }
 
         Snackbar.Add("Category not found", Severity.Warning);
         return false;
-    }
+        }
 
 
     private void CollectCategoriesToDelete(CategoryDto category, HashSet<CategoryDto> categoriesToDelete)
-    {
+        {
         categoriesToDelete.Add(category);
         foreach (var subCategory in category.SubCategories)
-        {
+            {
             CollectCategoriesToDelete(subCategory, categoriesToDelete);
+            }
         }
-    }
 
     #endregion
 
 
     private CategoryDto _selectedItem;
     private string GetItemClass(CategoryDto item)
-    {
+        {
         return item == _selectedItem ? "custom-tree-item custom-tree-item-selected" : "custom-tree-item";
-    }
+        }
 
     private string GetIcon(CategoryDto item)
-    {
+        {
         return item.Icon; ;
-    }
+        }
 
-    private void SelectItem(CategoryDto item)
-    {
+    private async void SelectItem(CategoryDto item)
+        {
+        var response = await CategoryService.GetCategoriesByParentId(item.Id, 1);
+
+        if (response.Success)
+            {
+
+            item.SubCategories = new HashSet<CategoryDto>(response.Data);
+            StateHasChanged();
+            }
+        else
+            {
+            Snackbar.Add(response.Message, Severity.Error);
+            }
+
         _selectedItem = item;
-    }
+        StateHasChanged();
+        }
+
+    private void OnToggleClicked(CategoryDto item, bool isExpanded)
+        {
+        Console.WriteLine($"Toggled: {item.Name}, Expanded: {isExpanded}");
+
+        // Example custom logic:
+        if (isExpanded)
+            {
+            SelectItem(item);
+            // e.g., Load data dynamically here if needed
+            }
+        else
+            {
+            Console.WriteLine($"Node '{item.Name}' collapsed");
+            }
+        }
+
+    private async Task MarkCategory(CategoryDto category)
+
+        {
+
+        if (category.MarkCategory)
+            {
+            category.MarkCategory = false;
+
+            }
+        else
+            {
+            category.MarkCategory = true;
+            }
+        var response = await CategoryService.MarkUnmarkCategoryAsync(category.Id, category.MarkCategory);
+        if (response.Success)
+            {
+            Snackbar.Add(response.Message, Severity.Success);
+
+            }
+        else
+            {
+            Snackbar.Add(response.Message, Severity.Error);
+            }
+
+
+        }
 }

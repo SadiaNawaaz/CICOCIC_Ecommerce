@@ -7,6 +7,7 @@ using Ecommerce.Shared.Entities.TrendingProducts;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Text.Json;
@@ -24,14 +25,14 @@ public interface IProductVariantService
     Task<ServiceResponse<List<ProductVariant>>> GetAllProductVariantsAsync(long ProductId,long UserId,bool IsAgent);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByCategoryAsync(long categoryId);
     Task<ServiceResponse<ProductVariantDetailDto>> GetProductVariantDetailByIdAsync(long categoryId);
-    Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId);
+    Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId, string languageCode = "en");
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId);
     Task<ServiceResponse<TrendingProduct>> AddTrendingProdutc(TrendingProduct productVariant);
-    Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync();
+    Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync(string languageCode="en");
     Task<ServiceResponse<bool>> RemoveTrendingProduct(long id);
     Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsWithinDistanceAsync(string Keyword, long ? CategoryId, string PostalCode, int? Distance);
     Task<ServiceResponse<bool>> SaveVariantObjectMediaAsync(List<VariantObjectMedia> mediaList);
-    Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync();
+    Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync(string languageCode = "en");
     Task<ServiceResponse<List<ProductVariantDto>>> GetTopTenProductVariantsByCategoryAsync(long categoryId);
     Task<ServiceResponse<List<BrandVariantCountDto>>> GetBrandsWithVariantCountsAsync();
     Task<ServiceResponse<List<ProductVariantDto>>> SearchProductVariantsByKeywordAsync(string keyword);
@@ -284,15 +285,7 @@ public class ProductVariantService: IProductVariantService
 
             List<long> categoryIds = new List<long>();
 
-            if (category.Level == 4)
-                {
-
-                categoryIds.Add(categoryId);
-                }
-            else
-                {
-                categoryIds = await GetAllDescendantCategoryIdsAsync(categoryId);
-                }
+            categoryIds.AddRange(await GetAllDescendantCategoryIdsAsync(categoryId));
 
             // Fetch product variants for the identified categories
             var productVariants = await _context.ProductVariants
@@ -335,17 +328,12 @@ public class ProductVariantService: IProductVariantService
 
         void AddChildCategories(long categoryId)
             {
+          
             var childCategories = allCategories.Where(c => c.ParentCategoryId == categoryId).ToList();
             foreach (var child in childCategories)
                 {
-                if (child.Level == 4)
-                    {
-                    descendantCategoryIds.Add(child.Id);
-                    }
-                else
-                    {
-                    AddChildCategories(child.Id); // Recursively add further descendants
-                    }
+                descendantCategoryIds.Add(child.Id);  // Add every child's ID
+                AddChildCategories(child.Id);         // Recursively find further descendants
                 }
             }
 
@@ -429,6 +417,7 @@ public class ProductVariantService: IProductVariantService
                     ProductVariantMedia = pv.ProductVariantMedias.Select(vi => new ProductVariantMedia
                     {
                         MediaUrl = vi.MediaUrl,
+                        ContentType=vi.ContentType
                         
                     }).ToList()
 
@@ -509,49 +498,111 @@ public class ProductVariantService: IProductVariantService
 
         return response;
     }
-    public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId)
-    {
-        var response = new ServiceResponse<List<ClusterFeatureDto>>();
-
-        try
+    public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId, string languageCode)
         {
+        var response = new ServiceResponse<List<ClusterFeatureDto>>();
+        try
+            {
+        
+
+            // Fetch LanguageId based on languageCode
+            var languageId = await _context.Languages
+                .Where(l => l.LanguageCode == languageCode)
+                .Select(l => l.Id)
+                .FirstOrDefaultAsync();
+
+            var query = @"
+            SELECT 
+                COALESCE(ct.TranslatedName, c.Name) AS Cluster, 
+                COALESCE(ft.TranslatedName, f.Name) AS Feature, 
+                c.Id AS ClusterId, 
+                f.Id AS FeatureId, 
+                ISNULL(pcf.Value, '-') AS Value,
+                pc.[Order]
+            FROM ProductCluster pc 
+            INNER JOIN Clusters c ON pc.ClusterId = c.Id 
+            LEFT JOIN ClusterTranslations ct ON c.Id = ct.ClusterId AND ct.LanguageId = {0}
+            INNER JOIN ProductClusterFeature pcf ON pc.Id = pcf.ProductClusterId 
+            INNER JOIN Features f ON pcf.FeatureId = f.Id 
+            LEFT JOIN FeatureTranslations ft ON f.Id = ft.FeatureId AND ft.LanguageId = {0}
+            WHERE pc.ProductId = {1}";
+
             var clusterFeatures = await _context.Set<RawClusterFeatureDto>()
-                .FromSqlRaw("SELECT c.Name AS Cluster, f.Name AS Feature, c.Id AS ClusterId, f.Id AS FeatureId, ISNULL(pcf.Value, '-') AS Value,pc.[Order]" +
-                            "FROM ProductCluster pc " +
-                            "INNER JOIN Clusters c ON pc.ClusterId = c.Id " +
-                            "INNER JOIN ProductClusterFeature pcf ON pc.Id = pcf.ProductClusterId " +
-                            "INNER JOIN Features f ON pcf.FeatureId = f.Id " +
-                            "WHERE pc.ProductId = {0}", productVariantId)
+                .FromSqlRaw(query, languageId, productVariantId)
                 .ToListAsync();
 
             var groupedData = clusterFeatures
-                .GroupBy(cf => new { cf.Cluster, cf.ClusterId,cf.Order })
+                .GroupBy(cf => new { cf.Cluster, cf.ClusterId, cf.Order })
                 .Select(g => new ClusterFeatureDto
-                {
+                    {
                     Cluster = g.Key.Cluster,
                     ClusterId = g.Key.ClusterId,
-                    Order=g.Key.Order,
+                    Order = g.Key.Order,
                     Features = g.Select(cf => new FeatureValuePair
-                    {
+                        {
                         Feature = cf.Feature,
                         Value = cf.Value
-                    }).ToList()
-                })
+                        }).ToList()
+                    })
                 .ToList();
 
             response.Data = groupedData;
             response.Success = true;
             response.Message = "Cluster features fetched successfully.";
-        }
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error fetching cluster features.");
             response.Success = false;
             response.Message = $"An error occurred while fetching cluster features: {ex.Message}";
-        }
+            }
 
         return response;
-    }
+        }
+
+    /* public async Task<ServiceResponse<List<ClusterFeatureDto>>> GetClusterFeaturesAsync(long productVariantId,string languageCode)
+     {
+         var response = new ServiceResponse<List<ClusterFeatureDto>>();
+
+         try
+         {
+             var clusterFeatures = await _context.Set<RawClusterFeatureDto>()
+                 .FromSqlRaw("SELECT c.Name AS Cluster, f.Name AS Feature, c.Id AS ClusterId, f.Id AS FeatureId, ISNULL(pcf.Value, '-') AS Value,pc.[Order]" +
+                             "FROM ProductCluster pc " +
+                             "INNER JOIN Clusters c ON pc.ClusterId = c.Id " +
+                             "INNER JOIN ProductClusterFeature pcf ON pc.Id = pcf.ProductClusterId " +
+                             "INNER JOIN Features f ON pcf.FeatureId = f.Id " +
+                             "WHERE pc.ProductId = {0}", productVariantId)
+                 .ToListAsync();
+
+             var groupedData = clusterFeatures
+                 .GroupBy(cf => new { cf.Cluster, cf.ClusterId,cf.Order })
+                 .Select(g => new ClusterFeatureDto
+                 {
+                     Cluster = g.Key.Cluster,
+                     ClusterId = g.Key.ClusterId,
+                     Order=g.Key.Order,
+                     Features = g.Select(cf => new FeatureValuePair
+                     {
+                         Feature = cf.Feature,
+                         Value = cf.Value
+                     }).ToList()
+                 })
+                 .ToList();
+
+             response.Data = groupedData;
+             response.Success = true;
+             response.Message = "Cluster features fetched successfully.";
+         }
+         catch (Exception ex)
+         {
+             _logger.LogError(ex, "Error fetching cluster features.");
+             response.Success = false;
+             response.Message = $"An error occurred while fetching cluster features: {ex.Message}";
+         }
+
+         return response;
+     }*/
 
     public async Task<ServiceResponse<List<ProductVariantDto>>> GetProductVariantsByBrandAsync(long brandId)
     {
@@ -614,56 +665,85 @@ public class ProductVariantService: IProductVariantService
             };
         }
     }
-    public async Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync()
-    {
+
+    public async Task<ServiceResponse<List<TrendingProductDto>>> GetTrendingProductVariantsAsync(string languageCode = "en")
+        {
         var response = new ServiceResponse<List<TrendingProductDto>>();
 
         try
-        {
+            {
+
+            var languageId = await _context.Languages
+                .Where(l => l.LanguageCode == languageCode) 
+                .Select(l => l.Id)
+                .FirstOrDefaultAsync();
+            if (languageId == 0)
+                {
+                languageId = await _context.Languages
+                    .Where(l => l.LanguageCode == "en")
+                    .Select(l => l.Id)
+                    .FirstOrDefaultAsync();
+                }
+
             var trendingProductVariants = await _context.TrendingProducts
                 .Include(tp => tp.ProductVariant)
-                .ThenInclude(pv => pv.Product)
-                .ThenInclude(p => p.Category)
+                    .ThenInclude(pv => pv.Product)
+                        .ThenInclude(p => p.Category)
                 .Include(tp => tp.ProductVariant.productVariantImages)
+                .Include(tp => tp.ProductVariant.Product.Translations) 
                 .Select(tp => new TrendingProductDto
-                {
+                    {
                     ProductId = tp.ProductVariant.ProductId,
                     Id = tp.Id,
-                    ProductVariantId= tp.ProductVariant.Id,
-                    Name = tp.ProductVariant.Product.Name,
-                    Description = tp.ProductVariant.Description,
+                    ProductVariantId = tp.ProductVariant.Id,
+
+                    Name = tp.ProductVariant.Product.Translations
+                        .Where(t => t.LanguageId == languageId) 
+                        .Select(t => t.TranslatedName)
+                        .FirstOrDefault()
+                        ?? tp.ProductVariant.Product.Name, 
+
+                    Description = tp.ProductVariant.Product.Translations
+                        .Where(t => t.LanguageId == languageId)
+                        .Select(t => t.TranslatedDescription)
+                        .FirstOrDefault()
+                        ?? tp.ProductVariant.Description,
+
                     Category = tp.ProductVariant.Product.Category.Name,
                     VariantPrice = tp.ProductVariant.Price,
                     ProductPrice = tp.ProductVariant.Product.Price,
                     Sku = tp.ProductVariant.Sku,
-                    DefaultImageUrl = tp.ProductVariant.productVariantImages.FirstOrDefault() != null ? tp.ProductVariant.productVariantImages.FirstOrDefault().ImageName : null
-                })
+                    DefaultImageUrl = tp.ProductVariant.productVariantImages.FirstOrDefault() != null
+                        ? tp.ProductVariant.productVariantImages.FirstOrDefault().ImageName
+                        : null
+                    })
                 .ToListAsync();
 
             // Calculate discount percentage for each product variant
             foreach (var productVariant in trendingProductVariants)
-            {
-                if (productVariant.ProductPrice > 0 && productVariant.VariantPrice > 0)
                 {
+                if (productVariant.ProductPrice > 0 && productVariant.VariantPrice > 0)
+                    {
                     double discount = productVariant.ProductPrice - productVariant.VariantPrice;
                     int discountPercentage = (int)Math.Round((discount / productVariant.ProductPrice) * 100);
                     productVariant.discountPercentage = discountPercentage;
+                    }
                 }
-            }
 
             response.Data = trendingProductVariants;
             response.Success = true;
             response.Message = "Trending product variants fetched successfully.";
-        }
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error fetching trending product variants.");
             response.Success = false;
             response.Message = $"An error occurred while fetching trending product variants: {ex.Message}";
-        }
+            }
 
         return response;
-    }
+        }
+
     public async Task<ServiceResponse<bool>> RemoveTrendingProduct(long id)
     {
         try
@@ -887,7 +967,75 @@ public class ProductVariantService: IProductVariantService
             }
         }
 
-    public async Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync()
+
+    public async Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync(string languageCode = "en")
+        {
+        var response = new ServiceResponse<List<CategoryVariantCountDto>>();
+
+        try
+            {
+            // Fetch the corresponding LanguageId based on the given languageCode
+            var languageId = await _context.Languages
+                .Where(l => l.LanguageCode == languageCode)
+                .Select(l => l.Id)
+                .FirstOrDefaultAsync();
+
+            var query = @"
+        WITH RecursiveCategory AS (
+            -- Start with Level 1 categories
+            SELECT 
+                c.Id AS RootCategoryId, 
+                c.Name AS DefaultCategoryName, 
+                c.Id AS CategoryId, 
+                c.ParentCategoryId
+            FROM Categories c
+            WHERE c.Level = 1
+            
+            UNION ALL
+            
+            -- Recursively join to get all subcategories
+            SELECT 
+                rc.RootCategoryId, 
+                rc.DefaultCategoryName, 
+                c.Id, 
+                c.ParentCategoryId
+            FROM Categories c
+            INNER JOIN RecursiveCategory rc ON c.ParentCategoryId = rc.CategoryId
+        )
+        -- Get Translated Names if available
+        SELECT 
+            rc.RootCategoryId AS CategoryId, 
+            COALESCE((
+                SELECT TOP 1 ct.TranslatedName 
+                FROM CategoryTranslations ct 
+                WHERE ct.CategoryId = rc.RootCategoryId 
+                AND ct.LanguageId = {0}
+            ), rc.DefaultCategoryName) AS CategoryName, 
+            COUNT(DISTINCT pv.Id) AS VariantCount -- Ensure distinct count
+        FROM RecursiveCategory rc
+        LEFT JOIN Products p ON rc.CategoryId = p.CategoryId
+        LEFT JOIN ProductVariants pv ON p.Id = pv.ProductId AND pv.Sold = 0
+        GROUP BY rc.RootCategoryId, rc.DefaultCategoryName
+        ORDER BY VariantCount DESC;
+        ";
+
+            var result = await _context.Database.SqlQueryRaw<CategoryVariantCountDto>(query, languageId).ToListAsync();
+
+            response.Data = result;
+            response.Success = true;
+            response.Message = "Categories with variant counts fetched successfully.";
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error fetching categories with product variant counts.");
+            response.Success = false;
+            response.Message = $"An error occurred: {ex.Message}";
+            }
+
+        return response;
+        }
+
+    public async Task<ServiceResponse<List<CategoryVariantCountDto>>> GetCategoriesWithVariantCountsAsync1(string languageCode="en")
         {
         var response = new ServiceResponse<List<CategoryVariantCountDto>>();
 

@@ -4,6 +4,12 @@
 @inject IProductVariantService ProductVariantService
 @inject NavigationManager Navigation
 
+@using Microsoft.Extensions.Localization
+@using Web.Resources;
+@using System.Globalization
+@inject IStringLocalizer<Web.Resources.Resources> localizer
+
+
 <style>
     .search-input {
         width: 80%;
@@ -44,7 +50,7 @@
             <div class="search-container flex-grow-1 d-flex align-items-center">
                 <div class="mx-10px">
                     <span class="text-ligt" style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.7);">
-                        &nbsp;&nbsp; Deliver to
+                        &nbsp;&nbsp;@localizer["DeliverTo"]
                     </span>
                     <span class="text-white">
                         <b style="display: flex; align-items: center;">
@@ -76,11 +82,30 @@
             </div>
 
             <ul class="nav navbar-nav navbar-end">
+
+                <CultureSelector/>
+                @*<li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> Language
+            </a>
+            <ul class="dropdown-menu">
                 <li>
-                    <a href="#" data-bs-toggle="dropdown">
-                        <img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English <b class="caret"></b>
+                    <a class="dropdown-item" href="#" @onclick='(() => ChangeLanguage("en"))'>
+                        <img src="../assets/img/flag/flag-english.png" class="flag-img" alt="" /> English
                     </a>
                 </li>
+                <li>
+                    <a class="dropdown-item" href="#" @onclick='() => ChangeLanguage("nl")'>
+                        <img src="../assets/img/flag/OIP.jpg" class="flag-img" alt="" /> Dutch
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" @onclick='() => ChangeLanguage("de")'>
+                        <img src="../assets/img/flag/flag-german.png" class="flag-img" alt="" /> German
+                    </a>
+                </li>
+            </ul>
+        </li>*@
 
                 <li class="dropdown dropdown-hover">
                     @if (!String.IsNullOrEmpty(userName))
@@ -118,23 +143,9 @@
     private string searchTerm = string.Empty;
     private List<string> searchResults = new List<string>();
     private bool hasInitialized = false;
-
-    //protected override async Task OnAfterRenderAsync(bool firstRender)
-    //    {
-    //    if (firstRender && !hasInitialized)
-    //        {
-    //        var result = await ProtectedLocalStore.GetAsync<string>("UserName");
-
-    //        if (result.Success && !string.IsNullOrEmpty(result.Value))
-    //            {
-    //            userName = result.Value;
-    //            }
-    //        hasInitialized = true;
-    //        StateHasChanged();
-    //        }
-    //    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+
         if (firstRender && !hasInitialized)
             {
             try
@@ -204,25 +215,32 @@
         await ProtectedLocalStore.DeleteAsync("CustomerId");
         Navigation.NavigateTo("/login", forceLoad: true);
         }
+
+
+    private async Task ChangeLanguage(string culture)
+        {
+
+        Navigation.NavigateTo($"?culture={culture}&ui-culture={culture}", forceLoad: true);
+        }
 }
-<script>
+@*<script>
 
-    document.addEventListener('click', function(event) {
-        const searchInput = document.getElementById('searchInput');
-        const dropdownMenu = document.getElementById('dropdownMenu');
+        document.addEventListener('click', function(event) {
+            const searchInput = document.getElementById('searchInput');
+            const dropdownMenu = document.getElementById('dropdownMenu');
 
-        if (dropdownMenu && searchInput) {
-            if (!searchInput.contains(event.target) && !dropdownMenu.contains(event.target)) {
-                dropdownMenu.classList.remove('show');
+            if (dropdownMenu && searchInput) {
+                if (!searchInput.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
             }
-        }
-    });
+        });
 
-    // Show dropdown when search input is focused or typed in
-    document.getElementById('searchInput').addEventListener('focus', function() {
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        if (dropdownMenu && dropdownMenu.children.length > 0) {
-            dropdownMenu.classList.add('show');
-        }
-    });
-</script>
+        // Show dropdown when search input is focused or typed in
+        document.getElementById('searchInput').addEventListener('focus', function() {
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            if (dropdownMenu && dropdownMenu.children.length > 0) {
+                dropdownMenu.classList.add('show');
+            }
+        });
+    </script>*@

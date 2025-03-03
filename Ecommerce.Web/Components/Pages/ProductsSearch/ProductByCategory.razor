@@ -4,157 +4,158 @@
 @inject ICategoryService CategoryService
 @using Ecommerce.Shared.Entities;
 @rendermode InteractiveServer
+@inject CultureStateService CultureState
 
 
+<div id="search-results" class="section-container">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN search-container -->
+        <div class="search-container">
+            <!-- BEGIN search-sidebar -->
+            <div class="search-sidebar">
+                <h4 class="title">
 
-    <div id="search-results" class="section-container">
-        <!-- BEGIN container -->
-        <div class="container">
-            <!-- BEGIN search-container -->
-            <div class="search-container">
-                <!-- BEGIN search-sidebar -->
-                <div class="search-sidebar">
-                    <h4 class="title">
-                        Filter By
+                    @localizer["FilterBy"]
 
-                    </h4>
-                    <div>
-                        <div class="mb-3">
-                            <label class="form-label">Keywords</label>
+                </h4>
+                <div>
+                    <div class="mb-3">
+                        <label class="form-label"> @localizer["Keywords"]</label>
 
 
-                            <input type="text" class="form-control input-sm" name="keyword" value="@Keyword" placeholder="Enter Keywords" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Price</label>
-                            <div class="row row-space-0">
-                                <div class="col-md-5">
-                                    <input type="number" @bind="@PriceForm" class="form-control input-sm" name="price_from" placeholder="Price From" />
-                                </div>
-                                <div class="col-md-2 text-center pt-5px fs-12px text-muted">to</div>
-                                <div class="col-md-5">
-                                    <input type="number" @bind="@PriceTo" class="form-control input-sm" name="price_to" placeholder="Price To" />
-                                </div>
+                        <input type="text" class="form-control input-sm" name="keyword" value="@Keyword" placeholder="@localizer["EnterKeywords"]" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@localizer["Price"]</label>
+                        <div class="row row-space-0">
+                            <div class="col-md-5">
+                                <input type="number" @bind="@PriceForm" class="form-control input-sm" name="price_from" placeholder="Price From" />
+                            </div>
+                            <div class="col-md-2 text-center pt-5px fs-12px text-muted">@localizer["To"]</div>
+                            <div class="col-md-5">
+                                <input type="number" @bind="@PriceTo" class="form-control input-sm" name="price_to" placeholder="Price To" />
                             </div>
                         </div>
-                        <div class="mb-30px">
-                            <button type="button" @onclick='() => ChangeSort("Range")' class="btn btn-sm btn-theme btn-dark w-100"><i class="fa fa-search fa-fw me-1 ms-n3"></i> FILTER</button>
-                        </div>
                     </div>
-                    <h4 class="title mb-0">Categories</h4>
-                    <ul class="search-category-list">
-                        @if (CategoryVariantCount != null && CategoryVariantCount.Count() > 0)
-                            {
-                            foreach (var cat in CategoryVariantCount)
-                                {
-                                <li><a href="/ProductByCategory?Id=@cat.CategoryId">@cat.CategoryName <span class="pull-right">(@cat.VariantCount)</span></a></li>
-                                }
-                            }
-
-
-                    </ul>
+                    <div class="mb-30px">
+                        <button type="button" @onclick='() => ChangeSort("Range")' class="btn btn-sm btn-theme btn-dark w-100"><i class="fa fa-search fa-fw me-1 ms-n3"></i> @localizer["Filter"]</button>
+                    </div>
                 </div>
-                <!-- END search-sidebar -->
-                <!-- BEGIN search-content -->
+                <h4 class="title mb-0">@localizer["Categories"]</h4>
+                <ul class="search-category-list">
+                    @if (CategoryVariantCount != null && CategoryVariantCount.Count() > 0)
+                        {
+                        foreach (var cat in CategoryVariantCount)
+                            {
+                            <li><a href="/ProductByCategory?Id=@cat.CategoryId">@cat.CategoryName <span class="pull-right">(@cat.VariantCount)</span></a></li>
+                            }
+                        }
 
 
-                <div class="search-content">
-                    <!-- BEGIN search-toolbar -->
-                    <div class="search-toolbar">
-                        <!-- BEGIN row -->
-                        <div class="row">
-                            <div class="col-lg-6">
+                </ul>
+            </div>
+            <!-- END search-sidebar -->
+            <!-- BEGIN search-content -->
 
-                                <h4>We found @ProductVariants.Count() Items For @(string.IsNullOrEmpty(_Category.Name) ? Keyword : _Category.Name) </h4>
 
-                            </div>
-                            <!-- END col-6 -->
-                            <!-- BEGIN col-6 -->
-                            <div class="col-lg-6 text-end">
-                                <ul class="sort-list">
-                                    <li class="text"><i class="fa fa-filter"></i> Sort by:</li>
-                                    <li class="@((selectedSort == "Popular") ? "active" : "")">
-                                        <a href="#" @onclick='() => ChangeSort("Popular")'>Popular</a>
-                                    </li>
-                                    <li class="@((selectedSort == "New Arrival") ? "active" : "")">
-                                        <a href="#" @onclick='() => ChangeSort("New Arrival")'>New Arrival</a>
-                                    </li>
-                                    <li class="@((selectedSort == "Discount") ? "active" : "")">
-                                        <a href="#" @onclick='() => ChangeSort("Discount")'>Discount</a>
-                                    </li>
-                                    <li class="@((selectedSort == "Price") ? "active" : "")">
-                                        <a href="#" @onclick='() => ChangeSort("Price")'>Price</a>
-                                    </li>
-                                </ul>
+            <div class="search-content">
+                <!-- BEGIN search-toolbar -->
+                <div class="search-toolbar">
+                    <!-- BEGIN row -->
+                    <div class="row">
+                        <div class="col-lg-6">
 
-                            </div>
-                            <!-- END col-6 -->
+                            <h4>@localizer["WeFound"] @ProductVariants.Count() @localizer["ItemsFor"] @(string.IsNullOrEmpty(_Category.Name) ? Keyword : _Category.Name) </h4>
+
                         </div>
-                        <!-- END row -->
+                        <!-- END col-6 -->
+                        <!-- BEGIN col-6 -->
+                        <div class="col-lg-6 text-end">
+                            <ul class="sort-list">
+                                <li class="text"><i class="fa fa-filter"></i> @localizer["SortBy"]:</li>
+                                <li class="@((selectedSort == "Popular") ? "active" : "")">
+                                    <a href="#" @onclick='() => ChangeSort("Popular")'>@localizer["Popular"]</a>
+                                </li>
+                                <li class="@((selectedSort == "New Arrival") ? "active" : "")">
+                                    <a href="#" @onclick='() => ChangeSort("New Arrival")'>@localizer["NewArrival"]</a>
+                                </li>
+                                <li class="@((selectedSort == "Discount") ? "active" : "")">
+                                    <a href="#" @onclick='() => ChangeSort("Discount")'>@localizer["Discount"]</a>
+                                </li>
+                                <li class="@((selectedSort == "Price") ? "active" : "")">
+                                    <a href="#" @onclick='() => ChangeSort("Price")'>@localizer["Price"]</a>
+                                </li>
+                            </ul>
+
+                        </div>
+                        <!-- END col-6 -->
                     </div>
-                    <!-- END search-toolbar -->
-                    <!-- BEGIN search-item-container -->
-                    <div class="search-container">
-                        <div class="container justify-content-center mt-50 mb-50">
+                    <!-- END row -->
+                </div>
+                <!-- END search-toolbar -->
+                <!-- BEGIN search-item-container -->
+                <div class="search-container">
+                    <div class="container justify-content-center mt-50 mb-50">
 
-                            <div class="row">
-                                @if (FilteredProductVariants != null && FilteredProductVariants.Any())
-                                    {
+                        <div class="row">
+                            @if (FilteredProductVariants != null && FilteredProductVariants.Any())
+                                {
 
-                                    int discountPercentage;
-                                    }
-                                @foreach (var variant in FilteredProductVariants)
-                                    {
-                                    int discountPercentage;
-                                    <div class="col-md-3 mt-2">
-
-
-                                        <div class="card">
-                                            <div class="card-body bg-light">
-                                                <div class="card-img-actions d-flex flex-column justify-content-center align-items-center"
-                                                     style="height:100px; background-color: #f5f5f5; padding:5px; border-radius: 5px;">
-                                                    <img src="@(!string.IsNullOrEmpty(variant.Thumbnail) ? variant.Thumbnail : UrlHelper.GetVariantImageUrl(variant.Id, variant.DefaultImageUrl))"
-                                                         class="img-fluid"
-                                                         style="object-fit: contain; height:110px;"
-                                                         alt="Product Image">
+                                int discountPercentage;
+                                }
+                            @foreach (var variant in FilteredProductVariants)
+                                {
+                                int discountPercentage;
+                                <div class="col-md-3 mt-2">
 
 
-                                                </div>
-                                                <div style="text-align:center; position:relative; z-index:2;">
+                                    <div class="card">
+                                        <div class="card-body bg-light">
+                                            <div class="card-img-actions d-flex flex-column justify-content-center align-items-center"
+                                                 style="height:100px; background-color: #f5f5f5; padding:5px; border-radius: 5px;">
+                                                <img src="@(!string.IsNullOrEmpty(variant.Thumbnail) ? variant.Thumbnail : UrlHelper.GetVariantImageUrl(variant.Id, variant.DefaultImageUrl))"
+                                                     class="img-fluid"
+                                                     style="object-fit: contain; height:110px;"
+                                                     alt="Product Image">
 
-                                                    @if (variant.Brand != null)
-                                                        {
-                                                        <span class="brand"
-                                                              style="font-size: 12px; font-weight: bold; color: #555;text-align:center">
-                                                            @variant.Brand
-                                                        </span>
-                                                        }
-                                                    <br />
-                                                    <!-- Year -->
-                                                    @if (variant.Year != null)
-                                                        {
-                                                        <span class="year"
-                                                              style="font-size: 12px; color: #999; text-align: center">
-                                                            @variant.Year
-                                                        </span>
-                                                        }
-                                                </div>
-                                            
+
+                                            </div>
+                                            <div style="text-align:center; position:relative; z-index:2;">
+
+                                                @if (variant.Brand != null)
+                                                    {
+                                                    <span class="brand"
+                                                          style="font-size: 12px; font-weight: bold; color: #555;text-align:center">
+                                                        @variant.Brand
+                                                    </span>
+                                                    }
+                                                <br />
+                                                <!-- Year -->
+                                                @if (variant.Year != null)
+                                                    {
+                                                    <span class="year"
+                                                          style="font-size: 12px; color: #999; text-align: center">
+                                                        @variant.Year
+                                                    </span>
+                                                    }
                                             </div>
 
+                                        </div>
 
-                                            <div class="card-body text-center">
 
-                                                <div class="mb-2">
-                                                    <NavLink class="text-muted" data-abc="true" href="@GetProductUrl(variant.Id)" title="@variant.Name" style="display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                        @variant.Name<br />
+                                        <div class="card-body text-center">
+
+                                            <div class="mb-2">
+                                                <NavLink class="text-muted" data-abc="true" href="@GetProductUrl(variant.Id)" title="@variant.Name" style="display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    @variant.Name<br />
 
 
                                                 </NavLink>
                                             </div>
 
                                             @{
-                                             
+
                                                 double discount = variant.ProductPrice - variant.VariantPrice;
                                                 if (discount > 0)
                                                     {
@@ -180,14 +181,14 @@
                                             <a href="@GetProductUrl(variant.Id)" class="btn bg-cart"><i class="fa fa-cart-plus mr-2"></i> Add to cart</a>
 
 
-                                            </div>
                                         </div>
-
-
-
-
                                     </div>
-                                    }
+
+
+
+
+                                </div>
+                                }
 
 
 
@@ -195,193 +196,196 @@
 
 
 
-                            </div>
                         </div>
                     </div>
-
-
-
                 </div>
-                <!-- END search-content -->
+
+
+
             </div>
-            <!-- END search-container -->
+            <!-- END search-content -->
         </div>
-        <!-- END container -->
+        <!-- END search-container -->
     </div>
+    <!-- END container -->
+</div>
 
 
-    @code
+@code
 {
-        [Parameter]
-        [SupplyParameterFromQuery(Name = "Id")]
-        public long Id { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "Id")]
+    public long Id { get; set; }
 
-        [Parameter]
-        [SupplyParameterFromQuery(Name = "keyword")]
-        public string Keyword { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "keyword")]
+    public string Keyword { get; set; }
 
 
-        private IEnumerable<ProductVariantDto> ProductVariants = new List<ProductVariantDto>();
-        private IEnumerable<CategoryVariantCountDto> CategoryVariantCount = new List<CategoryVariantCountDto>();
-        private IEnumerable<ProductVariantDto> FilteredProductVariants = new List<ProductVariantDto>();
-        private Category _Category = new Category();
-        private string selectedSort = "Popular"; // Default sorting
-        private int PriceForm;
-        private int PriceTo;
+    private IEnumerable<ProductVariantDto> ProductVariants = new List<ProductVariantDto>();
+    private IEnumerable<CategoryVariantCountDto> CategoryVariantCount = new List<CategoryVariantCountDto>();
+    private IEnumerable<ProductVariantDto> FilteredProductVariants = new List<ProductVariantDto>();
+    private Category _Category = new Category();
+    private string selectedSort = "Popular"; // Default sorting
+    private int PriceForm;
+    private int PriceTo;
 
-        protected override async Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
+        {
+        if (Id > 0)
             {
-            if (Id > 0)
-                {
-                await LoadCategoryTreeAsync();
-                await LoadProductVariants();
-                }
-            if (!string.IsNullOrEmpty(Keyword))
-                {
-                FilterByKeyword();
-                }
+            await LoadCategoryTreeAsync();
+            await LoadProductVariants();
             }
-
-        protected override async Task OnInitializedAsync()
+        if (!string.IsNullOrEmpty(Keyword))
             {
-            await LoadCategoryVariantCount();
+            FilterByKeyword();
             }
-        private async Task LoadProductVariants()
+        }
+
+    protected override async Task OnInitializedAsync()
+        {
+        await LoadCategoryVariantCount();
+        CultureState.OnChange += async () => await InvokeAsync(StateHasChanged);
+        }
+    private async Task LoadProductVariants()
+        {
+        try
             {
-            try
+
+
+            var response = await productVariantService.GetProductVariantsByCategoryAsync(Id);
+            if (response.Success)
                 {
-
-
-                var response = await productVariantService.GetProductVariantsByCategoryAsync(Id);
-                if (response.Success)
-                    {
-                    ProductVariants = response.Data;
-                    FilteredProductVariants = ProductVariants;
-                    }
-                else
-                    {
-
-                    }
+                ProductVariants = response.Data;
+                FilteredProductVariants = ProductVariants;
                 }
-            catch (Exception ex)
+            else
                 {
 
                 }
             }
-
-
-        private async Task LoadCategoryVariantCount()
+        catch (Exception ex)
             {
-            try
+
+            }
+        }
+
+
+    private async Task LoadCategoryVariantCount()
+        {
+        try
+            {
+
+
+            string languageCode = !string.IsNullOrWhiteSpace(CultureState.CurrentCulture)
+? CultureState.CurrentCulture.Split('-')[0]
+: "en";
+
+            var response = await productVariantService.GetCategoriesWithVariantCountsAsync(languageCode);
+            if (response.Success)
                 {
-
-
-
-
-                var response = await productVariantService.GetCategoriesWithVariantCountsAsync();
-                if (response.Success)
-                    {
-                    CategoryVariantCount = response.Data;
-                    }
-                else
-                    {
-
-                    }
+                CategoryVariantCount = response.Data;
                 }
-            catch (Exception ex)
+            else
                 {
 
                 }
             }
+        catch (Exception ex)
+            {
 
-        private async Task LoadCategoryTreeAsync()
-            {
-            try
-                {
-                var response = await CategoryService.GetCategoryByIdAsync(Id);
-                if (response.Success)
-                    {
-                    _Category = response.Data;
-                    StateHasChanged();
-                    }
+            }
+        }
 
-                }
-            catch (Exception ex)
-                {
-                _Category = new Category();
-                }
-            }
-        private string GetProductUrl(long productId)
+    private async Task LoadCategoryTreeAsync()
+        {
+        try
             {
-            return $"/Product?Id={productId}";
-            }
-        #region Filters
-        private void SortAndFilterProductVariants()
-            {
-            try
+            var response = await CategoryService.GetCategoryByIdAsync(Id);
+            if (response.Success)
                 {
-                switch (selectedSort)
-                    {
-                    case "Popular":
-                        FilteredProductVariants = ProductVariants.OrderByDescending(v => v.Id); // Adjust based on actual data
-                        break;
-                    case "New Arrival":
-                        FilteredProductVariants = ProductVariants.OrderByDescending(v => v.ProductId); // Assuming higher ID is newer
-                        break;
-                    case "Discount":
-                        FilteredProductVariants = ProductVariants.OrderByDescending(v => (v.ProductPrice - v.VariantPrice) / v.ProductPrice);
-                        break;
-                    case "Price":
-                        FilteredProductVariants = ProductVariants.OrderBy(v => v.VariantPrice);
-                        break;
-                    case "Range":
-                        FilteredProductVariants = ProductVariants.Where(v => v.VariantPrice >= PriceForm && v.VariantPrice <= PriceTo);
-                        break;
-                    }
+                _Category = response.Data;
                 StateHasChanged();
                 }
-            catch (Exception ex)
+
+            }
+        catch (Exception ex)
+            {
+            _Category = new Category();
+            }
+        }
+    private string GetProductUrl(long productId)
+        {
+        return $"/Product?Id={productId}";
+        }
+    #region Filters
+    private void SortAndFilterProductVariants()
+        {
+        try
+            {
+            switch (selectedSort)
+                {
+                case "Popular":
+                    FilteredProductVariants = ProductVariants.OrderByDescending(v => v.Id); // Adjust based on actual data
+                    break;
+                case "New Arrival":
+                    FilteredProductVariants = ProductVariants.OrderByDescending(v => v.ProductId); // Assuming higher ID is newer
+                    break;
+                case "Discount":
+                    FilteredProductVariants = ProductVariants.OrderByDescending(v => (v.ProductPrice - v.VariantPrice) / v.ProductPrice);
+                    break;
+                case "Price":
+                    FilteredProductVariants = ProductVariants.OrderBy(v => v.VariantPrice);
+                    break;
+                case "Range":
+                    FilteredProductVariants = ProductVariants.Where(v => v.VariantPrice >= PriceForm && v.VariantPrice <= PriceTo);
+                    break;
+                }
+            StateHasChanged();
+            }
+        catch (Exception ex)
+            {
+
+            }
+
+        }
+
+    private void ChangeSort(string sort)
+        {
+        selectedSort = sort;
+        SortAndFilterProductVariants();
+        }
+
+    private void ApplyPriceFilter()
+        {
+        SortAndFilterProductVariants();
+        }
+    #endregion
+
+
+    private async void FilterByKeyword()
+        {
+        try
+            {
+
+
+            var response = await productVariantService.SearchProductVariantsByKeywordAsync(Keyword);
+            if (response.Success)
+                {
+                ProductVariants = response.Data;
+                FilteredProductVariants = ProductVariants;
+                StateHasChanged();
+                }
+            else
                 {
 
                 }
-
             }
-
-        private void ChangeSort(string sort)
+        catch (Exception ex)
             {
-            selectedSort = sort;
-            SortAndFilterProductVariants();
-            }
-
-        private void ApplyPriceFilter()
-            {
-            SortAndFilterProductVariants();
-            }
-        #endregion
-
-
-        private  async void FilterByKeyword()
-            {
-            try
-                {
-
-
-                var response = await productVariantService.SearchProductVariantsByKeywordAsync(Keyword);
-                if (response.Success)
-                    {
-                    ProductVariants = response.Data;
-                    FilteredProductVariants = ProductVariants;
-                    StateHasChanged();
-                    }
-                else
-                    {
-
-                    }
-                }
-            catch (Exception ex)
-                {
-
-                }
 
             }
-    }
+
+        }
+}

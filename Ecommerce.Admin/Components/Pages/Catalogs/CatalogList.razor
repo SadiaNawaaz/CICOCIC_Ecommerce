@@ -10,6 +10,8 @@
 @using Ecommerce.Shared.Services;
 @inject IDataDownloads DataDownloadsService
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject ProtectedSessionStorage SessionStorage
 
 <style>
 
@@ -33,7 +35,7 @@
 </div>
 
 <div class="panel panel-inverse">
-    <div class="panel-heading">
+    <div class="panel-heading" style="display:none">
         <h4 class="panel-title">Catalog - List</h4>
         <div class="panel-heading-btn">
             <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
@@ -49,22 +51,39 @@
             </div>
         </div>
 
-
-        <div class="input-group mb-3">
-            <button class="btn btn-white" type="button" aria-haspopup="true" aria-expanded="false">Filter Catalog <b class="caret"></b></button>
-            <div class="flex-fill position-relative">
-                <div class="input-group">
-                    <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
-                        <i class="fa fa-search opacity-5"></i>
+        <div class="mb-3 d-sm-flex fw-bold">
+            <div class="mt-sm-0 mt-2"><a href="javascript:void(0);" class="text-dark text-decoration-none"><i class="fa fa-download fa-fw me-1 text-dark text-opacity-50"></i> Export</a></div>
+            <div class="ms-sm-4 ps-sm-1 mt-sm-0 mt-2"><a href="javascript:void(0);" class="text-dark text-decoration-none"><i class="fa fa-upload fa-fw me-1 text-dark text-opacity-50"></i> Import</a></div>
+            <div class="ms-sm-4 ps-sm-1 mt-sm-0 mt-2 dropdown-toggle">
+                <a href="#" data-bs-toggle="dropdown" class="text-dark text-decoration-none"><i class="fa fa-cog fa-fw me-1 text-dark text-opacity-50"></i> Filter <b class="caret"></b></a>
+                <div class="dropdown-menu" style="width:50%">
+                    <div class="flex-fill position-relative">
+                        <div class="input-group">
+                            <div class="input-group-text position-absolute top-0 bottom-0 bg-none border-0 pe-0" style="z-index: 1;">
+                                <i class="fa fa-search opacity-5"></i>
+                            </div>
+                            <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..." @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged" />
+                        </div>
                     </div>
-                    <input type="text" class="form-control ps-35px bg-light" placeholder="Search ..." @bind="_searchString" @bind:event="oninput" @onkeyup="OnSearchChanged" />
                 </div>
             </div>
         </div>
+        <ul class="nav nav-tabs nav-tabs-v2 px-3">
+            <li class="nav-item me-2">
+                <a href="#" class="nav-link active px-2" data-bs-toggle="tab" @onclick="() => TabClick(0)">All</a>
+            </li>
+            <li class="nav-item me-2">
+                <a href="#" class="nav-link px-2" data-bs-toggle="tab" @onclick="() => TabClick(1)">Marked</a>
+            </li>
+            <li class="nav-item me-2">
+                <a href="#" class="nav-link px-2" data-bs-toggle="tab" @onclick="() => TabClick(2)">UnMarked</a>
+            </li>
+        </ul>
 
 
-        <MudDataGrid T="CatalogDto" Items="@filteredCatalogs" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
-            <ColGroup>
+
+        <MudDataGrid T="CatalogDto" Items="@filteredCatalogs" CurrentPage="@_currentPage" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="20" Striped="true" Bordered="true"  RowsPerPageChanged="OnRowsPerPageChanged">
+            <ColGroup >
                 <col style="width: 10%;" />
                 <col style="width: 40%;" />
                 <col style="width: 15%;" />
@@ -89,25 +108,47 @@
                 <!-- Code Column (if you have a field like Code) -->
                 <PropertyColumn Property="x => x.Code" Title="Code" Style="width:15%" />
 
+                <PropertyColumn Property="x => x.CategoryName" Title="Category" Style="width:15%" />
 
-                
+                <TemplateColumn Title="Imported Icecat">
+                    <CellTemplate>
+                        @{
+
+
+                            if (context.Item.Integrated == false)
+                                {
+                                <span>No</span>
+                                }
+                            else
+                                { <span>Yes</span>
+
+                                }
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+
 
 
                 <TemplateColumn Title="Marked Product">
                     <CellTemplate>
                         @{
-                            bool marked = context.Item.Mark;
 
-                            if (marked)
+
+                            if (context.Item.Integrated == true)
                                 {
-                                <span class="text-success" style="text-align:center">
-                                    <i class="fa fa-check-circle"></i> <!-- Bootstrap icon for checkmark -->
-                                </span>
+                                bool marked = context.Item.Mark;
+                                if (marked)
+                                    {
+                                    <span class="text-success" style="text-align:center">
+                                        <i class="fa fa-check-circle"></i> <!-- Bootstrap icon for checkmark -->
+                                    </span>
+                                    }
+                                else
+                                    {
+                                    <button class="btn btn-primary" @onclick="(() => MarkProduct(context.Item))">Mark</button>
+                                    }
                                 }
-                            else
-                                {
-                                <button class="btn btn-primary" @onclick="(() => MarkProduct(context.Item))">Mark</button>
-                                }
+
                         }
                     </CellTemplate>
                 </TemplateColumn>
@@ -140,7 +181,7 @@
             </Columns>
 
             <PagerContent>
-                <MudDataGridPager T="CatalogDto" PageSizeOptions=@(new int[] {5, 10, 20}) />
+                <MudDataGridPager T="CatalogDto" PageSizeOptions=@(new int[] {5, 10, 20})  />
             </PagerContent>
         </MudDataGrid>
 
@@ -158,6 +199,7 @@
 
 @code {
     private bool _resizeColumn;
+    private int _currentPage = 2;
     private IEnumerable<CatalogDto> catalogs = new List<CatalogDto>();
     private IEnumerable<CatalogDto> filteredCatalogs = new List<CatalogDto>();
     private string _searchString = string.Empty;
@@ -171,6 +213,11 @@
     protected override async Task OnInitializedAsync()
         {
         await LoadCatalogs();
+        var result = await SessionStorage.GetAsync<int>("catalogPageIndex");
+        if (result.Success)
+            {
+            _currentPage = result.Value;
+            }
         }
 
     private async Task LoadCatalogs()
@@ -303,7 +350,7 @@
                     var updatedCatalog = catalogs.FirstOrDefault(c => c.Id == catalog.Id);
                     if (updatedCatalog != null)
                         {
-                        updatedCatalog.Mark = true;                                                    
+                        updatedCatalog.Mark = true;
                         StateHasChanged();
                         }
                     }
@@ -322,4 +369,38 @@
             }
 
         }
+
+
+
+    private void TabClick(int tab)
+        {
+
+        switch (tab)
+            {
+            case 0:
+
+                filteredCatalogs = catalogs;
+                break;
+            case 1:
+
+                filteredCatalogs = catalogs.Where(a => a.Mark == true).ToList();
+                break;
+            case 2:
+
+                filteredCatalogs = catalogs.Where(a => a.Mark == false).ToList(); ;
+                break;
+            default:
+
+                filteredCatalogs = catalogs;
+                break;
+            }
+
+        }
+
+    private async Task OnRowsPerPageChanged(int pageIndex)
+        {
+        _currentPage = pageIndex;
+        await SessionStorage.SetAsync("catalogPageIndex", _currentPage);
+        }
 }
+s

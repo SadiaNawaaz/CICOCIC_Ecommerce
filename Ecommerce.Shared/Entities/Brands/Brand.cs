@@ -15,7 +15,17 @@ public class Brand: BaseEntity
     public string? ThumbnailFileUrl { get; set; }
     [NotMapped]
     public byte[] ImageByte { get; set; }
-}
+
+    public bool MarkBrand { get; set; } = false;
+    }
 
 
 
+public class BrandDto
+    {
+
+    public long Id { get; set; }
+    public string Name { get; set; }
+    public bool MarkBrand { get; set; } = false;
+
+    }

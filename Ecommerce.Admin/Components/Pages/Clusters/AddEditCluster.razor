@@ -5,6 +5,7 @@
 @rendermode InteractiveServer
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
+@inject ILanguageService languageService
 <div class="d-flex align-items-center mb-3">
     <div>
         <ol class="breadcrumb mb-2">
@@ -38,23 +39,81 @@
                 <EditForm Model="@newCluster" OnValidSubmit="@HandleValidSubmit" FormName="clusterForm">
                     <div class="row">
                         <div class="col-4">
+                            <label>Cluster Name</label>
                             <InputText id="Name" class="form-control" @bind-Value="newCluster.Name" />
                             <ValidationMessage For="@(() => newCluster.Name)" />
-
                         </div>
 
-                        <div class="col-4">
+                        <div class="col-4 mt-3">
                             <button type="submit" class="btn btn-General w-100px me-5px">Save</button>
-                           
                         </div>
                     </div>
 
-                    <p style="margin-top:30px">
+                    <hr />
+                    <h5>cluster Translations</h5>
+                    <!-- Translation Section -->
+                    <div class="row mt-4">
+                        <div class="col-4">
+                            <label>Select Language</label>
+                            <select class="form-select" @bind="SelectedLanguageId">
+                                <option value="0">-- Select Language --</option>
+                                @foreach (var lang in Languages)
+                                    {
+                                    <option value="@lang.Id">@lang.LanguageName</option>
+                                    }
+                            </select>
+                        </div>
+
+                        <div class="col-4">
+                            <label>Translated Name</label>
+                            <InputText class="form-control" @bind-Value="TranslationText" />
+                        </div>
+
+                        <div class="col-4 mt-4">
+                            <button type="button" class="btn btn-primary" @onclick="AddTranslation">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            @if (newCluster?.Translations?.Any() == true)
+                                {
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Language</th>
+                                            <th>Translated Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var translation in newCluster.Translations)
+                                            {
+                                            <tr>
+                                                <td>@GetLanguageName(translation.LanguageId)</td>
+                                                <td>
+                                                    <InputText class="form-control" @bind-Value="translation.TranslatedName" />
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveTranslation(translation.LanguageId)">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            }
+                                    </tbody>
+                                </table>
+                                }
+                        </div>
+                    </div>
+
+                    <p style="">
                         <a href="javascript:history.back(-1);" class="btn btn-GeneralBack">
                             <i class="fa fa-arrow-circle-left"></i> Back to previous page
                         </a>
                     </p>
                 </EditForm>
+
             </div>
 
 
@@ -69,60 +128,114 @@
 @code {
     [Parameter] public long? ClusterId { get; set; }
     private Cluster newCluster = new Cluster();
+    private List<Language> Languages = new List<Language>();
+    ClusterTranslation clusterTranslation = new ClusterTranslation();
+    private int SelectedLanguageId;
+    private string TranslationText { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
-    {
-        if (ClusterId.HasValue)
         {
+        await LoadLanguagesAsync();
+        if (ClusterId.HasValue)
+            {
             var response = await clusterService.GetClusterByIdAsync(ClusterId.Value);
             if (response.Success)
-            {
+                {
                 newCluster = response.Data;
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(response.Message, Severity.Error);
 
+                }
             }
         }
-    }
-
-    private async Task HandleValidSubmit()
-    {
-        try
+    private async Task LoadLanguagesAsync()
         {
-            if (ClusterId.HasValue)
+        var response = await languageService.GetLanguagesAsync();
+        if (response.Success)
             {
+            Languages = response.Data;
+            SelectedLanguageId = Languages.FirstOrDefault()?.Id ?? 1;
+            }
+        else
+            {
+            Snackbar.Add("Error fetching languages", Severity.Error);
+            }
+        }
+    private async Task HandleValidSubmit()
+        {
+        try
+            {
+            if (ClusterId.HasValue)
+                {
                 var response = await clusterService.UpdateClusterAsync(newCluster);
                 if (response.Success)
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Success);
                     await Task.Delay(1000);
                     NavigationManager.NavigateTo("/ClusterList");
-                }
+                    }
                 else
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Error);
+                    }
                 }
-            }
             else
-            {
+                {
                 var response = await clusterService.AddClusterAsync(newCluster);
                 if (response.Success)
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Success);
                     NavigationManager.NavigateTo("/ClusterList");
-                }
+                    }
                 else
-                {
+                    {
                     Snackbar.Add(response.Message, Severity.Error);
+                    }
                 }
             }
-        }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            }
         }
-    }
+    private void AddTranslation()
+        {
+        if (SelectedLanguageId == 0 || string.IsNullOrWhiteSpace(TranslationText))
+            {
+            Snackbar.Add("Please select a valid language and enter a translated name.", Severity.Warning);
+            return;
+            }
+
+        if (newCluster.Translations.Any(t => t.LanguageId == SelectedLanguageId))
+            {
+            Snackbar.Add("Translation for this language already exists.", Severity.Warning);
+            return;
+            }
+
+        newCluster.Translations.Add(new ClusterTranslation
+            {
+            LanguageId = SelectedLanguageId,
+            TranslatedName = TranslationText
+            });
+
+        // Reset input fields
+        SelectedLanguageId = 0;
+        TranslationText = string.Empty;
+        }
+    private string GetLanguageName(int languageId) =>
+Languages.FirstOrDefault(l => l.Id == languageId)?.LanguageName ?? "Unknown";
+
+
+    private void RemoveTranslation(int languageId)
+        {
+        var translation = newCluster.Translations.FirstOrDefault(t => t.LanguageId == languageId);
+        if (translation != null)
+            {
+            newCluster.Translations.Remove(translation);
+            }
+        }
+
 }
 

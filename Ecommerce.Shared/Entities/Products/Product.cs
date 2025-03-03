@@ -35,13 +35,13 @@ public class Product : BaseEntity
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
     public string? EanNumber { get; set; }
-
     public List<ProductCluster> ProductClusters { get; set; } = new List<ProductCluster>();
-
     public List<ProductImages> ProductImages { get; set; } = new List<ProductImages>();
     public List<ProductMedia> ProductMedias { get; set; } = new List<ProductMedia>();
+    public List<ProductTranslation> Translations { get; set; } = new List<ProductTranslation>();
+    
 
-}
+    }
 
 public class ProductCluster : BaseEntity
 {
@@ -106,3 +106,25 @@ public class ProductMedia
     }
 
 
+
+
+public class ProductTranslation :BaseDetailEntity
+    {
+    [Required]
+    public long ProductId { get; set; }
+
+    [ForeignKey("ProductId")]
+    public Product Product { get; set; }
+
+    [Required]
+    public int LanguageId { get; set; }
+
+    [ForeignKey("LanguageId")]
+    public Language Language { get; set; }
+
+    [Required, MaxLength(255)]
+    public string TranslatedName { get; set; } = string.Empty;
+
+    public string? TranslatedDescription { get; set; }
+    public string? TranslatedShortDescription { get; set; }
+    }

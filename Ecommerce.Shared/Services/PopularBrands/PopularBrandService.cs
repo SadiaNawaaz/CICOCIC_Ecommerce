@@ -22,20 +22,21 @@ public interface IPopularBrandService
 
 public class PopularBrandService : IPopularBrandService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<PopularBrandService> _logger;
 
 
 
-    public PopularBrandService(ApplicationDbContext context, ILogger<PopularBrandService> logger)
+    public PopularBrandService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<PopularBrandService> logger)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _logger = logger;
     }
     public async Task<ServiceResponse<List<PopularBrandDto>>> GetPopularBrandsAsync()
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var popularBrands = await _context.PopularBrands
                 .Select(pb => new PopularBrandDto
                 {
@@ -69,6 +70,7 @@ public class PopularBrandService : IPopularBrandService
     {
         try
         {
+            using var _context = _contextFactory.CreateDbContext();
             var brand = await _context.Brands.FindAsync(popularBrand.BrandId);
             if (brand == null)
             {
@@ -91,7 +93,8 @@ public class PopularBrandService : IPopularBrandService
     public async Task<ServiceResponse<bool>> RemovePopularBrandAsync(long Id)
     {
         try
-        {
+            {
+            using var _context = _contextFactory.CreateDbContext();
             var popularBrand = await _context.PopularBrands.FirstOrDefaultAsync(pb => pb.Id == Id);
             if (popularBrand == null)
             {

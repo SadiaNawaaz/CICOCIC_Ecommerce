@@ -1,6 +1,7 @@
 ﻿@using Ecommerce.Shared.Services.PopularCategories;
 @inject IPopularCategoryService PopularCategoryService
 @using Ecommerce.Shared.Entities.PopularCategories;
+@inject CultureStateService CultureState
 <style>
 
 
@@ -25,26 +26,28 @@
 
     .section-title {
         font-weight: bold;
-    }    .position-relative {
+    }
+
+    .position-relative {
         position: relative;
     }
 
-     .position-relative {
+    .position-relative {
         position: relative;
     }
 
     /* Position the text in the corner */
     .animated-text {
         position: absolute;
-        bottom: 20px;  /* 20px from the bottom */
-        left: 20px;  /* 20px from the left */
+        bottom: 20px; /* 20px from the bottom */
+        left: 20px; /* 20px from the left */
         color: white;
         font-size: 1.5rem;
         font-weight: bold;
-        background-color: rgba(0, 0, 0, 0.5);  /* Optional: Background for better visibility */
+        background-color: rgba(0, 0, 0, 0.5); /* Optional: Background for better visibility */
         padding: 10px;
         border-radius: 5px;
-        animation: moveUpDown 3s ease-in-out infinite;  /* Infinite bounce animation */
+        animation: moveUpDown 3s ease-in-out infinite; /* Infinite bounce animation */
     }
 
     /* Keyframes for the continuous up-down movement */
@@ -52,6 +55,7 @@
         0%, 100% {
             transform: translateY(0); /* Start and end at the original position */
         }
+
         50% {
             transform: translateY(-15px); /* Move up 15px */
         }
@@ -63,7 +67,7 @@
     <!-- BEGIN container -->
     <div class="container">
         <div class="container py-5 text-center">
-            <h4 class="section-title mb-5">Explore Popular Categories</h4>
+            <h4 class="section-title mb-5">@localizer["PopularCategories"]</h4>
             <div class="row justify-content-center">
                 @if (Categories != null && Categories.Count > 0)
                     {
@@ -97,7 +101,7 @@
         <div class="container py-5 text-center" style="position: relative;">
             <img src="https://d-themes.com/wordpress/riode/demo-23/wp-content/uploads/sites/25/2021/01/banner-5.jpg" style="width: 100%;" />
             <div style="position: absolute; top: 50%; left: 20%; transform: translate(-50%, -50%); color: white; font-size: 2rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
-                Discover More. Pay Less.
+                <h2>@localizer["DiscoverMore"]</h2>
             </div>
             <!-- Position the first SVG at the top right corner of the image -->
             <svg class="star-2" xmlns="http://www.w3.org/2000/svg" width="82" height="94" viewBox="0 0 82 94" fill="none" style="position: absolute; top:0px; right: 10px;">
@@ -125,11 +129,12 @@
         <div class="col-lg-6 p-0 position-relative">
             <img src="/assets/img/work/banner-media.png" style="height: 400px; width: 100%; object-fit: cover;" />
             <!-- Overlay Text on the Right Image -->
-            <h2 class="animated-text">Discovering the Hottest Nearby Destinations in Your Area</h2>
+            <h2 class="animated-text"><p>@localizer["DiscoverHottestDestinations"]</p></h2>
         </div>
     </div>
 </div>
-<br /><br />
+<br />
+<br />
 
 @code
 {
@@ -139,6 +144,7 @@
 
     protected override async Task OnInitializedAsync()
         {
+        CultureState.OnChange += async () => await InvokeAsync(StateHasChanged);
         await LoadCategories();
         }
 
@@ -146,7 +152,10 @@
         {
         try
             {
-            var response = await PopularCategoryService.GetPopularCategoriesAsync();
+            string languageCode = !string.IsNullOrWhiteSpace(CultureState.CurrentCulture)
+? CultureState.CurrentCulture.Split('-')[0]
+: "en";
+            var response = await PopularCategoryService.GetPopularCategoriesAsync(languageCode);
             if (response.Success)
                 {
                 Categories = response.Data;

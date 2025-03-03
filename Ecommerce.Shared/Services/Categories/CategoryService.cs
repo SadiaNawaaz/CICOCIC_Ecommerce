@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities;
+using Ecommerce.Shared.Entities.Brands;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -16,11 +17,15 @@ public interface ICategoryService
     Task<ServiceResponse<Category>> UpdateCategoryAsync(Category category);
     Task<ServiceResponse<bool>> DeleteCategoryAsync(long id);
     Task<ServiceResponse<List<CategoryDto>>> GetCategoriesDtoAsync();
-    Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync();
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync(string languageCode = "en");
     Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTopLevelDtoAsync();
     Task<ServiceResponse<bool>> UpdateCategoryOrderAsync(long categoryId, int newOrder);
-    Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync(long categoryId);
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync(long categoryId , string languageCode="en");
     Task<ServiceResponse<bool>> ImportCategoriesAsync(List<Category> icecatCategories);
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoriesAsyncWithTranslation(int? languageId = null);
+    Task<ServiceResponse<List<CategoryDto>>> GetCategoriesByParentId(long CategoryId, int? languageId);
+    Task<List<CategoryDto>> BuildCategoryTree(List<CategoryDto> categories);
+    Task<ServiceResponse<Category>> MarkUnmarkCategoryAsync(long id, bool isMarked);
 
 }
 
@@ -30,35 +35,95 @@ public class CategoryService : ICategoryService
     private readonly ILogger<CategoryService> _logger;
     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
+
     public CategoryService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<CategoryService> logger)
     {
         _contextFactory = contextFactory;
         _logger = logger;
     }
 
+
     public async Task<ServiceResponse<List<Category>>> GetCategoriesAsync()
-    {
+        {
         try
             {
             using var _context = _contextFactory.CreateDbContext();
-            var categories = await _context.Categories.Include(c => c.SubCategories).ToListAsync();
+
+            var categories = await _context.Categories
+                .Include(c => c.SubCategories)
+                .Include(c => c.Translations) // Include all translations but don't filter by language
+                .ToListAsync();
+
             return new ServiceResponse<List<Category>>
-            {
+                {
                 Data = categories,
                 Success = true,
                 Message = "Categories fetched successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error occurred while fetching categories.");
             return new ServiceResponse<List<Category>>
-            {
+                {
                 Success = false,
                 Message = "Error occurred while fetching categories"
-            };
+                };
+            }
         }
-    }
+
+
+
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesAsyncWithTranslation(int? languageId = null)
+        {
+        try
+            {
+            using var _context = _contextFactory.CreateDbContext();
+
+            var categories = await _context.Categories
+                .Where(a => a.Level == 1)
+                .Include(c => c.Translations)
+                .ToListAsync();
+
+            var categoryDtos = categories.Select(category =>
+            {
+                var dto = MapToCategoryDto(category, languageId);
+
+                // Check if this category has children
+                bool hasChildren = _context.Categories.Any(c => c.ParentCategoryId == category.Id);
+                if (hasChildren)
+                    {
+                    dto.SubCategories = new HashSet<CategoryDto>
+                {
+                    new CategoryDto { Name = "Loading...", Id = -1 } // Placeholder
+                };
+                    }
+                else
+                    {
+                    dto.SubCategories = new HashSet<CategoryDto>(); // Empty but initialized
+                    }
+
+                return dto;
+            }).ToList();
+
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Data = categoryDtos,
+                Success = true,
+                Message = "Categories fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching categories.");
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching categories"
+                };
+            }
+        }
+
 
     public async Task<ServiceResponse<Category>> GetCategoryByIdAsync(long id)
     {
@@ -110,46 +175,66 @@ public class CategoryService : ICategoryService
     }
 
     public async Task<ServiceResponse<Category>> UpdateCategoryAsync(Category updatedCategory)
-    {
-        try
         {
+        try
+            {
             using var _context = _contextFactory.CreateDbContext();
-            var existingCategory = await _context.Categories.FindAsync(updatedCategory.Id);
+            var existingCategory = await _context.Categories
+                .Include(c => c.Translations) // Ensure translations are loaded
+                .FirstOrDefaultAsync(c => c.Id == updatedCategory.Id);
 
             if (existingCategory == null)
-            {
-                return new ServiceResponse<Category>
                 {
+                return new ServiceResponse<Category>
+                    {
                     Success = false,
                     Message = "Category not found"
-                };
-            }
+                    };
+                }
 
+            // Update category properties
             existingCategory.Name = updatedCategory.Name;
             existingCategory.Icon = updatedCategory.Icon;
             existingCategory.Level = updatedCategory.Level;
             existingCategory.ParentCategoryId = updatedCategory.ParentCategoryId;
             existingCategory.LastModifiedDate = DateTime.Now;
-            _context.Categories.Update(existingCategory);
+
+            // Remove all previous translations
+            _context.CategoryTranslations.RemoveRange(existingCategory.Translations);
+
+            // Add new translations
+            if (updatedCategory.Translations != null && updatedCategory.Translations.Any())
+                {
+                var newTranslations = updatedCategory.Translations.Select(t => new CategoryTranslation
+                    {
+                    CategoryId = updatedCategory.Id,
+                    LanguageId = t.LanguageId,
+                    TranslatedName = t.TranslatedName
+                    }).ToList();
+
+                await _context.CategoryTranslations.AddRangeAsync(newTranslations);
+                }
+
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<Category>
-            {
+                {
                 Data = existingCategory,
                 Success = true,
                 Message = "Category updated successfully"
-            };
-        }
+                };
+            }
         catch (Exception ex)
-        {
+            {
             _logger.LogError(ex, "Error occurred while updating category.");
             return new ServiceResponse<Category>
-            {
+                {
                 Success = false,
                 Message = "Error occurred while updating category"
-            };
+                };
+            }
         }
-    }
+
 
     public async Task<ServiceResponse<bool>> DeleteCategoryAsync(long id)
     {
@@ -220,7 +305,7 @@ public class CategoryService : ICategoryService
         try
             {
             using var _context = _contextFactory.CreateDbContext();
-            var categories = await _context.Categories.Include(c => c.SubCategories).ToListAsync();
+            var categories = await _context.Categories.Include(c => c.SubCategories).Where(a=>a.MarkCategory==true).ToListAsync();
             var categoryDtos = categories.Select(ToDto).ToList();
 
             return new ServiceResponse<List<CategoryDto>>
@@ -241,13 +326,44 @@ public class CategoryService : ICategoryService
         }
     }
 
-    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync()
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesTreeDtoAsync(string languageCode ="en")
     {
         try
             {
             using var _context = _contextFactory.CreateDbContext();
-            var categories = await _context.Categories.Where(a=>a.Level>0 && a.Level<6).OrderBy(a => a.Level).ToListAsync();
-            var categoryDtos = categories.Select(ToDto).ToList();
+           /// var categories = await _context.Categories.Where(a=>a.Level>0 && a.Level<6).OrderBy(a => a.Level).ToListAsync();
+
+            var categories = await _context.Categories
+         .Where(a => a.Level > 0 && a.Level < 6)
+         .OrderBy(a => a.Level)
+         .Select(c => new
+             {
+             c.Id,
+             c.Level,
+             c.Icon,
+             c.ParentCategoryId,
+             c.Order,
+             Name = languageCode == "en"
+                 ? c.Name  // ✅ Use default name if English
+                 : c.Translations
+                     .Where(t => t.Language.LanguageCode == languageCode)
+                     .Select(t => t.TranslatedName)
+                     .FirstOrDefault() ?? c.Name // ✅ Use translation, fallback to default if not found
+             })
+         .ToListAsync();
+
+
+            var categoryDtos = categories.Select(c => new CategoryDto
+                {
+                Id = c.Id,
+                Name = c.Name, 
+                Level = c.Level,
+                Icon = c.Icon,
+                ParentCategoryId = c.ParentCategoryId,
+                Order = c.Order
+                }).ToList();
+
+
             var categoryTree = await BuildCategoryTree(categoryDtos);
             return new ServiceResponse<List<CategoryDto>>
             {
@@ -310,7 +426,7 @@ public class CategoryService : ICategoryService
 
         };
     }
-    private async Task<List<CategoryDto>> BuildCategoryTree(List<CategoryDto> categories)
+    public async Task<List<CategoryDto>> BuildCategoryTree(List<CategoryDto> categories)
     {
         var lookup = categories.ToLookup(c => c.ParentCategoryId);
         foreach (var category in categories)
@@ -363,8 +479,61 @@ public class CategoryService : ICategoryService
             };
         }
     }
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync(long categoryId, string languageCode = "en")
+        {
+        try
+            {
+            using var _context = _contextFactory.CreateDbContext();
+            var categoryDtos = new List<CategoryDto>();
 
-    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync(long categoryId)
+            // Fetch the corresponding LanguageId based on the given languageCode
+            var languageId = await _context.Languages
+                .Where(l => l.LanguageCode == languageCode)
+                .Select(l => l.Id)
+                .FirstOrDefaultAsync();
+
+            var category = await _context.Categories.FindAsync(categoryId);
+            while (category != null)
+                {
+                // Fetch the translated name if the language is not "en"
+                var translatedName = languageCode == "en"
+                    ? category.Name
+                    : await _context.CategoryTranslations
+                        .Where(ct => ct.CategoryId == category.Id && ct.LanguageId == languageId)
+                        .Select(ct => ct.TranslatedName)
+                        .FirstOrDefaultAsync() ?? category.Name; 
+
+                categoryDtos.Insert(0, new CategoryDto
+                    {
+                    Id = category.Id,
+                    ParentCategoryId= category.ParentCategoryId,
+                    Name = translatedName
+                    });
+
+                category = category.ParentCategoryId != null
+                    ? await _context.Categories.FindAsync(category.ParentCategoryId)
+                    : null;
+                }
+
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Data = categoryDtos,
+                Success = true,
+                Message = "Category hierarchy fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching category hierarchy.");
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching category hierarchy"
+                };
+            }
+        }
+
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoryHierarchyAsync1(long categoryId,string languageCode="en")
         {
         try
             {
@@ -468,6 +637,127 @@ public class CategoryService : ICategoryService
                 }
             }
         }
+
+    private CategoryDto MapToCategoryDto(Category category, int? languageId)
+        {
+        var selectedTranslation = category.Translations
+            .FirstOrDefault(t => t.LanguageId == languageId) ??
+            category.Translations.FirstOrDefault(t => t.LanguageId == 1); // Default to English (LanguageId = 1)
+
+        return new CategoryDto
+            {
+            Id = category.Id,
+            Name = selectedTranslation?.TranslatedName ?? category.Name,
+            Icon = category.Icon,
+            MarkCategory= category.MarkCategory,
+            Level = category.Level,
+            ParentCategoryId = category.ParentCategoryId,
+            SubCategories = category.SubCategories?
+                .Select(sub => MapToCategoryDto(sub, languageId))
+                .ToHashSet(), // ✅ Convert List to HashSet
+            Translations = category.Translations
+                .Select(t => new CategoryTranslationDto  // ✅ Convert Entity to DTO
+                    {
+                    Id = t.Id,
+                    CategoryId = t.CategoryId,
+                    LanguageId = t.LanguageId,
+                    TranslatedName = t.TranslatedName
+                    }).ToList()
+            };
+        }
+
+
+
+    public async Task<ServiceResponse<List<CategoryDto>>> GetCategoriesByParentId(long CategoryId, int? languageId)
+        {
+        try
+            {
+            using var _context = _contextFactory.CreateDbContext();
+
+            var categories = await _context.Categories
+                .Where(a => a.ParentCategoryId == CategoryId)
+                .Include(c => c.Translations)
+                .ToListAsync();
+
+            var categoryDtos = categories.Select(category =>
+            {
+                var dto = MapToCategoryDto(category, languageId);
+
+                // Check if this category has children
+                bool hasChildren = _context.Categories.Any(c => c.ParentCategoryId == category.Id);
+                if (hasChildren)
+                    {
+                    dto.SubCategories = new HashSet<CategoryDto>
+                {
+                    new CategoryDto { Name = "Loading...", Id = -1 } // Placeholder
+                };
+                    }
+                else
+                    {
+                    dto.SubCategories = new HashSet<CategoryDto>(); // Empty but initialized
+                    }
+
+                return dto;
+            }).ToList();
+
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Data = categoryDtos,
+                Success = true,
+                Message = "Categories fetched successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while fetching categories.");
+            return new ServiceResponse<List<CategoryDto>>
+                {
+                Success = false,
+                Message = "Error occurred while fetching categories"
+                };
+            }
+        }
+
+    public async Task<ServiceResponse<Category>> MarkUnmarkCategoryAsync(long id, bool isMarked)
+        {
+        try
+            {
+            using var context = _contextFactory.CreateDbContext();
+            var category = await context.Categories.FindAsync(id);
+
+            if (category == null)
+                {
+                return new ServiceResponse<Category>
+                    {
+                    Success = false,
+                    Message = "Category not found"
+                    };
+                }
+
+            category.MarkCategory = isMarked;
+            context.Categories.Update(category);
+            await context.SaveChangesAsync();
+
+            return new ServiceResponse<Category>
+                {
+                Data = category,
+                Success = true,
+                Message = isMarked ? "Category marked successfully" : "Category unmarked successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while marking/unmarking Category.");
+            return new ServiceResponse<Category>
+                {
+                Success = false,
+                Message = "Error occurred while marking/unmarking Category"
+                };
+            }
+        }
+
+
+
 
 
     }

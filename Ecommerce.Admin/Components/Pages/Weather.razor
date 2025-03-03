@@ -1,48 +1,101 @@
-﻿@page "/Testing"
+﻿
+@using MudBlazor
 
-@using System.Threading
-@inject CsvExportService CsvExportService
-@rendermode InteractiveServer
+@using MudBlazor
 
-<PageTitle>Index</PageTitle>
+<input type="button" @onclick="fncool" value="hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" />
+@if (Elements != null && Elements.Count() > 0)
+    {
+    <MudDataGrid Items="@Elements" CurrentPage="@CurrentPage"
+                 Dense="true"
+                 Hover="true"
+                 MultiSelection="false"
+                 SortMode="SortMode.Multiple"
+                 Elevation="2"
+                 Bordered="true"
+                 Striped="true" CurrentPageChanged="fncool1"
+                 Breakpoint="Breakpoint.Sm"
+                 RowsPerPage="5">
+        <!-- Hide default pager -->
 
-<MudGrid>
-    <MudItem xs="12" sm="6" md="4">
-        <MudAutocomplete T=Country
-                         Label="Select Country"
-                         @bind-Value=selectedCountry
-                         SearchFunc=this.FilterCountriesAsync
-                         ToStringFunc=DisplayValue />
-    </MudItem>
-</MudGrid>
+        <Columns>
+            <PropertyColumn Property="@(e => e.Number)" Title="Atomic Number" />
+            <PropertyColumn Property="@(e => e.Sign)" Title="Symbol" />
+            <PropertyColumn Property="@(e => e.Name)" Title="Element Name" />
+            <PropertyColumn Property="@(e => e.Position)" Title="Position" />
+            <PropertyColumn Property="@(e => e.Molar)" Title="Molar Mass" />
+            <PropertyColumn Property="@(e => e.Group)" Title="Group" />
+        </Columns>
+
+        <!-- Custom Pager -->
+
+        <PagerContent>
+            <MudDataGridPager T="Element" />
+        </PagerContent>
+
+    </MudDataGrid>
+
+
+
+    }
+
+
 
 @code {
-    private Country? selectedCountry;
-
-    private Func<Country, string?> DisplayValue = item => item is null ? null : item.Name;
-
-    private async Task<IEnumerable<Country>> FilterCountriesAsync(string value)
+    private int CurrentPage = 1;
+    public class Element
         {
-        // pretend to be a async api or Db call
-        await Task.Yield();
-
-        if (!string.IsNullOrWhiteSpace(value))
-            return _countries.Where(item => item.Name.ToLower().Contains(value.ToLower())) ?? _countries;
-
-        return _countries;
+        public int Number { get; set; }
+        public string Sign { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public int Position { get; set; }
+        public double Molar { get; set; }
+        public string Group { get; set; } = string.Empty;
         }
-
-    private List<Country> _countries = new()
+    private IEnumerable<Element> Elements = new List<Element>
 {
-       new Country("France"),
-       new Country("Finland"),
-       new Country("United Kingdom"),
-       new Country("United States of America"),
+        new Element { Number = 1, Sign = "H", Name = "Hydrogen", Position = 1, Molar = 1.008, Group = "Nonmetal" },
+        new Element { Number = 2, Sign = "He", Name = "Helium", Position = 18, Molar = 4.0026, Group = "Noble Gas" },
+        new Element { Number = 3, Sign = "Li", Name = "Lithium", Position = 2, Molar = 6.94, Group = "Alkali Metal" },
+        new Element { Number = 4, Sign = "Be", Name = "Beryllium", Position = 2, Molar = 9.0122, Group = "Alkaline Earth Metal" },
+        new Element { Number = 5, Sign = "B", Name = "Boron", Position = 13, Molar = 10.81, Group = "Metalloid" },
+        new Element { Number = 6, Sign = "C", Name = "Carbon", Position = 14, Molar = 12.011, Group = "Nonmetal" },
+        new Element { Number = 7, Sign = "N", Name = "Nitrogen", Position = 15, Molar = 14.007, Group = "Nonmetal" },
+        new Element { Number = 8, Sign = "O", Name = "Oxygen", Position = 16, Molar = 15.999, Group = "Nonmetal" },
+        new Element { Number = 9, Sign = "F", Name = "Fluorine", Position = 17, Molar = 18.998, Group = "Halogen" },
+        new Element { Number = 10, Sign = "Ne", Name = "Neon", Position = 18, Molar = 20.180, Group = "Noble Gas" },
+        new Element { Number = 11, Sign = "Na", Name = "Sodium", Position = 1, Molar = 22.990, Group = "Alkali Metal" },
+        new Element { Number = 12, Sign = "Mg", Name = "Magnesium", Position = 2, Molar = 24.305, Group = "Alkaline Earth Metal" },
+        new Element { Number = 13, Sign = "Al", Name = "Aluminum", Position = 13, Molar = 26.982, Group = "Post-transition Metal" },
+        new Element { Number = 14, Sign = "Si", Name = "Silicon", Position = 14, Molar = 28.085, Group = "Metalloid" },
+        new Element { Number = 15, Sign = "P", Name = "Phosphorus", Position = 15, Molar = 30.974, Group = "Nonmetal" },
+        new Element { Number = 16, Sign = "S", Name = "Sulfur", Position = 16, Molar = 32.06, Group = "Nonmetal" },
+        new Element { Number = 17, Sign = "Cl", Name = "Chlorine", Position = 17, Molar = 35.45, Group = "Halogen" },
+        new Element { Number = 18, Sign = "Ar", Name = "Argon", Position = 18, Molar = 39.948, Group = "Noble Gas" },
+        new Element { Number = 19, Sign = "K", Name = "Potassium", Position = 1, Molar = 39.098, Group = "Alkali Metal" },
+        new Element { Number = 20, Sign = "Ca", Name = "Calcium", Position = 2, Molar = 40.078, Group = "Alkaline Earth Metal" },
+        new Element { Number = 21, Sign = "Sc", Name = "Scandium", Position = 3, Molar = 44.956, Group = "Transition Metal" },
+        new Element { Number = 22, Sign = "Ti", Name = "Titanium", Position = 4, Molar = 47.867, Group = "Transition Metal" },
+        new Element { Number = 23, Sign = "V", Name = "Vanadium", Position = 5, Molar = 50.942, Group = "Transition Metal" },
+        new Element { Number = 24, Sign = "Cr", Name = "Chromium", Position = 6, Molar = 51.996, Group = "Transition Metal" },
+        new Element { Number = 25, Sign = "Mn", Name = "Manganese", Position = 7, Molar = 54.938, Group = "Transition Metal" },
+        new Element { Number = 26, Sign = "Fe", Name = "Iron", Position = 8, Molar = 55.845, Group = "Transition Metal" },
+        new Element { Number = 27, Sign = "Co", Name = "Cobalt", Position = 9, Molar = 58.933, Group = "Transition Metal" },
+        new Element { Number = 28, Sign = "Ni", Name = "Nickel", Position = 10, Molar = 58.693, Group = "Transition Metal" },
+        new Element { Number = 29, Sign = "Cu", Name = "Copper", Position = 11, Molar = 63.546, Group = "Transition Metal" },
+        new Element { Number = 30, Sign = "Zn", Name = "Zinc", Position = 12, Molar = 65.38, Group = "Transition Metal" }
     };
 
-    public record Country(string Name);
+    private bool _sortNameByLength;
+    private SortMode _sortMode = SortMode.Multiple;
 
+    private Func<Element, object> _sortBy => x => _sortNameByLength ? x.Name.Length : x.Name;
+    private void fncool()
+        {
 
-
-
+        }
+    private void fncool1(int page)
+        {
+        CurrentPage = page;
+        }
 }

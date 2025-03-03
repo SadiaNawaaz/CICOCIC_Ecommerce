@@ -35,7 +35,7 @@
 
 
 
-                <MudDataGrid T="Brand" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
+                <MudDataGrid T="BrandDto" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
                     <ColGroup>
                         <col style="width: 60%;" />
                         <col style="width: 20%;" />
@@ -43,7 +43,27 @@
                     </ColGroup>
                     <Columns>
                         <PropertyColumn Property="x => x.Name" Title="Name" />
-                        <PropertyColumn Property="x => x.ImageUrl" Title="Image URL" />
+                        <TemplateColumn Title="Marked Brand">
+                            <CellTemplate>
+                                @{
+                                    bool marked = context.Item.MarkBrand;
+                                    @if (marked)
+                                        {
+                                        <button class="btn btn-success" @onclick="(() => MarkBrand(context.Item))">
+                                            <i class="fa fa-check"></i>
+                                        </button>
+                                        }
+                                    else
+                                        {
+                                        <button class="btn btn-danger" @onclick="(() => MarkBrand(context.Item))">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                        }
+
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+
                         <TemplateColumn>
                             <HeaderTemplate>
                                 <div>Manage Records</div>
@@ -51,7 +71,7 @@
                             <CellTemplate>
                                 <MudStack Row>
                                     @*<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditBrand(context.Item.Id)" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />*@
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />*@
 
 
 
@@ -68,7 +88,7 @@
                         </TemplateColumn>
                     </Columns>
                     <PagerContent>
-                        <MudDataGridPager T="Brand" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                        <MudDataGridPager T="BrandDto" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
                     </PagerContent>
                 </MudDataGrid>
             </div>
@@ -79,43 +99,43 @@
 @code {
 
     private bool _resizeColumn = true;
-    private List<Brand> brands;
+    private List<BrandDto> brands;
     [Inject]
     public IDialogService DialogService { get; set; }
 
     protected override async Task OnInitializedAsync()
-    {
+        {
         await LoadBrands();
-    }
+        }
 
     private async Task LoadBrands()
-    {
-        var response = await BrandService.GetBrandsAsync();
+        {
+        var response = await BrandService.GetAllBrandsDtoAsync();
         if (response.Success)
-        {
+            {
             brands = response.Data;
-        }
+            }
         else
-        {
+            {
             Snackbar.Add(response.Message, Severity.Error);
+            }
         }
-    }
 
     private void NavigateToAddBrand()
-    {
+        {
         NavigationManager.NavigateTo("/AddEditBrand");
-    }
+        }
 
     private void EditBrand(long brandId)
-    {
-        NavigationManager.NavigateTo($"/AddEditBrand/{brandId}");
-    }
-
-
-    private async Task DeleteBrand(Brand cluster)
-    {
-        try
         {
+        NavigationManager.NavigateTo($"/AddEditBrand/{brandId}");
+        }
+
+
+    private async Task DeleteBrand(BrandDto cluster)
+        {
+        try
+            {
             var parameters = new DialogParameters();
             parameters.Add("ContentText", "Do you want to confirm?");
             parameters.Add("ButtonText", "Yes");
@@ -123,25 +143,51 @@
             var result = await dialogresult.Result;
             if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
                 await DeleteBrand(cluster.Id);
-        }
+            }
         catch (Exception ex)
-        {
+            {
             Snackbar.Add("An error occurred while attempting to delete the cluster: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in DeleteCluster: {ex}");
+            }
         }
-    }
 
     private async Task DeleteBrand(long brandId)
-    {
+        {
         var response = await BrandService.DeleteBrandAsync(brandId);
         if (response.Success)
-        {
+            {
             Snackbar.Add(response.Message, Severity.Success);
             await LoadBrands();
-        }
+            }
         else
-        {
+            {
             Snackbar.Add(response.Message, Severity.Error);
+            }
         }
-    }
+
+
+    private async Task MarkBrand(BrandDto brand)
+
+        {
+
+        if (brand.MarkBrand)
+            {
+            brand.MarkBrand = false;
+
+            }
+        else
+            {
+            brand.MarkBrand = true;
+            }
+        var response = await BrandService.MarkUnmarkBrandAsync(brand.Id, brand.MarkBrand);
+        if (response.Success)
+            {
+            Snackbar.Add(response.Message, Severity.Success);
+
+            }
+        else
+            {
+            Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
 }

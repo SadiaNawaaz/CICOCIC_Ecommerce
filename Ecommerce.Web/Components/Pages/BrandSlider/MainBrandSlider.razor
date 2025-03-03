@@ -1,5 +1,4 @@
 ﻿@inject IBrandService BrandService
-
 @if (Brands != null && Brands.Count > 0)
     {
 
@@ -12,7 +11,7 @@
 
             <h4 class="section-title clearfix">
                 <span class="flex-1">
-                    We’re just keep growing with 50+ trusted brands
+                    <p>@localizer["GrowingWithBrands"]</p>
 
                 </span>
 
@@ -53,8 +52,8 @@ else
                     </div>
                     <div class="col-xl-8 col-lg-8">
                         <div class="best-product-caption">
-                            <h2 style="font-family:Poppins" , sans-serif;">Find The Best Product<br> from Our Shop</h2>
-                            <button class="btn btn-dark btn-lg">Shop Now</button>
+                            <h2 style="font-family:Poppins,sans-serif;">@localizer["FindBestProduct"]</h2>
+                            <button class="btn btn-dark btn-lg">@localizer["ShopNow"]</button>
 
                         </div>
                     </div>

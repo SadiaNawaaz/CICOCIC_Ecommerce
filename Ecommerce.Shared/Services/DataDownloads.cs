@@ -13,10 +13,12 @@ using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Features;
 using Ecommerce.Shared.Services.Products;
 using Ecommerce.Shared.Services.Shared;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO.Compression;
 using System.Linq;
@@ -115,9 +117,17 @@ public class DataDownloads: IDataDownloads
                     Name = cat.Elements("Name")
                               .FirstOrDefault(n => (int)n.Attribute("langid") == 1)?.Attribute("Value")?.Value,
                     ParentCategoryId = cat.Element("ParentCategory") != null ? (int?)cat.Element("ParentCategory").Attribute("ID") : null,
-                    CreatedDate=DateTime.Now
-                    
-                    
+                    CreatedDate=DateTime.Now,
+                    Translations = cat.Elements("Name")
+                    .Where(n => new[] { 1, 2, 4 }.Contains((int)n.Attribute("langid"))) // English, Dutch, German
+                    .Select(n => new CategoryTranslation
+                        {
+                        LanguageId = (int)n.Attribute("langid"),
+                        TranslatedName = n.Attribute("Value")?.Value ?? string.Empty
+                        })
+                    .ToList()
+
+
                     }).ToList();
 
             return categories;
@@ -218,7 +228,17 @@ public class DataDownloads: IDataDownloads
                 {
                 Id = (int)fg.Attribute("ID"),
                 Name = fg.Elements("Name")
-                     .FirstOrDefault(n => (int)n.Attribute("langid") == 1)?.Attribute("Value")?.Value ?? "Default Name"
+                     .FirstOrDefault(n => (int)n.Attribute("langid") == 1)?.Attribute("Value")?.Value ?? "Default Name",
+
+                Translations = fg.Elements("Name")
+                    .Where(n => new[] { 1, 2, 4 }.Contains((int)n.Attribute("langid"))) // English, Dutch, German
+                    .Select(n => new ClusterTranslation
+                        {
+                        LanguageId = (int)n.Attribute("langid"),
+                        TranslatedName = n.Attribute("Value")?.Value ?? string.Empty
+                        })
+                    .ToList()
+
                 }).ToList();
 
         return featureGroups;
@@ -263,7 +283,15 @@ public class DataDownloads: IDataDownloads
            Name = f.Elements("Names").Elements("Name")
                 .FirstOrDefault(n => (int)n.Attribute("langid") == 1)?.Value ?? "",
 
-           ClusterId =1
+           ClusterId =1,
+           Translations = f.Element("Names")?.Elements("Name")
+                    .Where(n => new[] { 1, 2, 4 }.Contains((int)n.Attribute("langid"))) // English, Dutch, German
+                    .Select(n => new FeatureTranslation
+                        {
+                        LanguageId = (int)n.Attribute("langid"),
+                        TranslatedName = n.Value ?? string.Empty
+                        })
+                    .ToList() ?? new List<FeatureTranslation>(),
            }).ToList();
 
         return features;
@@ -280,7 +308,159 @@ public class DataDownloads: IDataDownloads
 
 
     #region Products
+
+
     private async Task<Product> FetchProductDetails(CatalogDto catalog)
+        {
+        try
+            {
+            var languages = new Dictionary<string, int>
+        {
+            { "en", 1 }, // English (Default)
+            { "nl", 2 }, // Dutch
+            { "de", 4 }  // German
+        };
+
+            Product product = null;
+
+            foreach (var lang in languages)
+                {
+                string apiUrl = $"https://live.icecat.biz/api?UserName=openIcecat-live&Language={lang.Key}&icecat_id={catalog.IntegratedId}";
+                using HttpClient client = new HttpClient();
+                string jsonResponse = await client.GetStringAsync(apiUrl);
+
+                JObject response = JObject.Parse(jsonResponse);
+                if (response == null || response["data"] == null || !response["data"].HasValues)
+                    continue;
+
+                // Extract necessary product details
+                JObject generalInfo = (JObject)response["data"]["GeneralInfo"];
+                JObject image = (JObject)response["data"]["Image"];
+                JArray gallery = (JArray)response["data"]["Gallery"];
+                JArray featuresGroups = (JArray)response["data"]["FeaturesGroups"];
+                JArray multimedia = (JArray)response["data"]["Multimedia"];
+
+                if (generalInfo == null || image == null)
+                    continue;
+
+                string productName = generalInfo["ProductName"]?.ToString();
+                string description = generalInfo["SummaryDescription"]?["LongSummaryDescription"]?.ToString();
+                string shortDescription = generalInfo["SummaryDescription"]?["ShortSummaryDescription"]?.ToString();
+                long? brandId = (long?)generalInfo["BrandID"];
+                long? categoryId = generalInfo["Category"]?["CategoryID"]?.ToObject<long>();
+                string thumbnail = image["HighPic"]?.ToString();
+                string productCode = generalInfo["BrandPartCode"]?.ToString() ?? "";
+                string productTransName = generalInfo["TitleInfo"]?["GeneratedLocalTitle"]?["Value"]?.ToString();
+                string slug = GenerateSlug(shortDescription);
+
+                if (productName == null || brandId == null || categoryId == null || thumbnail == null)
+                    continue;
+
+                if (lang.Key == "en") // Save English as the default product
+                    {
+                    double price = await FetchProductPriceByUPC(catalog.EanNumber);
+                    product = new Product
+                        {
+                        CatalogId = catalog.Id,
+                        Name = productName,
+                        Price = price,
+                        Code = productCode,
+                        Description = description,
+                        ShortDescription = shortDescription,
+                        BrandId = brandId.Value,
+                        CategoryId = categoryId.Value,
+                        Thumbnail = thumbnail,
+                        EanNumber = catalog.EanNumber,
+                        Slug = slug,
+                        ProductClusters = new List<ProductCluster>(),
+                        ProductImages = new List<ProductImages>(),
+                        ProductMedias = new List<ProductMedia>(),
+                        Translations = new List<ProductTranslation>()
+                        };
+                    // Handle Gallery Images
+                    if (gallery != null)
+                        {
+                        foreach (JObject item in gallery)
+                            {
+
+                            var imageToUse = new[] { item["Pic500x500"], item["HighPic"], item["LowPic"], item["ThumbPic"] }.Select(i => i?.ToString()).FirstOrDefault(s => !string.IsNullOrEmpty(s));
+
+                            if (imageToUse != null)
+                                {
+                                product.ProductImages.Add(new ProductImages { ImageName = imageToUse });
+                                }
+
+
+                          /*  product.ProductImages.Add(new ProductImages
+                                {
+                                ImageName = item["Pic500x500"]?.ToString()
+                                });*/
+                            }
+                        }
+
+                    // Handle Multimedia
+                    if (multimedia != null)
+                        {
+                        foreach (JObject item in multimedia)
+                            {
+                            product.ProductMedias.Add(new ProductMedia
+                                {
+                                MediaUrl = item["URL"]?.ToString(),
+                                ContentType = item["ContentType"]?.ToString()
+                                });
+                            }
+                        }
+
+                    // Handle FeaturesGroups
+                    if (featuresGroups != null)
+                        {
+                        foreach (JObject fg in featuresGroups)
+                            {
+                            ProductCluster cluster = new ProductCluster
+                                {
+                                ClusterId = (long)fg["FeatureGroup"]["ID"],
+                                ProductClusterFeatures = new List<ProductClusterFeature>()
+                                };
+
+                            JArray features = (JArray)fg["Features"];
+                            foreach (JObject f in features)
+                                {
+                                cluster.ProductClusterFeatures.Add(new ProductClusterFeature
+                                    {
+                                    FeatureId = (long)f["Feature"]["ID"],
+                                    Value = f["PresentationValue"]?.ToString()
+                                    });
+                                }
+
+                            product.ProductClusters.Add(cluster);
+                            }
+                        }
+
+                    }
+
+                // Add Translation for Each Language (Including English)
+                product.Translations.Add(new ProductTranslation
+                    {
+                    Product = product,
+                    LanguageId = lang.Value,
+                    TranslatedName = productTransName ?? productName, // Fallback to default if null
+                    TranslatedDescription = description,
+                    TranslatedShortDescription = shortDescription
+                    });
+
+              
+                }
+
+            return product;
+            }
+        catch (Exception ex)
+            {
+            throw;
+            }
+        }
+
+
+    private async Task<Product> FetchProductDetails1(CatalogDto catalog)
         {
         try
             {
@@ -456,6 +636,7 @@ public class DataDownloads: IDataDownloads
         if (string.IsNullOrEmpty(value))
             return string.Empty;
 
+        value=ExtractBeforeFirstComma(value);
         // Convert to lower case and remove all accents
         var normalizedString = value.ToLowerInvariant().Normalize(NormalizationForm.FormD);
         var stringBuilder = new StringBuilder();
@@ -479,7 +660,11 @@ public class DataDownloads: IDataDownloads
         return slug;
         }
 
-
+    public string ExtractBeforeFirstComma(string input)
+        {
+        int index = input.IndexOf(',');
+        return index != -1 ? input.Substring(0, index) : input;
+        }
 
     #endregion
 
@@ -610,36 +795,45 @@ public class DataDownloads: IDataDownloads
 
     public async Task DownloadAndSaveAllCatalogs()
         {
-       await  DownloadCatalogs();
+        //await  DownloadCatalogs();
+        await UpdateAllCatalogColumnsAsync();
         }
-    private async Task<List<Catalog>> DownloadCatalogs()
+    private async Task<List<Catalog>> DownloadCatalogs(int batchSize = 10000)
         {
         string localFilePath = @"F:\buurter\files.index.xml";
-
         List<Catalog> products = new List<Catalog>();
-  
+
         try
             {
             using (FileStream fileStream = File.OpenRead(localFilePath))
             using (StreamReader reader = new StreamReader(fileStream))
                 {
                 XDocument doc = XDocument.Load(reader);
+                var files = doc.Descendants("file").ToList();
+                List<Catalog> batch = new List<Catalog>();
 
-                var files = doc.Descendants("file");
                 foreach (var file in files)
                     {
+                    string productXmlPath = (string)file.Attribute("path");
+                    string productXmlUrl = "https://data.icecat.biz/" + productXmlPath;
+                  //  XDocument productDoc = await DownloadProductXml(productXmlUrl);
+
                     var gtinElements = file.Descendants("EAN_UPC");
                     string selectedGtin = gtinElements
-                                          .Where(e => (int)e.Attribute("IsApproved") == 1) // Prefer approved GTIN
-                                          .Select(e => (string)e.Attribute("Value"))
-                                          .FirstOrDefault(); 
+                        .Where(e => (int?)e.Attribute("IsApproved") == 1)
+                        .Select(e => (string)e.Attribute("Value"))
+                        .FirstOrDefault() ?? gtinElements.Select(e => (string)e.Attribute("Value")).FirstOrDefault();
 
-                    if (selectedGtin == null) // Fallback if no approved GTINs are found
-                        {
-                        selectedGtin = gtinElements.Select(e => (string)e.Attribute("Value")).FirstOrDefault();
-                        }
+                    var dateAddedStr = (string)file.Attribute("Date_Added");
+                    var updatedStr = (string)file.Attribute("Updated");
 
+                    DateTime createdDate = !string.IsNullOrEmpty(dateAddedStr)
+                        ? DateTime.ParseExact(dateAddedStr, "yyyyMMddHHmmss", null)
+                        : DateTime.Now;
 
+                    DateTime lastModifiedDate = !string.IsNullOrEmpty(updatedStr)
+                        ? DateTime.ParseExact(updatedStr, "yyyyMMddHHmmss", null)
+                        : DateTime.Now;
 
                     var productDetails = new Catalog
                         {
@@ -649,33 +843,72 @@ public class DataDownloads: IDataDownloads
                         BrandId = (int)file.Attribute("Supplier_id"),
                         CategoryId = (int)file.Attribute("Catid"),
                         Name = (string)file.Attribute("Model_Name"),
-                        EanNumber= selectedGtin
-
+                        EanNumber = selectedGtin,
+                        Thumbnail = productXmlUrl,
+                     /*   Thumbnail = (string)productDoc.Descendants("Product").Select(e => e.Attribute("ThumbPic")?.Value).FirstOrDefault(),
+                        ShortDescription = productDoc.Descendants("SummaryDescription")
+                            .Descendants("ShortSummaryDescription")
+                            .Where(e => (string)e.Attribute("langid") == "1")
+                            .Select(e => e.Value)
+                            .FirstOrDefault(),
+                        Description = productDoc.Descendants("SummaryDescription")
+                            .Descendants("LongSummaryDescription")
+                            .Where(e => (string)e.Attribute("langid") == "1")
+                            .Select(e => e.Value)
+                            .FirstOrDefault(),*/
+                        CreatedDate = createdDate,
+                        LastModifiedDate = lastModifiedDate
                         };
 
-                    products.Add(productDetails);
+                    batch.Add(productDetails);
+
+                    // Save the batch when it reaches the batch size
+                    if (batch.Count >= batchSize)
+                        {
+                        await SaveCatalogs(batch);
+                        products.AddRange(batch);
+                        Console.WriteLine($"Saved {products.Count}/{files.Count} products.");
+                        batch.Clear();
+                        }
+                    }
+
+                // Save any remaining products
+                if (batch.Count > 0)
+                    {
+                    await SaveCatalogs(batch);
+                    products.AddRange(batch);
+                    Console.WriteLine($"Saved final batch. Total products saved: {products.Count}");
                     }
                 }
-
-            await SaveCatalogs(products);
-
-
-
-
-
-
             }
         catch (Exception ex)
             {
             Console.WriteLine("Error reading local index file: " + ex.Message);
-            // Handle exceptions or errors here
             }
 
         return products;
         }
+    private async Task<XDocument> DownloadProductXml(string url)
+        {
+        try
+            {
+            using (HttpClient client = new HttpClient())
+                {
+                var authToken = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_username}:{_password}"));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authToken);
 
+                string xmlContent = await client.GetStringAsync(url);
+                return XDocument.Parse(xmlContent);
+                }
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine($"Error fetching product XML: {url}, {ex.Message}");
+            return new XDocument();
+            }
+        }
 
-    private async Task SaveCatalogs(List<Catalog> catalogs, int batchSize = 1000)
+    private async Task SaveCatalogs(List<Catalog> catalogs, int batchSize = 10000)
         {
         int totalCatalogs = catalogs.Count;
         int processed = 0;
@@ -695,6 +928,107 @@ public class DataDownloads: IDataDownloads
             Console.WriteLine($"Processed {processed}/{totalCatalogs} catalogs.");
             }
         }
+
+
+
+    ///New working 
+
+    public async Task<ServiceResponse<bool>> UpdateAllCatalogColumnsAsync(int batchSize = 1000, int maxDegreeOfParallelism = 50)
+        {
+        try
+            {
+            // Step 1: Get all catalogs
+            var catalogsResponse = await _catalogService.GetCatalogsAsync();
+            if (!catalogsResponse.Success || catalogsResponse.Data == null)
+                {
+                return new ServiceResponse<bool>
+                    {
+                    Success = false,
+                    Message = "Failed to fetch catalogs."
+                    };
+                }
+
+            var catalogs = catalogsResponse.Data;
+
+            // Step 2: Process catalogs in batches
+            for (int i = 0; i < catalogs.Count; i += batchSize)
+                {
+                var batch = catalogs.Skip(i).Take(batchSize).ToList();
+
+                // Step 3: Parallel API calls to update columns
+                var tasks = batch.Select(async catalog =>
+                {
+                    try
+                        {
+                        using (HttpClient client = new HttpClient())
+                            {
+                            var authToken = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_username}:{_password}"));
+                            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authToken);
+
+                            string xmlContent = await client.GetStringAsync(catalog.Thumbnail); // Assuming Thumbnail stores API URL
+                            XDocument productDoc = XDocument.Parse(xmlContent);
+
+                            // Update columns from API response
+                            catalog.Thumbnail = (string)productDoc.Descendants("Product").Select(e => e.Attribute("ThumbPic")?.Value).FirstOrDefault();
+                            catalog.ShortDescription = productDoc.Descendants("SummaryDescription")
+                                                                 .Descendants("ShortSummaryDescription")
+                                                                 .Where(e => (string)e.Attribute("langid") == "1")
+                                                                 .Select(e => e.Value)
+                                                                 .FirstOrDefault();
+                            catalog.Description = productDoc.Descendants("SummaryDescription")
+                                                            .Descendants("LongSummaryDescription")
+                                                            .Where(e => (string)e.Attribute("langid") == "1")
+                                                            .Select(e => e.Value)
+                                                            .FirstOrDefault();
+                            }
+                        }
+                    catch (Exception ex)
+                        {
+                      Debug.WriteLine(ex, $"Error updating catalog {catalog.IntegratedId}: {ex.Message}");
+                        }
+                });
+
+                // Step 4: Run tasks with limited parallelism
+                await Task.WhenAll(tasks.Take(maxDegreeOfParallelism));
+
+               await  _catalogService.BulkUpdateCatalogsAsync(batch);
+                // Step 5: Bulk update to database
+                //using (var transaction = await _context.Database.BeginTransactionAsync())
+                //    {
+                //    try
+                //        {
+                //        _context.Catalogs.UpdateRange(batch);
+                //        await _context.SaveChangesAsync();
+                //        await transaction.CommitAsync();
+                //        Console.WriteLine($"Updated batch {i / batchSize + 1}/{(catalogs.Count / batchSize) + 1}");
+                //        }
+                //    catch (Exception ex)
+                //        {
+                //        await transaction.RollbackAsync();
+                //        _logger.LogError(ex, "Error during bulk update.");
+                //        }
+                //    }
+                }
+
+            return new ServiceResponse<bool>
+                {
+                Success = true,
+                Data = true,
+                Message = "All catalogs updated successfully."
+                };
+            }
+        catch (Exception ex)
+            {
+            Debug.WriteLine(ex, "Error occurred during catalog update.");
+            return new ServiceResponse<bool>
+                {
+                Success = false,
+                Message = "Error occurred while updating catalogs."
+                };
+            }
+        }
+
+
     #endregion
     }
 
