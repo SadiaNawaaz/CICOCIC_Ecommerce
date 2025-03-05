@@ -14,23 +14,23 @@
 </div>
 @code {
     [CascadingParameter]
-    MudDialogInstance MudDialog
-    {
+    IMudDialogInstance MudDialog
+        {
         get;
         set;
-    }
+        }
     [Parameter]
     public string ContentText
-    {
+        {
         get;
         set;
-    }
+        }
     [Parameter]
     public string ButtonText
-    {
+        {
         get;
         set;
-    }
+        }
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
 }

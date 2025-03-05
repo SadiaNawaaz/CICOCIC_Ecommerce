@@ -111,7 +111,7 @@
 
         var dialogResult = await DialogService.Show<DeleteDialog>("Confirm", parameters).Result;
 
-        if (!dialogResult.Cancelled && bool.TryParse(dialogResult.Data.ToString(), out bool result) && result)
+        if (!dialogResult.Canceled && bool.TryParse(dialogResult.Data.ToString(), out bool result) && result)
         {
             var response = await UserService.DeleteUserAsync(user.Id);
             if (response.Success)

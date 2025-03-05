@@ -10,6 +10,8 @@
 @inject ILanguageService languageService
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
+
+
 <style>
     .custom-tree-item {
         color: gray;
@@ -23,8 +25,6 @@
     }
 </style>
 
-
-
 @if (IsLoading)
     {
     <div class="text-center">
@@ -33,35 +33,31 @@
     }
 else
     {
-    @if(_selectedItem!=null)
-                    {
-                    <span>Selected Category : <b> @_selectedItem.Name </b> </span>
-                    <hr />
-                    }
-    if(TreeItems.Count()<1 || TreeItems==null)
+    @if (_selectedItem != null)
+        {
+        <span>Selected Category : <b> @_selectedItem.Name </b> </span>
+        <hr />
+        }
+    if (TreeItems.Count() < 1 || TreeItems == null)
+        {
+        <span>Please wait....</span>
+        }
 
-                    {
-                    <span>Please wait....</span>
-                    }
-
-    <MudTreeView Items="@TreeItems" Hover="true" Width="100%">
+    <MudTreeView Items="@TreeItems" Hover="true" Width="100%" T="CategoryDto">
         <ItemTemplate Context="item">
-            <MudTreeViewItem Class="@GetItemClass(item)" @onclick="() => SelectItem(item)" Items="@item.SubCategories" sm="6" Expanded="@item.IsExpanded" ExpandedChanged="@((bool expanded) => OnToggleClicked(item, expanded))">
+            <MudTreeViewItem @onclick="() => SelectItem(item.Value)"
+                             Items="@item.Children"
+                             Expanded="@item.Value.IsExpanded"
+                             ExpandedChanged="@((bool expanded) => OnToggleClicked(item.Value, expanded))">
                 <BodyContent>
                     <i class="fas fa-lg fa-fw me-10px fa-folder-open"></i>
-                    <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
-
-                        <MudText Style="justify-self: start;">&nbsp;&nbsp;&nbsp; @item.Name </MudText>
-                        <div style="justify-self: end;">
-
-
-
-                        </div>
-                    </div>
+                    <MudText>&nbsp;&nbsp;&nbsp; @item.Value.Name </MudText>
                 </BodyContent>
             </MudTreeViewItem>
         </ItemTemplate>
     </MudTreeView>
+
+
 
     }
 
@@ -69,77 +65,18 @@ else
 
 @code {
 
-    private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
+    private List<TreeItemData<CategoryDto>> TreeItems { get; set; } = new List<TreeItemData<CategoryDto>>();
     private bool IsLoading { get; set; } = false;
+
     [Parameter]
     public EventCallback<CategoryDto> OnCategorySelected { get; set; }
 
     [Parameter]
     public long SelectedCategoryId { get; set; }
 
-
     protected override async Task OnInitializedAsync()
         {
-
-        }
-
-
-
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-        if (firstRender)
-            {
-
-
-
-            await LoadCategoryTreeAsync();
-
-
-            if (SelectedCategoryId != null && SelectedCategoryId > 0)
-                {
-
-                try
-                    {
-                    var response = await CategoryService.GetCategoryHierarchyAsync(SelectedCategoryId, "en");
-                    if (response.Success)
-                        {
-                        var tree = await CategoryService.BuildCategoryTree(response.Data);
-                        var treeitem = TreeItems.FirstOrDefault(a => a.Id == tree[0].Id);
-                        treeitem.SubCategories = tree[0].SubCategories;
-                        _selectedItem = FindCategoryById(TreeItems, SelectedCategoryId);
-
-                        if (_selectedItem != null)
-                            {               
-                            ExpandParentNodes(TreeItems, response.Data);
-                            _selectedItem.IsExpanded = true;
-                            await OnCategorySelected.InvokeAsync(_selectedItem);
-
-                            StateHasChanged();
-                            }
-                        }
-                    }
-                catch (Exception ex)
-                    {
-
-                    }
-
-
-                
-            }
-        StateHasChanged();
-        }
-        }
-    private void ExpandParentNodes(IEnumerable<CategoryDto> categories, IEnumerable<CategoryDto> hierarchy)
-        {
-        foreach (var parentCategory in hierarchy)
-            {
-            var node = FindCategoryById(categories, parentCategory.Id);
-            if (node != null)
-                {
-                node.IsExpanded = true;
-                }
-            }
+        await LoadCategoryTreeAsync();
         }
 
 
@@ -152,8 +89,19 @@ else
 
             if (response.Success)
                 {
-                TreeItems = new HashSet<CategoryDto>(response.Data);
-
+                // Ensure Children is always initialized
+                TreeItems = response.Data.Select(category => new TreeItemData<CategoryDto>
+                    {
+                    Value = category,
+                    Children = category.SubCategories != null
+                        ? category.SubCategories.Select(sub => new TreeItemData<CategoryDto>
+                            {
+                            Value = sub,
+                            Children = new List<TreeItemData<CategoryDto>>(), // Always initialize Children
+                            Expanded = sub.IsExpanded
+                            }).ToList()
+                        : new List<TreeItemData<CategoryDto>>() // Ensure it is not null
+                    }).ToList();
                 }
             else
                 {
@@ -167,46 +115,29 @@ else
         finally
             {
             IsLoading = false;
+            StateHasChanged(); // Force UI update
             }
         }
 
-
-
-    private CategoryDto MapToCategoryDto(Category category)
-        {
-        return new CategoryDto
-            {
-            Id = category.Id,
-            Name = category.Name,
-            Icon = category.Icon,
-            Level = category.Level,
-            ParentCategoryId = category.ParentCategoryId,
-            SubCategories = category.SubCategories?.Select(MapToCategoryDto).ToHashSet()
-            };
-        }
-
-
-
     private CategoryDto _selectedItem;
-    private string GetItemClass(CategoryDto item)
-        {
-        return item == _selectedItem ? "custom-tree-item custom-tree-item-selected" : "custom-tree-item";
-        }
-
-    private string GetIcon(CategoryDto item)
-        {
-        return item.Icon; ;
-        }
 
     private async void SelectItem(CategoryDto item)
         {
-
         var response = await CategoryService.GetCategoriesByParentId(item.Id, 1);
 
         if (response.Success)
             {
+            item.SubCategories = response.Data;
+            var treeItem = FindTreeItem(TreeItems, item.Id);
+            if (treeItem != null)
+                {
 
-            item.SubCategories = new HashSet<CategoryDto>(response.Data);
+                if (treeItem != null)
+                    {
+                    treeItem.Children = response.Data.Select(sub => ConvertToTreeItemData(sub)).ToList();
+                    treeItem.Expanded = true;
+                    }
+                }
             StateHasChanged();
             }
         else
@@ -215,6 +146,10 @@ else
             }
 
         _selectedItem = item;
+
+
+
+
         await OnCategorySelected.InvokeAsync(item);
         StateHasChanged();
         }
@@ -226,32 +161,48 @@ else
             item.IsExpanded = isExpanded;
             }
 
-
         Console.WriteLine($"Toggled: {item.Name}, Expanded: {isExpanded}");
 
-        // Example custom logic:
         if (isExpanded)
             {
             SelectItem(item);
-            // e.g., Load data dynamically here if needed
             }
         else
             {
             Console.WriteLine($"Node '{item.Name}' collapsed");
             }
         }
-    private CategoryDto FindCategoryById(IEnumerable<CategoryDto> categories, long id)
-        {
-        foreach (var category in categories)
-            {
-            if (category.Id == id)
-                return category;
 
-            var subCategory = FindCategoryById(category.SubCategories ?? new HashSet<CategoryDto>(), id);
-            if (subCategory != null)
-                return subCategory;
+    private string GetItemClass(CategoryDto item)
+        {
+        return item == _selectedItem ? "custom-tree-item custom-tree-item-selected" : "custom-tree-item";
+        }
+
+    private TreeItemData<CategoryDto> FindTreeItem(List<TreeItemData<CategoryDto>> treeItems, long id)
+        {
+        foreach (var treeItem in treeItems)
+            {
+            if (treeItem.Value.Id == id)
+                return treeItem;
+
+            if (treeItem.Children != null)
+                {
+                var found = FindTreeItem(treeItem.Children.ToList(), id);
+                if (found != null)
+                    return found;
+                }
             }
         return null;
         }
+    private TreeItemData<CategoryDto> ConvertToTreeItemData(CategoryDto category)
+        {
+        return new TreeItemData<CategoryDto>
+            {
+            Value = category,
+            Expanded = false,
+            Children = category.SubCategories?.Select(sub => ConvertToTreeItemData(sub)).ToList() ?? new List<TreeItemData<CategoryDto>>()
+            };
+        }
+
 
 }

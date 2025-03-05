@@ -93,14 +93,14 @@ public class CategoryService : ICategoryService
                 bool hasChildren = _context.Categories.Any(c => c.ParentCategoryId == category.Id);
                 if (hasChildren)
                     {
-                    dto.SubCategories = new HashSet<CategoryDto>
+                    dto.SubCategories = new List<CategoryDto>
                 {
                     new CategoryDto { Name = "Loading...", Id = -1 } // Placeholder
                 };
                     }
                 else
                     {
-                    dto.SubCategories = new HashSet<CategoryDto>(); // Empty but initialized
+                    dto.SubCategories = new List<CategoryDto>(); // Empty but initialized
                     }
 
                 return dto;
@@ -654,7 +654,7 @@ public class CategoryService : ICategoryService
             ParentCategoryId = category.ParentCategoryId,
             SubCategories = category.SubCategories?
                 .Select(sub => MapToCategoryDto(sub, languageId))
-                .ToHashSet(), // ✅ Convert List to HashSet
+                .ToList(), // ✅ Convert List to HashSet
             Translations = category.Translations
                 .Select(t => new CategoryTranslationDto  // ✅ Convert Entity to DTO
                     {
@@ -687,14 +687,14 @@ public class CategoryService : ICategoryService
                 bool hasChildren = _context.Categories.Any(c => c.ParentCategoryId == category.Id);
                 if (hasChildren)
                     {
-                    dto.SubCategories = new HashSet<CategoryDto>
+                    dto.SubCategories = new List<CategoryDto>
                 {
                     new CategoryDto { Name = "Loading...", Id = -1 } // Placeholder
                 };
                     }
                 else
                     {
-                    dto.SubCategories = new HashSet<CategoryDto>(); // Empty but initialized
+                    dto.SubCategories = new List<CategoryDto>(); // Empty but initialized
                     }
 
                 return dto;

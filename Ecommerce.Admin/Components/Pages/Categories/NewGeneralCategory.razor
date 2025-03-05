@@ -103,7 +103,7 @@
     private string input = string.Empty;
     CategoryDto category = new CategoryDto();
     [CascadingParameter]
-    private MudDialogInstance MudDialog { get; set; } = default!;
+    private IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public CategoryDto Item { get; set; }
     [Parameter]
     public bool IsEdit { get; set; }

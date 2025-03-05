@@ -9,7 +9,6 @@
 @using Ecommerce.Shared.Services.Shared;
 @inject ILanguageService languageService
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-
 <style>
     .custom-tree-item {
         color: gray;
@@ -21,6 +20,14 @@
         background-color: rgb(185 207 231 / 10%);
         font-weight: bold;
     }
+    .selected-node {
+        background-color: #c4c4c4!important;
+        border-radius: 5px;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+
+
 </style>
 
 
@@ -59,14 +66,14 @@
                 }
 
 
-            <MudTreeView Items="@TreeItems" Hover="true" Width="100%">
+            <MudTreeView Items="@TreeItems" Hover  Width="100%" T="CategoryDto">
                 <ItemTemplate Context="item">
-                    <MudTreeViewItem Class="@GetItemClass(item)" @onclick="() => SelectItem(item)" Items="@item.SubCategories" sm="6" ExpandedChanged="@((bool expanded) => OnToggleClicked(item, expanded))">
+                    <MudTreeViewItem     Class="@(_selectedItem == item.Value ? "selected-node" : "")" @onclick="() => SelectItem(item.Value)" Items="@item.Children" sm="6" ExpandedChanged="@((bool expanded) => OnToggleClicked(item.Value, expanded))">
                         <BodyContent>
                             @if (!string.IsNullOrEmpty(item.Icon))
                                 {
 
-                                var icon = "/Category/" + item.Id.ToString() + "/" + item.Icon;
+                                var icon = "/Category/" + item.Value.Id.ToString() + "/" + item.Icon;
 
                                 <img src="@icon" alt="@icon" style="height: 24px; width: 24px" />
                                 }
@@ -76,19 +83,11 @@
                                 }
                             <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
 
-                                <MudText Style="justify-self: start;">&nbsp;&nbsp;&nbsp; @item.Name </MudText>
+                                <MudText Style="justify-self: start;">&nbsp;&nbsp;&nbsp; @item.Value.Name </MudText>
                                 <div style="justify-self: end;">
-
-
-
-
-                                    @if ((item.MarkCategory))
+                                    @if ((item.Value.MarkCategory))
                                         {
-
-
-
-
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item)">
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item.Value)">
                                             <i class="fa fa-check"></i>
                                         </button>
 
@@ -96,38 +95,23 @@
                                         }
                                     else
                                         {
-
-
-
-                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item)">
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item.Value)">
                                             <i class="fa fa-times"></i>
                                         </button>
                                         }
-
-
-
-                                   
-                                    <button style="margin-left:3px" type="button" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenAddDialog(item)">
+                                    <button style="margin-left:3px" type="button" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenAddDialog(item.Value)">
                                         <i class="fas fa-plus"></i>
                                     </button>
 
-                                    <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenEditDialog(item)">
+                                    <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenEditDialog(item.Value)">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => ConfirmRemoveDialog(item)">
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => ConfirmRemoveDialog(item.Value)">
                                         <i class="fas fa-trash"></i>
                                     </button>
 
 
-                                    @*<MudTooltip Text="Edit">
-            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="text-success btn btn-sm" OnClick="() => OpenAddDialog(item)" />
-        </MudTooltip>
-        <MudTooltip Text="Edit">
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" class="text-warning btn btn-sm" OnClick="() => OpenEditDialog(item)" />
-        </MudTooltip>
-        <MudTooltip Text="Delete">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" class="text-danger btn btn-sm" OnClick="() => ConfirmRemoveDialog(item)" />
-        </MudTooltip>*@
+
                                 </div>
                             </div>
                         </BodyContent>
@@ -144,7 +128,7 @@
 
 @code {
 
-    private HashSet<CategoryDto> TreeItems { get; set; } = new HashSet<CategoryDto>();
+    private List<TreeItemData<CategoryDto>> TreeItems { get; set; } = new List<TreeItemData<CategoryDto>>();
     private bool IsLoading { get; set; } = false;
     private List<Language> Languages = new List<Language>();
     private int SelectedLanguageId;
@@ -178,7 +162,18 @@
 
             if (response.Success)
                 {
-                TreeItems = new HashSet<CategoryDto>(response.Data);
+                TreeItems = response.Data.Select(category => new TreeItemData<CategoryDto>
+                    {
+                    Value = category,
+                    Children = category.SubCategories != null
+         ? category.SubCategories.Select(sub => new TreeItemData<CategoryDto>
+             {
+             Value = sub,
+             Children = new List<TreeItemData<CategoryDto>>(),
+             Expanded = sub.IsExpanded
+             }).ToList()
+         : new List<TreeItemData<CategoryDto>>()
+                    }).ToList();
                 }
             else
                 {
@@ -226,7 +221,7 @@
 
             var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
             string value = result.Data as string ?? string.Empty;
-            if (!result.Cancelled && value != null)
+            if (!result.Canceled && value != null)
                 {
 
 
@@ -257,7 +252,24 @@
                         Category cate = await SaveOrUpdateCategoryAsync(category);
                         if (cate != null)
                             {
-                            TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId, Icon = cate.Icon });
+                            //TreeItems.Add(new CategoryDto { Name = newCategoryName, Level = category.Level, Id = category.Id, ParentCategoryId = category.ParentCategoryId, Icon = cate.Icon });
+
+                            TreeItems.Add(new TreeItemData<CategoryDto>
+                                {
+
+                                Value = new CategoryDto
+                                    {
+                                    Name = newCategoryName,
+                                    Level = category.Level,
+                                    Id = category.Id,
+                                    ParentCategoryId = category.ParentCategoryId,
+                                    Icon = cate.Icon
+                                    },
+                                Text = newCategoryName,
+                                Icon = !string.IsNullOrEmpty(cate.Icon) ? $"/Category/{category.Id}/{cate.Icon}" : "",
+                                Children = new List<TreeItemData<CategoryDto>>() // Initialize empty subcategory list
+                                });
+
                             }
 
                         }
@@ -309,7 +321,7 @@
 
             var result = await DialogService.Show<NewGeneralCategory>(string.Empty, parameters, options).Result;
 
-            if (!result.Cancelled)
+            if (!result.Canceled)
                 {
 
                 var data = result.Data as dynamic;
@@ -352,7 +364,6 @@
                 }
 
             }
-
         catch (Exception ex)
             {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
@@ -426,7 +437,7 @@
             Icon = category.Icon,
             Level = category.Level,
             ParentCategoryId = category.ParentCategoryId,
-            SubCategories = category.SubCategories?.Select(MapToCategoryDto).ToHashSet()
+            SubCategories = category.SubCategories?.Select(MapToCategoryDto).ToList()
             };
         }
 
@@ -481,7 +492,7 @@
         }
 
 
-    private async Task<bool> RemoveCategoryAndDeleteAsync(HashSet<CategoryDto> categories, long id)
+    private async Task<bool> RemoveCategoryAndDeleteAsync(List<CategoryDto> categories, long id)
         {
         var itemToRemove = categories.FirstOrDefault(c => c.Id == id);
         if (itemToRemove != null)
@@ -546,7 +557,17 @@
         if (response.Success)
             {
 
-            item.SubCategories = new HashSet<CategoryDto>(response.Data);
+            item.SubCategories = new List<CategoryDto>(response.Data);
+            var treeItem = FindTreeItem(TreeItems, item.Id);
+            if (treeItem != null)
+                {
+
+                if (treeItem != null)
+                    {
+                    treeItem.Children = response.Data.Select(sub => ConvertToTreeItemData(sub)).ToList();
+                    treeItem.Expanded = true;
+                    }
+                }
             StateHasChanged();
             }
         else
@@ -600,4 +621,30 @@
 
 
         }
+    private TreeItemData<CategoryDto> FindTreeItem(List<TreeItemData<CategoryDto>> treeItems, long id)
+        {
+        foreach (var treeItem in treeItems)
+            {
+            if (treeItem.Value.Id == id)
+                return treeItem;
+
+            if (treeItem.Children != null)
+                {
+                var found = FindTreeItem(treeItem.Children.ToList(), id);
+                if (found != null)
+                    return found;
+                }
+            }
+        return null;
+        }
+    private TreeItemData<CategoryDto> ConvertToTreeItemData(CategoryDto category)
+        {
+        return new TreeItemData<CategoryDto>
+            {
+            Value = category,
+            Expanded = false,
+            Children = category.SubCategories?.Select(sub => ConvertToTreeItemData(sub)).ToList() ?? new List<TreeItemData<CategoryDto>>()
+            };
+        }
+
 }

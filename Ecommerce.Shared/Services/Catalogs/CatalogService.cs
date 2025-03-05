@@ -37,7 +37,7 @@ public class CatalogService: ICatalogService
         try
             {
             // Project only the needed columns into CatalogDto
-            var catalogs = await _context.Catalogs.Take(100)
+            var catalogs = await _context.Catalogs.Where(a=>a.Code== "F4666J")
                 .Include(c => c.Brand)
                 .Include(c=>c.Category)
                 .Select(c => new CatalogDto

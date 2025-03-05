@@ -102,7 +102,7 @@
             parameters.Add("ButtonText", "Yes");
             var dialogresult = DialogService.Show<DeleteDialog>("Confirm", parameters);
             var result = await dialogresult.Result;
-            if (!result.Cancelled && bool.TryParse(result.Data.ToString(), out bool resultbool))
+            if (!result.Canceled && bool.TryParse(result.Data.ToString(), out bool resultbool))
                 await DeleteTemplate(template.Id);
         }
         catch (Exception ex)

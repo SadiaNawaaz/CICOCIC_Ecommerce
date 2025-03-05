@@ -127,7 +127,7 @@ public partial class AddEditTemplate
             var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
             var result = await DialogService.Show<TemplateDialog>("Template Dialog", parameters, options).Result;
 
-            if (!result.Cancelled)
+            if (!result.Canceled)
             {
                 var resultData = (dynamic)result.Data;
                 templateClusterFeatures = resultData.TemplateClusterFeatures;

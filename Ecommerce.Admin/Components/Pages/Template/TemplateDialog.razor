@@ -85,7 +85,7 @@
     </fieldset>
 </div>
 @code {
-    [CascadingParameter] private MudDialogInstance Dialog { get; set; }
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; }
     [Parameter] public List<Feature> Features { get; set; }
     [Parameter] public List<Cluster> Clusters { get; set; }
     [Parameter] public List<TemplateClusterFeature> TemplateClusterFeatures { get; set; }
@@ -94,71 +94,71 @@
     private Feature objFeature = new Feature();
 
     private void AddToList()
-    {
-        if (cluster.Id == 0)
         {
+        if (cluster.Id == 0)
+            {
             Snackbar.Add("Select clusters:", Severity.Info);
             return;
-        }
+            }
         else if (objFeature.Id == 0)
-        {
+            {
             Snackbar.Add("Select Feature:", Severity.Info);
             return;
-        }
+            }
         else
-        {
+            {
             var fet = Features.FirstOrDefault(a => a.Id == objFeature.Id);
             var feature = new TemplateClusterFeature { FeatureId = objFeature.Id, Feature = fet };
             TemplateClusterFeatures.Add(feature);
             feature.Id = 0;
             StateHasChanged();
+            }
         }
-    }
 
     private void RemoveFromList(TemplateClusterFeature feature)
-    {
+        {
         TemplateClusterFeatures.Remove(feature);
         StateHasChanged();
-    }
+        }
     private void Save()
-    {
-        if (cluster.Id == 0)
         {
+        if (cluster.Id == 0)
+            {
             Snackbar.Add("Please Select clusters:", Severity.Info);
             return;
-        }
+            }
 
 
         var result = new { TemplateClusterFeatures, cluster };
         Dialog.Close(DialogResult.Ok(result));
-    }
+        }
     private void OnClusterChange(object args)
-    {
+        {
 
 
         try
-        {
+            {
             long selectedClusterId = Convert.ToInt64(args);
             if (selectedClusterId != 0 && selectedClusterId > 0)
-            {
+                {
                 selectedCluster = Clusters.FirstOrDefault(c => c.Id == selectedClusterId);
                 cluster = selectedCluster;
                 StateHasChanged();
 
-            }
+                }
 
             else
-            {
+                {
                 cluster = new Cluster();
+                }
             }
-        }
 
         catch(Exception ex)
 
-        {
+            {
+
+            }
+
 
         }
-
-
-    }
 }
