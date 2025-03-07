@@ -181,8 +181,30 @@
                                 <CellTemplate>
                                     @{
                                         var isPublished = context.Item.Publish;
+
+                                        if (isPublished)
+                                            {
+
+
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Marked">
+                                                <i class="fa fa-check"></i>
+                                            </button>
+
+                                            }
+                                        else
+                                            {
+
+
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="UnMarked">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                            }
                                     }
-                                    <MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />
+                                    @*<MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />*@
+
+
+
+
                                 </CellTemplate>
                             </TemplateColumn>
 
@@ -193,8 +215,10 @@
                                 </HeaderTemplate>
                                 <CellTemplate>
                                     <MudStack Row>
-                                        <MudIconButton Icon="@Icons.Material.Filled.EmojiObjects" Size="Size.Small" Class="text-warning" OnClick="() => CreateObject(context.Item)" />
-
+                                        @*<MudIconButton Icon="@Icons.Material.Filled.EmojiObjects" Size="Size.Small" Class="text-warning" OnClick="() => CreateObject(context.Item)" />*@
+                                        <button type="button" @onclick="() => CreateObject(context.Item)" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Object">
+                                            <i class="fa fa-lightbulb"></i>
+                                        </button>
                                     </MudStack>
                                 </CellTemplate>
                             </TemplateColumn>

@@ -29,7 +29,17 @@
 
 
 </style>
-
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Categories</li>
+        </ol>
+    </div>
+    <div class="ms-auto">
+        <button @onclick="() => OpenAddDialog(null)" class="btn btn-General btn-rounded px-4 rounded-pill"><i class="fa fa-plus fa-lg me-2 ms-n2 text-primary-900"></i>Add Category</button>
+    </div>
+</div>
 
 <div class="col-xl-12">
 
@@ -47,7 +57,7 @@
             </div>
         </div>
         <div class="panel-body">
-            <div class="mb-2">
+            @*<div class="mb-2">
                 <button href="javascript:;" class="btn btn-sm btn-General" @onclick="() => OpenAddDialog(null)">
                     <span class="d-flex align-items-center text-start">
                         <i class="fab fa-plus"></i>
@@ -57,7 +67,7 @@
                         </span>
                     </span>
                 </button>
-            </div>
+            </div>*@
             @if (IsLoading)
                 {
                 <div class="text-center">
@@ -87,7 +97,7 @@
                                 <div style="justify-self: end;">
                                     @if ((item.Value.MarkCategory))
                                         {
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item.Value)">
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Marked – Click to Unmark" @onclick="() => MarkCategory(item.Value)">
                                             <i class="fa fa-check"></i>
                                         </button>
 
@@ -95,7 +105,7 @@
                                         }
                                     else
                                         {
-                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Mark/UnMarks" @onclick="() => MarkCategory(item.Value)">
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="UnMarked – Click to Mark" @onclick="() => MarkCategory(item.Value)">
                                             <i class="fa fa-times"></i>
                                         </button>
                                         }
@@ -103,7 +113,7 @@
                                         <i class="fas fa-plus"></i>
                                     </button>
 
-                                    <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Add" @onclick="() => OpenEditDialog(item.Value)">
+                                    <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="() => OpenEditDialog(item.Value)">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" @onclick="() => ConfirmRemoveDialog(item.Value)">

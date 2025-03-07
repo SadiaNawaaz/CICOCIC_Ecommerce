@@ -38,7 +38,7 @@
                 <MudDataGrid T="BrandDto" Items="@brands" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
                     <ColGroup>
                         <col style="width: 60%;" />
-                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
                         <col style="width: 20%;" />
                     </ColGroup>
                     <Columns>
@@ -49,13 +49,16 @@
                                     bool marked = context.Item.MarkBrand;
                                     @if (marked)
                                         {
-                                        <button class="btn btn-success" @onclick="(() => MarkBrand(context.Item))">
+
+
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Marked – Click to Unmark" @onclick="(() => MarkBrand(context.Item))">
                                             <i class="fa fa-check"></i>
                                         </button>
                                         }
                                     else
                                         {
-                                        <button class="btn btn-danger" @onclick="(() => MarkBrand(context.Item))">
+                                  
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="UnMarked – Click to Mark" @onclick="(() => MarkBrand(context.Item))">
                                             <i class="fa fa-times"></i>
                                         </button>
                                         }
@@ -70,9 +73,7 @@
                             </HeaderTemplate>
                             <CellTemplate>
                                 <MudStack Row>
-                                    @*<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="text-warning" OnClick="() => EditBrand(context.Item.Id)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="text-danger" OnClick="() => DeleteBrand(context.Item)" />*@
-
+                    
 
 
                                     <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Edit" @onclick="() => EditBrand(context.Item.Id)">
