@@ -11,7 +11,8 @@
     <div>
         <ol class="breadcrumb mb-2">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/ProductVariantList?ProductId=@Id"></a>Variants</li>
+            <li class="breadcrumb-item"><a href="/VariantObjects">Objects</a></li>
+            @*<li class="breadcrumb-item"><a href="/ProductVariantList?ProductId=@Id"></a></li>*@
             <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Object</li>
         </ol>
         <h1 class="page-header mb-0"> Object</h1>
@@ -22,7 +23,7 @@
         <DataAnnotationsValidator />
 
         <div class="row">
-            <div class="col-xl-12">
+            <div class="col-xl-8">
                 <div class="card border-0 mb-4">
                     <div class="card-header h6 mb-0 bg-none p-3">
                         <i class="fa fa-dolly fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Variant Information
@@ -42,7 +43,7 @@
 
                 <div class="card border-0 mb-4">
                     <div class="card-header h6 mb-0 bg-none p-3">
-                        <i class="fa fa-plug-circle-check fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Section
+                        <i class="fa fa-folder fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Make your object Unique
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -68,9 +69,17 @@
                             </div>
                         </div>
 
+
+                    </div>
+                </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-folder fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Ownership docs
+                    </div>
+                    <div class="card-body">
                         <!-- Variant Object Media Section -->
-                        <div class="mt-4">
-                            <h5>Object Media </h5>
+                        <div>
+                            <h5> </h5>
                             @foreach (var media in productVariant.VariantObjectMedias.Where(a => a.IsDeleted == false))
                                 {
                                 <div class="row mb-3">
@@ -110,9 +119,91 @@
                         <span class="text-warning-500"><b>Note</b> :The name of the attachment is mandatory; otherwise, data will be lost</span>
                     </div>
                 </div>
+
+
+               
+
+
+
+
+
+
+
+
             </div>
-        </div>
-    </EditForm>
+
+            <div class="col-xl-4">
+
+                <div class="card border-0 mb-3">
+                    <div class="card-header h6 mb-0 bg-none p-3 d-flex">
+                        <div class="flex-1">
+                            <div>  <i class="fa fa-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i><b>Image</b></div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                       
+                        <div class="form-horizontal form-bordered">
+                            <div class="form-group row">
+                                <label class="form-label col-form-label col-lg-4">Thumbnail</label>
+                                <div class="col-lg-8">
+
+                                    @*<InputText @bind-Value="productVariant.Thumbnail" class="form-control" />*@
+
+                                    @if (!String.IsNullOrEmpty(productVariant.Thumbnail))
+                                        {
+                                        <img src="@productVariant.Thumbnail" style="max-height:200px;max-width:200px" class="mt-15px" />
+                                        }
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-folder fa-lg fa-fw text-dark text-opacity-50 me-1"></i> Object Library
+                    </div>
+                    <div class="card-body">
+                        <!-- Variant Object Media Section -->
+                        <div>
+                            <h5> </h5>
+                            @if (productVariant.ProductVariantMedias.Count > 0)
+                                {
+                                @foreach (var media in productVariant.ProductVariantMedias)
+                                    {
+                                    <div class="row align-items-center mb-3">
+
+                                        <div class="col-md-8">
+                                            @*<img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />*@
+
+                                            @if (media.MediaUrl.Contains("pdf", StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                <a href="@media.MediaUrl" target="_blank" class="btn btn-secondary">
+                                                    <i class="fas fa-file-pdf"></i> View PDF
+                                                </a>
+                                                }
+                                            else
+                                                {
+                                                <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" alt="@media.MediaUrl" />
+                                                }
+
+                                        </div>
+
+                                    </div>
+                                    }
+                                }
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+            </div>
+</EditForm>
 </ErrorBoundary>
 @code {
     #region Variables
@@ -167,17 +258,23 @@
         {
         try
             {
-
-
-
             ServiceResponse<bool> response;
+            if (productVariant.VariantObjectMedias.Any(media => string.IsNullOrEmpty(media.Name)))
+                {
 
+                Snackbar.Add("Error: One or more files have no name", Severity.Info);
+                return;
+                }
 
             productVariant.VariantObjectMedias = productVariant.VariantObjectMedias
-           .Where(media => !string.IsNullOrEmpty(media.Name) && !media.IsDeleted)
-           .ToList();
+       .Where(media => !string.IsNullOrEmpty(media.Name) && !media.IsDeleted)
+       .ToList();
 
+            if(productVariant.variantType==null)
+                {
+                productVariant.variantType = VariantType.Serial;
 
+                }
 
             #region Image
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductVariants", Id.ToString(), "ObjectMedia");

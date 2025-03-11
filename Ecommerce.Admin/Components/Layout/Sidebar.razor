@@ -115,38 +115,38 @@
     },
     new MenuItem
     {
-        Title = "Product",
+        Title = "Product Management",
         IconClass = "fab fa-simplybuilt",
         Routes = new List<string> { "/MainProductList" },
         PermissionId = 5,
         SubItems = new List<SubMenuItem>
 {
-                new SubMenuItem { Title = "Product", Route = "/MainProductList", PermissionId = 5 },
-                new SubMenuItem { Title = "Variant", Route = "/ProductVariantList", PermissionId = 5 },
+                new SubMenuItem { Title = "Products", Route = "/MainProductList", PermissionId = 5 },
+                new SubMenuItem { Title = "Variants", Route = "/ProductVariantList", PermissionId = 5 },
                 new SubMenuItem { Title = "Objects", Route = "/VariantObjects", PermissionId = 5 }
         }
     },
     new MenuItem
     {
-        Title = "Category",
+        Title = "Category Hub",
         IconClass = "fab fa-dashcube",
         Routes = new List<string> { "/AddCategory" },
         PermissionId = 6,
         SubItems = new List<SubMenuItem>
 {
-            new SubMenuItem { Title = "Category", Route = "/AddCategory", PermissionId = 6 }
+            new SubMenuItem { Title = "Categories", Route = "/AddCategory", PermissionId = 6 }
         }
     },
     new MenuItem
     {
-        Title = "Users & Management",
+        Title = "User Management",
         IconClass = "fa fa-key",
         Routes = new List<string> { "/UserList", "/RoleList" },
         PermissionId = 8,
         SubItems = new List<SubMenuItem>
 {
-            new SubMenuItem { Title = "Register", Route = "/UserList", PermissionId = 18 },
-            new SubMenuItem { Title = "Role", Route = "/RoleList", PermissionId = 19 }
+            new SubMenuItem { Title = "Users", Route = "/UserList", PermissionId = 18 },
+            new SubMenuItem { Title = "Roles", Route = "/RoleList", PermissionId = 19 }
         }
     },
     new MenuItem
@@ -164,7 +164,7 @@
     },
     new MenuItem
     {
-        Title = "Customer & Agent",
+        Title = "Customers & Agents",
         IconClass = "fa fa-key",
         Routes = new List<string> { "/AgentList" },
         PermissionId = 10,

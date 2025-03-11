@@ -43,8 +43,8 @@ else
             <div>
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/ProductList">Product</a></li>
-                    <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Variants</li>
+                    <li class="breadcrumb-item"><a href="/MainProductList">Variants</a></li>
+                    <li class="breadcrumb-item active"><i class="fa fa-arrow-back"></i>  Variant</li>
                 </ol>
                 <h1 class="page-header mb-0"> Variants</h1>
             </div>
@@ -158,7 +158,7 @@ else
 
 
 
-                <div class="card border-0 mb-4">
+                @*<div class="card border-0 mb-4">
                     <div class="card-header h6 mb-0 bg-none p-3 d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fa fa-file-image fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLS</b>
@@ -183,15 +183,7 @@ else
                                             {
                                             <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" alt="@media.MediaUrl" />
                                             }
-                                        @*@if (media.ContentType.StartsWith("image/"))
-            {
-            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />
-            }
-        else
-            {
-            <a href="@media.MediaUrl" target="_blank">View File</a>
-            }*@
-
+      
 
 
                                     </div>
@@ -208,7 +200,7 @@ else
                             }
 
                     </div>
-                </div>
+                </div>*@
 
                 <div class="card border-0 mb-4">
                     <div class="card-header h6 mb-0 bg-none p-3">
@@ -425,7 +417,7 @@ else
                         <div class="mb-0 mt-10px">
                             <label class="form-label">
                                 Product
-                                <a href="/MainProduct" class="text-success me-1 mb-1">  Add New</a>
+                                @*<a href="/MainProduct" class="text-success me-1 mb-1">  Add New</a>*@
                             </label>
                             <div class="input-group">
                                 <input type="text" value="@Product.Name" class="form-control" readonly />
@@ -464,7 +456,7 @@ else
 
                                     <select class="form-select" @bind="@productVariant.GeneralSizeId">
                                         <option value="">-- Select Size --</option>
-                                        @foreach (var size in Sizes)
+                                        @foreach (var size in Sizes.OrderBy(c => c.Name))
                                             {
                                             <option value="@size.Id">@size.Name</option>
                                             }
@@ -494,7 +486,7 @@ else
                                         <option value="">-- Select Color --</option>
                                         @if (colors != null && colors.Count > 0)
                                             {
-                                            @foreach (var col in colors)
+                                            @foreach (var col in colors.OrderBy(c => c.Name))
                                                 {
 
 
@@ -526,7 +518,7 @@ else
 
                                     <select class="form-select" @bind="@productVariant.ModelYearId">
                                         <option value="">-- Select Model Year --</option>
-                                        @foreach (var modelYear in ModelYears)
+                                        @foreach (var modelYear in ModelYears.OrderBy(c => c.Year))
                                             {
                                             <option value="@modelYear.Id">@modelYear.Year</option>
                                             }
@@ -574,6 +566,56 @@ else
                         </div>
                     </div>
                 </div>
+
+
+
+                <div class="card border-0 mb-4">
+                    <div class="card-header h6 mb-0 bg-none p-3">
+                        <i class="fa fa-images fa-lg fa-fw text-dark text-opacity-50 me-1"></i> <b>Media URLs</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-10">
+                                <InputText @bind-Value="newMediaUrl" class="form-control" placeholder="Enter image URL" />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-success" @onclick="AddMediaUrl">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @if (productVariant.ProductVariantMedias.Count > 0)
+                            {
+                            @foreach (var media in productVariant.ProductVariantMedias)
+                                {
+                                <div class="row align-items-center mb-3">
+
+                                    <div class="col-md-8">
+                                        @*<img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" />*@
+
+                                        @if (media.MediaUrl.Contains("pdf", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                            <a href="@media.MediaUrl" target="_blank" class="btn btn-secondary">
+                                                <i class="fas fa-file-pdf"></i> View PDF
+                                            </a>
+                                            }
+                                        else
+                                            {
+                                            <img src="@media.MediaUrl" style="max-width: 100px; height: auto;" class="img-thumbnail" alt="@media.MediaUrl" />
+                                            }
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" @onclick="() => RemoveMediaUrl(media)" class="btn btn-default d-block"><i class="fa fa-trash"></i></button>
+
+                                    </div>
+                                </div>
+                                }
+                            }
+                    </div>
+                </div>
+
+
             </div>
 
 
@@ -607,6 +649,7 @@ else
     private Catalog catalog = new Catalog();
     private List<GeneralColor> colors;
     string webAppUrl = "";
+    private string newMediaUrl = string.Empty; // New URL input
     private bool isLoading = false;
 
 
@@ -1206,6 +1249,20 @@ else
             return;
             }
         }
+
+    #region MediaURl
+
+    private void AddMediaUrl()
+        {
+        if (!string.IsNullOrWhiteSpace(newMediaUrl))
+            {
+            productVariant.ProductVariantMedias.Add(new ProductVariantMedia { MediaUrl = newMediaUrl,ContentType= "image/jpeg" });
+            newMediaUrl = string.Empty;
+            }
+        }
+
+
+    #endregion
 
 }
 

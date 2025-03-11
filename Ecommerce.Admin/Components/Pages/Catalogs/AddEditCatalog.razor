@@ -333,7 +333,7 @@
 
                                     <select class="form-select" @bind="@catalog.GeneralSizeId">
                                         <option value="">-- Select Size --</option>
-                                        @foreach (var size in Sizes)
+                                        @foreach (var size in Sizes.OrderBy(c => c.Name))
                                             {
                                             <option value="@size.Id">@size.Name</option>
                                             }
@@ -369,7 +369,7 @@
                                         <option value="">-- Select Color --</option>
                                         @if (colors != null && colors.Count > 0)
                                             {
-                                            foreach (var col in colors)
+                                            foreach (var col in colors.OrderBy(c => c.Name))
                                                 {
                                                 <option value="@col.Id">@col.Name</option>
                                                 }
@@ -386,7 +386,7 @@
 
                                     <select class="form-select" @bind="@catalog.ModelYearId">
                                         <option value="">-- Select Model Year --</option>
-                                        @foreach (var modelYear in ModelYears)
+                                        @foreach (var modelYear in ModelYears.OrderBy(c => c.Year))
                                             {
                                             <option value="@modelYear.Id">@modelYear.Year</option>
                                             }

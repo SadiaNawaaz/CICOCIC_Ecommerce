@@ -905,7 +905,7 @@ public class ProductVariantService: IProductVariantService
                 return new ServiceResponse<bool>
                     {
                     Success = false,
-                    Message = "No media to save."
+                    Message = "No media File Selected ,Please Select Media First"
                     };
                 }
 
