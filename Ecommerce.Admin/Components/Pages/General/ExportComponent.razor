@@ -10,7 +10,7 @@
             <span>Excel</span>
 
             
-        </button> <button class="btn btn-secondary buttons-print btn-sm" tabindex="0" aria-controls="data-table-combine" type="button" @onclick='() => Export("pdf")'><span>Print</span></button>
+        </button> <button class="btn btn-secondary buttons-print btn-sm" tabindex="0" aria-controls="data-table-combine" type="button" @onclick='() => Export("pdf")'><span>Pdf</span></button>
     </div>
 </div>
 
@@ -36,7 +36,8 @@
                 await CsvExportService.ExportDataAsExcel(Data, $"{FileNamePrefix}_Export.xlsx", ColumnMappings);
                 break;
             case "pdf":
-                Snackbar.Add("PDF export functionality is not implemented yet.", Severity.Info);
+
+                await CsvExportService.ExportDataAsPdf(Data, $"{FileNamePrefix}_Export.pdf", ColumnMappings);
                 break;
             default:
                 Snackbar.Add("Unknown export type", Severity.Error);

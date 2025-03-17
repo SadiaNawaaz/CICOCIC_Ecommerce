@@ -22,6 +22,7 @@ public class ProductVariantDto
     public double VariantPrice { get; set; }
     public string? Sku { get; set; }
     public string? Value { get; set; }
+    public string VariantType { get; set; }
     public string? Year { get; set; }
     public string? Brand { get; set; }
     public string? SSN { get; set; }

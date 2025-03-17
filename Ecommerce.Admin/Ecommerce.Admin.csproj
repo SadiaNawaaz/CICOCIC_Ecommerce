@@ -165,9 +165,11 @@
     <Folder Include="wwwroot\assets\plugins\jquery-mockjax\test\ember\mockjax-app\app\templates\components\" />
     <Folder Include="wwwroot\assets\plugins\jquery-mockjax\test\ember\mockjax-app\tests\integration\" />
     <Folder Include="wwwroot\assets\plugins\jquery-mockjax\test\ember\mockjax-app\vendor\" />
+    <Folder Include="wwwroot\Reports\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.Reporting" Version="2.1.0" />
     <PackageReference Include="EPPlus" Version="7.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -175,6 +177,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
     <PackageReference Include="MudBlazor" Version="8.3.0" />
+    <PackageReference Include="QuestPDF" Version="2025.1.6" />
     <PackageReference Include="Radzen.Blazor" Version="4.32.2" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
   </ItemGroup>

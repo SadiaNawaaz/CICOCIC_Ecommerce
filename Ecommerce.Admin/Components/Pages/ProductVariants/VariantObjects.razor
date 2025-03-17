@@ -83,7 +83,7 @@
                         </div>
                     </div>
                     &nbsp; &nbsp; &nbsp;
-                    <ExportComponent T="ProductVariant" Data="productVariants" FileNamePrefix="Objects" ColumnMappings="objectColumnMappings" />
+                    <ExportComponent T="ProductVariantDto" Data="productVariants" FileNamePrefix="Objects" ColumnMappings="objectColumnMappings" />
                 </div>
                 <div class="tab-pane fade show active" id="allTab">
                 </div>
@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <MudDataGrid T="ProductVariant" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
+                    <MudDataGrid T="ProductVariantDto" Items="@productVariants" ColumnResizeMode="@(_resizeColumn ? ResizeMode.Column : ResizeMode.Container)" RowsPerPage="10" Striped="true" Bordered="true">
 
                         <Columns>
 
@@ -126,7 +126,7 @@
                             <TemplateColumn Title="Obj">
                                 <CellTemplate>
                                     @{
-                                        var variantType = context.Item.variantType?.ToString() ?? "N/A";
+                                        var variantType = context.Item.VariantType;
                                     }
                                     <div>
                                         @variantType
@@ -138,18 +138,18 @@
                             <TemplateColumn Title="Obj ID">
                                 <CellTemplate>
                                     @{
-                                        var typeValue = context.Item.TypeValue ?? "N/A";
+                                        var typeValue = context.Item.Value;
                                     }
                                     <div>
                                         @typeValue
                                     </div>
                                 </CellTemplate>
                             </TemplateColumn>
-                            <PropertyColumn Property="x => x.Price" Title="Price" />
+                            <PropertyColumn Property="x => x.VariantPrice" Title="Price" />
                             <TemplateColumn Title="Size">
                                 <CellTemplate>
                                     @{
-                                        var sizeName = context.Item.GeneralSize?.Name ?? "N/A"; // Provide a default value if null
+                                        var sizeName = context.Item.Size; // Provide a default value if null
                                     }
                                     <div>
                                         @sizeName
@@ -159,7 +159,7 @@
                             <TemplateColumn Title="Color">
                                 <CellTemplate>
                                     @{
-                                        var hexCode = context.Item.GeneralColor?.HexCode ?? "#FFFFFF"; // Provide a default value if null
+                                        var hexCode = context.Item.Color ?? "#FFFFFF"; // Provide a default value if null
                                     }
                                     <span class="badge" style="background-color:@hexCode"> @hexCode </span>
                                 </CellTemplate>
@@ -168,13 +168,39 @@
                             <TemplateColumn Title="Year">
                                 <CellTemplate>
                                     @{
-                                        var year = context.Item.ModelYear?.Year.ToString() ?? "N/A";
+                                        var year = context.Item.Year; ;
                                     }
                                     <div>
                                         @year
                                     </div>
                                 </CellTemplate>
                             </TemplateColumn>
+
+
+
+                            <TemplateColumn Title="Report">
+                                <CellTemplate>
+
+                                    <a href="api/Report/Print?VariantId=@context.Item.Id" target="_blank" class="btn btn-primary" >
+                                        <i class="fa fa-file"></i> 
+                                    </a>
+
+
+
+
+                                </CellTemplate>
+                            </TemplateColumn>
+
+
+
+
+
+
+
+
+
+
+
 
                             <TemplateColumn Title="Publish">
                                 <CellTemplate>
@@ -199,7 +225,6 @@
                                             </button>
                                             }
                                     }
-                                    @*<MudIcon Icon="@($"{(isPublished ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)}")" Color="@(isPublished ? Color.Success : Color.Error)" />*@
 
 
 
@@ -214,7 +239,7 @@
                                 </HeaderTemplate>
                                 <CellTemplate>
                                     <MudStack Row>
-                                        @*<MudIconButton Icon="@Icons.Material.Filled.EmojiObjects" Size="Size.Small" Class="text-warning" OnClick="() => CreateObject(context.Item)" />*@
+
                                         <button type="button" @onclick="() => CreateObject(context.Item)" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Object">
                                             <i class="fa fa-lightbulb"></i>
                                         </button>
@@ -223,7 +248,7 @@
                             </TemplateColumn>
                         </Columns>
                         <PagerContent>
-                            <MudDataGridPager T="ProductVariant" PageSizeOptions=@(new int[] { 5, 10, 20 }) />
+                            <MudDataGridPager T="ProductVariantDto" PageSizeOptions=@(new int[] { 5, 10, 20 }) />
                         </PagerContent>
                     </MudDataGrid>
                 </div>
@@ -247,19 +272,19 @@
     public long ProductId { get; set; }
 
     private bool _resizeColumn;
-    private IEnumerable<ProductVariant> AllproductVariants = new List<ProductVariant>();
-    private IEnumerable<ProductVariant> productVariants = new List<ProductVariant>();
+    private IEnumerable<ProductVariantDto> AllproductVariants = new List<ProductVariantDto>();
+    private IEnumerable<ProductVariantDto> productVariants = new List<ProductVariantDto>();
 
     private Dictionary<string, string> objectColumnMappings = new Dictionary<string, string>
     {
-     { "ProductId", "Product ID" }, 
+     { "ProductId", "Product ID" },
     { "Name", "Product Name" },
-    { "variantType", "Variant Type" }, 
-    { "TypeValue", "Type ID" }, 
-    { "Price", "Price" },
-    { "GeneralSize.Name", "Size" }, 
-    { "GeneralColor.HexCode", "Color" },
-    { "ModelYear.Year", "Year" }, 
+    { "VariantType", "Obj" },
+    { "Value", "Obj ID" },
+    { "VariantPrice", "Price" },
+    { "Size", "Size" },
+    { "Color", "Color" },
+    { "Year", "Year" },
     { "Publish", "Is Published" }
 
     };
@@ -276,7 +301,7 @@
         {
         try
             {
-            var response = await productVariantService.GetAllProductVariantsAsync(ProductId, UserId, IsAgent);
+            var response = await productVariantService.GetAllProductVariantDtosAsync(ProductId, UserId, IsAgent);
             if (response.Success)
                 {
                 productVariants = response.Data;
@@ -344,15 +369,15 @@
         else
             {
             productVariants = AllproductVariants.Where(pv => pv.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                                                             (pv.TypeValue?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                                                              (pv.Price.ToString()?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                                                              (pv.GeneralSize.ToString()?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                                             (pv.Value?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                                              (pv.VariantPrice.ToString()?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                                              (pv.Size.ToString()?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
                                                              (pv.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
                                                              ).ToList();
             }
         }
 
-    private void CreateObject(ProductVariant productVariant)
+    private void CreateObject(ProductVariantDto productVariant)
         {
         try
             {
@@ -362,6 +387,18 @@
             {
             snackbar.Add("An error occurred while navigating to edit the product variant: " + ex.Message, Severity.Error);
             Console.Error.WriteLine($"Error in EditProductVariant: {ex}");
+            }
+        }
+
+    private void GeteObjectReport(ProductVariant productVariant)
+        {
+        try
+            {
+           
+            }
+        catch (Exception ex)
+            {
+         
             }
         }
 }
