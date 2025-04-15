@@ -398,6 +398,7 @@ public class ProductVariantService : IProductVariantService
             }
 
         AddChildCategories(parentId);
+        descendantCategoryIds.Add(parentId);
         return descendantCategoryIds;
         }
 

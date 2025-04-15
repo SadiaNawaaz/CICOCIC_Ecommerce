@@ -2,6 +2,7 @@
 
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities.Clusters;
+using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -16,6 +17,7 @@ public interface IClusterService
     Task<ServiceResponse<Cluster>> UpdateClusterAsync(Cluster cluster);
     Task<ServiceResponse<bool>> DeleteClusterAsync(long id);
     Task<ServiceResponse<bool>> ImportFeatureGroupsAsync(List<Cluster> clusters);
+    Task<ServiceResponse<List<long>>> GetMissingFeatureGroupsAsync(List<ProductCluster> productClusters);
 }
 
 public class ClusterService : IClusterService
@@ -302,6 +304,20 @@ public class ClusterService : IClusterService
         }
 
 
+
+    public async Task<ServiceResponse<List<long>>> GetMissingFeatureGroupsAsync(List<ProductCluster> productClusters)
+        {
+        using var _context = _contextFactory.CreateDbContext();
+        var existingIds = await _context.Clusters
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        var requestedIds = productClusters.Select(c => c.ClusterId).Distinct();
+
+        var missing = requestedIds.Except(existingIds).ToList();
+
+        return new ServiceResponse<List<long>> { Data = missing, Success = true };
+        }
 
 
 

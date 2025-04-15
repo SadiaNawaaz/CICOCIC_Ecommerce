@@ -69,12 +69,15 @@
     <HeadOutlet />
 </head>
 <body>
-    <Routes @rendermode="InteractiveServer"/>
+    <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
 
     <!-- ================== BEGIN BASE JS ================== -->
     <script src="/assets/js/e-commerce/vendor.min.js"></script>
     <script src="/assets/js/e-commerce/app.min.js"></script>
+    <script src="~/assets/js/adyenInterop.js"></script>
+    <link rel="stylesheet" href="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/5.44.0/adyen.css" />
+    <script src="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/5.44.0/adyen.js"></script>
 </body>
 <script>
 window.closeDropdownMenu = function () {

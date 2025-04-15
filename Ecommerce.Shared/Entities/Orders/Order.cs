@@ -11,6 +11,7 @@ namespace Ecommerce.Shared.Entities.Orders;
 public class Order
     {
     public long Id { get; set; }
+    public string OrderNumber { get; set; }
     public long CustomerId { get; set; }    
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -22,6 +23,7 @@ public class Order
     public bool IsBusinessAddress { get; set; }
     public double TotalAmount { get; set; }
     public DateTime OrderDate {  get; set; }
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 
@@ -34,4 +36,16 @@ public class OrderItem
     public string ProductName { get; set; }
     public double Price { get; set; }
     public int Quantity { get; set; }
+    }
+
+
+public enum OrderStatus
+    {
+    Pending,       // Order created but not paid yet
+    Paid,          // Payment successful
+    Failed,        // Payment failed
+    Cancelled,     // User cancelled or order timed out
+    Shipped,       // Order shipped
+    Delivered,     // Delivered to customer
+    Refunded       // Payment refunded
     }

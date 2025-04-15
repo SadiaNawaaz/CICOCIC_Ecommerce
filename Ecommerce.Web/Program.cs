@@ -1,5 +1,6 @@
 using Blazored.LocalStorage;
 using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Services;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Categories;
@@ -39,6 +40,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Transient);
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")), ServiceLifetime.Scoped);
+builder.Services.Configure<AdyenSettings>(builder.Configuration.GetSection("Adyen"));
+builder.Services.AddHttpClient<IAdyenService, AdyenService>();
 
 
 builder.Services.AddSingleton<CultureStateService>();
@@ -48,6 +51,7 @@ builder.Services.AddControllers();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
+StaticServiceProvider.Configure(app.Services);
 
 string[] supportedCultures = ["en-US","nl-NL", "de-CH"];
 var localizationOptions = new RequestLocalizationOptions()

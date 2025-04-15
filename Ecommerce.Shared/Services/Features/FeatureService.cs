@@ -2,6 +2,7 @@
 
 using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Entities.Features;
+using Ecommerce.Shared.Entities.Products;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -18,6 +19,7 @@ public interface IFeatureService
     Task<ServiceResponse<bool>> DeleteFeatureAsync(long id);
     Task<ServiceResponse<List<Feature>>> GetFeaturesByClusterId(long clusterId);
     Task<ServiceResponse<bool>> ImportFeaturesAsync(List<Feature> features);
+    Task<ServiceResponse<List<long>>> GetMissingFeaturesAsync(List<ProductCluster> features);
 }
 public class FeatureService : IFeatureService
 {
@@ -306,6 +308,50 @@ public class FeatureService : IFeatureService
             }
         }
 
+    public async Task<ServiceResponse<List<long>>> GetMissingFeaturesAsync(List<ProductCluster> features)
+        {
+        try
+            {
+            using var context = _contextFactory.CreateDbContext();
+
+            // Extract unique FeatureIds from incoming ProductClusters
+            var featureIdsToCheck = features
+                .SelectMany(pc => pc.ProductClusterFeatures)
+                .Select(f => f.FeatureId)
+                .Distinct()
+                .ToList();
+
+            var missingFeatureIds = new List<long>();
+
+            foreach (var featureId in featureIdsToCheck)
+                {
+                bool exists = await context.Features
+                    .AsNoTracking()
+                    .AnyAsync(f => f.Id == featureId);
+
+                if (!exists)
+                    {
+                    missingFeatureIds.Add(featureId);
+                    }
+                }
+
+            return new ServiceResponse<List<long>>
+                {
+                Data = missingFeatureIds,
+                Success = true,
+                Message = missingFeatureIds.Any() ? "Missing features found" : "All features exist"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while checking missing features.");
+            return new ServiceResponse<List<long>>
+                {
+                Success = false,
+                Message = "Error occurred while checking missing features"
+                };
+            }
+        }
 
 
     }

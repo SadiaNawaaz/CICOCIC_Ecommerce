@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Ecommerce.Shared.Migrations
 {
     /// <inheritdoc />
-    public partial class mig : Migration
+    public partial class Start : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,6 +20,7 @@ namespace Ecommerce.Shared.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ThumbnailFileUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MarkBrand = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastModifiedBy = table.Column<long>(type: "bigint", nullable: true),
@@ -41,6 +42,7 @@ namespace Ecommerce.Shared.Migrations
                     Icon = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ParentCategoryId = table.Column<long>(type: "bigint", nullable: true),
                     Order = table.Column<int>(type: "int", nullable: false),
+                    MarkCategory = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastModifiedBy = table.Column<long>(type: "bigint", nullable: true),
@@ -202,7 +204,8 @@ namespace Ecommerce.Shared.Migrations
                     ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsBusinessAddress = table.Column<bool>(type: "bit", nullable: false),
                     TotalAmount = table.Column<double>(type: "float", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -418,7 +421,7 @@ namespace Ecommerce.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CategoryTranslation",
+                name: "CategoryTranslations",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -429,15 +432,42 @@ namespace Ecommerce.Shared.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryTranslation", x => x.Id);
+                    table.PrimaryKey("PK_CategoryTranslations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CategoryTranslation_Categories_CategoryId",
+                        name: "FK_CategoryTranslations_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CategoryTranslation_Languages_LanguageId",
+                        name: "FK_CategoryTranslations_Languages_LanguageId",
+                        column: x => x.LanguageId,
+                        principalTable: "Languages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClusterTranslations",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClusterId = table.Column<long>(type: "bigint", nullable: false),
+                    LanguageId = table.Column<int>(type: "int", nullable: false),
+                    TranslatedName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClusterTranslations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClusterTranslations_Clusters_ClusterId",
+                        column: x => x.ClusterId,
+                        principalTable: "Clusters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClusterTranslations_Languages_LanguageId",
                         column: x => x.LanguageId,
                         principalTable: "Languages",
                         principalColumn: "Id",
@@ -636,6 +666,33 @@ namespace Ecommerce.Shared.Migrations
                         name: "FK_UserRoles_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FeatureTranslations",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FeatureId = table.Column<long>(type: "bigint", nullable: false),
+                    LanguageId = table.Column<int>(type: "int", nullable: false),
+                    TranslatedName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeatureTranslations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FeatureTranslations_Features_FeatureId",
+                        column: x => x.FeatureId,
+                        principalTable: "Features",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FeatureTranslations_Languages_LanguageId",
+                        column: x => x.LanguageId,
+                        principalTable: "Languages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -865,6 +922,35 @@ namespace Ecommerce.Shared.Migrations
                     table.PrimaryKey("PK_ProductMedias", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProductMedias_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductTranslations",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<long>(type: "bigint", nullable: false),
+                    LanguageId = table.Column<int>(type: "int", nullable: false),
+                    TranslatedName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    TranslatedDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TranslatedShortDescription = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductTranslations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductTranslations_Languages_LanguageId",
+                        column: x => x.LanguageId,
+                        principalTable: "Languages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductTranslations_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -1207,19 +1293,39 @@ namespace Ecommerce.Shared.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CategoryTranslation_CategoryId",
-                table: "CategoryTranslation",
+                name: "IX_CategoryTranslations_CategoryId",
+                table: "CategoryTranslations",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CategoryTranslation_LanguageId",
-                table: "CategoryTranslation",
+                name: "IX_CategoryTranslations_LanguageId",
+                table: "CategoryTranslations",
+                column: "LanguageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClusterTranslations_ClusterId",
+                table: "ClusterTranslations",
+                column: "ClusterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClusterTranslations_LanguageId",
+                table: "ClusterTranslations",
                 column: "LanguageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Features_ClusterId",
                 table: "Features",
                 column: "ClusterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeatureTranslations_FeatureId",
+                table: "FeatureTranslations",
+                column: "FeatureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeatureTranslations_LanguageId",
+                table: "FeatureTranslations",
+                column: "LanguageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
@@ -1290,6 +1396,16 @@ namespace Ecommerce.Shared.Migrations
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTranslations_LanguageId",
+                table: "ProductTranslations",
+                column: "LanguageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTranslations_ProductId",
+                table: "ProductTranslations",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductVariantFeatureValues_ProductVariantId",
@@ -1409,13 +1525,19 @@ namespace Ecommerce.Shared.Migrations
                 name: "CategoryFeatures");
 
             migrationBuilder.DropTable(
-                name: "CategoryTranslation");
+                name: "CategoryTranslations");
+
+            migrationBuilder.DropTable(
+                name: "ClusterTranslations");
 
             migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "ErrorLogs");
+
+            migrationBuilder.DropTable(
+                name: "FeatureTranslations");
 
             migrationBuilder.DropTable(
                 name: "OrderItems");
@@ -1437,6 +1559,9 @@ namespace Ecommerce.Shared.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProductMedias");
+
+            migrationBuilder.DropTable(
+                name: "ProductTranslations");
 
             migrationBuilder.DropTable(
                 name: "ProductVariantFeatureValues");
@@ -1472,13 +1597,13 @@ namespace Ecommerce.Shared.Migrations
                 name: "CatalogCluster");
 
             migrationBuilder.DropTable(
-                name: "Languages");
-
-            migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "ProductCluster");
+
+            migrationBuilder.DropTable(
+                name: "Languages");
 
             migrationBuilder.DropTable(
                 name: "TemplateClusterFeatures");

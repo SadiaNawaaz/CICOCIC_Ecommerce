@@ -19,9 +19,11 @@
     <Folder Include="wwwroot\assets\img\Logo\" />
     <Folder Include="wwwroot\assets\img\Account\" />
     <Folder Include="wwwroot\assets\img\loader\" />
+    <Folder Include="wwwroot\assets\img\cart\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Adyen" Version="31.0.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Localization" Version="2.3.0" />

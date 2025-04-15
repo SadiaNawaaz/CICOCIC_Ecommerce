@@ -95,10 +95,21 @@ public class ProductService : IProductService
 
     public async Task<ServiceResponse<Product>> AddProductAsync(Product product)
         {
+
+        //product.ProductClusters.RemoveAll(a => a.Id == 0);
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
             {
             // Add product to the database
+
+
+            var invalidFeatureIds = product.ProductClusters?
+          .SelectMany(pc => pc.ProductClusterFeatures)
+          .Where(f => !_context.Features.Any(fe => fe.Id == f.FeatureId))
+          .Select(f => f.FeatureId)
+          .ToList();
+
+
             _context.Products.Add(product);
             var catalog = await _context.Catalogs.FindAsync(product.CatalogId);
             await _context.SaveChangesAsync();

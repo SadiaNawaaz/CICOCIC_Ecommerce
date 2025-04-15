@@ -45,9 +45,11 @@
         }
 </style>
 
+
+
+
+      
 <div id="alert" class="alert alert-info notification-alert" style="display: none;"></div>
-
-
 <div class="section-container" id="checkout-cart">
     <div class="container">
         <div class="checkout">
@@ -57,7 +59,7 @@
                 <div class="checkout-header">
                     <div class="row">
 
-                        <div class="col-lg-3">
+                        <div class="col-lg-4">
                             <div class="step @(currentStep == 1 ? "active" : "")">
                                 <a href="#" @onclick="() => SetStep(1)">
                                     <div class="number">1</div>
@@ -68,7 +70,7 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-4">
                             <div class="step @(currentStep == 2 ? "active" : "")">
                                 <a href="#" @onclick="() => SetStep(2)">
                                     <div class="number">2</div>
@@ -79,7 +81,7 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-4">
                             <div class="step @(currentStep == 3 ? "active" : "")">
                                 <a href="#" @onclick="() => SetStep(3)">
                                     <div class="number">3</div>
@@ -90,7 +92,7 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="col-lg-3">
+                        @*<div class="col-lg-3">
                             <div class="step @(currentStep == 4 ? "active" : "")">
                                 <a href="#" @onclick="() => SetStep(4)">
                                     <div class="number">4</div>
@@ -100,7 +102,7 @@
                                     </div>
                                 </a>
                             </div>
-                        </div>
+                        </div>*@
                     </div>
                 </div>
                 <div class="checkout-body">
@@ -186,13 +188,13 @@
                         }
                     else if (currentStep == 3)
                         {
-                        <CheckoutPayment />
+                        <CheckoutPayment  Order="@order"/>
 
                         }
-                    else if (currentStep == 4)
+                    @*else if (currentStep == 4)
                         {
                         <CheckoutComplete PlaceOrderCallback="PlaceOrder" />
-                        }
+                        }*@
                 </div>
                 <div class="checkout-footer d-flex justify-content-between">
                     @if (currentStep > 1)
@@ -256,6 +258,8 @@
     private Order shippingInfo = new Order();
     private bool isUserLoggedIn;
     long CustomerId = 0;
+    Order order = new Order();
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -263,6 +267,32 @@
             {
             try
                 {
+                CartItems = await CartService.GetItems();
+
+                if (CartItems == null || !CartItems.Any())
+                    {
+                    ShowMessage("Your cart is empty. Add some items before placing an order.", "danger");
+                    NavigationManager.NavigateTo("/empty-cart");
+                    return;
+                    }
+
+
+
+                var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+                var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                var paymentStatus = query["paymentStatus"];
+                if (paymentStatus == "success")
+                    {
+                    currentStep = 4; ;
+
+
+                    ShowMessage("Payment completed successfully!", "success");
+                    }
+                else if (paymentStatus == "failed")
+                    {
+                    currentStep = 4; ;
+                    ShowMessage("Payment failed. Please try again.", "danger");
+                    }
 
 
                 var result = await ProtectedLocalStor.GetAsync<string>("UserName");
@@ -281,7 +311,7 @@
                     }
 
 
-                CartItems = await CartService.GetItems();
+
                 StateHasChanged();
                 }
             catch (Exception ex)
@@ -292,8 +322,19 @@
             }
         }
 
-    private void SetStep(int step)
+    private async void SetStep(int step)
         {
+        if (step == 3)
+            {
+            if (!ValidateShippingInfo())
+                return;
+            }
+        else if(step==4)
+            {
+
+            return;
+            }
+
         currentStep = step;
         }
 
@@ -310,12 +351,29 @@
         ShowMessage("Item removed successfully", "success");
         }
 
-    private void NextStep()
+    private async Task NextStep()
         {
+
+
+        if (currentStep == 2)
+            {
+            if(ValidateShippingInfo())
+                {
+                await  PlaceOrder();
+                }
+            else
+                {
+                return;
+                }
+
+            }
         if (currentStep < 4)
             {
             currentStep++;
             }
+
+
+
         }
 
     private void BackStep()
@@ -331,35 +389,7 @@
         try
             {
 
-            if (checkoutInfoComponent == null)
-                {
-                ShowMessage("Shipping information is missing.", "danger");
-                return;
-                }
-            var shippingInfo = checkoutInfoComponent.ShippingInfo;
-
-            if (string.IsNullOrEmpty(shippingInfo.FirstName) ||
-                string.IsNullOrEmpty(shippingInfo.LastName) ||
-                string.IsNullOrEmpty(shippingInfo.StreetAddress) ||
-                string.IsNullOrEmpty(shippingInfo.AreaCode) ||
-                string.IsNullOrEmpty(shippingInfo.PrimaryPhone) ||
-                string.IsNullOrEmpty(shippingInfo.ZipCode))
-                {
-
-                ShowMessage("Please fill out all the required shipping information.", "danger");
-                currentStep = 2;
-                return;
-                }
-
-
-            if (CartItems == null || !CartItems.Any())
-                {
-                ShowMessage("Your cart is empty. Add some items before placing an order.", "danger");
-                return;
-                }
-
-
-            Order order = new Order
+            order = new Order
                 {
                 FirstName = shippingInfo.FirstName,
                 LastName = shippingInfo.LastName,
@@ -369,6 +399,7 @@
                 ZipCode = shippingInfo.ZipCode,
                 IsBusinessAddress = shippingInfo.IsBusinessAddress,
                 CustomerId = CustomerId,
+                OrderNumber = GenerateOrderNumber(),
                 TotalAmount = CartItems.Sum(item => item.VariantPrice * item.Qty)
                 };
             foreach (var cartItem in CartItems)
@@ -387,11 +418,18 @@
 
             if (response != null && response.Success)
                 {
+                order = response.Data;
+
+                /*
                 ShowMessage("Order placed successfully.", "success");
                 await CartService.DeleteItems();
                 CartItems.Clear();
                 CartStateService.CartItemCount = 0;
+                */
+
+
                 StateHasChanged();
+;
 
                 }
             else
@@ -408,11 +446,37 @@
             ShowMessage("An error occurred while placing the order. Please try again.", "danger");
             }
         }
-
-
     private void ShowMessage(string message, string type)
         {
         IJSRuntime.InvokeVoidAsync("showAlert", message, type);
+        }
+    private bool ValidateShippingInfo()
+        {
+        if (checkoutInfoComponent == null)
+            {
+            ShowMessage("Shipping information is missing.", "danger");
+            return false;
+            }
+
+        var shippingInfo = checkoutInfoComponent.ShippingInfo;
+
+        if (string.IsNullOrEmpty(shippingInfo.FirstName) ||
+            string.IsNullOrEmpty(shippingInfo.LastName) ||
+            string.IsNullOrEmpty(shippingInfo.StreetAddress) ||
+            string.IsNullOrEmpty(shippingInfo.AreaCode) ||
+            string.IsNullOrEmpty(shippingInfo.PrimaryPhone) ||
+            string.IsNullOrEmpty(shippingInfo.ZipCode))
+            {
+            ShowMessage("Please fill out all the required shipping information.", "danger");
+            currentStep = 2;
+            return false;
+            }
+
+        return true;
+        }
+    public string GenerateOrderNumber()
+        {
+        return $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
         }
 
 }

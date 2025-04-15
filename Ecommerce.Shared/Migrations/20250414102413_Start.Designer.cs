@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250123075507_EanNumber")]
-    partial class EanNumber
+    [Migration("20250414102413_Start")]
+    partial class Start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,6 +73,9 @@ namespace Ecommerce.Shared.Migrations
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("MarkBrand")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -131,6 +134,9 @@ namespace Ecommerce.Shared.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("MarkProduct")
+                        .HasColumnType("bit");
 
                     b.Property<long?>("ModelYearId")
                         .HasColumnType("bigint");
@@ -291,6 +297,9 @@ namespace Ecommerce.Shared.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("int");
 
+                    b.Property<bool>("MarkCategory")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -396,6 +405,34 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("CategoryFeatures");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.CategoryTranslation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TranslatedName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("CategoryTranslations");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Clusters.Cluster", b =>
                 {
                     b.Property<long>("Id")
@@ -423,6 +460,34 @@ namespace Ecommerce.Shared.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Clusters");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Clusters.ClusterTranslation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ClusterId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TranslatedName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("ClusterTranslations");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Colors.GeneralColor", b =>
@@ -604,6 +669,57 @@ namespace Ecommerce.Shared.Migrations
                     b.ToTable("Features");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Features.FeatureTranslation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FeatureId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TranslatedName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FeatureId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("FeatureTranslations");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Language", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("LanguageName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Languages");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.ModelYears.ModelYear", b =>
                 {
                     b.Property<long>("Id")
@@ -667,6 +783,9 @@ namespace Ecommerce.Shared.Migrations
                     b.Property<string>("PrimaryPhone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("StreetAddress")
                         .IsRequired()
@@ -982,7 +1101,11 @@ namespace Ecommerce.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1065,6 +1188,9 @@ namespace Ecommerce.Shared.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EanNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("LastModifiedBy")
@@ -1256,7 +1382,11 @@ namespace Ecommerce.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1268,6 +1398,40 @@ namespace Ecommerce.Shared.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductMedias");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Products.ProductTranslation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TranslatedDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TranslatedName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("TranslatedShortDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LanguageId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductTranslations");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Roles.Role", b =>
@@ -1732,6 +1896,44 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.CategoryTranslation", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Category", "Category")
+                        .WithMany("Translations")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Language", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Clusters.ClusterTranslation", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Clusters.Cluster", "Cluster")
+                        .WithMany("Translations")
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Language", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cluster");
+
+                    b.Navigation("Language");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Configurations.Slider", b =>
                 {
                     b.HasOne("Ecommerce.Shared.Entities.Products.Product", "Product")
@@ -1752,6 +1954,25 @@ namespace Ecommerce.Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("Cluster");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Features.FeatureTranslation", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Features.Feature", "Feature")
+                        .WithMany("Translations")
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Language", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Feature");
+
+                    b.Navigation("Language");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Orders.OrderItem", b =>
@@ -1970,6 +2191,25 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Products.ProductTranslation", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.Language", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ecommerce.Shared.Entities.Products.Product", "Product")
+                        .WithMany("Translations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Ecommerce.Shared.Entities.Roles.RolePermission", b =>
                 {
                     b.HasOne("Ecommerce.Shared.Entities.Permissions.Permission", "Permission")
@@ -2091,11 +2331,20 @@ namespace Ecommerce.Shared.Migrations
             modelBuilder.Entity("Ecommerce.Shared.Entities.Category", b =>
                 {
                     b.Navigation("SubCategories");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Clusters.Cluster", b =>
                 {
                     b.Navigation("Features");
+
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.Features.Feature", b =>
+                {
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Orders.Order", b =>
@@ -2119,6 +2368,8 @@ namespace Ecommerce.Shared.Migrations
                     b.Navigation("ProductImages");
 
                     b.Navigation("ProductMedias");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.Products.ProductCluster", b =>

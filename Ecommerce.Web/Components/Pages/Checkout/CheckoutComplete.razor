@@ -1,23 +1,100 @@
-﻿		<!-- BEGIN #checkout-cart -->
-<div class="section-container" id="checkout-cart">
-    <!-- BEGIN container -->
-    <div class="container">
-        <div class="checkout-footer text-center">
-            <button type="button" class="btn btn-white btn-theme" @onclick="OnPlaceOrder">PLACE ORDERS</button>
+﻿@page "/Order-Success/{OrderId:long}"
+@using Ecommerce.Shared.Entities.Orders;
+@using Ecommerce.Shared.Services;
+@inject IOrderService OrderService
+
+
+<div class="container">
+    <div class="checkout" style="margin:3%">
+
+        <div class="row">
+            <div class="checkout-message">
+                <h1>Thank you! <small>Your payment has been successfully processed with the following details.</small></h1>
+
+                @if (orderDetails != null)
+                    {
+                    <div class="table-responsive">
+                        <table class="table table-payment-summary">
+                            <tbody>
+                                <tr>
+                                    <td class="field">Transaction Status</td>
+                                    <td class="value">Success</td>
+                                </tr>
+                                <tr>
+                                    <td class="field">Order Number</td>
+                                    <td class="value">@orderDetails.OrderNumber</td>
+                                </tr>
+                                <tr>
+                                    <td class="field">Order Date</td>
+                                    <td class="value">@orderDetails.OrderDate.ToString("dd MMM yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td class="field">Payment Amount</td>
+                                    <td class="value">€@orderDetails.TotalAmount</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4>Purchased Items</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                           
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Image</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in orderDetails.OrderItems)
+                                    {
+                                    <tr>
+                                  
+                                        <td>@item.VariantName</td>
+                                        <td>€@item.Price</td>
+                                        <td>@item.Quantity</td>
+                                        <td>
+                                            <img src="@item.DefaultImageUrl" alt="@item.ProductName" width="100" />
+                                        </td>
+                                    </tr>
+                                    }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="text-silver-darker text-center mb-0">
+                        Should you require any assistance, you can get in touch with our Support Team at  (+31) 623 195 505.
+                    </p>
+                    }
+                else
+                    {
+                    <p>Loading order details...</p>
+                    }
+            </div>
         </div>
     </div>
-    <!-- END container -->
 </div>
-<!-- END #checkout-cart -->
-@code {
-    [Parameter]
-    public EventCallback PlaceOrderCallback { get; set; }
 
-    private async Task OnPlaceOrder()
+
+@code {
+
+    [Parameter]
+    public long OrderId { get; set; }
+    private OrderDto orderDetails;
+
+    protected override async Task OnInitializedAsync()
         {
-        if (PlaceOrderCallback.HasDelegate)
+        var response = await OrderService.GetOrderDtoById(OrderId);
+        if (response.Success)
             {
-            await PlaceOrderCallback.InvokeAsync();
+            orderDetails = response.Data;
+            }
+        else
+            {
+            // Handle the error accordingly
             }
         }
 }

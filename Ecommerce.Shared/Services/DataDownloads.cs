@@ -314,6 +314,8 @@ public class DataDownloads: IDataDownloads
         {
         try
             {
+         
+
             var languages = new Dictionary<string, int>
         {
             { "en", 1 }, // English (Default)
@@ -586,6 +588,23 @@ public class DataDownloads: IDataDownloads
         try
             {
             var productDetails = await FetchProductDetails(catalogDto);
+
+
+            //Check if FeatureGroup not found
+            var clusterResponse = await _featureGroupService.GetMissingFeatureGroupsAsync(productDetails.ProductClusters);
+            if (clusterResponse.Data.Count > 0)
+                {
+                var downloadedGroups = await DownloadFeatureGroupsAsync(clusterResponse.Data);
+                await SaveFeatureGroupsToDatabase(downloadedGroups);
+                }
+
+            //Check Features if not found.
+            var featureResponse=await _featureService.GetMissingFeaturesAsync(productDetails.ProductClusters);
+            if(featureResponse.Data.Count>0)
+                {
+                var downloadedFeatures = await DownloadFeaturesAsync(featureResponse.Data);
+                await SaveFeaturesToDatabase(downloadedFeatures);
+                }
             var serviceResponse= await _productService.AddProductAsync(productDetails);
             if(serviceResponse.Success)
                 {
@@ -795,8 +814,8 @@ public class DataDownloads: IDataDownloads
 
     public async Task DownloadAndSaveAllCatalogs()
         {
-        //await  DownloadCatalogs();
-        await UpdateAllCatalogColumnsAsync();
+     //   await  DownloadCatalogs();
+       await UpdateAllCatalogColumnsAsync();
         }
     private async Task<List<Catalog>> DownloadCatalogs(int batchSize = 10000)
         {
@@ -809,7 +828,14 @@ public class DataDownloads: IDataDownloads
             using (StreamReader reader = new StreamReader(fileStream))
                 {
                 XDocument doc = XDocument.Load(reader);
-                var files = doc.Descendants("file").ToList();
+                var files = doc.Descendants("file")
+           .Where(file =>
+               (string)file.Attribute("On_Market") == "1" && // Only products on market
+               DateTime.TryParseExact((string)file.Attribute("Updated"), "yyyyMMddHHmmss", null, System.Globalization.DateTimeStyles.None, out DateTime updatedDate) &&
+               updatedDate.Year >= 2021 && updatedDate.Year <= 2025 // Updated between 2021 and 2025
+           )
+           .ToList();
+                // var files = doc.Descendants("file").ToList();
                 List<Catalog> batch = new List<Catalog>();
 
                 foreach (var file in files)
@@ -1026,6 +1052,126 @@ public class DataDownloads: IDataDownloads
                 Message = "Error occurred while updating catalogs."
                 };
             }
+        }
+
+
+    #endregion
+
+
+
+    #region FeatureExtraPro
+
+    private async Task<List<Feature>> DownloadFeaturesAsync(List<long> featureIds)
+        {
+        List<Feature> downloadedFeatures = new List<Feature>();
+
+        try
+            {
+            WebClient client = new WebClient();
+            client.Credentials = new NetworkCredential(_username, _password);
+            byte[] data = await client.DownloadDataTaskAsync(_featuresUrl);
+
+            using var compressedStream = new MemoryStream(data);
+            using var decompressedStream = new MemoryStream();
+            using var gzipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
+            gzipStream.CopyTo(decompressedStream);
+            decompressedStream.Seek(0, SeekOrigin.Begin);
+
+            var xmlContent = Encoding.UTF8.GetString(decompressedStream.ToArray());
+            XDocument doc = XDocument.Parse(xmlContent);
+
+            foreach (var featureId in featureIds)
+                {
+                var featureElement = doc.Descendants("Feature")
+                    .FirstOrDefault(f => (int)f.Attribute("ID") == featureId);
+
+                if (featureElement != null)
+                    {
+                    Feature feature = new Feature
+                        {
+                        Id = (int)featureElement.Attribute("ID"),
+                        Name = featureElement.Elements("Names").Elements("Name")
+                            .FirstOrDefault(n => (int)n.Attribute("langid") == 1)?.Value ?? "",
+
+                        ClusterId = 1,
+                        Translations = featureElement.Element("Names")?.Elements("Name")
+                            .Where(n => new[] { 1, 2, 4 }.Contains((int)n.Attribute("langid"))) // English, Dutch, German
+                            .Select(n => new FeatureTranslation
+                                {
+                                LanguageId = (int)n.Attribute("langid"),
+                                TranslatedName = n.Value ?? string.Empty
+                                })
+                            .ToList() ?? new List<FeatureTranslation>(),
+                        };
+
+                    downloadedFeatures.Add(feature);
+                    }
+                }
+            }
+        catch (Exception ex)
+            {
+            
+            }
+
+        return downloadedFeatures;
+        }
+
+
+    #endregion
+
+
+    #region FeatureGroupExtraPro
+
+    private async Task<List<Cluster>> DownloadFeatureGroupsAsync(List<long> clusterIds)
+        {
+        List<Cluster> downloadedGroups = new();
+
+        try
+            {
+            using WebClient client = new();
+            client.Credentials = new NetworkCredential(_username, _password);
+            byte[] data = await client.DownloadDataTaskAsync(_featureGroupsUrl);
+
+            using var compressedStream = new MemoryStream(data);
+            using var decompressedStream = new MemoryStream();
+            using var gzipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
+            gzipStream.CopyTo(decompressedStream);
+            decompressedStream.Seek(0, SeekOrigin.Begin);
+
+            var xmlContent = Encoding.UTF8.GetString(decompressedStream.ToArray());
+            XDocument doc = XDocument.Parse(xmlContent);
+
+            foreach (var clusterId in clusterIds)
+                {
+                var fg = doc.Descendants("FeatureGroup")
+                    .FirstOrDefault(x => (int)x.Attribute("ID") == clusterId);
+
+                if (fg != null)
+                    {
+                    Cluster cluster = new()
+                        {
+                        Id = (int)fg.Attribute("ID"),
+                        Name = fg.Elements("Name")
+                            .FirstOrDefault(n => (int)n.Attribute("langid") == 1)?.Attribute("Value")?.Value ?? "Default",
+                        Translations = fg.Elements("Name")
+                            .Where(n => new[] { 1, 2, 4 }.Contains((int)n.Attribute("langid")))
+                            .Select(n => new ClusterTranslation
+                                {
+                                LanguageId = (int)n.Attribute("langid"),
+                                TranslatedName = n.Attribute("Value")?.Value ?? string.Empty
+                                }).ToList()
+                        };
+
+                    downloadedGroups.Add(cluster);
+                    }
+                }
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine("Error downloading missing feature groups: " + ex.Message);
+            }
+
+        return downloadedGroups;
         }
 
 

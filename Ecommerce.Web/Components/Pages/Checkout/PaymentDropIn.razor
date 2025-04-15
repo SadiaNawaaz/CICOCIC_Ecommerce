@@ -1,0 +1,128 @@
+﻿@page "/payment-DropIn"
+@inject IJSRuntime JSRuntime
+@inject IAdyenService AdyenService
+@inject IConfiguration Configuration
+@rendermode InteractiveServer
+@using Microsoft.JSInterop;
+@using System.Text;
+@using System.Text.Json;
+<h3>💳 Checkout</h3>
+<p>Please complete your payment below:</p>
+
+<div id="dropin-container"></div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender)
+            {
+            try
+                {
+                var paymentMethods = await AdyenService.GetPaymentMethodsAsync();
+                var allowedMethods = new
+                    {
+                    paymentMethods = paymentMethods
+        .GetProperty("paymentMethods")
+        .EnumerateArray()
+        .Where(pm =>
+        {
+            var type = pm.GetProperty("type").GetString();
+            return type == "ideal" || type == "scheme"; //
+        })
+        .Select(pm => JsonSerializer.Deserialize<object>(pm.GetRawText()))
+        .ToList()
+                    };
+
+                var config = new
+                    {
+                    environment = "test", // Use "test" for testing
+                    clientKey = Configuration["Adyen:ClientKey"],
+                    paymentMethodsResponse = allowedMethods
+                    };
+
+                await JSRuntime.InvokeVoidAsync("adyenInterop.renderDropin", config);
+                }
+            catch (Exception ex)
+                {
+                Console.Error.WriteLine($"Adyen Drop-in init error: {ex.Message}");
+                }
+            }
+        }
+
+
+    //[JSInvokable("ProcessPayment")]
+    //public static async Task<object> ProcessPayment(JsonElement paymentData)
+    //    {
+    //    try
+    //        {
+    //        var configuration = StaticServiceProvider.GetService<IConfiguration>();
+
+    //        var apiKey = configuration["Adyen:ApiKey"];
+    //        var merchantAccount = configuration["Adyen:MerchantAccount"];
+
+    //        if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(merchantAccount))
+    //            throw new Exception("API Key or Merchant Account is missing.");
+
+    //        var payload = new
+    //            {
+    //            amount = new { currency = "EUR", value = 1000 },
+    //            reference = Guid.NewGuid().ToString(),
+    //            merchantAccount = merchantAccount,
+    //            paymentMethod = paymentData.GetProperty("paymentMethod"),
+    //            returnUrl = "https://localhost:7204/payment-status"
+    //            };
+
+    //        using var httpClient = new HttpClient();
+    //        httpClient.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+
+    //        var content = new StringContent(
+    //            JsonSerializer.Serialize(payload),
+    //            Encoding.UTF8,
+    //            "application/json"
+    //        );
+
+    //        var response = await httpClient.PostAsync("https://checkout-test.adyen.com/v70/payments", content);
+    //        var json = await response.Content.ReadAsStringAsync();
+
+    //        return JsonSerializer.Deserialize<object>(json)!;
+    //        }
+    //    catch (Exception ex)
+    //        {
+    //        Console.WriteLine($"❌ Adyen payment error: {ex.Message}");
+    //        return new { resultCode = "Error", message = ex.Message };
+    //        }
+    //    }
+
+
+}
+
+
+@*<script>
+    window.adyenInterop = {
+    renderDropin: async function (config) {
+
+            const checkout = await AdyenCheckout({
+                ...config,
+            onSubmit: async (state, dropin) => {
+                try {
+                    const result = await DotNet.invokeMethodAsync("Ecommerce.Web", "ProcessPayment", state.data);
+
+                    if (result.action) {
+                        dropin.handleAction(result.action);
+                        } else if (result.resultCode === "Authorised") {
+                        dropin.setStatus('success', { message: 'Payment complete!' });
+                        } else {
+                        dropin.setStatus('error', { message: 'Payment failed or was refused.' });
+                        }
+                    } catch (error) {
+                    dropin.setStatus('error', { message: 'Something went wrong.' });
+                    console.error(error);
+                    }
+            }
+            });
+
+            checkout.create('dropin').mount('#dropin-container');
+            }
+        };
+
+</script>*@

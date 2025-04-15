@@ -1,0 +1,73 @@
+﻿@page "/payment-status"
+@inject NavigationManager NavigationManager
+@using System.Text.Json
+@using System.Text
+@using Microsoft.AspNetCore.WebUtilities
+@using Ecommerce.Shared.Services;
+@using Ecommerce.Shared.Entities.Orders;
+@inject IOrderService OrderService
+@inject ICartService CartService
+@inject CartStateService CartStateService
+<h3>Processing Payment...</h3>
+
+<p>Please wait while we confirm your payment.</p>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender)
+            {
+            var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            var query = QueryHelpers.ParseQuery(uri.Query);
+
+            if (query.TryGetValue("redirectResult", out var redirectResult) &&
+                query.TryGetValue("orderId", out var orderIdString) &&
+                long.TryParse(orderIdString, out var orderId))
+                {
+                var result = await FinalizePayment(redirectResult);
+                var resultCode = result.GetProperty("resultCode").GetString();
+
+                if (resultCode == "Authorised")
+                    {
+
+                    await CartService.DeleteItems();
+                    CartStateService.CartItemCount = 0;
+
+
+
+                    await OrderService.UpdateOrderStatus(orderId, OrderStatus.Paid);
+                    NavigationManager.NavigateTo($"/Order-Success/{orderId}");
+                    }
+                else
+                    {
+
+                    NavigationManager.NavigateTo($"/Order-failure/{orderId}");
+                    }
+                }
+            }
+        }
+
+
+    private async Task<JsonElement> FinalizePayment(string redirectResult)
+        {
+        var apiKey = "AQEqhmfxKIPIaRVEw0m/n3Q5qf3VZYJHA5BDW2qPabmG84zubsONct+vi53TEMFdWw2+5HzctViMSCJMYAc=-OcKq+ogxuTKwG9ojQq6BViWC1Fe1iqQe2l/xXzKmoPs=-i1igepw6?TU)QECI2VL";
+        var merchantAccount = "MijncicoECOM";
+
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+
+        var payload = new
+            {
+            details = new { redirectResult = redirectResult }
+            };
+
+        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PostAsync("https://checkout-test.adyen.com/v70/payments/details", content);
+        var json = await response.Content.ReadAsStringAsync();
+
+        var doc = JsonDocument.Parse(json);
+        return doc.RootElement;
+        }
+}

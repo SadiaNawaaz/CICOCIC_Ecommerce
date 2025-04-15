@@ -17,6 +17,9 @@ public interface IOrderService
     Task<ServiceResponse<Order>> PlaceOrder(Order order);
     Task<ServiceResponse<Order>> GetOrderById(long orderId);
     Task<ServiceResponse<List<OrderDto>>> GetOrdersByCustomerId(long customerId);
+    Task<ServiceResponse<bool>> UpdateOrderStatus(long orderId, OrderStatus newStatus);
+    Task<ServiceResponse<OrderDto>> GetOrderDtoById(long orderId);
+
     }
 public class OrderService : IOrderService
     {
@@ -45,10 +48,10 @@ public class OrderService : IOrderService
                         {
                         throw new Exception($"Product with ID {orderItem.ProductId} not found.");
                         }
-                    if (product.Sold == 1)
-                        {
-                        throw new Exception($"Product with ID {product.Id} is already sold.");
-                        }
+                    //if (product.Sold == 1)
+                    //    {
+                    //    throw new Exception($"Product with ID {product.Id} is already sold.");
+                    //    }
                     product.Sold = 1;
                     product.Publish = false;
                     _context.ProductVariants.Update(product);
@@ -159,5 +162,84 @@ public class OrderService : IOrderService
             }
         }
 
+
+    public async Task<ServiceResponse<bool>> UpdateOrderStatus(long orderId, OrderStatus newStatus)
+        {
+        var order = await _context.Orders.FindAsync(orderId);
+        if (order == null)
+            {
+            return new ServiceResponse<bool> { Success = false, Message = "Order not found." };
+            }
+
+        order.Status = newStatus;
+        await _context.SaveChangesAsync();
+
+        return new ServiceResponse<bool> { Success = true, Data = true };
+        }
+
+
+
+
+    public async Task<ServiceResponse<OrderDto>> GetOrderDtoById(long orderId)
+        {
+        try
+            {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+                {
+                return new ServiceResponse<OrderDto>
+                    {
+                    Success = false,
+                    Message = "Order not found"
+                    };
+                }
+
+            // Retrieve the product variants related to the order items
+            var variantIds = order.OrderItems.Select(oi => oi.VariantId).ToList();
+            var variants = await _context.ProductVariants
+                .Where(pv => variantIds.Contains(pv.Id))
+                .ToDictionaryAsync(pv => pv.Id);
+
+            // Map the order entity to the OrderDto
+            var orderDto = new OrderDto
+                {
+                Id = order.Id,
+                CustomerId = order.CustomerId,
+                FirstName = order.FirstName,
+                LastName = order.LastName,
+                TotalAmount = order.TotalAmount,
+                OrderNumber=order.OrderNumber,
+                OrderDate = order.OrderDate,
+                OrderItems = order.OrderItems.Select(item => new OrderItemDto
+                    {
+                    Id = item.Id,
+                    ProductName = item.ProductName,
+                    VariantName = variants.TryGetValue(item.VariantId, out var variant) ? variant.Name : "N/A",
+                    Price = item.Price,
+                    Quantity = item.Quantity,
+                    DefaultImageUrl = variants.TryGetValue(item.VariantId, out variant) ? variant.Thumbnail : "N/A"
+                    }).ToList()
+                };
+
+            return new ServiceResponse<OrderDto>
+                {
+                Data = orderDto,
+                Success = true,
+                Message = "Order retrieved successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error occurred while retrieving the order.");
+            return new ServiceResponse<OrderDto>
+                {
+                Success = false,
+                Message = "Error occurred while retrieving the order"
+                };
+            }
+        }
 
     }

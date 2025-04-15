@@ -5,25 +5,25 @@
 namespace Ecommerce.Shared.Migrations
 {
     /// <inheritdoc />
-    public partial class newID : Migration
+    public partial class OrderNumber : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "IceCatFeatureGroupId",
-                table: "CategoryFeatures",
-                type: "int",
+            migrationBuilder.AddColumn<string>(
+                name: "OrderNumber",
+                table: "Orders",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IceCatFeatureGroupId",
-                table: "CategoryFeatures");
+                name: "OrderNumber",
+                table: "Orders");
         }
     }
 }

@@ -1172,6 +1172,7 @@ else
                         product.ProductMedias = catalogObj.CatalogMedias.Select(cm => new ProductMedia
                             {
                             MediaUrl = cm.ImageUrl,
+                            ContentType= GetContentTypeFromUrl(newMediaUrl)
 
                             }).ToList();
                         }

@@ -121,6 +121,14 @@
                                 </CellTemplate>
                             </TemplateColumn>
 
+                            <TemplateColumn Title="QR">
+                                <CellTemplate>
+                                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAACm0lEQVR4nO2bTW7cMAyF36sMZCkDc4AeRb5Bj1TkSLmBdZQcoIC8HEDG64LyeCZB84M67rggF4Z/vsUDCFISSVP4jOVvn8IB55133nnnnXf+TzybdSB7AJg6AJjJYVq+DTvqcX5jPkmSCoD0TNq7zAdpRJAk6Zb/aj3Ob8xPLUI1IsiCOOls70h2e+tx/mt4DvFMIJ5JWvz+Wz3O/x3fvXhWJoA0zhAw89Xp+N70O/8xPqrFalKFHvkgZHbgAEBS3VuP89vwLX6z7akCmJ5OYionMJVTJTBzTz3Ob8ubf1+l4ViB/P1MIN5+uzf9zr9jdvhJBdCItn82GwEglSCNsbYj1Hhv+p3/GB+rXTjECg5TB6QCAJjJnyX4+feYfMvPuf8Fq1qlJ2JxtwDL3VO/pPB70+/8O9Zy8ZqBEaQxSlJpd0hqF8/PR+MtfpkKhMxQgVgAYO4sXacCKDNUj99D8jf1jVhAgEAqVt/olBkqUumJNO6hx/ltedzslQGNscKy8mqpwPfPx+Sv/NvaRPHSSbpamOvC3Zt+5z/GR1lBEum5A9kHAVOrTyL3u+txfhu+xaVK0NoEbl0j2zpXrNHt8Xs0/lK/CsvRCIA52T6otiKW+/eI/BK/tsLerrUIl+XY/XtsPvNBHKYOeuwBsp/ZilgT2Way9tTj/Eb8JX51M2Z11Q5e3vn56Lj8Oj/ZohZY+gtTe9f2XPep3/l3+HV+0h7tLmh1N4c99Ti/MX8zP3m16maSSM8+P/mf8BwA22S1dr9Ncvj880H5l/OTAOYOqZwqU+nZOsBTtyzK96bf+bdt8W8UgMm6+WLuYaNXRAxC/nGm9wePzGe2BbeN5tipaObV7yq76nF+I/71BPub5v93O++888477/wG/G/k2aRYfB3LWQAAAABJRU5ErkJggg==" width="40" />
+
+                                </CellTemplate>
+                            </TemplateColumn>
+                         
+
                             <PropertyColumn Property="x => x.Name" Title="Name" />
                             <!-- New Column for VariantType -->
                             <TemplateColumn Title="Obj">
@@ -181,8 +189,8 @@
                             <TemplateColumn Title="Report">
                                 <CellTemplate>
 
-                                    <a href="api/Report/Print?VariantId=@context.Item.Id" target="_blank" class="btn btn-primary" >
-                                        <i class="fa fa-file"></i> 
+                                    <a href="api/Report/Print?VariantId=@context.Item.Id" target="_blank" class="btn btn-black btn-sm" data-bs-toggle="tooltip" title="Print">
+                                        <i class="fa fa-file"></i>
                                     </a>
 
 
@@ -240,8 +248,8 @@
                                 <CellTemplate>
                                     <MudStack Row>
 
-                                        <button type="button" @onclick="() => CreateObject(context.Item)" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Object">
-                                            <i class="fa fa-lightbulb"></i>
+                                        <button type="button" @onclick="() => CreateObject(context.Item)" class="btn btn-yellow btn-sm" data-bs-toggle="tooltip" title="Object">
+                                            <i class="fas fa-edit"></i>
                                         </button>
                                     </MudStack>
                                 </CellTemplate>

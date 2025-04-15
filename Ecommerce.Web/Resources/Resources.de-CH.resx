@@ -161,7 +161,7 @@ in unserem Geschäft</value>
     <value>GERELATEERDE </value>
   </data>
   <data name="LatestProduct" xml:space="preserve">
-    <value>NEUESTES</value>
+    <value>NEUESTES PRODUKT</value>
   </data>
   <data name="OurContact" xml:space="preserve">
     <value>UNSER KONTAKT</value>
@@ -221,13 +221,13 @@ in unserem Geschäft</value>
     <value>Artikel für</value>
   </data>
   <data name="ProductDescription" xml:space="preserve">
-    <value>Productbeschrijving</value>
+    <value>Produktbeschreibung</value>
   </data>
   <data name="AdditionalInformation" xml:space="preserve">
     <value>Zusätzliche Informationen</value>
   </data>
   <data name="RatingReviews " xml:space="preserve">
-    <value>Beoordelingen &amp; recensies</value>
+    <value>Bewertungen &amp; Rezensionen</value>
   </data>
   <data name="Availability" xml:space="preserve">
     <value>Verfügbarkeit</value>
@@ -242,7 +242,7 @@ in unserem Geschäft</value>
     <value>Nur noch 1 auf Lager – bald bestellen</value>
   </data>
   <data name="AddToCart" xml:space="preserve">
-    <value> IN WINKELWAGEN</value>
+    <value> In den Warenkorb</value>
   </data>
   <data name="YouMightAlsoLike" xml:space="preserve">
     <value>Das Könnte Dir Auch Gefallen</value>

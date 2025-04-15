@@ -1,59 +1,245 @@
-﻿<div class="checkout-body">
+﻿
+@inject IJSRuntime JSRuntime
+@inject IAdyenService AdyenService
+@inject IConfiguration Configuration
+@rendermode InteractiveServer
+@using Microsoft.JSInterop;
+@using System.Text;
+@using System.Text.Json;
+@using Ecommerce.Shared.Entities.Orders;
+<div class="checkout-body">
     <h4 class="checkout-title">Choose a payment method</h4>
-    <div class="mb-2 row">
-        <label class="col-md-4 col-form-label text-lg-end">Cardholder Name <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            <input type="text" class="form-control required" name="cardholder" placeholder="" />
-        </div>
-    </div>
-    <div class="mb-2 row">
-        <label class="col-md-4 col-form-label text-lg-end">Card Number <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            <input type="text" class="form-control required" name="cardnumber" placeholder="" />
-        </div>
-    </div>
-    <div class="mb-2 row">
-        <label class="col-md-4 col-form-label text-lg-end">Payment Types <span class="text-danger">*</span></label>
-        <div class="col-md-8">
-            <ul class="list-inline payment-type">
-                <li class="active"><a href="#" data-click="set-payment" data-value="Paypal" data-toggle="tooltip" data-title="Paypal" data-placement="top" data-trigger="hover"><i class="fab fa-cc-paypal"></i></a></li>
-                <li><a href="#" data-click="set-payment" data-value="Visa" data-toggle="tooltip" data-title="Visa" data-placement="top" data-trigger="hover"><i class="fab fa-cc-visa"></i></a></li>
-                <li><a href="#" data-click="set-payment" data-value="Master Card" data-toggle="tooltip" data-title="Master Card" data-placement="top" data-trigger="hover"><i class="fab fa-cc-mastercard"></i></a></li>
-                <li><a href="#" data-click="set-payment" data-value="Credit Card" data-toggle="tooltip" data-title="Credit Card" data-placement="top" data-trigger="hover"><i class="fab fa-cc-discover"></i></a></li>
-            </ul>
-            <input type="hidden" name="payment_type" value="" data-id="payment-type" />
-        </div>
-    </div>
-    <div class="mb-2 row">
-        <label class="col-md-4 col-form-label text-lg-end">Expiration Date <span class="text-danger">*</span></label>
-        <div class="col-md-8">
-            <div class="w-150px">
-                <div class="row gx-0">
-                    <div class="col-5">
-                        <input type="text" name="mm" placeholder="MM" class="form-control required p-l-5 p-r-5 text-center" />
-                    </div>
-                    <div class="col-2 text-center">
-                        <div class="text-muted pt-5px mt-2px">/</div>
-                    </div>
-                    <div class="col-5">
-                        <input type="text" name="yy" placeholder="YY" class="form-control required p-l-5 p-r-5 text-center" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="mb-2 row">
-        <label class="col-md-4 col-form-label text-lg-end">CSC <span class="text-danger">*</span></label>
-        <div class="col-md-8 d-flex align-items-center">
-            <div class="w-150px me-10px">
-                <input type="text" name="number" placeholder="" class="form-control required p-l-5 p-r-5 text-center" />
-            </div>
-            <a href="#" class="text-muted fs-12px"><i class="fa fa-question-circle"></i> What's this?</a>
-        </div>
-    </div>
+
+    <h3>💳 Checkout</h3>
+    <p>Please complete your payment below:</p>
+
+    <div id="dropin-container"></div>
 </div>
 
 
+
 @code {
+    [Parameter]
+    public Order Order { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender)
+            {
+            try
+                {
+                var paymentMethods = await AdyenService.GetPaymentMethodsAsync();
+                var allowedMethods = new
+                    {
+                    paymentMethods = paymentMethods
+        .GetProperty("paymentMethods")
+        .EnumerateArray()
+        .Where(pm =>
+        {
+            var type = pm.GetProperty("type").GetString();
+            return type == "ideal" || type == "scheme"; //
+        })
+        .Select(pm => JsonSerializer.Deserialize<object>(pm.GetRawText()))
+        .ToList()
+                    };
+
+                var config = new
+                    {
+                    environment = "test", // Use "test" for testing
+                    clientKey = Configuration["Adyen:ClientKey"],
+                    paymentMethodsResponse = allowedMethods
+                    };
+                var orderData = new
+                    {
+                    orderId = Order.Id,
+                    totalAmount = (int)(Order.TotalAmount * 100)
+                    };
+                await JSRuntime.InvokeVoidAsync("adyenInterop.renderDropin", config, orderData);
+                }
+            catch (Exception ex)
+                {
+                Console.Error.WriteLine($"Adyen Drop-in init error: {ex.Message}");
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+    [JSInvokable("ProcessPayment")]
+    public static async Task<object> ProcessPayment(PaymentRequest request)
+        {
+        try
+            {
+            var configuration = StaticServiceProvider.GetService<IConfiguration>();
+            var apiKey = configuration["Adyen:ApiKey"];
+            var merchantAccount = configuration["Adyen:MerchantAccount"];
+
+            var payload = new
+                {
+                amount = new { currency = "EUR", value = request.TotalAmount },
+                reference = $"ORDER_{request.OrderId}",
+                merchantAccount = merchantAccount,
+                paymentMethod = request.PaymentMethod,
+                returnUrl = $"https://localhost:7204/payment-status?orderId={request.OrderId}"
+                };
+
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("https://checkout-test.adyen.com/v70/payments", content);
+            var json = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<object>(json)!;
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine($"❌ Adyen payment error: {ex.Message}");
+            return new { resultCode = "Error", message = ex.Message };
+            }
+        }
+
+
+
+
+    [JSInvokable("ProcessPayment1")]
+    public static async Task<object> ProcessPayment1(JsonElement paymentData)
+        {
+        try
+            {
+            var configuration = StaticServiceProvider.GetService<IConfiguration>();
+
+            var apiKey = configuration["Adyen:ApiKey"];
+            var merchantAccount = configuration["Adyen:MerchantAccount"];
+
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(merchantAccount))
+                throw new Exception("API Key or Merchant Account is missing.");
+
+            var payload = new
+                {
+                amount = new { currency = "EUR", value = 1000 },
+                reference = Guid.NewGuid().ToString(),
+                merchantAccount = merchantAccount,
+                paymentMethod = paymentData.GetProperty("paymentMethod"),
+                returnUrl = "https://localhost:7204/payment-status"
+                };
+
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(payload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await httpClient.PostAsync("https://checkout-test.adyen.com/v70/payments", content);
+            var json = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<object>(json)!;
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine($"❌ Adyen payment error: {ex.Message}");
+            return new { resultCode = "Error", message = ex.Message };
+            }
+        }
+    public class PaymentRequest
+        {
+        public JsonElement PaymentMethod { get; set; }
+        public long OrderId { get; set; }
+        public int TotalAmount { get; set; } // in cents
+        }
+
 
 }
+
+
+<script>
+   window.adyenInterop = {
+    renderDropin: async function (config, orderData) {
+        const checkout = await AdyenCheckout({
+            ...config,
+            onSubmit: async (state, dropin) => {
+                try {
+                    const result = await DotNet.invokeMethodAsync("Ecommerce.Web", "ProcessPayment", {
+                        paymentMethod: state.data.paymentMethod,
+                        orderId: orderData.orderId,
+                        totalAmount: orderData.totalAmount
+                    });
+
+                    if (result.action) {
+                        dropin.handleAction(result.action);
+                    } else if (result.resultCode === "Authorised") {
+                        dropin.setStatus('success', { message: 'Payment complete!' });
+                    } else {
+                        dropin.setStatus('error', { message: 'Payment failed or was refused.' });
+                    }
+                } catch (error) {
+                    dropin.setStatus('error', { message: 'Something went wrong.' });
+                    console.error(error);
+                }
+            }
+        });
+
+        checkout.create('dropin').mount('#dropin-container');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    window.adyenInterop1 = {
+    renderDropin1: async function (config,orderData) {
+
+    console.log("this is the order");
+     console.log(orderData);
+
+            const checkout = await AdyenCheckout({
+                ...config,
+            onSubmit: async (state, dropin) => {
+                try {
+                    const result = await DotNet.invokeMethodAsync("Ecommerce.Web", "ProcessPayment", state.data);
+
+                    if (result.action) {
+                        dropin.handleAction(result.action);
+                        } else if (result.resultCode === "Authorised") {
+                        dropin.setStatus('success', { message: 'Payment complete!' });
+                        } else {
+                        dropin.setStatus('error', { message: 'Payment failed or was refused.' });
+                        }
+                    } catch (error) {
+                    dropin.setStatus('error', { message: 'Something went wrong.' });
+                    console.error(error);
+                    }
+            }
+            });
+
+            checkout.create('dropin').mount('#dropin-container');
+            }
+        };</script>

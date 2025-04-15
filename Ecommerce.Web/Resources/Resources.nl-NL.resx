@@ -161,7 +161,7 @@ in onze winkel</value>
     <value>VERWANDTE</value>
   </data>
   <data name="LatestProduct" xml:space="preserve">
-    <value>LAATSTE PRODUCT</value>
+    <value>NIEUWSTE PRODUCT</value>
   </data>
   <data name="OurContact" xml:space="preserve">
     <value>ONZE CONTACTGEGEVENS</value>
@@ -221,13 +221,13 @@ in onze winkel</value>
     <value>Items voor</value>
   </data>
   <data name="ProductDescription" xml:space="preserve">
-    <value> Produktbeschreibung</value>
+    <value>Productbeschrijving</value>
   </data>
   <data name="AdditionalInformation" xml:space="preserve">
-    <value>Aanvullende informatie</value>
+    <value> Aanvullende informatie</value>
   </data>
   <data name="RatingReviews " xml:space="preserve">
-    <value>Bewertungen &amp; Rezensionen</value>
+    <value>Beoordelingen &amp; Recensies</value>
   </data>
   <data name="Availability" xml:space="preserve">
     <value>Beschikbaarheid</value>
@@ -242,9 +242,9 @@ in onze winkel</value>
     <value>Nog maar 1 op voorraad - bestel snel</value>
   </data>
   <data name="AddToCart" xml:space="preserve">
-    <value>IN DEN WARENKORB</value>
+    <value>Toevoegen aan winkelwagen</value>
   </data>
   <data name="YouMightAlsoLike" xml:space="preserve">
-    <value>Je Vindt Dit Misschien Ook Leuk</value>
+    <value>Dit vindt u misschien ook leuk</value>
   </data>
 </root>
