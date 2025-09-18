@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Shared.Context;
 using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Entities.Orders;
+using Ecommerce.Shared.Enums;
 using Ecommerce.Shared.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,8 @@ public interface IOrderService
     Task<ServiceResponse<List<OrderDto>>> GetOrdersByCustomerId(long customerId);
     Task<ServiceResponse<bool>> UpdateOrderStatus(long orderId, OrderStatus newStatus);
     Task<ServiceResponse<OrderDto>> GetOrderDtoById(long orderId);
+    Task<ServiceResponse<List<OrderDto>>> GetAllOrders(bool isAdmin,long UserId);
+
 
     }
 public class OrderService : IOrderService
@@ -185,6 +188,7 @@ public class OrderService : IOrderService
         try
             {
             var order = await _context.Orders
+                 .Include(o => o.Customer)
                 .Include(o => o.OrderItems)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
@@ -211,8 +215,13 @@ public class OrderService : IOrderService
                 FirstName = order.FirstName,
                 LastName = order.LastName,
                 TotalAmount = order.TotalAmount,
-                OrderNumber=order.OrderNumber,
+                Email = order.Customer?.Email,
+                PrimaryPhone = order.PrimaryPhone,
+                StreetAddress = order.StreetAddress,
+                AreaCode = order.AreaCode,
+                OrderNumber =order.OrderNumber,
                 OrderDate = order.OrderDate,
+                PaymentStatus = order.Status,
                 OrderItems = order.OrderItems.Select(item => new OrderItemDto
                     {
                     Id = item.Id,
@@ -238,6 +247,67 @@ public class OrderService : IOrderService
                 {
                 Success = false,
                 Message = "Error occurred while retrieving the order"
+                };
+            }
+        }
+
+
+    public async Task<ServiceResponse<List<OrderDto>>> GetAllOrders(bool isAdmin, long UserId)
+        {
+        try
+            {
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ToListAsync();
+
+            var variantIds = orders
+                .SelectMany(o => o.OrderItems)
+                .Select(oi => oi.VariantId)
+                .Distinct()
+                .ToList();
+
+            var variants = await _context.ProductVariants
+                .Where(v => variantIds.Contains(v.Id))
+                .ToDictionaryAsync(v => v.Id);
+
+            var orderDtos = orders.Select(order => new OrderDto
+                {
+                Id = order.Id,
+                CustomerId = order.CustomerId,
+                FirstName = order.FirstName,
+                LastName = order.LastName,
+                TotalAmount = order.TotalAmount,
+                OrderNumber = order.OrderNumber,
+                OrderDate = order.OrderDate,
+                PaymentStatus = order.Status, 
+                PrimaryPhone=order.PrimaryPhone,
+                StreetAddress=order.StreetAddress,
+                AreaCode=order.AreaCode,
+                OrderItems = order.OrderItems.Select(item => new OrderItemDto
+                    {
+                    Id = item.Id,
+                    ProductName = item.ProductName,
+                    VariantName = variants.TryGetValue(item.VariantId, out var variant) ? variant.Name : "N/A",
+                    Price = item.Price,
+                    Quantity = item.Quantity,
+                    DefaultImageUrl = variants.TryGetValue(item.VariantId, out variant) ? variant.Thumbnail : "N/A"
+                    }).ToList()
+                }).ToList();
+
+            return new ServiceResponse<List<OrderDto>>
+                {
+                Data = orderDtos,
+                Success = true,
+                Message = "Orders loaded successfully"
+                };
+            }
+        catch (Exception ex)
+            {
+            _logger.LogError(ex, "Error retrieving all orders.");
+            return new ServiceResponse<List<OrderDto>>
+                {
+                Success = false,
+                Message = "Failed to retrieve orders."
                 };
             }
         }

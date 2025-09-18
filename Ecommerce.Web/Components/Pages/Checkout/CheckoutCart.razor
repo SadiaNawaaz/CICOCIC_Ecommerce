@@ -267,6 +267,8 @@
             {
             try
                 {
+
+                await CheckUserSessionAsync();
                 CartItems = await CartService.GetItems();
 
                 if (CartItems == null || !CartItems.Any())
@@ -295,32 +297,46 @@
                     }
 
 
-                var result = await ProtectedLocalStor.GetAsync<string>("UserName");
-                var resultId = await ProtectedLocalStor.GetAsync<long>("CustomerId");
-                CustomerId = result.Success ? resultId.Value : 0;
-
-                var userName = result.Value;
-
-                if (string.IsNullOrEmpty(userName) || CustomerId == 0)
-                    {
-                    NavigationManager.NavigateTo("/login", forceLoad: true);
-                    }
-                else
-                    {
-                    isUserLoggedIn = true;
-                    }
-
-
 
                 StateHasChanged();
                 }
             catch (Exception ex)
                 {
                 Console.WriteLine("Error loading cart items: " + ex.Message);
-                ShowMessage("Error loading cart items: " + ex.Message, "danger");
+                ShowMessage(ex.Message.ToString(), "danger");
                 }
             }
         }
+
+    private async Task CheckUserSessionAsync()
+        {
+        try
+            {
+            var resultUser = await ProtectedLocalStor.GetAsync<string>("UserName");
+            var resultId = await ProtectedLocalStor.GetAsync<long>("CustomerId");
+
+            if (!resultUser.Success || !resultId.Success || string.IsNullOrWhiteSpace(resultUser.Value) || resultId.Value == 0)
+                {
+                RedirectToLogin();
+                return;
+                }
+
+            CustomerId = resultId.Value;
+            var userName = resultUser.Value;
+            isUserLoggedIn = true;
+            }
+        catch
+            {
+            // Catch all exceptions and redirect to login
+            RedirectToLogin();
+            }
+        }
+
+    private void RedirectToLogin()
+        {
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+        }
+
 
     private async void SetStep(int step)
         {
@@ -429,7 +445,7 @@
 
 
                 StateHasChanged();
-;
+                ;
 
                 }
             else

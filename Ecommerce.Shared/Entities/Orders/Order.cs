@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Shared.Abstraction;
+using Ecommerce.Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +13,8 @@ public class Order
     {
     public long Id { get; set; }
     public string OrderNumber { get; set; }
-    public long CustomerId { get; set; }    
+    public long CustomerId { get; set; }
+    public Customer Customer { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string? CompanyName { get; set; }
@@ -39,13 +41,3 @@ public class OrderItem
     }
 
 
-public enum OrderStatus
-    {
-    Pending,       // Order created but not paid yet
-    Paid,          // Payment successful
-    Failed,        // Payment failed
-    Cancelled,     // User cancelled or order timed out
-    Shipped,       // Order shipped
-    Delivered,     // Delivered to customer
-    Refunded       // Payment refunded
-    }

@@ -1,0 +1,125 @@
+﻿
+@page "/OrderList"
+@using Ecommerce.Shared.Dto
+@using Ecommerce.Shared.Services
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<style>
+    .mud-table-head {
+        background-color: #348FE2;
+        color: white;
+    }
+</style>
+
+<div class="d-flex align-items-center mb-3">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Orders</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="panel panel-inverse">
+            <div class="panel-heading">
+                <h4 class="panel-title">Order List</h4>
+                <div class="panel-heading-btn">
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+                    <a href="javascript:;" class="btn btn-xs btn-icon btn-success" @onclick="ReloadOrders"><i class="fa fa-redo"></i></a>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <MudDataGrid T="OrderDto" Items="@filteredOrders" ColumnResizeMode="ResizeMode.Column" RowsPerPage="20" Striped="true" Bordered="true">
+                    <Columns>
+                        <PropertyColumn Property="x => x.OrderNumber" Title="Order" />
+                        <PropertyColumn Property="x => x.OrderDate" Title="Date" FormatString="dd MMM yyyy, hh:mm tt" />
+                        <TemplateColumn Title="Customer">
+                            <CellTemplate>
+                                @($"{context.Item.FirstName} {context.Item.LastName}")
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                        <PropertyColumn Property="x => x.TotalAmount" Title="Total" FormatString="\u20AC0.00" />
+                        <PropertyColumn Property="x => x.PaymentStatus" Title="Payment status" />
+
+                        <PropertyColumn Property="x => x.TotalItems" Title="Items" />
+
+
+
+                        <TemplateColumn>
+                            <HeaderTemplate>
+                                <div>Manage Records</div>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudStack Row>
+                         
+
+                                    <!-- List Product Variants Button -->
+                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Order Detail" @onclick="() => ViewOrderDetail(context.Item.Id)">
+                                        <i class="fas fa-list-squares"></i>
+                                    </button>
+
+
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="OrderDto" PageSizeOptions="@(new int[] { 5, 10, 20 })" />
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<OrderDto> orders = new();
+    private List<OrderDto> filteredOrders = new();
+
+    protected override async Task OnInitializedAsync()
+        {
+        await LoadOrders();
+        }
+
+    private async Task LoadOrders()
+        {
+        try
+            {
+            var response = await OrderService.GetAllOrders(true,0);
+            if (response.Success)
+                {
+                orders = response.Data;
+                filteredOrders = orders;
+                }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        catch (Exception ex)
+            {
+            Snackbar.Add("Failed to load orders: " + ex.Message, Severity.Error);
+            }
+        }
+
+    private async Task ReloadOrders()
+        {
+        await LoadOrders();
+        }
+
+    private void ViewOrderDetail(long OrderId)
+        {
+
+
+        NavigationManager.NavigateTo($"/OrderView?OrderId={OrderId}");
+        }
+}

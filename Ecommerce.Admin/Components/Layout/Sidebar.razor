@@ -126,6 +126,27 @@
                 new SubMenuItem { Title = "Objects", Route = "/VariantObjects", PermissionId = 5 }
         }
     },
+
+        new MenuItem
+    {
+        Title = "Order Management",
+        IconClass = "fa fa-table",
+        Routes = new List<string> { "/OrderList" },
+        PermissionId = 5,
+        SubItems = new List<SubMenuItem>
+{
+                new SubMenuItem { Title = "Orders", Route = "/OrderList", PermissionId = 5 },
+
+        }
+    },
+
+
+
+
+
+
+
+
     new MenuItem
     {
         Title = "Category Hub",

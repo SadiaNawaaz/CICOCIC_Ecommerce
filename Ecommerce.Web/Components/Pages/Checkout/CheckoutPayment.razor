@@ -85,7 +85,7 @@
                 reference = $"ORDER_{request.OrderId}",
                 merchantAccount = merchantAccount,
                 paymentMethod = request.PaymentMethod,
-                returnUrl = $"https://localhost:7204/payment-status?orderId={request.OrderId}"
+                returnUrl = $"https://www.cicocic.com/payment-status?orderId={request.OrderId}"
                 };
 
             using var httpClient = new HttpClient();

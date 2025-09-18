@@ -1,0 +1,170 @@
+﻿@page "/OrderView/{OrderId:long?}"
+@using Ecommerce.Shared.Dto
+@using Ecommerce.Shared.Services
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.WebUtilities
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<div class="d-flex align-items-center">
+    <div>
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
+            <li class="breadcrumb-item"><a href="javascript:;">Extra</a></li>
+            <li class="breadcrumb-item active">Order Details</li>
+        </ol>
+        <h1 class="page-header">
+            Order Details
+        </h1>
+    </div>
+</div>
+
+@if (order != null)
+    {
+    <div class="mb-3 d-md-flex fw-bold">
+        <div class="mt-md-0 mt-2"><a  class="text-decoration-none text-dark"><i class="fa fa-print fa-fw me-1 text-dark text-opacity-50"></i> Print</a></div>
+        <div class="ms-md-4 mt-md-0 mt-2"><a  class="text-decoration-none text-dark"><i class="fa fa-boxes-stacked fa-fw me-1 text-dark text-opacity-50"></i> Restock items</a></div>
+       
+    </div>
+
+    <div class="row gx-4">
+        <div class="col-xl-8 mb-xl-0 mb-4">
+            <div class="card border-0 mb-4">
+                <div class="card-header bg-none p-3 h6 m-0 d-flex align-items-center">
+                    <i class="fa fa-shopping-bag fa-lg me-2 text-gray text-opacity-50"></i>
+                    Products (@order.TotalItems)
+                </div>
+                <div class="card-body p-3 text-dark fw-bold">
+                    @foreach (var item in order.OrderItems)
+                        {
+                        <div class="row align-items-center mb-4">
+                            <div class="col-lg-8 d-flex align-items-center">
+                                <div class="h-65px w-65px d-flex align-items-center justify-content-center position-relative">
+                                    <img src="@item.DefaultImageUrl" class="mw-100 mh-100" />
+                                    <span class="w-20px h-20px p-0 d-flex align-items-center justify-content-center badge bg-primary text-white position-absolute end-0 top-0 fw-bold fs-12px rounded-pill mt-n2 me-n2">@item.Quantity</span>
+                                </div>
+                                <div class="ps-3 flex-1">
+                                    <div><a href="#" class="text-decoration-none text-dark">@item.ProductName</a></div>
+                                    <div class="text-dark text-opacity-50 small fw-bold">@item.VariantName</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 m-0 ps-lg-3">
+                                €@item.Price x @item.Quantity
+                            </div>
+                            <div class="col-lg-2 text-dark fw-bold m-0 text-end">
+                                €@(item.Price * item.Quantity)
+                            </div>
+                        </div>
+                        }
+                </div>
+                <div class="card-footer bg-none d-flex p-3">
+                    <a  class="btn btn-default ms-auto">More <b class="caret"></b></a>
+                    <a  class="btn btn-primary ms-2">Add Tracking</a>
+                </div>
+            </div>
+
+            <div class="card border-0">
+                <div class="card-header bg-none p-3 h6 m-0 d-flex align-items-center">
+                    <i class="fa fa-credit-card fa-lg me-2 text-gray text-opacity-50"></i>
+                    Payment Summary
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless table-sm fw-bold m-0">
+                        <tbody>
+                            <tr>
+                                <td class="w-150px">Total Items</td>
+                                <td>@order.TotalItems</td>
+                                <td class="text-end">€@order.TotalAmount</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><b>Total Paid</b></td>
+                                <td class="text-end text-decoration-underline"><b>€@order.TotalAmount</b></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <hr class="m-0" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="pt-2 pb-2" nowrap>
+                                    Status
+                                </td>
+                                <td class="pt-2 pb-2">
+                                    <span class="badge border border-success text-success px-2 pt-5px pb-5px rounded fs-12px">@order.PaymentStatus</span>
+                                </td>
+                                <td class="pt-2 pb-2 text-end">€@order.TotalAmount</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+              
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card border-0 mb-4">
+                <div class="card-header bg-none p-3 h6 m-0 d-flex align-items-center">
+                    Customer
+                </div>
+     
+
+                <div class="card-body fw-bold">
+                    <div class="d-flex align-items-center">
+                        <a href="#" class="d-block"><img src="../assets/img/user/user-1.jpg" width="45" class="rounded-pill" /></a>
+                        <div class="flex-1 ps-3">
+                            <a href="#" class="d-block text-decoration-none">@order.FirstName @order.LastName</a>
+                            @order.Email
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 mb-4">
+                <div class="card-header bg-none p-3 h6 m-0 d-flex align-items-center">
+                    Shipping Address
+                </div>
+             
+
+                <div class="card-body fw-bold">
+                    <i class="fa fa-phone fa-fw"></i> @order.PrimaryPhone<br><br>
+                    <i class="fa fa-home fa-fw"></i>  @order.StreetAddress<br />
+                    <i class="fa fa-code fa-fw"></i> @order.AreaCode<br />
+                    <br>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+else
+    {
+    <div>Loading order details...</div>
+    }
+
+@code {
+    [Parameter]
+    public long OrderId { get; set; }
+
+    private OrderDto order;
+    protected override async Task OnInitializedAsync()
+        {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("OrderId", out var orderIdStr) && long.TryParse(orderIdStr, out var orderId))
+            {
+            OrderId = orderId;
+
+            var response = await OrderService.GetOrderDtoById(OrderId);
+            if (response.Success)
+                {
+                order = response.Data;
+                }
+            else
+                {
+                Snackbar.Add(response.Message, Severity.Error);
+                }
+            }
+        }
+
+}
