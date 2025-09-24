@@ -30,7 +30,10 @@ public static class UrlHelper
 
     public static string GetBrandImageUrl(long productId, string imageUrl)
     {
-
+        if (imageUrl == null)
+            {
+            return "";
+            }
         if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
             {
             return imageUrl; 
@@ -41,6 +44,10 @@ public static class UrlHelper
 
     public static string GetSliderImageUrl(long productId, string imageUrl)
     {
+        if (imageUrl == null)
+            {
+            return "";
+            }
         return $"{_baseUrl}/Slider/{productId}/{imageUrl}";
     }
     public static string GetMenuIconImageUrl(long productId, string imageUrl)

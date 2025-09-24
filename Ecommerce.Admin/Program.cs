@@ -1,10 +1,11 @@
-using Blazored.SessionStorage;
+﻿using Blazored.SessionStorage;
 using Ecommerce.Admin.Authentication;
 using Ecommerce.Admin.Components;
 using Ecommerce.Admin.Components.Pages;
 using Ecommerce.Admin.Services;
 using Ecommerce.Mailer;
 using Ecommerce.Shared.Context;
+using Ecommerce.Shared.Dto;
 using Ecommerce.Shared.Services;
 using Ecommerce.Shared.Services.Brands;
 using Ecommerce.Shared.Services.Catalogs;
@@ -15,6 +16,7 @@ using Ecommerce.Shared.Services.Clusters;
 using Ecommerce.Shared.Services.Colors;
 using Ecommerce.Shared.Services.Configurations;
 using Ecommerce.Shared.Services.Features;
+using Ecommerce.Shared.Services.Integrations;
 using Ecommerce.Shared.Services.Languages;
 using Ecommerce.Shared.Services.ModelYears;
 using Ecommerce.Shared.Services.PopularBrands;
@@ -72,6 +74,9 @@ builder.Services.AddScoped<IDataDownloads, DataDownloads>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<ICategoryFeatureService, CategoryFeatureService>();
 
+builder.Services.AddScoped<IBikeListingIngestionService, BikeListingIngestionService>();
+
+
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 
@@ -105,19 +110,20 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.Get
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddScoped<SidebarStateService>();
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie(options =>
-//    {
-//        options.LoginPath = "/login"; // Path to the login page
-//        options.AccessDeniedPath = "/accessdenied"; // Path to the access denied page
-//    });
 builder.Services.AddAuthentication("Auth")
-           .AddCookie("Auth", options =>
-           {
-               options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-               options.SlidingExpiration = true;
-               options.LoginPath = "/login";
-           });
+    .AddCookie("Auth", options =>
+    {
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/accessdenied";
+    });
+
+//builder.Services.AddAuthentication("Auth")
+//           .AddCookie("Auth", options =>
+//           {
+//               options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+//               options.SlidingExpiration = true;
+//               options.LoginPath = "/login";
+//           });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -144,5 +150,26 @@ app.UseEndpoints(endpoints =>
 });
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+
+//Minimal Apis started
+
+app.MapPost("/api/integrations/v1/bikes/upsert", async (
+    HttpRequest req,
+    IBikeListingIngestionService svc,
+    CancellationToken ct) =>
+{
+
+    var dto = await req.ReadFromJsonAsync<BikeListingUpsertRequestDto>(cancellationToken: ct);
+    if (dto is null) return Results.BadRequest("Invalid JSON.");
+
+    var result = await svc.UpsertAsync(dto, ct);
+    return result.Ok ? Results.Ok(result) : Results.BadRequest(result);
+})
+.WithTags("Integrations")
+.DisableAntiforgery();
+
+
+
 
 app.Run();

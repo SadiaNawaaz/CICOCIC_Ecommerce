@@ -917,6 +917,10 @@ else
         {
 
         product.CategoryId = selectedCategoryId;
+        if(product.Category==null)
+            {
+            product.Category = new Category();
+            }
         product.Category.Name = selectedCategory.Name;
 
         }

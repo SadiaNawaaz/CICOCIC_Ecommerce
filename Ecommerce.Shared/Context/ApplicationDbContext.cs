@@ -83,6 +83,7 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<CategoryFeature> CategoryFeatures { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<IntegrationUserLink> IntegrationUserLinks { get; set; }
 
     /*Translation*/
 
