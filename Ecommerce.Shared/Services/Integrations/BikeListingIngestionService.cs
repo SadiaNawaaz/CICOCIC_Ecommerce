@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 namespace Ecommerce.Shared.Services.Integrations;
 public interface IBikeListingIngestionService
     {
-    Task<BikeListingUpsertRequestDto> UpsertAsync( BikeListingUpsertRequestDto dto,CancellationToken ct = default);
+    Task<BikeUpsertResultDto> UpsertAsync( BikeListingUpsertRequestDto dto,CancellationToken ct = default);
     Task<ResetPasswordGateResultDto> GetResetPasswordGateAsync(long productId, string email, CancellationToken ct = default);
     Task<ResetPasswordGateResultDto> SetPasswordAndClaimAsync(long productId, string email, string password, CancellationToken ct = default);
     }
@@ -36,36 +36,51 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
     private readonly ILogger<BikeListingIngestionService> _log;
     private readonly IMailerServices _mailer;
     private readonly string _baseUrl = "https://registerbyasset.com";
-
-    public BikeListingIngestionService( ApplicationDbContext context,ILogger<BikeListingIngestionService> log, IMailerServices mailer)
+    private readonly string _WebbaseUrl = "https://cicocic.com";
+    private readonly IImageStorage _imageStorage;
+    public BikeListingIngestionService( ApplicationDbContext context,ILogger<BikeListingIngestionService> log, IMailerServices mailer, IImageStorage imageStorage)
         {
         _context = context;
         _log = log;
         _mailer = mailer;
+        _imageStorage = imageStorage;
         }
     private static string? NormalizeEmail(string? e)=> string.IsNullOrWhiteSpace(e) ? null : e.Trim().ToLowerInvariant();
 
-    public async  Task<BikeListingUpsertRequestDto>UpsertAsync(BikeListingUpsertRequestDto dto, CancellationToken ct)
+    public async  Task<BikeUpsertResultDto> UpsertAsync(BikeListingUpsertRequestDto dto, CancellationToken ct)
         {
         var refs = await ResolveRefIdsAsync(dto, ct);
-        dto.Ok = true; 
-        return dto;
     
+        return new BikeUpsertResultDto
+            {
+            Ok = true,
+            Message = (refs.UserExists)
+                 ? "Listing published successfully."
+                 : "Listing created. Please check your confirmation email to activate.",
+            ProductId = refs.ProductId,
+            VariantId = refs.VariantId,
+            UserExists = refs.UserExists,
+            Published = refs.Published ,
+            ClaimEmailSent = !(refs.UserExists), 
+            PublicUrl = $"{_WebbaseUrl}/Product?Id={refs.VariantId}",
+            NextAction = (refs.UserExists) ? "OpenPublicUrl" : "CheckEmail"
+            };
+
         }
 
 
 
-    public async Task<ResetPasswordGateResultDto> GetResetPasswordGateAsync(long productId, string email, CancellationToken ct)
+    public async Task<ResetPasswordGateResultDto> GetResetPasswordGateAsync(long variantId, string email, CancellationToken ct)
         {
         var norm = NormalizeEmail(email);
         if (string.IsNullOrWhiteSpace(norm))
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.MissingEmail, Message = "Email required." };
 
-        var productExists = await _context.Products.AnyAsync(p => p.Id == productId, ct);
-        if (!productExists)
+        var exists = await _context.ProductVariants.AnyAsync(p => p.Id == variantId, ct);
+        if (!exists)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.ProductNotFound, Message = "Listing not found." };
 
-        var link = await _context.IntegrationUserLinks.FirstOrDefaultAsync(x => x.ProductId == productId, ct);
+        var link = await _context.IntegrationUserLinks.FirstOrDefaultAsync(x => x.VariantId == variantId, ct);
         if (link is null)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.LinkNotFound, Message = "No claim record for this listing." };
 
@@ -75,11 +90,19 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         if (link.EcommerceUserId > 0)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.AlreadyClaimed, Message = "This listing is already claimed." };
 
-        return new ResetPasswordGateResultDto { Allow = true, Status = ResetPasswordStatus.Allow, Message = "Proceed to set password." };
+        return new ResetPasswordGateResultDto
+            {
+            Allow = true,
+            Status = ResetPasswordStatus.Allow,
+            Message = "Proceed to set password.",
+            VariantId = variantId,
+            PublicUrl = $"{_WebbaseUrl}/Product?Id={variantId}" // <- storefront by variant
+            };
         }
 
 
-    public async Task<ResetPasswordGateResultDto> SetPasswordAndClaimAsync(long productId, string email, string password, CancellationToken ct)
+
+    public async Task<ResetPasswordGateResultDto> SetPasswordAndClaimAsync(long variantId, string email, string password, CancellationToken ct)
         {
         var norm = NormalizeEmail(email);
         if (string.IsNullOrWhiteSpace(norm))
@@ -87,7 +110,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.MissingEmail, Message = "Password must be at least 8 characters." };
 
-        var link = await _context.IntegrationUserLinks.FirstOrDefaultAsync(x => x.ProductId == productId, ct);
+        var link = await _context.IntegrationUserLinks.FirstOrDefaultAsync(x => x.VariantId == variantId, ct);
         if (link is null)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.LinkNotFound, Message = "No claim record for this listing." };
         if (!string.Equals(link.Email ?? "", norm, StringComparison.OrdinalIgnoreCase))
@@ -95,8 +118,8 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         if (link.EcommerceUserId > 0)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.AlreadyClaimed, Message = "This listing is already claimed." };
 
-        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId, ct);
-        if (product is null)
+        var variant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.Id == variantId, ct);
+        if (variant is null)
             return new ResetPasswordGateResultDto { Allow = false, Status = ResetPasswordStatus.ProductNotFound, Message = "Listing not found." };
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == norm, ct);
@@ -132,19 +155,20 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             await _context.SaveChangesAsync(ct);
             }
 
-        product.CreatedBy = user.Id;
-
-        var variants = await _context.ProductVariants.Where(v => v.ProductId == productId).ToListAsync(ct);
-        foreach (var v in variants)
-            {
-            v.Publish = true;
-            if (v.CreatedBy == null) v.CreatedBy = user.Id;
-            }
+        variant.Publish = true;
+        if (variant.CreatedBy == null) variant.CreatedBy = user.Id;
 
         link.EcommerceUserId = user.Id;
         await _context.SaveChangesAsync(ct);
 
-        return new ResetPasswordGateResultDto { Allow = true, Status = ResetPasswordStatus.Allow, Message = "Password set. Listing activated." };
+        return new ResetPasswordGateResultDto
+            {
+            Allow = true,
+            Status = ResetPasswordStatus.Allow,
+            Message = "Password set. Listing activated.",
+            VariantId = variantId,
+            PublicUrl = $"{_WebbaseUrl}/Product?Id={variantId}"
+            };
         }
 
 
@@ -152,12 +176,25 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
     public async Task<ResolvedRefIds> ResolveRefIdsAsync(BikeListingUpsertRequestDto dto, CancellationToken ct = default)
         {
         if (dto is null) throw new ArgumentNullException(nameof(dto));
-        if (string.IsNullOrWhiteSpace(dto.BrandName)) throw new ArgumentException("BrandName required");
-        if (string.IsNullOrWhiteSpace(dto.ModelName)) throw new ArgumentException("ModelName required");
-        if (string.IsNullOrWhiteSpace(dto.CategoryName)) throw new ArgumentException("CategoryName required");
-        if (string.IsNullOrWhiteSpace(dto.ColorName)) throw new ArgumentException("ColorName required");
-        if (string.IsNullOrWhiteSpace(dto.Size)) throw new ArgumentException("Size required");
-        if (string.IsNullOrWhiteSpace(dto.Year)) throw new ArgumentException("Year required");
+
+        if (string.IsNullOrWhiteSpace(dto.BrandName))
+            throw new ArgumentException("Please select a Brand before publishing.", nameof(dto.BrandName));
+
+        if (string.IsNullOrWhiteSpace(dto.ModelName))
+            throw new ArgumentException("Please enter a Model before publishing.", nameof(dto.ModelName));
+
+        if (string.IsNullOrWhiteSpace(dto.CategoryName))
+            throw new ArgumentException("Please select a Category before publishing.", nameof(dto.CategoryName));
+
+        if (string.IsNullOrWhiteSpace(dto.ColorPrimary))
+            throw new ArgumentException("Please select a Primary color before publishing.", nameof(dto.ColorPrimary));
+
+        if (string.IsNullOrWhiteSpace(dto.Size))
+            throw new ArgumentException("Please select a Size before publishing.", nameof(dto.Size));
+
+        if (string.IsNullOrWhiteSpace(dto.Year))
+            throw new ArgumentException("Please select a Year before publishing.", nameof(dto.Year));
+
 
         using var trx = await _context.Database.BeginTransactionAsync(ct);
 
@@ -165,7 +202,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         string N(string s) => s.Trim();
         var brandName = N(dto.BrandName);
         var categoryName = N(dto.CategoryName);
-        var colorName = N(dto.ColorName);
+        var colorName = N(dto.ColorPrimary);
         var sizeName = N(dto.Size);
         var yearValue = TryParseYear(dto.Year);
 
@@ -173,8 +210,8 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
 
         var externalUserId = dto.ExternalUserId;
         var ownerUserId = await TryResolveOwnerUserIdAsync(dto.Email, externalUserId, ct);
-
-        // ---- Brand
+        bool shouldPublish = ownerUserId.HasValue;
+        // -- Brand
         var brand = await _context.Brands.FirstOrDefaultAsync(b => b.Name == brandName, ct);
         if (brand is null)
             {
@@ -192,7 +229,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             await _context.SaveChangesAsync(ct);
             }
 
-        // ---- Color  (use the same entity as FK table)
+        // -- Color
         var color = await _context.Colors.FirstOrDefaultAsync(c => c.Name == colorName, ct);
         if (color is null)
             {
@@ -201,7 +238,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             await _context.SaveChangesAsync(ct);
             }
 
-        // ---- Size
+        // -- Size
         var size = await _context.Sizes.FirstOrDefaultAsync(s => s.Name == sizeName, ct);
         if (size is null)
             {
@@ -210,7 +247,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             await _context.SaveChangesAsync(ct);
             }
 
-        // ---- Year (optional lookup)
+        // -- Year 
         long? yearId = null;
         if (yearValue.HasValue)
             {
@@ -248,7 +285,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         _context.Products.Add(product);
         await _context.SaveChangesAsync(ct); 
 
-        // ---------------- Variant ----------------
+        // -- Variant --
         var variant = new ProductVariant
             {
             ProductId = product.Id,
@@ -261,7 +298,7 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             SSN = dto.SerialNumber ?? dto.FrameNumber, 
             Description = dto.Description,
             //Thumbnail = dto.ThumbnailUrl,
-            Publish = false,
+            Publish = shouldPublish,
             variantType = (int)Enums.VariantType.Serial,
             Sold = 0,                       
             CreatedDate = DateTime.UtcNow,
@@ -269,9 +306,48 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             };
         _context.ProductVariants.Add(variant);
         await _context.SaveChangesAsync(ct);
+        await UpsertVariantAttributesFromDtoAsync(product.Id, variant.Id, ownerUserId, dto, ct);
+
+
+        if (dto.Images != null && dto.Images.Count > 0)
+            {
+            int order = 0;
+            foreach (var img in dto.Images)
+                {
+          
+                byte[] bytes = Convert.FromBase64String(img.DataBase64);
+                if (bytes is null || bytes.Length == 0) continue;
+
+                var ext = PickExt(img.FileName ?? img.ContentType);
+                var unique = $"{Guid.NewGuid():N}{ext}";
+                var baseName = Path.GetFileNameWithoutExtension(unique);
+                var originalUrl = await _imageStorage.SaveOriginalAsync(variant.Id, unique, bytes, ct);
+               
+
+                // persist DB record
+                var dbImage = new ProductVariantImages
+                    {
+                    ProductVariantId = variant.Id,
+                    ImageUrl = originalUrl,
+                    ImageName = unique,
+                    ImageByte = null,            
+                    Order = order++,
+                    IsDeleted = false,
+                    IsCloned = false,
+                    CreatedDate = DateTime.UtcNow
+                    };
+                _context.productVariantImages.Add(dbImage);
+                }
+
+            await _context.SaveChangesAsync(ct);
+            }
+
+
+
+
 
         if (!ownerUserId.HasValue)
-            await UpsertIntegrationUserLinkAndMaybeNotifyAsync(product.Id, externalUserId, dto.Email, dto.FirstName, dto.LastName, ownerUserId, ct);
+            await UpsertIntegrationUserLinkAndMaybeNotifyAsync(variant.Id, externalUserId, dto.Email, dto.FirstName, dto.LastName, ownerUserId, ct);
 
         await trx.CommitAsync(ct);
 
@@ -286,10 +362,16 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             CategorySlug = Slug(categoryName),
             ColorSlug = Slug(colorName),
             SizeSlug = Slug(sizeName),
-            YearLabel = dto.Year.Trim()
+            YearLabel = dto.Year.Trim(),
+
+            // NEW:
+            ProductId = product.Id,
+            VariantId = variant.Id,
+            UserExists = ownerUserId.HasValue,
+            Published = shouldPublish
             };
-       
-        
+
+
         }
 
 
@@ -307,14 +389,14 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
 
     private static int? TryParseYear(string s)
         => int.TryParse(s, out var y) && y >= 1900 && y <= 2100 ? y : (int?)null;
-    // ---------- Title & Slug (inline helpers) ----------
+
     private static string BuildTitle(
         string brandName,
         string modelName,
         int? year = null,
         string? colorName = null,
         string? wheelSize = null,
-        string? extraRight = null // e.g., "Step-Through"
+        string? extraRight = null
     )
         {
         string N(string? s) => (s ?? string.Empty).Trim();
@@ -404,15 +486,15 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         return prior;
         }
 
-    private async Task UpsertIntegrationUserLinkAndMaybeNotifyAsync(long productId, int  externalUserId, string? email, string? firstName, string? lastName, long? ownerUserId, CancellationToken ct)
+    private async Task UpsertIntegrationUserLinkAndMaybeNotifyAsync(long variantId, int  externalUserId, string? email, string? firstName, string? lastName, long? ownerUserId, CancellationToken ct)
         {
         var norm = NormalizeEmail(email);
-        var link = await _context.IntegrationUserLinks.FirstOrDefaultAsync(x => x.ProductId == productId, ct);
+        var link = await _context.IntegrationUserLinks.FirstOrDefaultAsync(x => x.VariantId == variantId, ct);
         if (link is null)
             {
             link = new IntegrationUserLink
                 {
-                ProductId = productId,
+                VariantId = variantId,
                 ExternalUserId = externalUserId,
                 Email = norm,
                 FirstName = firstName,
@@ -433,13 +515,13 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
         if (!ownerUserId.HasValue && !string.IsNullOrWhiteSpace(norm))
             {
             var toName = $"{firstName} {lastName}".Trim();
-            var url = $"{_baseUrl}/auth/set-password?productId={productId}";
+            var url = $"{_baseUrl}/auth/set-password?variantId={variantId}&email={email}";
 
             var mail = new SendEmail
                 {
                 To = new List<EmailAddress> { new EmailAddress { Email = norm } },
                 Subject = "Set your password to manage your listing",
-                Body = $"<p>Hello {toName},</p><p>Set your password to claim and manage your listing.</p><p><a href=\"{url}\">Set Password</a></p><p>If the button doesn’t work, copy this URL:<br/>{url}</p>"
+                Body = $"<p>Hello {toName},</p><p>Set your password to claim and manage your listing.</p><p><a href=\"{url}\">Set Password</a></p>"
                 };
 
             await _mailer.Init();
@@ -457,9 +539,108 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
 
         }
 
+    private static string PickExt(string? fileNameOrContentType)
+        {
+        if (string.IsNullOrWhiteSpace(fileNameOrContentType)) return ".png";
+        var s = fileNameOrContentType.ToLowerInvariant();
+        if (s.Contains("png") || s.EndsWith(".png")) return ".png";
+        if (s.Contains("jpeg") || s.EndsWith(".jpeg") || s.Contains("jpg") || s.EndsWith(".jpg")) return ".jpg";
+        if (s.Contains("webp") || s.EndsWith(".webp")) return ".webp";
+        if (Path.HasExtension(s)) return Path.GetExtension(s);
+        return ".png";
+        }
 
 
-    
+
+    private async Task UpsertVariantAttributesFromDtoAsync(
+        long productId, long variantId, long? createdBy, BikeListingUpsertRequestDto dto, CancellationToken ct)
+        {
+        var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        // basics
+        AddPair(dict, "BikeModel", dto.ModelName);
+        AddPair(dict, "FrameNumber", dto.FrameNumber);
+        AddPair(dict, "SerialNumber", dto.SerialNumber);
+        AddPair(dict, "Productnumber", dto.Productnumber);
+        AddPair(dict, "Currency", dto.Currency);
+        AddPair(dict, "Year", dto.Year);
+        AddPair(dict, "Price", dto.Price.ToString());
+
+        // colors / type / audience
+ 
+        AddPair(dict, "FrameColorPrimary", dto.ColorPrimary);
+        AddPair(dict, "FrameColorSecondary", dto.ColorSecondary);
+        AddPair(dict, "Audience", dto.Audience);
+
+        // sizing & mechanics
+        AddPair(dict, "WheelSize", dto.WheelSize);
+        AddPair(dict, "FrameHeight", dto.FrameHeight);
+        AddPair(dict, "FrameMaterial", dto.FrameMaterial);
+        AddPair(dict, "BrakeType", dto.BrakeType);
+        AddPair(dict, "GearType", dto.GearType);
+        AddPair(dict, "DriveType", dto.DriveType);
+        AddPair(dict, "Gears", dto.Gears?.ToString());
+
+        // security / locks / keys
+        AddPair(dict, "LockModel", dto.LockModel);
+        AddPair(dict, "KeyNumber", dto.KeyNumber);
+
+        // powertrain / electric
+        if(dto.PropulsionType)
+            {
+            AddPair(dict, "AccelerationType", dto.AccelerationType);
+            AddPair(dict, "MileageKm", dto.MileageKm?.ToString());
+            AddPair(dict, "BatteryNumber", dto.BatteryNumber);
+            AddPair(dict, "BatteryCapacityWh", dto.BatteryCapacity);
+            AddPair(dict, "BrandEngine", dto.BrandEngine);
+            AddPair(dict, "EngineType", dto.EngineType);
+            AddPair(dict, "EngineNumber", dto.EngineNumber);
+            AddPair(dict, "ChargerSerialNumber", dto.ChargerSerialNumber);
+            AddPair(dict, "DisplaySerialNumber", dto.DisplaySerialNumber);
+            }
+  
+
+
+
+        var json = System.Text.Json.JsonSerializer.Serialize(dict);
+
+        var row = await _context.VariantAttributes
+            .FirstOrDefaultAsync(x => x.ProductVariantId == variantId, ct);
+
+        if (row is null)
+            {
+            row = new VariantAttributes
+                {
+                ProductId = productId,
+                ProductVariantId = variantId,
+                Data = json,
+                CreatedBy = createdBy,
+                CreatedDate = DateTime.UtcNow
+                };
+            _context.VariantAttributes.Add(row);
+            }
+        else
+            {
+            row.ProductId = productId;
+            row.Data = json;
+            row.LastModifiedBy = createdBy;
+            row.LastModifiedDate = DateTime.UtcNow;
+            }
+
+        await _context.SaveChangesAsync(ct);
+        }
+
+    private static void AddPair(Dictionary<string, string> d, string key, string? val)
+        {
+        if (!string.IsNullOrWhiteSpace(val)) d[key] = val.Trim();
+        }
 
     }
 
+
+
+public interface IImageStorage
+    {
+    Task<string> SaveOriginalAsync(long productId, string fileName, byte[] data, CancellationToken ct);
+ 
+    }

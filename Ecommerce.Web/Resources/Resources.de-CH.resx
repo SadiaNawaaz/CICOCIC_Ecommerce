@@ -247,4 +247,82 @@ in unserem Geschäft</value>
   <data name="YouMightAlsoLike" xml:space="preserve">
     <value>Das Könnte Dir Auch Gefallen</value>
   </data>
+  <data name="BikeModel" xml:space="preserve">
+    <value>Fahrradmodell</value>
+  </data>
+  <data name="BrakeType" xml:space="preserve">
+    <value>Bremsentyp</value>
+  </data>
+  <data name="DriveType" xml:space="preserve">
+    <value>Antriebsart</value>
+  </data>
+  <data name="FrameColorPrimary" xml:space="preserve">
+    <value>Rahmenfarbe (Primär)</value>
+  </data>
+  <data name="FrameColorSecondary" xml:space="preserve">
+    <value>Rahmenfarbe (Sekundär)</value>
+  </data>
+  <data name="FrameMaterial" xml:space="preserve">
+    <value>Rahmenmaterial</value>
+  </data>
+  <data name="FrameNumber" xml:space="preserve">
+    <value>Rahmennummer</value>
+  </data>
+  <data name="Gears" xml:space="preserve">
+    <value>Gänge</value>
+  </data>
+  <data name="GearType" xml:space="preserve">
+    <value>Schaltungstyp</value>
+  </data>
+  <data name="KeyNumber" xml:space="preserve">
+    <value>Schlüsselnummer</value>
+  </data>
+  <data name="SerialNumber" xml:space="preserve">
+    <value>Seriennummer</value>
+  </data>
+  <data name="WheelSize" xml:space="preserve">
+    <value>Radgrösse</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Baujahr</value>
+  </data>
+  <data name="Productnumber" xml:space="preserve">
+    <value>Produktnummer</value>
+  </data>
+  <data name="Audience" xml:space="preserve">
+    <value>Zielgruppe</value>
+  </data>
+  <data name="LockModel" xml:space="preserve">
+    <value>Schlossmodell</value>
+  </data>
+  <data name="AccelerationType" xml:space="preserve">
+    <value>Beschleunigungsart</value>
+  </data>
+  <data name="MileageKm" xml:space="preserve">
+    <value>Kilometerstand</value>
+  </data>
+  <data name="BatteryNumber" xml:space="preserve">
+    <value>Batterienummer</value>
+  </data>
+  <data name="BatteryCapacityWh" xml:space="preserve">
+    <value>Batteriekapazität (Wh)</value>
+  </data>
+  <data name="BrandEngine" xml:space="preserve">
+    <value>Motorhersteller</value>
+  </data>
+  <data name="EngineType" xml:space="preserve">
+    <value>Motortyp</value>
+  </data>
+  <data name="EngineNumber" xml:space="preserve">
+    <value>Motornummer</value>
+  </data>
+  <data name="ChargerSerialNumber" xml:space="preserve">
+    <value>Ladegerät-Seriennummer</value>
+  </data>
+  <data name="DisplaySerialNumber" xml:space="preserve">
+    <value>Display-Seriennummer</value>
+  </data>
+  <data name="WheelSizeInches" xml:space="preserve">
+    <value>Radgrösse (Zoll)</value>
+  </data>
 </root>

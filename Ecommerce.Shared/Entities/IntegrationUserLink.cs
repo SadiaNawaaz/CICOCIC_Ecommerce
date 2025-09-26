@@ -14,7 +14,7 @@ public class IntegrationUserLink : BaseEntity
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public long EcommerceUserId { get; set; }
-    public long ProductId { get; set; }
+    public long VariantId { get; set; }
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     }
 

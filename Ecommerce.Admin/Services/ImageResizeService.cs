@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using Ecommerce.Shared.Services.Integrations;
+using Microsoft.AspNetCore.Components.Forms;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
@@ -53,3 +54,28 @@ public class ImageResizeService
         }
     }
 }
+
+public sealed class LocalImageStorage : IImageStorage
+    {
+    private readonly IWebHostEnvironment _env;
+    public LocalImageStorage(IWebHostEnvironment env) => _env = env;
+
+    private string EnsureDir(long productId)
+        {
+        var root = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        var dir = Path.Combine(root, "ProductVariants", productId.ToString());
+        Directory.CreateDirectory(dir);
+        return dir;
+        }
+
+    public async Task<string> SaveOriginalAsync(long productvariantId, string fileName, byte[] data, CancellationToken ct)
+        {
+        var dir = EnsureDir(productvariantId);
+        var path = Path.Combine(dir, fileName);
+        await File.WriteAllBytesAsync(path, data, ct);
+        return $"/ProductVariants/{productvariantId}/{fileName}";
+        }
+
+ 
+    
+    }

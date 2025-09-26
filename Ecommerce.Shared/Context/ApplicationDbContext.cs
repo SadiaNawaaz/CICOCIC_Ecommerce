@@ -64,6 +64,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<VariantObjectMedia> VariantObjectMedias { get; set; }
     
     public DbSet<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; }
+    public DbSet<VariantAttributes> VariantAttributes { get; set; }
     public DbSet<TrendingProduct> TrendingProducts { get; set; }
     public DbSet<Catalog> Catalogs { get; set; }
     public DbSet<Slider> Sliders { get; set; }
@@ -92,6 +93,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<FeatureTranslation> FeatureTranslations { get; set; }
 
     public DbSet<ProductTranslation> ProductTranslations { get; set; }
+   
 
     /* public DbSet<FeatureTranslation> FeatureTranslations { get; set; }
      public DbSet<ClusterTranslation> ClusterTranslations { get; set; }
@@ -152,6 +154,17 @@ public class ApplicationDbContext : DbContext
        .HasForeignKey(pvfv => pvfv.TemplateClusterFeatureId)
        .OnDelete(DeleteBehavior.NoAction);
         modelBuilder.Entity<RawClusterFeatureDto>().HasNoKey();
+        modelBuilder.Entity<VariantAttributes>(e =>
+        {
+            e.ToTable("VariantAttributes");
+            e.HasIndex(x => x.ProductVariantId).IsUnique();
+            e.HasIndex(x => x.ProductId);
+
+            e.HasOne(x => x.ProductVariant)
+             .WithMany()
+             .HasForeignKey(x => x.ProductVariantId)
+             .OnDelete(DeleteBehavior.NoAction);
+        });
         //base.OnModelCreating(modelBuilder);
 
 

@@ -247,4 +247,82 @@ in onze winkel</value>
   <data name="YouMightAlsoLike" xml:space="preserve">
     <value>Dit vindt u misschien ook leuk</value>
   </data>
+  <data name="BikeModel" xml:space="preserve">
+    <value>Fietsmodel</value>
+  </data>
+  <data name="BrakeType" xml:space="preserve">
+    <value>Remtype</value>
+  </data>
+  <data name="DriveType" xml:space="preserve">
+    <value>Aandrijvingstype</value>
+  </data>
+  <data name="FrameColorPrimary" xml:space="preserve">
+    <value>Primaire framekleur</value>
+  </data>
+  <data name="FrameColorSecondary" xml:space="preserve">
+    <value>Secundaire framekleur</value>
+  </data>
+  <data name="FrameMaterial" xml:space="preserve">
+    <value>Framemateriaal</value>
+  </data>
+  <data name="FrameNumber" xml:space="preserve">
+    <value>Framenummer</value>
+  </data>
+  <data name="Gears" xml:space="preserve">
+    <value>Versnellingen</value>
+  </data>
+  <data name="GearType" xml:space="preserve">
+    <value>Versnellingstype</value>
+  </data>
+  <data name="KeyNumber" xml:space="preserve">
+    <value>Sleutelnummer</value>
+  </data>
+  <data name="SerialNumber" xml:space="preserve">
+    <value>Serienummer</value>
+  </data>
+  <data name="WheelSize" xml:space="preserve">
+    <value>Wielmaat</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value> Bouwjaar</value>
+  </data>
+  <data name="Productnumber" xml:space="preserve">
+    <value>Productnummer</value>
+  </data>
+  <data name="Audience" xml:space="preserve">
+    <value>Doelgroep</value>
+  </data>
+  <data name="LockModel" xml:space="preserve">
+    <value>Slotmodel</value>
+  </data>
+  <data name="AccelerationType" xml:space="preserve">
+    <value>Acceleratietype</value>
+  </data>
+  <data name="MileageKm" xml:space="preserve">
+    <value>Kilometerstand</value>
+  </data>
+  <data name="BatteryNumber" xml:space="preserve">
+    <value>Batterijnummer</value>
+  </data>
+  <data name="BatteryCapacityWh" xml:space="preserve">
+    <value>Batterijcapaciteit (Wh)</value>
+  </data>
+  <data name="BrandEngine" xml:space="preserve">
+    <value>Motormerk</value>
+  </data>
+  <data name="EngineType" xml:space="preserve">
+    <value>Motortype</value>
+  </data>
+  <data name="EngineNumber" xml:space="preserve">
+    <value>Motornummer</value>
+  </data>
+  <data name="ChargerSerialNumber" xml:space="preserve">
+    <value>Display-serienummer</value>
+  </data>
+  <data name="DisplaySerialNumber" xml:space="preserve">
+    <value>Display-serienummer</value>
+  </data>
+  <data name="WheelSizeInches" xml:space="preserve">
+    <value>Wielmaat (inch)</value>
+  </data>
 </root>

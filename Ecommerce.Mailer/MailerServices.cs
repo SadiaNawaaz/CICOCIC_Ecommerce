@@ -54,10 +54,16 @@ namespace Ecommerce.Mailer
         }
         private async Task<List<MailCredential>> ReadCredentials()
         {
-            if(CredentialPath==null)
-            {
-                CredentialPath = "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Data\\mailCredentials.json";
-            }
+            //if(CredentialPath==null)
+            //{
+            //    CredentialPath = "F:\\CICOCIC_Ecommerce\\Ecommerce.Admin\\Data\\mailCredentials.json";
+            //}
+            if (CredentialPath == null)
+                {
+                // Example: put it under your wwwroot\Data folder
+                CredentialPath = Path.Combine(AppContext.BaseDirectory, "Data", "mailCredentials.json");
+                }
+
             if (!System.IO.File.Exists(CredentialPath))
             {
                 return new List<MailCredential>();

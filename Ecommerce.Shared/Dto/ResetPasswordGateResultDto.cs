@@ -12,5 +12,7 @@ public class ResetPasswordGateResultDto
     public bool Allow { get; set; }
     public ResetPasswordStatus Status { get; set; }
     public string Message { get; set; } = "";
+    public long? VariantId { get; set; }
+    public string? PublicUrl { get; set; }
     }
 

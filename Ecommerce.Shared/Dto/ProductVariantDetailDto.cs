@@ -26,6 +26,8 @@ public class ProductVariantDetailDto
     public string? Thumbnail { get; set; }
     public bool Publish { get; set; }
     public string? DefaultImageUrl { get; set; }
+    public string? AttributesJson { get; set; }              
+    public Dictionary<string, string>? Attributes { get; set; }   
     public List<ProductVariantFeatureValue> ProductVariantFeatureValues { get; set; } = new List<ProductVariantFeatureValue>();
     public List<ProductVariantImages> productVariantImages { get; set; } = new List<ProductVariantImages>();
     public List<ProductVariantMedia> ProductVariantMedia { get; set; } = new List<ProductVariantMedia>();

@@ -734,7 +734,7 @@ namespace Ecommerce.Shared.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("ProductId")
+                    b.Property<long>("VariantId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -1168,6 +1168,46 @@ namespace Ecommerce.Shared.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductVariantMedias");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.VariantAttributes", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ProductVariantId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId")
+                        .IsUnique();
+
+                    b.ToTable("VariantAttributes", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.VariantObjectMedia", b =>
@@ -2133,6 +2173,17 @@ namespace Ecommerce.Shared.Migrations
                         .WithMany("ProductVariantMedias")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity("Ecommerce.Shared.Entities.ProductVariants.VariantAttributes", b =>
+                {
+                    b.HasOne("Ecommerce.Shared.Entities.ProductVariants.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ProductVariant");

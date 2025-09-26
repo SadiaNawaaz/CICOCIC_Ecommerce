@@ -480,9 +480,12 @@ public class ProductVariantService : IProductVariantService
                         MediaUrl = vi.MediaUrl,
                         ContentType = vi.ContentType
 
-                        }).ToList()
+                        }).ToList(),
 
-
+                     AttributesJson = _context.VariantAttributes
+                    .Where(a => a.ProductVariantId == pv.Id)
+                    .Select(a => a.Data)
+                    .FirstOrDefault()
 
                     })
                 .FirstOrDefaultAsync();
@@ -501,13 +504,31 @@ public class ProductVariantService : IProductVariantService
                     productVariant.discountPercentage = discountPercentage;
                     }
 
-                if (productVariant.ProductVariantMedia == null || !productVariant.ProductVariantMedia.Any())
+                //if (productVariant.ProductVariantMedia == null || !productVariant.ProductVariantMedia.Any())
+                //    {
+                //    productVariant.ProductVariantMedia.Add(new ProductVariantMedia
+                //        {
+                //        MediaUrl = productVariant.Thumbnail
+                //        });
+                //    }
+
+
+                if (!string.IsNullOrWhiteSpace(productVariant.AttributesJson))
                     {
-                    productVariant.ProductVariantMedia.Add(new ProductVariantMedia
+                    try
                         {
-                        MediaUrl = productVariant.Thumbnail
-                        });
+                        productVariant.Attributes =
+                            JsonSerializer.Deserialize<Dictionary<string, string>>(productVariant.AttributesJson!)
+                            ?? new Dictionary<string, string>();
+                        }
+                    catch
+                        {
+                        productVariant.Attributes = new Dictionary<string, string>(); // bad JSON fallback
+                        }
                     }
+
+
+
 
                 response.Data = productVariant;
                 response.Success = true;
@@ -672,7 +693,7 @@ public class ProductVariantService : IProductVariantService
         try
             {
             var productVariants = await _context.ProductVariants
-                .Where(pv => pv.Product.BrandId == brandId && pv.Sold == 0)
+                .Where(pv => pv.Product.BrandId == brandId && pv.Sold == 0 && pv.Publish==true)
                 .Select(pv => new ProductVariantDto
                     {
                     ProductId = pv.ProductId,

@@ -75,7 +75,7 @@ builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<ICategoryFeatureService, CategoryFeatureService>();
 
 builder.Services.AddScoped<IBikeListingIngestionService, BikeListingIngestionService>();
-
+builder.Services.AddScoped<IImageStorage, LocalImageStorage>();
 
 //builder.Services.AddDbContext<ApplicationDbContext>(
 // o => o.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
@@ -159,15 +159,36 @@ app.MapPost("/api/integrations/v1/bikes/upsert", async (
     IBikeListingIngestionService svc,
     CancellationToken ct) =>
 {
-
     var dto = await req.ReadFromJsonAsync<BikeListingUpsertRequestDto>(cancellationToken: ct);
-    if (dto is null) return Results.BadRequest("Invalid JSON.");
+    if (dto is null)
+        return Results.BadRequest(ApiResult<BikeUpsertResultDto>.Fail("Invalid JSON.", "INVALID_JSON"));
 
-    var result = await svc.UpsertAsync(dto, ct);
-    return result.Ok ? Results.Ok(result) : Results.BadRequest(result);
+    try
+        {
+        var result = await svc.UpsertAsync(dto, ct);
+        if (result.Ok)
+            return Results.Ok(ApiResult<BikeUpsertResultDto>.Ok(result, result.Message ?? "Listing upserted.", "OK"));
+
+        // business-level fail but 200 vs 400? Your choice:
+        return Results.BadRequest(ApiResult<BikeUpsertResultDto>.Fail(result.Message ?? "Upsert failed.", "BUSINESS_RULE_FAILED"));
+        }
+    catch (ArgumentException ex)
+        {
+        // validation from your ResolveRefIdsAsync throws
+        return Results.BadRequest(ApiResult<BikeUpsertResultDto>.Fail(ex.Message, "VALIDATION_FAILED"));
+        }
+    catch (Exception ex)
+        {
+        // log ex
+        return Results.Problem(ex.Message, statusCode: 500);
+        }
 })
 .WithTags("Integrations")
 .DisableAntiforgery();
+
+
+
+
 
 
 

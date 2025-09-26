@@ -169,3 +169,14 @@ public class VariantObjectMedia : BaseEntity
     [NotMapped]
     public bool IsDeleted { get; set; } = false;
     }
+
+
+
+
+public class VariantAttributes : BaseEntity
+    {
+    public long ProductId { get; set; }                // no FK (avoid multiple cascade)
+    public long ProductVariantId { get; set; }
+    public ProductVariant ProductVariant { get; set; } = default!;
+    public string Data { get; set; } = "{}";           // JSON
+    }
