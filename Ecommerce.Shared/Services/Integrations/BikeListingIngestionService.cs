@@ -227,6 +227,18 @@ public sealed class BikeListingIngestionService : IBikeListingIngestionService
             category = new Category { Name = categoryName };
             _context.Categories.Add(category);
             await _context.SaveChangesAsync(ct);
+
+        var translations = new List<CategoryTranslation>
+         {
+        new CategoryTranslation { CategoryId = category.Id, LanguageId = 1, TranslatedName = categoryName }, // English
+        new CategoryTranslation { CategoryId = category.Id, LanguageId = 2, TranslatedName = dto.CategoryNameNl??categoryName },         // Dutch
+        new CategoryTranslation { CategoryId = category.Id, LanguageId = 3, TranslatedName = dto.CategoryNameEn??categoryName }          // German
+        };
+
+        _context.CategoryTranslations.AddRange(translations);
+        await _context.SaveChangesAsync(ct);
+
+
             }
 
         // -- Color

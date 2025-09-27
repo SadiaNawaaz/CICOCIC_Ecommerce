@@ -248,7 +248,7 @@ from Our Shop</value>
     <value>You Might Also Like</value>
   </data>
   <data name="BikeModel" xml:space="preserve">
-    <value />
+    <value>Bike Model</value>
   </data>
   <data name="BrakeType" xml:space="preserve">
     <value>Brake Type</value>

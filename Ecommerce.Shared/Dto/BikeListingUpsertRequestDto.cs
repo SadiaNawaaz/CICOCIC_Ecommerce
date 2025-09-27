@@ -13,6 +13,8 @@ public class BikeListingUpsertRequestDto
     public string BrandName { get; set; } = default!;
     public string ModelName { get; set; } = default!;
     public string CategoryName { get; set; } = default!;
+    public string? CategoryNameEn { get; set; }
+    public string? CategoryNameNl { get; set; }
     public string ColorPrimary { get; set; } = default!;
     public string? ColorSecondary { get; set; }
     public string Size { get; set; } = default!;
